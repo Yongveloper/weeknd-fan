@@ -403,3 +403,61 @@ test('keeps every home section transparent so the sky shows through', async ({
   );
   expect(opaqueSections).toBe(0);
 });
+
+test('plays each scene transition once and leaves nothing running afterwards', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute(
+    'data-motion-ready',
+    'true',
+  );
+  await expect(page.locator('[data-home-hero]')).toHaveAttribute(
+    'data-motion-state',
+    'entered',
+  );
+  await expect(page.locator('eclipse-countdown')).toHaveAttribute(
+    'data-reveal',
+    'done',
+    { timeout: 5000 },
+  );
+
+  await page.locator('.setlist-preview').scrollIntoViewIfNeeded();
+  await expect(page.locator('.setlist-preview')).toHaveAttribute(
+    'data-motion-state',
+    'entered',
+  );
+  await page.locator('.guide-shortcuts').scrollIntoViewIfNeeded();
+  await expect(page.locator('.guide-shortcuts')).toHaveAttribute(
+    'data-motion-state',
+    'entered',
+  );
+
+  await page.waitForTimeout(900);
+  const running = await page.evaluate(
+    () =>
+      document
+        .getAnimations()
+        .filter(
+          (animation) =>
+            animation.playState === 'running' &&
+            !(
+              animation.effect as KeyframeEffect | null
+            )?.target?.classList.contains('dawn-sky'),
+        ).length,
+  );
+  expect(running).toBe(0);
+});
+
+test('reduced motion never marks the document motion-ready', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.waitForTimeout(500);
+  await expect(page.locator('html')).not.toHaveAttribute(
+    'data-motion-ready',
+    /.+/,
+  );
+  await expect(page.locator('[data-primary]')).toBeVisible();
+});

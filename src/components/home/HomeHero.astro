@@ -15,7 +15,12 @@ if (!dayOne || !dayTwo) {
 }
 ---
 
-<section class="home-hero" data-home-hero aria-labelledby="home-title">
+<section
+  class="home-hero"
+  data-home-hero
+  data-motion-scene-enter
+  aria-labelledby="home-title"
+>
   <div class="home-hero__visual" aria-hidden="true">
     <picture>
       <source
@@ -153,7 +158,43 @@ if (!dayOne || !dayTwo) {
   }
 
   .home-hero__heading {
+    position: relative;
     align-self: center;
+    overflow: hidden;
+  }
+
+  .home-hero__heading::after {
+    position: absolute;
+    inset: -20% -60%;
+    background: linear-gradient(
+      112deg,
+      transparent 40%,
+      color-mix(in srgb, var(--ivory) 22%, transparent) 50%,
+      transparent 60%
+    );
+    content: '';
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  :global(html[data-motion-ready])
+    .home-hero[data-motion-state='entered']
+    .home-hero__heading::after {
+    animation: hero-light-sweep 620ms var(--ease-cinematic) both;
+  }
+
+  @keyframes hero-light-sweep {
+    0% {
+      opacity: 0;
+      transform: translateX(-60%);
+    }
+    25% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(60%);
+    }
   }
 
   .home-hero :global(eclipse-countdown) {

@@ -69,6 +69,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         return;
       }
 
+      this.dataset.reveal = 'pending';
       this.startEntrance();
     }
 
@@ -163,7 +164,10 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
       const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');
 
-      if (!moon || !fog || !this.isConnected) return;
+      if (!moon || !fog || !this.isConnected) {
+        this.dataset.reveal = 'done';
+        return;
+      }
 
       this.dataset.motionState = 'running';
       const sequence: import('motion').AnimationSequence = [
@@ -175,7 +179,14 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         defaultTransition: { ease: [0.22, 1, 0.36, 1] },
       });
       await this.entranceControls.finished;
-      if (this.isConnected) this.dataset.motionState = 'resting';
+      if (!this.isConnected) return;
+      this.shadow.classList.remove('is-crossing');
+      void this.shadow.offsetWidth;
+      this.shadow.classList.add('is-crossing');
+      window.setTimeout(() => {
+        this.dataset.reveal = 'done';
+      }, 220);
+      this.dataset.motionState = 'resting';
     }
   }
 
@@ -207,10 +218,15 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     line-height: 1;
   }
 
+  eclipse-countdown[data-reveal='pending'] [data-primary] {
+    opacity: 0;
+  }
+
   [data-primary] {
     position: relative;
     z-index: 1;
     text-shadow: 0 0 1.5rem color-mix(in srgb, var(--night) 72%, transparent);
+    transition: opacity 180ms var(--ease-cinematic);
   }
 
   [data-shadow] {

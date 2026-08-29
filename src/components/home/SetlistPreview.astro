@@ -15,6 +15,7 @@ const remainingEntries = entries.slice(previewCount);
 
 <section
   class="setlist-preview fold fold--reverse"
+  data-motion-scene-enter
   aria-labelledby="setlist-preview-title"
 >
   <div class="shell-content setlist-preview__inner">
@@ -30,9 +31,9 @@ const remainingEntries = entries.slice(previewCount);
     </p>
     {
       previewEntries.length > 0 ? (
-        <ol class="setlist-preview__list">
-          {previewEntries.map((entry) => (
-            <li>{entry.data.songTitle}</li>
+        <ol class="setlist-preview__list setlist-preview__list--preview">
+          {previewEntries.map((entry, index) => (
+            <li style={`--i: ${index}`}>{entry.data.songTitle}</li>
           ))}
         </ol>
       ) : (
@@ -70,6 +71,17 @@ const remainingEntries = entries.slice(previewCount);
 <style>
   .setlist-preview {
     padding-block: var(--section-space);
+    overflow: hidden;
+  }
+
+  .setlist-preview::after {
+    position: absolute;
+    inset: 46% -30% auto;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    content: '';
+    opacity: 0;
+    pointer-events: none;
   }
 
   .setlist-preview__inner {
@@ -99,6 +111,53 @@ const remainingEntries = entries.slice(previewCount);
     color: var(--ivory);
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 700;
+    perspective: 900px;
+  }
+
+  :global(html[data-motion-ready])
+    .setlist-preview:not([data-motion-state='entered'])
+    .setlist-preview__list--preview
+    li {
+    opacity: 0;
+    transform: translateY(14px) rotateX(6deg);
+  }
+
+  :global(html[data-motion-ready])
+    .setlist-preview[data-motion-state='entered']::after {
+    animation: runway-sweep 560ms var(--ease-cinematic) both;
+  }
+
+  :global(html[data-motion-ready])
+    .setlist-preview[data-motion-state='entered']
+    .setlist-preview__list--preview
+    li {
+    animation: runway-rise 480ms var(--ease-cinematic) both;
+    animation-delay: calc(var(--i, 0) * 30ms);
+  }
+
+  @keyframes runway-sweep {
+    0% {
+      opacity: 0;
+      transform: translateX(-40%);
+    }
+    30% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateX(40%);
+    }
+  }
+
+  @keyframes runway-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px) rotateX(6deg);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .setlist-preview__comparison {

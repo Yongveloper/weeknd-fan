@@ -1,13 +1,25 @@
-<section class="guide-shortcuts fold" aria-labelledby="guide-shortcuts-title">
+<section
+  class="guide-shortcuts fold"
+  data-motion-scene-enter
+  aria-labelledby="guide-shortcuts-title"
+>
   <div class="shell-content guide-shortcuts__inner">
     <div>
       <p class="eyebrow">GOYANG, BEFORE THE LIGHTS</p>
       <h2 id="guide-shortcuts-title">고양 가이드</h2>
     </div>
     <nav aria-label="고양 가이드 바로가기">
-      <a href="/goyang/#transport">가는 길 <span aria-hidden="true">→</span></a>
-      <a href="/goyang/#packing">준비물 <span aria-hidden="true">→</span></a>
-      <a href="/goyang/#return">귀가 확인 <span aria-hidden="true">→</span></a>
+      {
+        [
+          ['/goyang/#transport', '가는 길'],
+          ['/goyang/#packing', '준비물'],
+          ['/goyang/#return', '귀가 확인'],
+        ].map(([href, label], index) => (
+          <a href={href} style={`--i: ${index}`}>
+            {label} <span aria-hidden="true">→</span>
+          </a>
+        ))
+      }
     </nav>
   </div>
 </section>
@@ -47,6 +59,63 @@
 
   a:last-child {
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+
+  .guide-shortcuts::after {
+    position: absolute;
+    inset: auto 0 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--amber), transparent);
+    content: '';
+    opacity: 0.35;
+    transform-origin: left;
+    pointer-events: none;
+  }
+
+  :global(html[data-motion-ready])
+    .guide-shortcuts:not([data-motion-state='entered'])
+    nav
+    a {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  :global(html[data-motion-ready])
+    .guide-shortcuts[data-motion-state='entered']::after {
+    animation: horizon-draw 600ms var(--ease-cinematic) both;
+  }
+
+  :global(html[data-motion-ready])
+    .guide-shortcuts[data-motion-state='entered']
+    nav
+    a {
+    animation: shortcut-rise 420ms var(--ease-cinematic) both;
+    animation-delay: calc(var(--i, 0) * 60ms + 120ms);
+  }
+
+  @keyframes horizon-draw {
+    from {
+      opacity: 1;
+      transform: scaleX(0);
+    }
+    60% {
+      opacity: 1;
+    }
+    to {
+      opacity: 0.35;
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes shortcut-rise {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   @media (max-width: 42rem) {

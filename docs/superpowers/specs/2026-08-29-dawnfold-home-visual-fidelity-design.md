@@ -121,7 +121,7 @@ h1, h2, h3 { font-family: var(--font-display-ko); font-weight: 900; line-height:
 - 구현: `src/scripts/home-motion.ts` 신규. 기존 deferred `motion` 청크 패턴을 따라 `prefers-reduced-motion: no-preference`일 때만 `import('motion')` 후 `inView(el, cb, { amount: 0.35 })` 1회(`once` 동작은 콜백에서 unsubscribe). 진입 즉시 `data-motion-state="entered"` 세팅 → CSS `@keyframes`가 재생. **no-JS와 reduced-motion은 최종 상태가 기본 CSS**(속성 초기값 = 완료 상태, `[data-motion-ready] .x:not([data-motion-state=entered])`에서만 시작 상태). CLS 0.
 - 히어로 fold/light sweep: heading 위 대각 ivory→transparent 빛 밴드 1회 sweep 620ms, 기존 달·안개 진입(EclipseCountdown)과 동시 시작.
 - 셋리스트 runway/blue sweep: 섹션 진입 시 코발트 레이저 밴드가 좌→우 560ms, 곡 `li` 6개 `translateY(14px)→0` + `opacity` 30ms stagger, `perspective(900px) rotateX(6deg)→0`로 얕은 원근. 네온 도시 깊이는 배경 밴드 2장(`::before/::after`) opacity로 암시.
-- 고양 arrival/horizon: 가이드 섹션 진입 시 하늘 지평선 glow 1회 pulse(`.dawn-sky`에 `data-horizon-pulse` 600ms) + 링크 3개 stagger fade-up.
+- 고양 arrival/horizon: 가이드 섹션 진입 시 `GuideShortcuts` 내부 로컬 `::after` 지평선 라인이 `scaleX(0→1)` 600ms로 그려지고(opacity 1→0.35로 안착), 링크 3개가 60ms stagger로 fade-up한다. `.dawn-sky`는 건드리지 않는다.
 - **Eclipse 진입 숫자 전환**(상위 §9 요구, 미구현분): 달 진입 애니메이션 `finished` 직후 `EclipseCountdown`이 기존 `eclipse-shadow` 키프레임(440ms)을 1회 재생하며 `D-39`를 드러낸다. 시작 상태는 숫자 `opacity: 0` → 그림자가 지나간 뒤 1. 이후 자정 라벨 변경 시 동작은 기존 그대로. reduced-motion·no-JS는 숫자 즉시 표시(현행 `data-motion-state="reduced"`/서버 마크업 경로 재사용). e2e `renders Eclipse Count inside the retained moon scene`의 `[data-primary]` 텍스트 검증은 opacity와 무관하므로 유지, `toBeVisible`은 애니메이션 종료 후 통과하도록 기존 대기 로직 확인.
 
 ### micro-interaction (사용자 조작 응답, 200ms 이하)
