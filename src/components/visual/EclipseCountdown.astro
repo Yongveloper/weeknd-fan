@@ -33,6 +33,9 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     <span data-primary>{initial.primaryLabel}</span>
     <span data-shadow></span>
   </span>
+  <p data-caption aria-hidden="true" hidden={!initial.captionLabel}>
+    {initial.captionLabel}
+  </p>
   <time data-clock hidden={!initial.showClock} aria-hidden="true"
     >{initialClock}</time
   >
@@ -107,6 +110,12 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         state.minutes,
         state.seconds,
       );
+
+      const caption = this.querySelector<HTMLElement>('[data-caption]');
+      if (caption) {
+        caption.hidden = !state.captionLabel;
+        caption.textContent = state.captionLabel;
+      }
 
       const changeAccessibleLabel = () => {
         this.primary.textContent = state.primaryLabel;
@@ -224,6 +233,14 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     color: var(--mist);
     font-family: var(--font-display);
     font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+    letter-spacing: 0.12em;
+  }
+
+  [data-caption] {
+    margin: -0.35rem 0 0;
+    color: var(--mist);
+    font-size: 0.78rem;
+    font-weight: 800;
     letter-spacing: 0.12em;
   }
 

@@ -77,6 +77,9 @@ const editorial = getSetlistEditorialMetadata(entries);
     <p class="expected-setlist__comparison">
       최근 2026년 공연 {editorial.observationCount}회 비교
     </p>
+    <p class="expected-setlist__hint">
+      곡을 누르면 관람 포인트·떼창·공식 듣기가 열립니다.
+    </p>
     <a class="expected-setlist__poster" href="/share/setlist/"
       >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
     >
@@ -85,8 +88,13 @@ const editorial = getSetlistEditorialMetadata(entries);
         entries.map((entry) => (
           <li>
             <details>
-              <summary>
-                {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+              <summary data-affordance="+">
+                <span>
+                  {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+                </span>
+                <span class="expected-setlist__album-tag" aria-hidden="true">
+                  {entry.data.album}
+                </span>
               </summary>
               <div class="expected-setlist__detail">
                 <p class="expected-setlist__metadata">
@@ -163,6 +171,13 @@ const editorial = getSetlistEditorialMetadata(entries);
     font-weight: 900;
   }
 
+  .expected-setlist__hint {
+    margin: -1rem 0 1rem;
+    color: var(--amber);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
   .expected-setlist__list,
   .actual-setlist ol {
     display: grid;
@@ -185,12 +200,40 @@ const editorial = getSetlistEditorialMetadata(entries);
   summary {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
     min-height: 44px;
     padding: 0.9rem 0.2rem;
     color: var(--ivory);
     cursor: pointer;
     font-size: clamp(1.05rem, 2.4vw, 1.45rem);
     font-weight: 800;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: attr(data-affordance);
+    color: var(--amber);
+    font-family: var(--font-display);
+    font-size: 1.4em;
+    line-height: 1;
+    transition: transform var(--motion-fast) var(--ease-cinematic);
+  }
+
+  details[open] > summary::after {
+    transform: rotate(45deg);
+  }
+
+  .expected-setlist__album-tag {
+    color: var(--mist);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    text-transform: lowercase;
   }
 
   .expected-setlist__detail {

@@ -222,10 +222,10 @@ test('keeps the ordered prediction and trust label usable without JavaScript', a
   const explorer = page.locator('.expected-setlist');
   await expect(explorer.getByText('예상 · 보장 아님').first()).toBeVisible();
   await expect(explorer.locator('summary').first()).toHaveText(
-    '01 Baptized in Fear',
+    /^01 Baptized in Fear/,
   );
   await expect(explorer.locator('summary').nth(37)).toHaveText(
-    '38 Moth to a Flame',
+    /^38 Moth to a Flame/,
   );
   expect(
     await explorer
@@ -337,7 +337,7 @@ test('shows checked primary sources when discover disclosures open', async ({
   await page.goto('/discover/');
 
   const intro = page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
-  await intro.locator('summary').click();
+  await expect(intro).toHaveAttribute('open', '');
   await expect(
     intro.getByRole('link', {
       name: 'Universal Music Canada — Kiss Land 발표',
@@ -436,4 +436,31 @@ test('places covers beside every album mention on home, discover, and setlist', 
   await expect(
     page.getByText('앨범 커버는 Spotify CDN에서 직접 불러옵니다'),
   ).toBeVisible();
+});
+
+test('states what the site is, who it is for, and where the official notice lives', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await expect(page.getByText('THE WEEKND · 비공식 팬 팜플렛')).toBeVisible();
+  await expect(page.getByText('만 19세 이상')).toBeVisible();
+  await expect(page.getByRole('link', { name: '공식 공지 ↗' })).toHaveAttribute(
+    'href',
+    'https://tickets.interpark.com/contents/notice/detail/14180',
+  );
+  await expect(page.locator('eclipse-countdown [data-caption]')).toHaveText(
+    /공연까지$/,
+  );
+  await expect(page.getByText('THE WEEKND · GOYANG 26')).toBeVisible();
+  await expect(
+    page.getByText('브라우저에서만 만들어지는 이미지 한 장').first(),
+  ).toBeVisible();
+
+  await page.goto('/setlist/');
+  await expect(
+    page.getByText('곡을 누르면 관람 포인트·떼창·공식 듣기가 열립니다.'),
+  ).toBeVisible();
+  const firstSummary = page.locator('.expected-setlist__list summary').first();
+  await expect(firstSummary).toHaveAttribute('data-affordance', '+');
 });

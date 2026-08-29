@@ -1,4 +1,5 @@
 ---
+import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import FanNote from '../components/home/FanNote.astro';
 import GuideShortcuts from '../components/home/GuideShortcuts.astro';
@@ -22,6 +23,10 @@ const eventJsonLd = buildEventJsonLd(
   concert.data,
   (Astro.site ?? Astro.url).toString(),
 );
+const sources = await getCollection('sources');
+const officialNoticeUrl = sources.find((source) => source.id === 'nol-notice')
+  ?.data.url;
+if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
 ---
 
 <BaseLayout
@@ -34,7 +39,7 @@ const eventJsonLd = buildEventJsonLd(
     type="application/ld+json"
     set:html={serializeJsonLd(eventJsonLd)}
   />
-  <HomeHero concert={concert} />
+  <HomeHero concert={concert} officialNoticeUrl={officialNoticeUrl} />
   <IntroSummary albums={albums} />
   <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
   <GuideShortcuts />

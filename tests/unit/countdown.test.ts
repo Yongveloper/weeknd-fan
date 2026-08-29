@@ -84,6 +84,27 @@ describe('getCountdownState', () => {
     expect(state.phase).toBe('before-day-two');
     expect(state.primaryLabel).toBe('D-1');
   });
+
+  it('captions the moon with which show the count points at', () => {
+    expect(
+      getCountdownState({
+        ...schedule,
+        now: new Date('2026-08-29T19:45:00+09:00'),
+      }).captionLabel,
+    ).toBe('첫 공연까지');
+    expect(
+      getCountdownState({
+        ...schedule,
+        now: new Date('2026-10-07T20:00:00+09:00'),
+      }).captionLabel,
+    ).toBe('둘째 날 공연까지');
+    expect(
+      getCountdownState({
+        ...schedule,
+        now: new Date('2026-10-08T20:00:00+09:00'),
+      }).captionLabel,
+    ).toBe('');
+  });
 });
 
 describe('getSelectedShowLabel', () => {

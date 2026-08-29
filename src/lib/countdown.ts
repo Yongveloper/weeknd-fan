@@ -41,6 +41,7 @@ export type CountdownState = {
   minutes: number;
   seconds: number;
   accessibleLabel: string;
+  captionLabel: string;
 };
 
 export function getSelectedShowLabel(input: {
@@ -69,6 +70,7 @@ export function getCountdownState(input: CountdownInput): CountdownState {
       showClock: false,
       ...emptyClock,
       accessibleLabel: '양일 공연 기록 보기',
+      captionLabel: '',
     };
   }
 
@@ -79,6 +81,7 @@ export function getCountdownState(input: CountdownInput): CountdownState {
       showClock: false,
       ...emptyClock,
       accessibleLabel: '두 번째 고양 공연이 시작되었습니다',
+      captionLabel: '',
     };
   }
 
@@ -94,5 +97,6 @@ export function getCountdownState(input: CountdownInput): CountdownState {
     minutes: Math.floor((remaining % 3_600_000) / 60_000),
     seconds: Math.floor((remaining % 60_000) / 1_000),
     accessibleLabel: `고양 공연까지 ${days}일 남았습니다`,
+    captionLabel: now < dayOne ? '첫 공연까지' : '둘째 날 공연까지',
   };
 }

@@ -61,6 +61,9 @@ const remainingEntries = entries.slice(previewCount);
     <a class="setlist-preview__link" href="/share/setlist/"
       >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
     >
+    <p class="setlist-preview__hint">
+      브라우저에서만 만들어지는 이미지 한 장. 서버 저장 없음.
+    </p>
   </div>
 </section>
 
@@ -138,6 +141,12 @@ const remainingEntries = entries.slice(previewCount);
   details .setlist-preview__list,
   details p {
     margin-block: 0.75rem 1.25rem;
+  }
+
+  .setlist-preview__hint {
+    margin-top: -0.75rem;
+    color: var(--mist);
+    font-size: 0.85rem;
   }
 
   @media (max-width: 36rem) {

@@ -4,9 +4,10 @@ import EclipseCountdown from '../visual/EclipseCountdown.astro';
 
 interface Props {
   concert: ConcertRecord;
+  officialNoticeUrl: string;
 }
 
-const { concert } = Astro.props;
+const { concert, officialNoticeUrl } = Astro.props;
 const [dayOne, dayTwo] = concert.data.shows;
 
 if (!dayOne || !dayTwo) {
@@ -83,12 +84,19 @@ if (!dayOne || !dayTwo) {
   />
   <div class="home-hero__content shell-content">
     <div class="home-hero__heading">
-      <p class="eyebrow">AFTER HOURS TIL DAWN / GOYANG</p>
+      <p class="eyebrow">THE WEEKND · 비공식 팬 팜플렛</p>
       <h1 id="home-title" class="display-latin">
         <span>AFTER HOURS</span>
         <span class="home-hero__dawn">TIL DAWN</span>
       </h1>
-      <p>2026.10.07—08 · {concert.data.venue}</p>
+      <p class="home-hero__facts">
+        <span>2026.10.07—08</span>
+        <span aria-hidden="true">·</span>
+        <span>{concert.data.venue}</span>
+        <span aria-hidden="true">·</span>
+        <span>{concert.data.ageRestriction}</span>
+        <a href={officialNoticeUrl} rel="noreferrer">공식 공지 ↗</a>
+      </p>
     </div>
   </div>
 </section>
@@ -180,12 +188,25 @@ if (!dayOne || !dayTwo) {
     color: transparent;
   }
 
-  h1 + p {
+  .home-hero__facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.6rem;
+    align-items: center;
     max-width: 34rem;
     margin-top: clamp(2rem, 5vw, 4rem);
     color: var(--mist);
     font-size: clamp(1rem, 2vw, 1.25rem);
     font-weight: 700;
+    text-shadow: 0 1px 12px var(--night);
+  }
+
+  .home-hero__facts a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--amber);
+    font-weight: 800;
   }
 
   @media (max-width: 42rem) {
@@ -200,13 +221,13 @@ if (!dayOne || !dayTwo) {
 
     .home-hero__moon-art {
       width: 84vw;
-      inset: auto -10vw -4rem auto !important;
+      inset: auto -10vw -9rem auto !important;
     }
 
     .home-hero :global(eclipse-countdown) {
       --eclipse-size: 84vw;
       right: -10vw;
-      bottom: 1.25rem;
+      bottom: -3.75rem;
     }
   }
 </style>
