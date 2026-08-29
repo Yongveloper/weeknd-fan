@@ -223,10 +223,10 @@ test('keeps the ordered prediction and trust label usable without JavaScript', a
   const explorer = page.locator('.expected-setlist');
   await expect(explorer.getByText('예상 · 보장 아님').first()).toBeVisible();
   await expect(explorer.locator('summary').first()).toHaveText(
-    /^01 Baptized in Fear/,
+    /^\s*01 Baptized in Fear/,
   );
   await expect(explorer.locator('summary').nth(37)).toHaveText(
-    /^38 Moth to a Flame/,
+    /^\s*38 Moth to a Flame/,
   );
   expect(
     await explorer
