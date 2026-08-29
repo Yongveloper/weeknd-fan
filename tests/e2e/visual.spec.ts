@@ -286,19 +286,42 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
 }) => {
   await page.goto('/');
 
-  const metrics = await page.evaluate(() => {
+  const metrics = await page.evaluate(async () => {
+    await document.fonts.ready;
+
     const lineCount = (element: Element) => {
-      const range = document.createRange();
-      range.selectNodeContents(element);
-      return new Set(
-        Array.from(range.getClientRects()).map((rect) => Math.round(rect.top)),
-      ).size;
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, {
+        acceptNode: (node) =>
+          (node.textContent ?? '').trim().length > 0
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_SKIP,
+      });
+      const tops = new Set<number>();
+      let node = walker.nextNode();
+      while (node) {
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        for (const rect of Array.from(range.getClientRects())) {
+          tops.add(Math.round(rect.top));
+        }
+        node = walker.nextNode();
+      }
+      return tops.size;
     };
+
     const h1 = document.querySelector('h1')!;
     const intro = document.getElementById('intro-title')!;
     const introStyle = getComputedStyle(intro);
+    const spanRights = Array.from(h1.querySelectorAll('span')).map(
+      (span) => span.getBoundingClientRect().right,
+    );
+
     return {
       heroLines: lineCount(h1),
+      heroScrollWidth: h1.scrollWidth,
+      heroClientWidth: h1.clientWidth,
+      spanRights,
+      viewportWidth: window.innerWidth,
       introFont: introStyle.fontFamily,
       introWeight: introStyle.fontWeight,
       introLineHeight:
@@ -307,6 +330,10 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
   });
 
   expect(metrics.heroLines).toBe(2);
+  expect(metrics.heroScrollWidth).toBeLessThanOrEqual(metrics.heroClientWidth);
+  for (const right of metrics.spanRights) {
+    expect(right).toBeLessThanOrEqual(metrics.viewportWidth);
+  }
   expect(metrics.introFont).toMatch(/Noto Sans KR/);
   expect(metrics.introWeight).toBe('900');
   expect(metrics.introLineHeight).toBeGreaterThan(1);
