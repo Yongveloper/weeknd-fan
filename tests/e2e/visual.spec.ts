@@ -378,6 +378,10 @@ test('turns the fixed sky from night to dawn as the home page scrolls', async ({
 test('does not mount the dawn sky on sub-pages', async ({ page }) => {
   await page.goto('/discover/');
   await expect(page.locator('.dawn-sky')).toHaveCount(0);
+  const bodyBackgroundImage = await page.evaluate(
+    () => getComputedStyle(document.body).backgroundImage,
+  );
+  expect(bodyBackgroundImage).not.toBe('none');
 });
 
 test('keeps every home section transparent so the sky shows through', async ({

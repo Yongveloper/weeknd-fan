@@ -44,7 +44,7 @@ const ogImageUrl = new URL(ogImage, site);
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>{title}</title>
   </head>
-  <body data-dawn-sky={dawnSky}>
+  <body data-dawn-sky={dawnSky || undefined}>
     {dawnSky && <div class="dawn-sky" aria-hidden="true" />}
     <a class="skip-link" href="#content">본문으로 건너뛰기</a>
     <SiteHeader />
