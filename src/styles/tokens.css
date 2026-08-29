@@ -8,6 +8,7 @@
   --ink-muted: color-mix(in srgb, var(--ivory) 70%, transparent);
   --font-display: 'Bebas Neue', Impact, sans-serif;
   --font-body: 'Noto Sans KR Variable', system-ui, sans-serif;
+  --font-display-ko: 'Noto Sans KR Variable', system-ui, sans-serif;
   --content-max: 74rem;
   --gutter: clamp(1rem, 4vw, 4rem);
   --section-space: clamp(5rem, 13vw, 11rem);

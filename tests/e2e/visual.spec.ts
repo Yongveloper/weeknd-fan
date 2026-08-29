@@ -280,3 +280,34 @@ test('selects native-capped moon and cover fog candidates on Pixel 7', async ({
       .evaluate((image) => (image as HTMLImageElement).currentSrc),
   ).resolves.toMatch(/fog-dawn-1536\.avif$/);
 });
+
+test('keeps the hero title on two lines and renders Korean headings in Noto Sans KR', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const metrics = await page.evaluate(() => {
+    const lineCount = (element: Element) => {
+      const range = document.createRange();
+      range.selectNodeContents(element);
+      return new Set(
+        Array.from(range.getClientRects()).map((rect) => Math.round(rect.top)),
+      ).size;
+    };
+    const h1 = document.querySelector('h1')!;
+    const intro = document.getElementById('intro-title')!;
+    const introStyle = getComputedStyle(intro);
+    return {
+      heroLines: lineCount(h1),
+      introFont: introStyle.fontFamily,
+      introWeight: introStyle.fontWeight,
+      introLineHeight:
+        parseFloat(introStyle.lineHeight) / parseFloat(introStyle.fontSize),
+    };
+  });
+
+  expect(metrics.heroLines).toBe(2);
+  expect(metrics.introFont).toMatch(/Noto Sans KR/);
+  expect(metrics.introWeight).toBe('900');
+  expect(metrics.introLineHeight).toBeGreaterThan(1);
+});

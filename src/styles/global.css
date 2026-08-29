@@ -59,6 +59,45 @@ p {
   margin: 0;
 }
 
+h1,
+h2,
+h3 {
+  font-family: var(--font-display-ko);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+  word-break: keep-all;
+  text-wrap: balance;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 7.5vw, 5.4rem);
+}
+
+h2 {
+  font-size: clamp(2.1rem, 5.5vw, 4rem);
+}
+
+h3 {
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+}
+
+.display-latin,
+.latin {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.latin {
+  font-size: 1.08em;
+}
+
+.display-latin {
+  line-height: 0.82;
+}
+
 a {
   color: inherit;
   text-underline-offset: 0.22em;

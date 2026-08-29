@@ -17,8 +17,10 @@ const remainingEntries = entries.slice(previewCount);
   <div class="shell-content setlist-preview__inner">
     <div class="setlist-preview__heading">
       <p class="eyebrow">A PATTERN, NOT A PROMISE</p>
-      <h2 id="setlist-preview-title">예상 셋리스트</h2>
-      <StatusBadge status="expected" />
+      <div class="setlist-preview__title-row">
+        <h2 id="setlist-preview-title">예상 셋리스트</h2>
+        <StatusBadge status="expected" />
+      </div>
     </div>
     <p class="setlist-preview__comparison">
       최근 2026년 공연 {observationCount}회 비교
@@ -75,18 +77,15 @@ const remainingEntries = entries.slice(previewCount);
   }
 
   .setlist-preview__heading {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.85rem 1.25rem;
-    align-items: end;
+    display: grid;
+    gap: 0.5rem;
   }
 
-  h2 {
-    font-family: var(--font-display);
-    font-size: clamp(3.2rem, 8vw, 6.5rem);
-    font-weight: 400;
-    letter-spacing: 0.02em;
-    line-height: 0.88;
+  .setlist-preview__title-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.25rem;
+    align-items: baseline;
   }
 
   .setlist-preview__list {

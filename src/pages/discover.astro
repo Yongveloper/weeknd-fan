@@ -36,7 +36,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
   <article class="discover shell-content">
     <header class="discover__hero">
       <p class="eyebrow">ONE MINUTE BEFORE THE SHOW</p>
-      <h1>The Weeknd를<br />한 장씩 넘겨 보기</h1>
+      <h1><span class="latin">The Weeknd</span>를 한 장씩 넘겨 보기</h1>
       <p>{intro.data.summary}</p>
       <StatusBadge status={intro.data.status} />
       <details aria-label="1분 입문 더 깊이 보기">
@@ -70,7 +70,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
 
     <section class="discover__timeline" aria-labelledby="timeline-title">
       <p class="eyebrow">CAREER, AT A GLANCE</p>
-      <h2 id="timeline-title">연표는 가볍게,<br />필요하면 더 깊게</h2>
+      <h2 id="timeline-title">연표는 가볍게, 필요하면 더 깊게</h2>
       <CareerTimeline entries={eras} sources={sources} />
     </section>
 
@@ -122,22 +122,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     gap: 1rem;
     padding-block: 2rem var(--section-space);
     border-top: 0;
-  }
-
-  h1,
-  h2 {
-    font-family: var(--font-display);
-    font-weight: 400;
-    letter-spacing: 0.025em;
-    line-height: 0.94;
-  }
-
-  h1 {
-    font-size: clamp(3.7rem, 11vw, 8.5rem);
-  }
-
-  h2 {
-    font-size: clamp(2.4rem, 5vw, 4.6rem);
   }
 
   .discover__hero > p:not(.eyebrow) {
