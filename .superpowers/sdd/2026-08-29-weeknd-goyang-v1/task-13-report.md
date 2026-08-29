@@ -111,3 +111,22 @@ Fresh production build values: aggregate JavaScript gzip `28.3 KiB`, aggregate
 raster `128.8 KiB`; home initial JavaScript gzip `2.3 KiB` and selected mobile
 raster `56.3 KiB`. All non-home routes have zero raster bytes and at most
 `2.6 KiB` initial JavaScript gzip.
+
+## Fix round 2 — responsive visual density
+
+The first bounded assets used one 720px moon and 480px fog candidate, which
+upscaled on Pixel 7. The scene now ships AVIF and WebP ladders generated from
+the approved originals: moon `320–1254w`; each fog layer `480–1536w`. Mobile
+fog `sizes` accounts for `object-fit: cover` (`150vw`), so the Pixel 7 DPR
+selects the native-capped 1536px fog while the moon selects 960px AVIF. The
+Pixel-only E2E gate asserts those exact `currentSrc` filenames.
+
+The full-dist budgets remain green: aggregate raster `739.0 KiB`; home selected
+mobile raster `144.1 KiB`.
+
+### Final verification (Node 22.14.0)
+
+`npm run verify`, `npm run budget`, and `git diff --check` passed on the final
+head. The production Pixel 7 Playwright check passed and observed
+`moon-960.avif`, `fog-night-1536.avif`, and `fog-dawn-1536.avif` as the active
+`currentSrc` candidates.

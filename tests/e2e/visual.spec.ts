@@ -174,3 +174,29 @@ test('serves every home-scene image as AVIF and WebP derivatives', async ({
     3,
   );
 });
+
+test('selects native-capped moon and cover fog candidates on Pixel 7', async ({
+  page,
+}) => {
+  test.skip(
+    test.info().project.name !== 'mobile-chromium',
+    'The source selection contract is specific to the Pixel 7 DPR.',
+  );
+  await page.goto('/');
+
+  await expect(
+    page
+      .locator('[data-moon-art]')
+      .evaluate((image) => (image as HTMLImageElement).currentSrc),
+  ).resolves.toMatch(/moon-960\.avif$/);
+  await expect(
+    page
+      .locator('.home-hero__fog--night')
+      .evaluate((image) => (image as HTMLImageElement).currentSrc),
+  ).resolves.toMatch(/fog-night-1536\.avif$/);
+  await expect(
+    page
+      .locator('.home-hero__fog--dawn')
+      .evaluate((image) => (image as HTMLImageElement).currentSrc),
+  ).resolves.toMatch(/fog-dawn-1536\.avif$/);
+});
