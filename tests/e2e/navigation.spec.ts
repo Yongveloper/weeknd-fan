@@ -78,3 +78,23 @@ test('keeps the complete predicted list collapsed by default', async ({
   await expect(disclosure).not.toHaveAttribute('open', '');
   await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
 });
+
+test('links each Goyang shortcut to its stable guide anchor', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const shortcuts = page.getByRole('navigation', {
+    name: '고양 가이드 바로가기',
+  });
+  await expect(
+    shortcuts.getByRole('link', { name: '가는 길' }),
+  ).toHaveAttribute('href', '/goyang/#transport');
+  await expect(shortcuts.getByRole('link', { name: '준비물' })).toHaveAttribute(
+    'href',
+    '/goyang/#packing',
+  );
+  await expect(
+    shortcuts.getByRole('link', { name: '귀가 확인' }),
+  ).toHaveAttribute('href', '/goyang/#return');
+});

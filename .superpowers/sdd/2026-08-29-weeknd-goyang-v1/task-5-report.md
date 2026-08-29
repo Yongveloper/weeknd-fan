@@ -71,3 +71,15 @@ list remains populated inside it.
 ## Commit
 
 `feat(home): compose fan pamphlet entry page`
+
+## Fix round 1 — stable Goyang guide anchors
+
+- **RED:** `npm run build && npm run test:e2e -- navigation.spec.ts` failed
+  the new exact-anchor regression in desktop and mobile: `가는 길` resolved to
+  `/goyang/#getting-there` instead of `/goyang/#transport`.
+- **GREEN:** `GuideShortcuts.astro` now uses `/goyang/#transport`,
+  `/goyang/#packing`, and `/goyang/#return`; the focused navigation suite
+  passed `12/12`.
+- **Final verification:** `npm run verify` passed lint, format, Astro check,
+  `10` unit tests, build, and `19` desktop/mobile E2E tests (`1`
+  desktop-inapplicable mobile test skipped). `git diff --check` passed.
