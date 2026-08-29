@@ -1,0 +1,247 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const sources = await getCollection('sources');
+const groups: Array<{
+  title: string;
+  description: string;
+  kinds: string[];
+}> = [
+  {
+    title: '공식',
+    description: '아티스트·주최·예매처·레이블이 직접 공개한 원문입니다.',
+    kinds: ['official'],
+  },
+  {
+    title: '공공 교통',
+    description: '공공시설·철도·버스 확인에 사용하는 공공 서비스입니다.',
+    kinds: ['public-agency'],
+  },
+  {
+    title: '공연 기록',
+    description:
+      '최근 공연의 반복 패턴을 비교하는 기록입니다. 공식 확정 정보가 아닙니다.',
+    kinds: ['crowd-sourced'],
+  },
+];
+
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .format(date)
+    .replace(/\. /g, '.')
+    .replace(/\.$/, '');
+
+const checkpoints = [
+  ['Tokyo', '9월 19–20일 이후', '첫 아시아 구성 확인'],
+  ['Jakarta', '9월 26–27일 이후', '게스트 없는 구간과 세트 변화 비교'],
+  ['Singapore', '10월 2–3일 이후', '가장 가까운 비교군 반영'],
+  ['고양 공식 확인', '10월 4–6일', '입장·반입·교통·접근성 공지 최종 확인'],
+  ['고양 1일차 아카이브', '10월 7일 공연 후', '실제 셋리스트 기록'],
+  ['고양 2일차 아카이브', '10월 8일 공연 후', '실제 셋리스트와 차이 기록'],
+] as const;
+---
+
+<BaseLayout
+  title="출처와 업데이트 | The Weeknd 고양 팬 가이드"
+  description="The Weeknd 고양 팬 가이드의 출처, 마지막 확인일, 그리고 공연 전후 업데이트 일정"
+>
+  <article class="sources-page shell-content">
+    <header class="sources-page__hero">
+      <p class="eyebrow">PROVENANCE / CHECKPOINTS</p>
+      <h1>출처와<br />업데이트</h1>
+      <p>
+        이 페이지는 정보의 근거와 확인 시점을 짧게 남깁니다. 운영 공지가 없는
+        항목은 추정으로 채우지 않습니다.
+      </p>
+    </header>
+
+    <section class="sources-page__groups" aria-label="출처 목록">
+      {
+        groups.map((group) => {
+          const records = sources.filter((source) =>
+            group.kinds.includes(source.data.kind),
+          );
+          return (
+            <section
+              class="source-group"
+              aria-labelledby={`source-group-${group.title}`}
+            >
+              <div>
+                <h2 id={`source-group-${group.title}`}>{group.title}</h2>
+                <p>{group.description}</p>
+              </div>
+              <ul>
+                {records.map((source) => (
+                  <li>
+                    <a href={source.data.url} target="_blank" rel="noreferrer">
+                      {source.data.name}
+                    </a>
+                    <span>
+                      마지막 확인 {formatDate(source.data.lastCheckedAt)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          );
+        })
+      }
+      <section class="source-group" aria-labelledby="source-group-supporting">
+        <div>
+          <h2 id="source-group-supporting">보조 참고</h2>
+          <p>
+            후보와 용어를 찾는 보조 자료이며, 핵심 사실은 위 원문으로 다시
+            확인합니다.
+          </p>
+        </div>
+        <ul>
+          <li>
+            <span class="source-group__reference">나무위키 PDF</span>
+            <span>누락 탐색용·핵심 사실 근거 아님</span>
+          </li>
+        </ul>
+      </section>
+    </section>
+
+    <section
+      class="sources-page__checkpoints"
+      aria-labelledby="checkpoints-title"
+    >
+      <p class="eyebrow">UPDATE CALENDAR</p>
+      <h2 id="checkpoints-title">다음 확인 지점</h2>
+      <ol>
+        {
+          checkpoints.map(([place, timing, action]) => (
+            <li>
+              <p>
+                {place} · {timing}
+              </p>
+              <span>{action}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="sources-page__note">
+        실제 고양 공연 기록은 양일 모두 확인한 뒤에만 아카이브로 전환합니다.
+      </p>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .sources-page {
+    display: grid;
+    gap: var(--section-space);
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  .sources-page__hero,
+  .source-group,
+  .sources-page__checkpoints {
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 20%, transparent);
+  }
+
+  .sources-page__hero {
+    display: grid;
+    gap: 1rem;
+    max-width: 50rem;
+    padding-top: 2rem;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    line-height: 0.92;
+  }
+
+  h1 {
+    font-size: clamp(4.2rem, 13vw, 9rem);
+  }
+  h2 {
+    font-size: clamp(2.5rem, 5vw, 4.8rem);
+  }
+
+  .sources-page__hero > p:last-child,
+  .source-group > div > p,
+  .sources-page__note {
+    color: var(--mist);
+  }
+
+  .sources-page__groups {
+    display: grid;
+  }
+
+  .source-group {
+    display: grid;
+    grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.3fr);
+    gap: 1.5rem clamp(2rem, 8vw, 9rem);
+    padding-block: clamp(2rem, 5vw, 4rem);
+  }
+
+  .source-group > div {
+    display: grid;
+    gap: 0.7rem;
+  }
+  .source-group ul,
+  .sources-page__checkpoints ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .source-group ul {
+    display: grid;
+    gap: 1rem;
+  }
+  .source-group li {
+    display: grid;
+    gap: 0.2rem;
+  }
+  .source-group a,
+  .source-group__reference {
+    color: var(--ivory);
+    font-weight: 800;
+  }
+  .source-group li > span {
+    color: var(--ink-muted);
+    font-size: 0.86rem;
+  }
+
+  .sources-page__checkpoints {
+    display: grid;
+    gap: 1rem;
+    padding-top: var(--section-space);
+  }
+
+  .sources-page__checkpoints ol {
+    display: grid;
+    max-width: 56rem;
+  }
+  .sources-page__checkpoints li {
+    display: grid;
+    grid-template-columns: minmax(14rem, 0.85fr) minmax(0, 1.15fr);
+    gap: 0.5rem 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 16%, transparent);
+  }
+  .sources-page__checkpoints li p {
+    color: var(--ivory);
+    font-weight: 800;
+  }
+  .sources-page__checkpoints li span {
+    color: var(--mist);
+  }
+
+  @media (max-width: 42rem) {
+    .source-group,
+    .sources-page__checkpoints li {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

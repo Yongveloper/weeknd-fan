@@ -49,6 +49,27 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
   );
 });
 
+test('groups sources and planned update checkpoints without overstating NamuWiki', async ({
+  page,
+}) => {
+  await page.goto('/sources/');
+
+  await expect(
+    page.getByRole('heading', { name: '출처와 업데이트' }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '공식' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '공공 교통' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '공연 기록' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '보조 참고' })).toBeVisible();
+  await expect(
+    page.getByText('누락 탐색용·핵심 사실 근거 아님', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Tokyo · 9월 19–20일 이후')).toBeVisible();
+  await expect(
+    page.getByText('고양 2일차 아카이브 · 10월 8일 공연 후'),
+  ).toBeVisible();
+});
+
 test('keeps navigation targets touch-sized in every viewport', async ({
   page,
 }) => {

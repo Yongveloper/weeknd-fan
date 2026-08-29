@@ -13,8 +13,9 @@
     "format:check": "prettier --check .",
     "check": "astro check",
     "test": "vitest run --passWithNoTests",
+    "audit:content": "vitest run tests/unit/content-audit.test.ts",
     "test:e2e": "playwright test",
-    "verify": "npm run lint && npm run format:check && npm run check && npm test && npm run build && npm run test:e2e"
+    "verify": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
