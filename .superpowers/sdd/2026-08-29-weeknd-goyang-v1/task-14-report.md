@@ -56,3 +56,9 @@ No authentication, Cloudflare project/domain creation, publication, or real depl
 - Replaced the non-empty shell guard with `scripts/assert-production-origin.mjs`. It requires a parseable absolute `https:` `PUBLIC_SITE_URL` before the build or `wrangler deploy` can run. Unit coverage rejects missing, HTTP, FTP, and malformed values and accepts HTTPS without invoking deployment.
 - Strengthened the static-delivery regression assertion with semantic JSONC parsing, exact allowed Wrangler config keys, static Astro output, no Cloudflare adapter, and absence of scoped Functions/Worker entrypoint paths.
 - Fresh Node 22.14.0 validation: `PUBLIC_SITE_URL=https://fan-guide.test npm run verify` passed (26 unit tests; 91 Playwright passed and 3 intended skips), `npm run budget` passed, `npx wrangler deploy --dry-run` read 189 `dist/` files with no bindings and exited before deploy, and `git diff --check` passed.
+
+## Fix round 2 — 2026-08-29
+
+- Replaced the Astro source-text assertion with a cache-busted dynamic import of `astro.config.mjs` under controlled missing and HTTPS `PUBLIC_SITE_URL` values. The evaluated configurations both require `output === 'static'` and no adapter; the valid origin resolves as expected.
+- Added mutation-style confidence checks proving that the config guard rejects server output and an adapter-shaped configuration. Package, Wrangler JSONC, and scoped Function/Worker-path checks remain secondary defense.
+- Fresh Node 22.14.0 validation again passed: targeted static config test; complete `PUBLIC_SITE_URL=https://fan-guide.test npm run verify` (26 unit tests; 91 Playwright passed, 3 intended skips); `npm run budget`; `npx wrangler deploy --dry-run` (189 `dist/` files, no bindings, exited before deployment); and `git diff --check`.

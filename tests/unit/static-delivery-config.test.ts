@@ -1,4 +1,5 @@
 import { access, readFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 
 import { parse } from 'jsonc-parser';
 import { expect, test } from 'vitest';
@@ -18,6 +19,36 @@ async function projectPathExists(path: string) {
   }
 }
 
+async function importAstroConfig(publicSiteUrl: string | undefined) {
+  const previousValue = process.env.PUBLIC_SITE_URL;
+
+  if (publicSiteUrl === undefined) {
+    delete process.env.PUBLIC_SITE_URL;
+  } else {
+    process.env.PUBLIC_SITE_URL = publicSiteUrl;
+  }
+
+  try {
+    const configUrl = new URL('../../astro.config.mjs', import.meta.url);
+    configUrl.searchParams.set('static-config-test', randomUUID());
+    return (await import(configUrl.href)).default;
+  } finally {
+    if (previousValue === undefined) {
+      delete process.env.PUBLIC_SITE_URL;
+    } else {
+      process.env.PUBLIC_SITE_URL = previousValue;
+    }
+  }
+}
+
+function assertStaticAstroConfig(config: {
+  output?: unknown;
+  adapter?: unknown;
+}) {
+  expect(config.output).toBe('static');
+  expect(config.adapter).toBeUndefined();
+}
+
 test('keeps Cloudflare delivery static-only and serves the required headers', async () => {
   const config = parse(await readProjectFile('wrangler.jsonc')) as {
     $schema?: unknown;
@@ -29,7 +60,10 @@ test('keeps Cloudflare delivery static-only and serves the required headers', as
     dependencies?: Record<string, unknown>;
     devDependencies?: Record<string, unknown>;
   };
-  const astroConfig = await readProjectFile('astro.config.mjs');
+  const missingOriginAstroConfig = await importAstroConfig(undefined);
+  const validOriginAstroConfig = await importAstroConfig(
+    'https://fan-guide.test',
+  );
   const headers = await readProjectFile('public/_headers');
 
   expect(Object.keys(config).sort()).toEqual([
@@ -44,8 +78,14 @@ test('keeps Cloudflare delivery static-only and serves the required headers', as
   });
   expect(config).not.toHaveProperty('main');
   expect(config.assets).not.toHaveProperty('binding');
-  expect(astroConfig).toMatch(/output:\s*'static'/);
-  expect(astroConfig).not.toContain('@astrojs/cloudflare');
+  assertStaticAstroConfig(missingOriginAstroConfig);
+  assertStaticAstroConfig(validOriginAstroConfig);
+  expect(missingOriginAstroConfig.site).toBeUndefined();
+  expect(validOriginAstroConfig.site).toBe('https://fan-guide.test/');
+  expect(() => assertStaticAstroConfig({ output: 'server' })).toThrow();
+  expect(() =>
+    assertStaticAstroConfig({ output: 'static', adapter: {} }),
+  ).toThrow();
   expect(packageJson.dependencies).not.toHaveProperty('@astrojs/cloudflare');
   expect(packageJson.devDependencies).not.toHaveProperty('@astrojs/cloudflare');
   await expect(
