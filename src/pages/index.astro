@@ -6,16 +6,26 @@ import HomeHero from '../components/home/HomeHero.astro';
 import IntroSummary from '../components/home/IntroSummary.astro';
 import SetlistPreview from '../components/home/SetlistPreview.astro';
 import { getConcert, getExpectedSetlist } from '../lib/content/queries';
+import { buildEventJsonLd, serializeJsonLd } from '../lib/seo/eventJsonLd';
 
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();
 const setlist = await getExpectedSetlist();
+const eventJsonLd = buildEventJsonLd(
+  concert.data,
+  (Astro.site ?? Astro.url).toString(),
+);
 ---
 
 <BaseLayout
   title={title}
   description="The Weeknd 2026 고양 공연을 위한 비공식·비영리 팬 가이드"
 >
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={serializeJsonLd(eventJsonLd)}
+  />
   <HomeHero concert={concert} />
   <IntroSummary />
   <SetlistPreview entries={setlist} previewCount={6} />
