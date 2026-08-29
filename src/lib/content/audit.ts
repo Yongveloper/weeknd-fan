@@ -44,13 +44,53 @@ export type PublishedContentAuditInput = {
 };
 
 export function parseSeoulDate(date: string): Date {
-  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-    return new Date(`${date}T00:00:00+09:00`);
+  const dateOnly = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (dateOnly) {
+    const year = Number(dateOnly[1]);
+    const month = Number(dateOnly[2]);
+    const day = Number(dateOnly[3]);
+    return isCalendarDate(year, month, day)
+      ? new Date(`${date}T00:00:00+09:00`)
+      : new Date(Number.NaN);
   }
-  if (/^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/i.test(date)) {
-    return new Date(date);
+
+  const timestamp = date.match(
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-](\d{2}):(\d{2}))$/i,
+  );
+  if (!timestamp) return new Date(Number.NaN);
+
+  const year = timestamp[1] ?? '';
+  const month = timestamp[2] ?? '';
+  const day = timestamp[3] ?? '';
+  const hours = timestamp[4] ?? '';
+  const minutes = timestamp[5] ?? '';
+  const seconds = timestamp[6] ?? '0';
+  const offset = timestamp[8] ?? '';
+  const offsetHours = timestamp[9] ?? '';
+  const offsetMinutes = timestamp[10] ?? '';
+  if (
+    !isCalendarDate(Number(year), Number(month), Number(day)) ||
+    Number(hours) > 23 ||
+    Number(minutes) > 59 ||
+    Number(seconds) > 59 ||
+    (offset.toUpperCase() !== 'Z' &&
+      (Number(offsetHours) > 23 || Number(offsetMinutes) > 59))
+  ) {
+    return new Date(Number.NaN);
   }
-  return new Date(Number.NaN);
+
+  const parsed = new Date(date);
+  return Number.isNaN(parsed.getTime()) ? new Date(Number.NaN) : parsed;
+}
+
+function isCalendarDate(year: number, month: number, day: number): boolean {
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  return (
+    candidate.getUTCFullYear() === year &&
+    candidate.getUTCMonth() === month - 1 &&
+    candidate.getUTCDate() === day
+  );
 }
 
 export function formatSeoulDate(date: Date): string {
@@ -112,6 +152,8 @@ export function auditPublishedContent(
     const hasValidContentDate = !Number.isNaN(entry.lastVerifiedAt.getTime());
     if (!hasValidContentDate) {
       issues.push({ id: entry.id, code: 'content-date-invalid' });
+    } else if (entry.lastVerifiedAt > input.now) {
+      issues.push({ id: entry.id, code: 'content-verification-in-future' });
     }
     if (entry.status !== 'unpublished' && entry.sourceCount < 1) {
       issues.push({ id: entry.id, code: 'published-content-missing-sources' });
@@ -133,7 +175,12 @@ export function auditPublishedContent(
       ) {
         issues.push({ id: entry.id, code: 'volatile-source-date-invalid' });
       } else if (
+        entry.sources.some((source) => source.lastCheckedAt > input.now)
+      ) {
+        issues.push({ id: entry.id, code: 'source-check-in-future' });
+      } else if (
         hasValidContentDate &&
+        entry.lastVerifiedAt <= input.now &&
         entry.sources.some(
           (source) =>
             input.now.getTime() - source.lastCheckedAt.getTime() >
@@ -142,6 +189,8 @@ export function auditPublishedContent(
       ) {
         issues.push({ id: entry.id, code: 'volatile-sources-stale' });
       } else if (
+        hasValidContentDate &&
+        entry.lastVerifiedAt <= input.now &&
         entry.sources.some(
           (source) => source.lastCheckedAt < entry.lastVerifiedAt,
         )

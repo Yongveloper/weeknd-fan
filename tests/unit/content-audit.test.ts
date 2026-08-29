@@ -225,6 +225,68 @@ describe('content trust contract', () => {
     ]);
   });
 
+  it('rejects impossible calendar dates and offset timestamps', () => {
+    for (const value of [
+      '2026-02-29',
+      '2026-04-31',
+      '2026-10-05T24:00:00+09:00',
+      '2026-02-29T12:00:00+09:00',
+      '2026-10-05T12:61:00+09:00',
+    ]) {
+      expect(Number.isNaN(parseSeoulDate(value).getTime())).toBe(true);
+    }
+    expect(Number.isNaN(parseSeoulDate('2024-02-29').getTime())).toBe(false);
+    expect(
+      Number.isNaN(parseSeoulDate('2024-02-29T23:59:59.123+09:00').getTime()),
+    ).toBe(false);
+  });
+
+  it('rejects future content and source checks, including aligned future timestamps', () => {
+    const now = parseSeoulDate('2026-10-05T12:00:00+09:00');
+    const entry = (lastVerifiedAt: Date, lastCheckedAt: Date) => ({
+      id: 'transport',
+      status: 'practical' as const,
+      lastVerifiedAt,
+      sourceCount: 1,
+      volatile: true,
+      sources: [{ id: 'transport-source', lastCheckedAt }],
+    });
+    const base = {
+      now,
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected' as const, records: [] },
+      showRecords: [],
+    };
+
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          entry(parseSeoulDate('2026-10-06'), parseSeoulDate('2026-10-05')),
+        ],
+      }),
+    ).toEqual([{ id: 'transport', code: 'content-verification-in-future' }]);
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          entry(parseSeoulDate('2026-10-05'), parseSeoulDate('2026-10-06')),
+        ],
+      }),
+    ).toEqual([{ id: 'transport', code: 'source-check-in-future' }]);
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          entry(parseSeoulDate('2026-10-06'), parseSeoulDate('2026-10-06')),
+        ],
+      }),
+    ).toEqual([
+      { id: 'transport', code: 'content-verification-in-future' },
+      { id: 'transport', code: 'source-check-in-future' },
+    ]);
+  });
+
   it('rejects duplicate, noncontiguous, and out-of-order archive song positions', () => {
     const issues = auditPublishedContent({
       now: new Date('2026-10-09T00:00:00+09:00'),

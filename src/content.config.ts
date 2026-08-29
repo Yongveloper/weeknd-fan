@@ -11,6 +11,13 @@ const status = z.enum([
   'unpublished',
 ]);
 const spoilerLevel = z.enum(['none', 'titles', 'full']);
+const editorialDate = z
+  .union([z.date(), z.iso.date(), z.iso.datetime({ offset: true })])
+  .transform((value) =>
+    value instanceof Date
+      ? value
+      : new Date(value.length === 10 ? `${value}T00:00:00+09:00` : value),
+  );
 
 const sources = defineCollection({
   loader: glob({ base: './src/data/sources', pattern: '**/*.json' }),
@@ -23,7 +30,7 @@ const sources = defineCollection({
       'crowd-sourced',
       'editorial-reference',
     ]),
-    lastCheckedAt: z.coerce.date(),
+    lastCheckedAt: editorialDate,
   }),
 });
 
@@ -32,7 +39,7 @@ const common = z.object({
   summary: z.string(),
   body: z.string().optional(),
   status,
-  lastVerifiedAt: z.coerce.date(),
+  lastVerifiedAt: editorialDate,
   sources: z.array(reference('sources')).min(1),
   relatedAlbums: z.array(z.string()).default([]),
   relatedSongs: z.array(z.string()).default([]),

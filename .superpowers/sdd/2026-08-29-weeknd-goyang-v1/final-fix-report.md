@@ -103,3 +103,18 @@ was preserved and excluded from this fix wave.
 - `parseSeoulDate` now accepts only date-only Seoul values or full offset ISO
   values. Invalid content/source dates produce deterministic audit findings,
   and offset-ISO stale/laundering paths are covered.
+
+## Edge round 2
+
+- Date-only values now round-trip through UTC calendar components, rejecting
+  impossible month/day combinations and non-leap Feb. 29. Offset timestamps
+  require a strict ISO-with-offset form and independently validate calendar,
+  clock, and offset ranges before parsing.
+- Content collection dates use an ISO date/offset union before conversion while
+  accepting Astro's already parsed `Date` values for Markdown frontmatter.
+- Audits now reject content verification and referenced source checks later
+  than the audit clock with `content-verification-in-future` and
+  `source-check-in-future`; aligned future pairs cannot bypass either gate.
+- Regression coverage includes impossible date-only/offset timestamps, leap
+  validity, future content, future sources, aligned future values, and the
+  existing current-data adapter pass.
