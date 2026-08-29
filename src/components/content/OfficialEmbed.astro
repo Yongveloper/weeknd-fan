@@ -22,60 +22,94 @@ if (
 }
 ---
 
-<div class="official-embed" data-official-embed data-embed-url={url}>
+<official-embed
+  class="official-embed"
+  data-embed-url={url}
+  data-song-title={songTitle}
+>
   <a href={url} target="_blank" rel="noreferrer">공식 원문에서 듣기</a>
   <button type="button" data-load-embed>공식 영상 불러오기</button>
-</div>
+</official-embed>
 
-<script is:inline define:vars={{ songTitle }}>
-  const timeoutMs = 8_000;
+<script is:inline>
+  (() => {
+    if (window.__officialEmbedEnhancement) return;
+    window.__officialEmbedEnhancement = true;
+    const timeoutMs = 8_000;
+    const allowedProviders = new Set([
+      'www.youtube.com',
+      'youtube.com',
+      'www.youtube-nocookie.com',
+      'youtube-nocookie.com',
+      'open.spotify.com',
+    ]);
 
-  document
-    .querySelectorAll<HTMLElement>('[data-official-embed]')
-    .forEach((embed) => {
-      const button =
-        embed.querySelector<HTMLButtonElement>('[data-load-embed]');
+    const activeEmbeds = new Map();
+    const cleanup = (embed) => {
+      const state = activeEmbeds.get(embed);
+      if (!state) return;
+      window.clearTimeout(state.timeout);
+      state.iframe.removeEventListener('load', state.onLoad);
+      state.iframe.removeEventListener('error', state.onError);
+      state.iframe.remove();
+      activeEmbeds.delete(embed);
+    };
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('official-embed [data-load-embed]');
+      const embed = button?.closest('official-embed');
+      if (!embed || activeEmbeds.has(embed)) return;
+
       const url = embed.dataset.embedUrl;
+      const songTitle = embed.dataset.songTitle;
+      if (!url || !songTitle) return;
 
-      if (!button || !url) return;
+      let mediaUrl;
+      try {
+        mediaUrl = new URL(url);
+      } catch {
+        return;
+      }
+      if (
+        mediaUrl.protocol !== 'https:' ||
+        !allowedProviders.has(mediaUrl.hostname)
+      ) {
+        return;
+      }
 
-      button.addEventListener('click', () => {
-        if (embed.querySelector('iframe')) return;
-
-        const mediaUrl = new URL(url);
-        const allowedProviders = new Set([
-          'www.youtube.com',
-          'youtube.com',
-          'www.youtube-nocookie.com',
-          'youtube-nocookie.com',
-          'open.spotify.com',
-        ]);
-
-        if (
-          mediaUrl.protocol !== 'https:' ||
-          !allowedProviders.has(mediaUrl.hostname)
-        ) {
-          return;
-        }
-
-        const iframe = document.createElement('iframe');
-        iframe.loading = 'lazy';
-        iframe.title = `${songTitle} 공식 미디어`;
-        iframe.src = mediaUrl.href;
-        iframe.allow =
-          'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
-
-        const cleanup = () => iframe.remove();
-        const timeout = window.setTimeout(cleanup, timeoutMs);
-        iframe.addEventListener('load', () => window.clearTimeout(timeout), {
-          once: true,
-        });
-        iframe.addEventListener('error', cleanup, { once: true });
-
-        button.insertAdjacentElement('afterend', iframe);
-      });
+      const iframe = document.createElement('iframe');
+      iframe.loading = 'lazy';
+      iframe.title = `${songTitle} 공식 미디어`;
+      iframe.src = mediaUrl.href;
+      iframe.allow = 'encrypted-media; fullscreen; picture-in-picture';
+      iframe.sandbox.add('allow-same-origin', 'allow-scripts');
+      iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+      const state = {
+        iframe,
+        timeout: undefined,
+        onLoad: undefined,
+        onError: undefined,
+      };
+      state.onLoad = () => window.clearTimeout(state.timeout);
+      state.onError = () => cleanup(embed);
+      iframe.addEventListener('load', state.onLoad, { once: true });
+      iframe.addEventListener('error', state.onError, { once: true });
+      state.timeout = window.setTimeout(() => cleanup(embed), timeoutMs);
+      activeEmbeds.set(embed, state);
+      button.insertAdjacentElement('afterend', iframe);
     });
+
+    new MutationObserver((records) => {
+      records.forEach((record) =>
+        record.removedNodes.forEach((node) => {
+          activeEmbeds.forEach((_, embed) => {
+            if (node === embed || (node.nodeType === 1 && node.contains(embed)))
+              cleanup(embed);
+          });
+        }),
+      );
+    }).observe(document, { childList: true, subtree: true });
+  })();
 </script>
 
 <style>

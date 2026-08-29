@@ -7,11 +7,13 @@
 - The home preview remains six visible titles plus 32 titles in its closed disclosure.
 - The page renders post-show records above the prediction when they exist. It uses `1일차 공연 후 확인` for a partial day-one archive and only changes the page title/heading to `WE WERE HERE` after `archivePublished` is true.
 - Added `OfficialEmbed.astro`: direct official link first, user-triggered lazy iframe only, HTTPS YouTube/YouTube-nocookie/Spotify allowlist, descriptive title, 8-second/error cleanup, and retained link fallback. Current records have no verified official URL, so production renders no media controls or invented URLs.
+- Fix round 1: one document-level, deduplicated media handler reads the clicked component's own URL/title; iframe timers and listeners are cleared on error, timeout, and host disconnection. The iframe now uses `sandbox="allow-same-origin allow-scripts"`, a minimal `encrypted-media; fullscreen; picture-in-picture` allow policy, and no clipboard permission.
 
 ## RED/GREEN
 
 - RED: with the new `/setlist/` behavior tests and no route, `PATH=/Users/yong/.nvm/versions/node/v22.14.0/bin:$PATH npm run build && npm run test:e2e -- navigation.spec.ts` failed in both browser projects because the `예상 셋리스트` heading was absent.
 - GREEN: after implementation, focused route/context, keyboard/order, and JavaScript-disabled tests passed in desktop and mobile: `6 passed`.
+- OfficialEmbed regression: initial two-instance test failed because the second component did not create its own iframe. It now passes, asserting both clicked controls create their own exact URL/title. A second browser-instrumented test proves timer cleanup after iframe error and host disconnection.
 
 ## Visual checks
 
@@ -22,7 +24,7 @@
 
 - Node: `v22.14.0`.
 - `npx astro sync` → completed.
-- `npm run verify` → passed: lint, formatting, Astro check, 11 unit tests, build, and 31 E2E tests; 1 desktop-only mobile test skipped by design.
+- `npm run verify` → passed: lint, formatting, Astro check, 13 unit tests, build, and 31 E2E tests; 1 desktop-only mobile test skipped by design.
 - `git diff --check` → passed.
 
 ## Concerns
