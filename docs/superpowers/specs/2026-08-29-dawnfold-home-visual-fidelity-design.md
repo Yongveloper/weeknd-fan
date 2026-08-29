@@ -18,7 +18,8 @@ v1 구현은 콘텐츠·접근성·성능·배포가 완성됐지만 승인된 D
 7. **페이지 간 h1 언어 불일치**(홈·setlist·goyang 영문, discover·sources 한글), setlist 페이지는 `EXPECTED SETLIST` h1 바로 아래 `예상 셋리스트` h2 중복.
 8. **셋리스트 페이지의 핵심 가치가 숨어 있다**: 38행이 `<details>`인데 펼침 표시가 없어 관람 포인트·떼창·공식 듣기가 있다는 사실을 알 수 없다. 리스트 배경이 ~5행 단위로 색이 급변한다.
 9. **Discover**: 첫 콘텐츠 `1분 입문`이 접혀 있고, 각 앨범 밑 `StatusBadge`가 grid stretch로 전폭 빈 막대처럼 렌더된다.
-10. 사용자 요구 추가: 앨범이 언급되는 모든 자리에 실제 앨범 커버를 함께 보여준다. 이는 상위 문서 §11 "앨범 아트를 복제하지 않는다"와 충돌하므로 §6에서 정책을 개정한다.
+10. **애니메이션 런타임 계측(1440×900, `document.getAnimations()`)**: 페이지 로드 후 달·안개 진입 0.62s 동안만 애니메이션 2개 실행, 이후 스크롤 600–3000px 구간 전체에서 실행 중 애니메이션 0개. `eclipse-shadow`는 D-숫자가 바뀌는 자정에만 재생되어 실질적으로 보이지 않으며, 상위 문서 §9 "페이지 진입 시 한 번만 짧은 숫자 전환"은 미구현. 상위 §9 전환 목록 6개 중 구현 1.5개.
+11. 사용자 요구 추가: 앨범이 언급되는 모든 자리에 실제 앨범 커버를 함께 보여준다. 이는 상위 문서 §11 "앨범 아트를 복제하지 않는다"와 충돌하므로 §6에서 정책을 개정한다.
 
 ## 1. 결정 사항 요약
 
@@ -28,7 +29,7 @@ v1 구현은 콘텐츠·접근성·성능·배포가 완성됐지만 승인된 D
 | 밤→새벽 구동 | 고정 하늘 레이어 + CSS scroll-driven animation. 미지원 브라우저는 정적 그라데이션 |
 | 모바일 헤더 | 가로 스크롤 유지, scrollbar 숨김 + 우측 fade hint + scroll-snap |
 | 앨범 커버 | Spotify oEmbed 공식 커버 hotlink, 커버는 항상 Spotify 앨범 링크. 자체 호스팅 없음 |
-| 전환 | 히어로 sweep / 셋리스트 runway / 고양 horizon 3개만. 각 1회, 450–700ms |
+| 전환 | 히어로 sweep / Eclipse 진입 숫자 전환 / 셋리스트 runway / 고양 horizon 4개. 각 1회, 450–700ms. 읽기를 방해하지 않는 micro-interaction 3개(셋리스트 펼침, 커버 hover, 메뉴 underline) 추가 |
 | 범위 외 | sources 좌측 여백, goyang 교통 도식, 티켓·포스터 썸네일, INDEX 메뉴, 새 래스터 에셋, 지속 parallax |
 
 ## 2. §0 이해도 — 카피·마크업
@@ -114,13 +115,20 @@ h1, h2, h3 { font-family: var(--font-display-ko); font-weight: 900; line-height:
 ### 셋리스트 미리보기 heading (`SetlistPreview.astro`)
 - 2단 grid: 1행 eyebrow, 2행 `h2 + StatusBadge`(flex, `align-items: baseline`).
 
-## 5. §3 전환 3개
+## 5. §3 전환 4개 + micro-interaction 3개
 
-- 원칙(상위 §9): 450–700ms, 1회, 읽는 동안 정지. 지속 애니메이션·parallax 없음.
+- 원칙(상위 §9): 장면 전환은 450–700ms, 1회, 읽는 동안 정지. 지속 애니메이션·parallax 없음. micro-interaction은 사용자 조작에 대한 응답만(hover·펼침·현재 위치), 200ms 이하.
 - 구현: `src/scripts/home-motion.ts` 신규. 기존 deferred `motion` 청크 패턴을 따라 `prefers-reduced-motion: no-preference`일 때만 `import('motion')` 후 `inView(el, cb, { amount: 0.35 })` 1회(`once` 동작은 콜백에서 unsubscribe). 진입 즉시 `data-motion-state="entered"` 세팅 → CSS `@keyframes`가 재생. **no-JS와 reduced-motion은 최종 상태가 기본 CSS**(속성 초기값 = 완료 상태, `[data-motion-ready] .x:not([data-motion-state=entered])`에서만 시작 상태). CLS 0.
 - 히어로 fold/light sweep: heading 위 대각 ivory→transparent 빛 밴드 1회 sweep 620ms, 기존 달·안개 진입(EclipseCountdown)과 동시 시작.
 - 셋리스트 runway/blue sweep: 섹션 진입 시 코발트 레이저 밴드가 좌→우 560ms, 곡 `li` 6개 `translateY(14px)→0` + `opacity` 30ms stagger, `perspective(900px) rotateX(6deg)→0`로 얕은 원근. 네온 도시 깊이는 배경 밴드 2장(`::before/::after`) opacity로 암시.
 - 고양 arrival/horizon: 가이드 섹션 진입 시 하늘 지평선 glow 1회 pulse(`.dawn-sky`에 `data-horizon-pulse` 600ms) + 링크 3개 stagger fade-up.
+- **Eclipse 진입 숫자 전환**(상위 §9 요구, 미구현분): 달 진입 애니메이션 `finished` 직후 `EclipseCountdown`이 기존 `eclipse-shadow` 키프레임(440ms)을 1회 재생하며 `D-39`를 드러낸다. 시작 상태는 숫자 `opacity: 0` → 그림자가 지나간 뒤 1. 이후 자정 라벨 변경 시 동작은 기존 그대로. reduced-motion·no-JS는 숫자 즉시 표시(현행 `data-motion-state="reduced"`/서버 마크업 경로 재사용). e2e `renders Eclipse Count inside the retained moon scene`의 `[data-primary]` 텍스트 검증은 opacity와 무관하므로 유지, `toBeVisible`은 애니메이션 종료 후 통과하도록 기존 대기 로직 확인.
+
+### micro-interaction (사용자 조작 응답, 200ms 이하)
+- 셋리스트 `<details>` 펼침: `.expected-setlist__detail`이 `opacity 0→1`, `translateY(6px)→0` 180ms. `details[open]`에서만 `@keyframes` 재생(네이티브 토글이라 JS 없음). `+`→`−` 마커 회전 180ms.
+- 앨범 커버 hover/focus-visible: `translateY(-2px)` + 시대 색 glow `box-shadow` 160ms. 터치 기기(`@media (hover: none)`)에서는 비활성.
+- 헤더 메뉴 현재 위치·hover: 기존 그라데이션 배경 대신 하단 2px underline이 `scaleX(0→1)` 180ms(`transform-origin: left`). `aria-current="page"`는 항상 채워진 상태. 기존 e2e 44px 타깃 검증 유지.
+- reduced-motion: 위 3개 모두 `transition-duration: 0.01ms`(전역 규칙)로 즉시 전환 — 별도 처리 없음.
 - e2e `reduced motion does not load the deferred Motion chunk` 유지: 새 스크립트도 같은 조건 분기 안에서만 import.
 
 ## 6. §4 헤더 (`SiteHeader.astro`)
@@ -185,6 +193,7 @@ const albums = defineCollection({
   - 셋리스트 미리보기 heading 2단, 셋리스트 페이지 행마다 `+` 마커 보임.
   - 헤더 scrollbar 미노출, 마지막 메뉴 `출처·업데이트` 완전 노출(스크롤 후).
   - 앨범 커버 로드, fallback 타일은 `img` 제거 시 보임.
+- 애니메이션 런타임 계측(독립 Playwright 스크립트): 로드 후 1.5s 안에 달·안개·light sweep·eclipse 숫자 전환이 순서대로 재생되고 종료; 셋리스트·가이드 섹션 첫 진입 시 각 1회 재생 후 `document.getAnimations()` 0; 되돌아가도 재생 없음; 스크롤 중 하늘 레이어 외 실행 중 애니메이션 0.
 - Firefox에서 정적 fallback 1회 확인(Playwright firefox 프로젝트 또는 수동).
 - `npm run verify` 전체 통과. JS gzip ≤ 75KiB(현 28.7), 로컬 raster 변화 0, CLS < 0.1, long task ≤ 50ms.
 - 기존 e2e 유지 대상: `getByText('고양종합운동장 주경기장')`, `eclipse-countdown`/`[data-primary]`/`[data-clock]`, `.expected-setlist details`, `1분 입문 펼쳐보기`(open 기본값 반영해 수정), `reduced motion does not load the deferred Motion chunk`.
@@ -193,7 +202,7 @@ const albums = defineCollection({
 ## 9. 파일 목록
 
 - 신규: `src/data/albums/*.json`(10), `scripts/refresh-album-covers.mjs`, `src/components/content/AlbumCover.astro`, `src/scripts/home-motion.ts`
-- 수정: `src/content.config.ts`, `src/lib/content/audit.ts`, `src/lib/content/queries.ts`, `src/layouts/BaseLayout.astro`, `src/styles/tokens.css`, `src/styles/global.css`, `src/styles/motion.css`, `src/components/chrome/SiteHeader.astro`, `SiteFooter.astro`, `src/components/home/HomeHero.astro`, `IntroSummary.astro`, `SetlistPreview.astro`, `GuideShortcuts.astro`, `FanNote.astro`, `src/components/visual/EclipseCountdown.astro`(캡션), `src/components/setlist/SetlistExplorer.astro`, `src/components/discover/CareerTimeline.astro`, `TrilogyExplainer.astro`, `src/components/content/StatusBadge.astro`, `src/pages/setlist.astro`, `goyang.astro`, `discover.astro`, `sources.astro`, `src/data/setlist/*.json`(album slug), `src/data/discover/*.md`(relatedAlbums slug), `tests/e2e/navigation.spec.ts`(1분 입문 open), `docs/superpowers/specs/2026-08-29-weeknd-goyang-fan-guide-design.md`(§11 1줄)
+- 수정: `src/content.config.ts`, `src/lib/content/audit.ts`, `src/lib/content/queries.ts`, `src/layouts/BaseLayout.astro`, `src/styles/tokens.css`, `src/styles/global.css`, `src/styles/motion.css`, `src/components/chrome/SiteHeader.astro`, `SiteFooter.astro`, `src/components/home/HomeHero.astro`, `IntroSummary.astro`, `SetlistPreview.astro`, `GuideShortcuts.astro`, `FanNote.astro`, `src/components/visual/EclipseCountdown.astro`(캡션, 진입 숫자 전환), `src/components/setlist/SetlistExplorer.astro`, `src/components/discover/CareerTimeline.astro`, `TrilogyExplainer.astro`, `src/components/content/StatusBadge.astro`, `src/pages/setlist.astro`, `goyang.astro`, `discover.astro`, `sources.astro`, `src/data/setlist/*.json`(album slug), `src/data/discover/*.md`(relatedAlbums slug), `tests/e2e/navigation.spec.ts`(1분 입문 open), `docs/superpowers/specs/2026-08-29-weeknd-goyang-fan-guide-design.md`(§11 1줄)
 
 ## 10. 권장 구현 순서
 
@@ -201,6 +210,6 @@ const albums = defineCollection({
 2. §2 타이포 전역 규칙 + 히어로 h1 + 셋리스트 heading
 3. §1 하늘 레이어 + 섹션 투명화 + 대각선 접힘 + 푸터
 4. §0 카피·마크업(h1 규칙, affordance, 입문 open, 배지)
-5. §3 전환 3개
+5. §3 전환 4개 + micro-interaction 3개
 6. §4 헤더
 7. §5 검증 — 스크린샷 4해상도 반복, `npm run verify`, Firefox fallback
