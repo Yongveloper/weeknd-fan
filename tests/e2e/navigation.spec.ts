@@ -411,3 +411,29 @@ test('hides the mobile menu scrollbar and keeps the last item reachable', async 
   const viewport = page.viewportSize()!;
   expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
 });
+
+test('places covers beside every album mention on home, discover, and setlist', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await expect(page.locator('.home-entry--intro a.album-cover')).toHaveCount(3);
+
+  await page.goto('/discover/');
+  await expect(page.locator('.trilogies__sequence a.album-cover')).toHaveCount(
+    6,
+  );
+  const kissLand = page.locator('.timeline__entry', {
+    hasText: '2013 · Kiss Land',
+  });
+  await expect(kissLand.locator('a.album-cover')).toHaveCount(1);
+
+  await page.goto('/setlist/');
+  const firstSong = page.locator('.expected-setlist__list details').first();
+  await firstSong.locator('summary').click();
+  await expect(firstSong.locator('a.album-cover')).toHaveCount(1);
+
+  await page.goto('/sources/');
+  await expect(
+    page.getByText('앨범 커버는 Spotify CDN에서 직접 불러옵니다'),
+  ).toBeVisible();
+});

@@ -1,14 +1,41 @@
+---
+import AlbumCover from '../content/AlbumCover.astro';
+import type { AlbumRecord } from '../../lib/content/contracts';
+import { findAlbumByTitle } from '../../lib/content/albums';
+
+interface Props {
+  albums: AlbumRecord[];
+}
+
+const { albums } = Astro.props;
+const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
+  .map((title) => findAlbumByTitle(albums, title))
+  .filter((album): album is AlbumRecord => Boolean(album));
+---
+
 <section
   class="home-entry home-entry--intro fold"
   aria-labelledby="intro-title"
 >
   <div class="shell-content home-entry__inner">
     <p class="eyebrow">START HERE / 03 MINUTES</p>
-    <h2 id="intro-title">3분 만에 The Weeknd 알기</h2>
+    <h2 id="intro-title">
+      3분 만에 <span class="latin">The Weeknd</span> 알기
+    </h2>
     <p>
       밤의 충동과 후회를 영화처럼 노래하던 인물이, 새벽을 향해 자신을 마주하는
       이야기. 이번 공연 전에는 이 세 장의 앨범만 이어 들어도 충분해요.
     </p>
+    <ul class="home-entry__albums" aria-label="이번 공연 전에 들을 세 장">
+      {
+        trilogy.map((album) => (
+          <li>
+            <AlbumCover album={album} size={120} />
+            <span>{album.data.year}</span>
+          </li>
+        ))
+      }
+    </ul>
     <a href="/discover/"
       >The Weeknd의 밤으로 들어가기 <span aria-hidden="true">→</span></a
     >
@@ -24,6 +51,24 @@
     display: grid;
     gap: 1.25rem;
     max-width: 48rem;
+  }
+
+  .home-entry__albums {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .home-entry__albums li {
+    display: grid;
+    gap: 0.35rem;
+    justify-items: start;
+    color: var(--mist);
+    font-size: 0.8rem;
+    font-weight: 800;
   }
 
   p:not(.eyebrow) {

@@ -1,12 +1,15 @@
 ---
+import AlbumCover from '../content/AlbumCover.astro';
 import OfficialEmbed from '../content/OfficialEmbed.astro';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
 import type {
+  AlbumRecord,
   SetlistRecord,
   ShowRecord,
   SourceRecord,
 } from '../../lib/content/contracts';
+import { findAlbumByTitle } from '../../lib/content/albums';
 import {
   getSetlistEditorialMetadata,
   resolveSourceReferences,
@@ -17,9 +20,10 @@ interface Props {
   showRecords: ShowRecord[];
   sources: SourceRecord[];
   archivePublished: boolean;
+  albums: AlbumRecord[];
 }
 
-const { entries, showRecords, sources, archivePublished } = Astro.props;
+const { entries, showRecords, sources, archivePublished, albums } = Astro.props;
 const twoDigits = (value: number) => String(value).padStart(2, '0');
 const dayLabel = (showDate: string) =>
   showDate.endsWith('-07') ? '1일차 공연 후 확인' : '2일차 공연 후 확인';
@@ -86,6 +90,12 @@ const editorial = getSetlistEditorialMetadata(entries);
               </summary>
               <div class="expected-setlist__detail">
                 <p class="expected-setlist__metadata">
+                  {(() => {
+                    const album = findAlbumByTitle(albums, entry.data.album);
+                    return album ? (
+                      <AlbumCover album={album} size={32} />
+                    ) : null;
+                  })()}
                   <span>{entry.data.album}</span>
                   <span>신뢰도 {entry.data.confidence}</span>
                   <StatusBadge status={entry.data.status} />

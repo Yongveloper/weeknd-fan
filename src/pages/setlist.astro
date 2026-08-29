@@ -3,16 +3,18 @@ import SetlistExplorer from '../components/setlist/SetlistExplorer.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import {
+  getAlbums,
   getConcert,
   getExpectedSetlist,
   getShowRecords,
 } from '../lib/content/queries';
 
-const [concert, entries, showRecords, sources] = await Promise.all([
+const [concert, entries, showRecords, sources, albums] = await Promise.all([
   getConcert(),
   getExpectedSetlist(),
   getShowRecords(),
   getCollection('sources'),
+  getAlbums(),
 ]);
 const archivePublished = concert.data.archivePublished;
 const title = archivePublished
@@ -43,6 +45,7 @@ const title = archivePublished
       showRecords={showRecords}
       sources={sources}
       archivePublished={archivePublished}
+      albums={albums}
     />
   </section>
 </BaseLayout>

@@ -1,33 +1,51 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
+import AlbumCover from '../content/AlbumCover.astro';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
-import type { SourceRecord } from '../../lib/content/contracts';
+import type { AlbumRecord, SourceRecord } from '../../lib/content/contracts';
+import { findAlbumByTitle } from '../../lib/content/albums';
 import { resolveSourceReferences } from '../../lib/content/queries';
 
 interface Props {
   entries: CollectionEntry<'discover'>[];
   sources: SourceRecord[];
+  albums: AlbumRecord[];
 }
 
-const { entries, sources } = Astro.props;
+const { entries, sources, albums } = Astro.props;
 const renderedEntries = await Promise.all(
   entries.map(async (entry) => ({
     entry,
     Content: (await render(entry)).Content,
     sources: resolveSourceReferences(entry.data.sources, sources),
+    covers: entry.data.relatedAlbums
+      .map((title) => findAlbumByTitle(albums, title))
+      .filter((album): album is AlbumRecord => Boolean(album)),
   })),
 );
 ---
 
 <ol class="timeline" aria-label="The Weeknd 시대별 커리어">
   {
-    renderedEntries.map(({ entry, Content, sources: entrySources }) => (
+    renderedEntries.map(({ entry, Content, sources: entrySources, covers }) => (
       <li class="timeline__entry">
         <div class="timeline__summary">
           <p class="eyebrow">{entry.data.title.split('·')[0]?.trim()}</p>
           <h2>{entry.data.title}</h2>
           <p>{entry.data.summary}</p>
+          {covers.length > 0 && (
+            <ul
+              class="timeline__covers"
+              aria-label={`${entry.data.title} 앨범`}
+            >
+              {covers.map((album) => (
+                <li>
+                  <AlbumCover album={album} size={72} />
+                </li>
+              ))}
+            </ul>
+          )}
           <StatusBadge status={entry.data.status} />
         </div>
         <details aria-label={`${entry.data.title} 더 깊이 보기`}>
@@ -71,6 +89,15 @@ const renderedEntries = await Promise.all(
 
   .timeline__summary > p:not(.eyebrow) {
     color: var(--mist);
+  }
+
+  .timeline__covers {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0.25rem 0 0;
+    padding: 0;
+    list-style: none;
   }
 
   details {

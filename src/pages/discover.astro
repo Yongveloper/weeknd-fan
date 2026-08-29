@@ -74,12 +74,12 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
       </p>
     </section>
 
-    <TrilogyExplainer />
+    <TrilogyExplainer albums={albums} />
 
     <section class="discover__timeline" aria-labelledby="timeline-title">
       <p class="eyebrow">CAREER, AT A GLANCE</p>
       <h2 id="timeline-title">연표는 가볍게, 필요하면 더 깊게</h2>
-      <CareerTimeline entries={eras} sources={sources} />
+      <CareerTimeline entries={eras} sources={sources} albums={albums} />
     </section>
 
     <section class="discover__closing" aria-labelledby="glossary-title">

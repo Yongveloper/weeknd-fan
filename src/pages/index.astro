@@ -6,6 +6,7 @@ import HomeHero from '../components/home/HomeHero.astro';
 import IntroSummary from '../components/home/IntroSummary.astro';
 import SetlistPreview from '../components/home/SetlistPreview.astro';
 import {
+  getAlbums,
   getConcert,
   getExpectedSetlist,
   getSetlistEditorialMetadata,
@@ -14,6 +15,7 @@ import { buildEventJsonLd, serializeJsonLd } from '../lib/seo/eventJsonLd';
 
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();
+const albums = await getAlbums();
 const setlist = await getExpectedSetlist();
 const { observationCount } = getSetlistEditorialMetadata(setlist);
 const eventJsonLd = buildEventJsonLd(
@@ -32,7 +34,7 @@ const eventJsonLd = buildEventJsonLd(
     set:html={serializeJsonLd(eventJsonLd)}
   />
   <HomeHero concert={concert} />
-  <IntroSummary />
+  <IntroSummary albums={albums} />
   <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
   <GuideShortcuts />
   <FanNote />
