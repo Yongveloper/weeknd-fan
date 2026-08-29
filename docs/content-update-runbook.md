@@ -26,5 +26,5 @@
 
 1. 배포 전 Node.js 22.14.0에서 `npm ci`, `PUBLIC_SITE_URL=https://fan-guide.test npm run verify`, `npx wrangler deploy --dry-run`을 순서대로 실행한다. dry-run은 구성과 `dist/`만 검증하며 게시하지 않는다.
 2. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
-3. 실제 배포는 인증된 Cloudflare 계정과 명시적 프로덕션 권한이 있을 때만 `PUBLIC_SITE_URL=https://<실제-origin> npm run deploy`로 실행한다. 권한 없는 자동화와 콘텐츠 갱신은 실제 배포를 실행하지 않는다.
-4. 최초 승인 배포에서 Wrangler가 출력한 HTTPS origin을 기록하고, 해당 값을 `PUBLIC_SITE_URL`로 지정해 다시 빌드·배포한다. 두 번째 배포 뒤 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 실제 HTTPS origin에서 점검한다.
+3. 실제 배포는 인증된 Cloudflare 계정과 명시적 프로덕션 권한이 있을 때만 실행한다. 최초 bootstrap은 `PUBLIC_SITE_URL=https://fan-guide.test npm run deploy`이며, 이 명령은 canonical URL·sitemap·OG URL에 테스트 origin을 **일시적으로 게시**한다. 검증이나 콘텐츠 갱신 목적으로 실행하지 않는다.
+4. bootstrap 후 Wrangler가 출력한 실제 HTTPS origin을 기록하고 `PUBLIC_SITE_URL=https://<wrangler-origin> npm run deploy`로 다시 빌드·배포한다. 이 두 번째 배포 뒤 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 실제 HTTPS origin에서 점검한다. 권한 없는 자동화와 콘텐츠 갱신은 실제 배포를 실행하지 않는다.

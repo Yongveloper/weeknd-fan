@@ -49,3 +49,10 @@ No authentication, Cloudflare project/domain creation, publication, or real depl
 
 - `npm ci` under the required Node 22.14.0 succeeds but emits existing `EBADENGINE` warnings from locked transitive packages requesting newer Node versions; the complete suite still passes on the required runtime. Updating those dependencies is outside Task 14 scope.
 - The worktree already contained a modified `task-13-report.md`; it was preserved and excluded from this task's commit.
+
+## Fix round 1 — 2026-08-29
+
+- Corrected the first-deployment instructions: the bootstrap step is now the explicit, authorized real-deploy command `PUBLIC_SITE_URL=https://fan-guide.test npm run deploy`. Both the README and runbook warn that it temporarily publishes test-origin canonical, sitemap, and OG URLs; the second authorized deployment uses the HTTPS origin printed by Wrangler.
+- Replaced the non-empty shell guard with `scripts/assert-production-origin.mjs`. It requires a parseable absolute `https:` `PUBLIC_SITE_URL` before the build or `wrangler deploy` can run. Unit coverage rejects missing, HTTP, FTP, and malformed values and accepts HTTPS without invoking deployment.
+- Strengthened the static-delivery regression assertion with semantic JSONC parsing, exact allowed Wrangler config keys, static Astro output, no Cloudflare adapter, and absence of scoped Functions/Worker entrypoint paths.
+- Fresh Node 22.14.0 validation: `PUBLIC_SITE_URL=https://fan-guide.test npm run verify` passed (26 unit tests; 91 Playwright passed and 3 intended skips), `npm run budget` passed, `npx wrangler deploy --dry-run` read 189 `dist/` files with no bindings and exited before deploy, and `git diff --check` passed.

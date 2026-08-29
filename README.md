@@ -22,10 +22,10 @@ npx wrangler deploy --dry-run
 
 `npm run deploy`는 외부 프로덕션 상태를 변경합니다. 인증된 Cloudflare 계정과 명시적인 프로덕션 배포 권한이 있는 운영자만 실제 도메인으로 실행할 수 있습니다.
 
-첫 번째 승인 배포는 두 번 수행합니다.
+처음 승인된 배포는 두 번 수행합니다. 두 단계 모두 **실제 게시**이므로, 인증된 Cloudflare 계정과 명시적인 프로덕션 배포 권한이 있을 때만 실행합니다. 검증 목적으로 실행하지 않습니다.
 
-1. 실제 `PUBLIC_SITE_URL` 없이 승인된 운영자가 배포하고 Wrangler가 출력한 HTTPS origin을 기록합니다.
-2. 그 origin을 `PUBLIC_SITE_URL`로 설정해 다시 빌드하고 배포합니다. 이 두 번째 결과가 canonical, sitemap, OG URL의 실제 origin을 고정합니다.
+1. 승인된 운영자가 `PUBLIC_SITE_URL=https://fan-guide.test npm run deploy`을 실행하고 Wrangler가 출력한 HTTPS origin을 기록합니다. 이 bootstrap 배포는 canonical, sitemap, OG URL에 테스트 origin을 **일시적으로 게시**합니다.
+2. Wrangler가 출력한 실제 HTTPS origin을 설정해 `PUBLIC_SITE_URL=https://<wrangler-origin> npm run deploy`을 실행합니다. 이 두 번째 결과가 canonical, sitemap, OG URL의 실제 origin을 고정합니다.
 
 실제 배포 전에 `npx wrangler deploy --dry-run`으로 구성과 `dist/`를 검증합니다.
 

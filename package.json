@@ -19,7 +19,8 @@
     "budget": "node scripts/check-performance-budget.mjs",
     "verify": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run test:e2e",
     "deploy:dry-run": "wrangler deploy --dry-run",
-    "deploy": "node -e \"if (!process.env.PUBLIC_SITE_URL) throw new Error('PUBLIC_SITE_URL is required for a production deployment')\" && npm run build && wrangler deploy"
+    "assert:production-origin": "node scripts/assert-production-origin.mjs",
+    "deploy": "npm run assert:production-origin && npm run build && wrangler deploy"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
