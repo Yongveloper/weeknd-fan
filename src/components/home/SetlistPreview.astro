@@ -5,9 +5,10 @@ import type { SetlistRecord } from '../../lib/content/contracts';
 interface Props {
   entries: SetlistRecord[];
   previewCount: number;
+  observationCount: number;
 }
 
-const { entries, previewCount } = Astro.props;
+const { entries, previewCount, observationCount } = Astro.props;
 const previewEntries = entries.slice(0, previewCount);
 const remainingEntries = entries.slice(previewCount);
 ---
@@ -19,7 +20,9 @@ const remainingEntries = entries.slice(previewCount);
       <h2 id="setlist-preview-title">예상 셋리스트</h2>
       <StatusBadge status="expected" />
     </div>
-    <p class="setlist-preview__comparison">최근 2026년 공연 3회 비교</p>
+    <p class="setlist-preview__comparison">
+      최근 2026년 공연 {observationCount}회 비교
+    </p>
     {
       previewEntries.length > 0 ? (
         <ol class="setlist-preview__list">
@@ -49,6 +52,9 @@ const remainingEntries = entries.slice(previewCount);
     </details>
     <a class="setlist-preview__link" href="/setlist/"
       >곡별 관람 포인트 보기 <span aria-hidden="true">→</span></a
+    >
+    <a class="setlist-preview__link" href="/share/setlist/"
+      >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
     >
   </div>
 </section>

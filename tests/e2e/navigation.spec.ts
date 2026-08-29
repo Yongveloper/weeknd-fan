@@ -32,6 +32,18 @@ test('serves the Korean fan-guide shell', async ({ page }) => {
   );
 });
 
+test('reaches both private share tools through contextual product CTAs', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: '나만의 D-day 티켓 만들기' }).click();
+  await expect(page).toHaveURL(/\/share\/ticket\/$/);
+
+  await page.goto('/');
+  await page.getByRole('link', { name: '셋리스트 포스터 만들기' }).click();
+  await expect(page).toHaveURL(/\/share\/setlist\/$/);
+});
+
 test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
   await page.goto('/');
   await expect(

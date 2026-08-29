@@ -47,6 +47,74 @@ test('reduced motion leaves the moon readable without a running animation', asyn
   await expect(page.locator('[data-primary]')).toBeVisible();
 });
 
+test('synchronizes stale server countdown markup and keeps polling under reduced motion', async ({
+  page,
+}) => {
+  await useClock(page, '2026-10-07T19:40:00+09:00');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
+  await expect(page.locator('[data-clock]')).toBeVisible();
+  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
+    /고양 공연까지 0일/,
+  );
+});
+
+test('updates the reduced-motion target after day one and clears polling on disconnect', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let now = new Date('2026-10-07T19:44:00+09:00').getTime();
+    const NativeDate = Date;
+    class ControlledDate extends NativeDate {
+      constructor(...args: [] | [string | number]) {
+        super(args.length === 0 ? now : args[0]);
+      }
+      static now() {
+        return now;
+      }
+    }
+    window.Date = ControlledDate as DateConstructor;
+    Object.assign(window, {
+      __setCountdownTime: (next: string) =>
+        (now = new NativeDate(next).getTime()),
+    });
+    const nativeClearInterval = window.clearInterval;
+    let cleared = 0;
+    window.clearInterval = ((id: number) => {
+      cleared += 1;
+      nativeClearInterval(id);
+    }) as typeof window.clearInterval;
+    Object.assign(window, { __countdownIntervalsCleared: () => cleared });
+  });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
+  await page.evaluate(() =>
+    (
+      window as typeof window & { __setCountdownTime: (time: string) => void }
+    ).__setCountdownTime('2026-10-07T20:00:00+09:00'),
+  );
+  await expect(page.locator('[data-primary]')).toHaveText('D-1');
+  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
+    /고양 공연까지 1일/,
+  );
+  await page
+    .locator('eclipse-countdown')
+    .evaluate((element) => element.remove());
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (
+          window as typeof window & {
+            __countdownIntervalsCleared: () => number;
+          }
+        ).__countdownIntervalsCleared(),
+      ),
+    )
+    .toBeGreaterThan(0);
+});
+
 test('reduced motion does not load the deferred Motion chunk', async ({
   page,
 }) => {

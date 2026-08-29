@@ -11,6 +11,6 @@ order: 40
 section: era
 ---
 
-레이블은 *Starboy*를 네 번째 full-length album으로 소개한다. 초기 믹스테이프와 2012년 컴필레이션을 정규 앨범으로 세지 않는 구분과 맞닿아 있다.
+레이블의 “네 번째 full-length” 표기는 앞선 full-length/컴필레이션 관례를 포함한 마케팅 번호다. 이 가이드는 정규 6장 분류를 따르므로 _Kiss Land_, _Beauty Behind the Madness_ 다음의 세 번째 정규 앨범으로 센다.
 
 라이브에서는 큰 합창과 빛의 대비를 즐기기 좋은 구간이다.

@@ -13,12 +13,14 @@ type PublishedEntryAuditRecord = {
   lastVerifiedAt: Date;
   sourceCount: number;
   volatile?: boolean;
+  sources?: Array<{ id: string; lastCheckedAt: Date }>;
 };
 
 type PublishedSetlistAuditRecord = {
   id: string;
   status: TrustStatus;
   observedInCount: number;
+  expectedOrder?: number;
 };
 
 type ArchiveAuditRecord = {
@@ -33,7 +35,11 @@ export type PublishedContentAuditInput = {
   now: Date;
   entries: PublishedEntryAuditRecord[];
   concert: { primarySourceCount: number; archivePublished: boolean };
-  setlist: { status: TrustStatus; records: PublishedSetlistAuditRecord[] };
+  setlist: {
+    status: TrustStatus;
+    records: PublishedSetlistAuditRecord[];
+    current?: boolean;
+  };
   showRecords: ArchiveAuditRecord[];
 };
 
@@ -108,6 +114,26 @@ export function auditPublishedContent(
     ) {
       issues.push({ id: entry.id, code: 'volatile-content-stale' });
     }
+    if (entry.status === 'practical' && entry.volatile && entry.sources) {
+      if (
+        entry.sources.some(
+          (source) =>
+            input.now.getTime() - source.lastCheckedAt.getTime() >
+            staleAfterMilliseconds,
+        )
+      ) {
+        issues.push({ id: entry.id, code: 'volatile-sources-stale' });
+      } else if (
+        entry.sources.some(
+          (source) => source.lastCheckedAt < entry.lastVerifiedAt,
+        )
+      ) {
+        issues.push({
+          id: entry.id,
+          code: 'volatile-source-older-than-content',
+        });
+      }
+    }
   }
 
   if (input.concert.primarySourceCount < 2) {
@@ -126,6 +152,42 @@ export function auditPublishedContent(
     }
   }
 
+  const expectedOrders = input.setlist.records.map(
+    (record) => record.expectedOrder,
+  );
+  if (
+    input.setlist.current &&
+    (input.setlist.records.length !== 38 ||
+      expectedOrders.some((order) => order === undefined) ||
+      new Set(expectedOrders).size !== 38 ||
+      expectedOrders.some(
+        (order) => !Number.isInteger(order) || order! < 1 || order! > 38,
+      ))
+  ) {
+    issues.push({ id: 'setlist', code: 'setlist-expected-orders-invalid' });
+  }
+
+  for (const record of input.showRecords) {
+    const id = `archive:${record.showDate}`;
+    if (!['2026-10-07', '2026-10-08'].includes(record.showDate)) {
+      issues.push({ id, code: 'archive-show-date-invalid' });
+      continue;
+    }
+    if (
+      record.status !== 'post-show' ||
+      record.songCount < 1 ||
+      record.sourceCount < 2
+    ) {
+      issues.push({ id, code: 'archive-record-invalid' });
+    }
+    if (
+      record.songOrders.length !== record.songCount ||
+      record.songOrders.some((order, index) => order !== index + 1)
+    ) {
+      issues.push({ id, code: 'archive-song-orders-invalid' });
+    }
+  }
+
   if (input.concert.archivePublished) {
     for (const showDate of ['2026-10-07', '2026-10-08']) {
       const record = input.showRecords.find(
@@ -137,25 +199,6 @@ export function auditPublishedContent(
           code: 'archive-record-missing',
         });
         continue;
-      }
-      if (
-        record.status !== 'post-show' ||
-        record.songCount < 1 ||
-        record.sourceCount < 2
-      ) {
-        issues.push({
-          id: `archive:${showDate}`,
-          code: 'archive-record-invalid',
-        });
-      }
-      if (
-        record.songOrders.length !== record.songCount ||
-        record.songOrders.some((order, index) => order !== index + 1)
-      ) {
-        issues.push({
-          id: `archive:${showDate}`,
-          code: 'archive-song-orders-invalid',
-        });
       }
     }
   }

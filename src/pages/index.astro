@@ -5,12 +5,17 @@ import GuideShortcuts from '../components/home/GuideShortcuts.astro';
 import HomeHero from '../components/home/HomeHero.astro';
 import IntroSummary from '../components/home/IntroSummary.astro';
 import SetlistPreview from '../components/home/SetlistPreview.astro';
-import { getConcert, getExpectedSetlist } from '../lib/content/queries';
+import {
+  getConcert,
+  getExpectedSetlist,
+  getSetlistEditorialMetadata,
+} from '../lib/content/queries';
 import { buildEventJsonLd, serializeJsonLd } from '../lib/seo/eventJsonLd';
 
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();
 const setlist = await getExpectedSetlist();
+const { observationCount } = getSetlistEditorialMetadata(setlist);
 const eventJsonLd = buildEventJsonLd(
   concert.data,
   (Astro.site ?? Astro.url).toString(),
@@ -28,7 +33,7 @@ const eventJsonLd = buildEventJsonLd(
   />
   <HomeHero concert={concert} />
   <IntroSummary />
-  <SetlistPreview entries={setlist} previewCount={6} />
+  <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
   <GuideShortcuts />
   <FanNote />
 </BaseLayout>

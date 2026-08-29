@@ -1,13 +1,13 @@
 ---
 import SetlistCardBuilder from '../../components/share/SetlistCardBuilder.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getConcert, getExpectedSetlist } from '../../lib/content/queries';
+import {
+  getExpectedSetlist,
+  getSetlistEditorialMetadata,
+} from '../../lib/content/queries';
 
-const [concert, expectedSetlist] = await Promise.all([
-  getConcert(),
-  getExpectedSetlist(),
-]);
-const version = concert.data.lastVerifiedAt.toISOString().slice(0, 10);
+const expectedSetlist = await getExpectedSetlist();
+const { version } = getSetlistEditorialMetadata(expectedSetlist);
 const songs = expectedSetlist.map((entry) => entry.data.songTitle);
 ---
 

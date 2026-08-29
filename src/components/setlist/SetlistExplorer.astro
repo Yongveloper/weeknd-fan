@@ -7,7 +7,10 @@ import type {
   ShowRecord,
   SourceRecord,
 } from '../../lib/content/contracts';
-import { resolveSourceReferences } from '../../lib/content/queries';
+import {
+  getSetlistEditorialMetadata,
+  resolveSourceReferences,
+} from '../../lib/content/queries';
 
 interface Props {
   entries: SetlistRecord[];
@@ -20,6 +23,7 @@ const { entries, showRecords, sources, archivePublished } = Astro.props;
 const twoDigits = (value: number) => String(value).padStart(2, '0');
 const dayLabel = (showDate: string) =>
   showDate.endsWith('-07') ? '1일차 공연 후 확인' : '2일차 공연 후 확인';
+const editorial = getSetlistEditorialMetadata(entries);
 ---
 
 <div class="setlist-explorer">
@@ -36,7 +40,7 @@ const dayLabel = (showDate: string) =>
                   ? record.data.showDate
                   : dayLabel(record.data.showDate)}
               </h3>
-              <StatusBadge status="post-show" />
+              <StatusBadge status={record.data.status} />
             </div>
             <ol>
               {record.data.songs
@@ -66,7 +70,12 @@ const dayLabel = (showDate: string) =>
       </div>
       <StatusBadge status="expected" />
     </div>
-    <p class="expected-setlist__comparison">최근 2026년 공연 3회 비교</p>
+    <p class="expected-setlist__comparison">
+      최근 2026년 공연 {editorial.observationCount}회 비교
+    </p>
+    <a class="expected-setlist__poster" href="/share/setlist/"
+      >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
+    >
     <ol class="expected-setlist__list">
       {
         entries.map((entry) => (
@@ -142,6 +151,11 @@ const dayLabel = (showDate: string) =>
     margin: 1rem 0 1.5rem;
     color: var(--mist);
     font-weight: 800;
+  }
+
+  .expected-setlist__poster {
+    color: var(--ivory);
+    font-weight: 900;
   }
 
   .expected-setlist__list,

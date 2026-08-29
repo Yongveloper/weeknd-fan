@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
+  workers: 1,
   testDir: './tests/e2e',
   webServer: {
     command: 'npm run preview -- --host 127.0.0.1',

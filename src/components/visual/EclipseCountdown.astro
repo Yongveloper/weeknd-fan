@@ -53,12 +53,13 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       finished: Promise<unknown>;
     };
     private lastPrimaryLabel = '';
-    private lastPhase = '';
+    private lastAccessibleLabel = '';
 
     connectedCallback() {
       this.lastPrimaryLabel = this.primary.textContent ?? '';
-      this.lastPhase = this.state.phase;
+      this.lastAccessibleLabel = this.accessibleCountdown.textContent ?? '';
       this.update();
+      this.intervalId = setInterval(() => this.update(), 1_000);
 
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
         this.dataset.motionState = 'reduced';
@@ -66,7 +67,6 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       }
 
       this.startEntrance();
-      this.intervalId = setInterval(() => this.update(), 1_000);
     }
 
     disconnectedCallback() {
@@ -108,16 +108,21 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         state.seconds,
       );
 
-      if (state.primaryLabel === this.lastPrimaryLabel) return;
-
       const changeAccessibleLabel = () => {
         this.primary.textContent = state.primaryLabel;
-        if (state.phase !== this.lastPhase) {
+        if (state.accessibleLabel !== this.lastAccessibleLabel) {
           this.accessibleCountdown.textContent = state.accessibleLabel;
         }
         this.lastPrimaryLabel = state.primaryLabel;
-        this.lastPhase = state.phase;
+        this.lastAccessibleLabel = state.accessibleLabel;
       };
+
+      if (state.primaryLabel === this.lastPrimaryLabel) {
+        if (state.accessibleLabel !== this.lastAccessibleLabel) {
+          changeAccessibleLabel();
+        }
+        return;
+      }
 
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
         changeAccessibleLabel();

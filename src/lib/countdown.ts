@@ -43,6 +43,16 @@ export type CountdownState = {
   accessibleLabel: string;
 };
 
+export function getSelectedShowLabel(input: {
+  now: Date;
+  showStart: string;
+}): string {
+  const showStart = new Date(input.showStart);
+  if (input.now >= showStart) return 'SHOW DAY';
+  const days = calendarDaysUntil(input.now, showStart);
+  return days === 0 ? 'D-DAY' : `D-${days}`;
+}
+
 const emptyClock = { hours: 0, minutes: 0, seconds: 0 };
 
 export function getCountdownState(input: CountdownInput): CountdownState {

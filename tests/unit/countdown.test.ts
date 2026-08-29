@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { getCountdownState } from '../../src/lib/countdown';
+import {
+  getCountdownState,
+  getSelectedShowLabel,
+} from '../../src/lib/countdown';
 
 const schedule = {
   dayOneStart: '2026-10-07T19:45:00+09:00',
@@ -81,4 +84,29 @@ describe('getCountdownState', () => {
     expect(state.phase).toBe('before-day-two');
     expect(state.primaryLabel).toBe('D-1');
   });
+});
+
+describe('getSelectedShowLabel', () => {
+  for (const showStart of [schedule.dayOneStart, schedule.dayTwoStart]) {
+    it(`uses the selected show boundary for ${showStart.slice(0, 10)}`, () => {
+      expect(
+        getSelectedShowLabel({
+          now: new Date(showStart.replace('19:45', '09:00')),
+          showStart,
+        }),
+      ).toBe('D-DAY');
+      expect(
+        getSelectedShowLabel({
+          now: new Date(showStart),
+          showStart,
+        }),
+      ).toBe('SHOW DAY');
+      expect(
+        getSelectedShowLabel({
+          now: new Date(showStart.replace('19:45', '20:00')),
+          showStart,
+        }),
+      ).toBe('SHOW DAY');
+    });
+  }
 });

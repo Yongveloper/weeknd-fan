@@ -106,4 +106,31 @@ test('shows a visible error when ticket JPEG creation returns no blob', async ({
   await expect(page.getByRole('alert')).toContainText(
     '이미지 생성에 실패했습니다',
   );
+  await expect(
+    page.getByRole('link', { name: '기본 공유 이미지 보기' }),
+  ).toHaveAttribute('href', '/og/default.jpg');
+  await expect(
+    page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
+  ).toBeVisible();
+});
+
+test('keeps setlist fallback alternatives available after JPEG failure', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    HTMLCanvasElement.prototype.toBlob = function (callback) {
+      callback(null);
+    };
+  });
+  await page.goto('/share/setlist/');
+  await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
+  await expect(page.getByRole('alert')).toContainText(
+    '이미지 생성에 실패했습니다',
+  );
+  await expect(
+    page.getByRole('link', { name: '기본 공유 이미지 보기' }),
+  ).toHaveAttribute('href', '/og/default.jpg');
+  await expect(
+    page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
+  ).toBeVisible();
 });

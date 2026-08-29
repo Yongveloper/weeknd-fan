@@ -1,6 +1,40 @@
 import { getCollection, type ReferenceDataEntry } from 'astro:content';
 import type { SourceRecord } from './contracts';
 
+type EditorialSetlistEntry = {
+  data: { lastVerifiedAt: Date; observedIn: Array<{ id: string }> };
+};
+
+export function getSetlistEditorialMetadata(entries: EditorialSetlistEntry[]) {
+  const latest = entries.reduce<Date | undefined>(
+    (current, entry) =>
+      !current || entry.data.lastVerifiedAt > current
+        ? entry.data.lastVerifiedAt
+        : current,
+    undefined,
+  );
+  const observations = new Set(
+    entries.flatMap((entry) => entry.data.observedIn.map(({ id }) => id)),
+  );
+  return {
+    version: latest ? formatSeoulIsoDate(latest) : '',
+    observationCount: observations.size,
+  };
+}
+
+function formatSeoulIsoDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date);
+  const value = Object.fromEntries(
+    parts.map(({ type, value }) => [type, value]),
+  );
+  return `${value.year}-${value.month}-${value.day}`;
+}
+
 export async function getConcert() {
   const entries = await getCollection('concert');
   const concert = entries.find((entry) => entry.id === 'goyang-2026');

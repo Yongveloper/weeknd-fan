@@ -198,6 +198,155 @@ describe('content trust contract', () => {
     ]);
   });
 
+  it('validates a partial archive even before the two-show archive is published', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-10-08T00:00:00+09:00'),
+      entries: [],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected', records: [] },
+      showRecords: [
+        {
+          showDate: '2026-10-07',
+          status: 'expected',
+          songCount: 2,
+          songOrders: [1, 1],
+          sourceCount: 1,
+        },
+      ],
+    });
+
+    expect(issues).toEqual([
+      { id: 'archive:2026-10-07', code: 'archive-record-invalid' },
+      { id: 'archive:2026-10-07', code: 'archive-song-orders-invalid' },
+    ]);
+  });
+
+  it('renders an actual show with its typed editorial status', async () => {
+    const explorer = await readFile(
+      join(process.cwd(), 'src/components/setlist/SetlistExplorer.astro'),
+      'utf8',
+    );
+    expect(explorer).toContain('<StatusBadge status={record.data.status} />');
+    expect(explorer).not.toContain('<StatusBadge status="post-show" />');
+  });
+
+  it('rejects an unsupported archive date and incomplete expected-setlist shape', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-10-08T00:00:00+09:00'),
+      entries: [],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: {
+        status: 'expected',
+        current: true,
+        records: [
+          ...Array.from({ length: 37 }, (_, index) => ({
+            id: `song-${index + 1}`,
+            status: 'expected' as const,
+            observedInCount: 3,
+            expectedOrder: index + 1,
+          })),
+          {
+            id: 'out-of-range',
+            status: 'expected',
+            observedInCount: 3,
+            expectedOrder: 39,
+          },
+        ],
+      },
+      showRecords: [
+        {
+          showDate: '2026-10-09',
+          status: 'post-show',
+          songCount: 1,
+          songOrders: [1],
+          sourceCount: 2,
+        },
+      ],
+    });
+
+    expect(issues).toEqual([
+      { id: 'setlist', code: 'setlist-expected-orders-invalid' },
+      { id: 'archive:2026-10-09', code: 'archive-show-date-invalid' },
+    ]);
+  });
+
+  it('rejects volatile content when referenced sources are stale or older than the claim', () => {
+    const base = {
+      now: new Date('2026-10-05T12:00:00+09:00'),
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected' as const, records: [] },
+      showRecords: [],
+    };
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('2026-10-05'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'old-source',
+                lastCheckedAt: parseSeoulDate('2026-09-27'),
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([{ id: 'transport', code: 'volatile-sources-stale' }]);
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('2026-10-05'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'laundered-source',
+                lastCheckedAt: parseSeoulDate('2026-10-04'),
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([
+      { id: 'transport', code: 'volatile-source-older-than-content' },
+    ]);
+  });
+
+  it('accepts a current volatile claim when its referenced source was refreshed with it', () => {
+    expect(
+      auditPublishedContent({
+        now: new Date('2026-10-05T12:00:00+09:00'),
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('2026-10-05'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'transport-source',
+                lastCheckedAt: parseSeoulDate('2026-10-05'),
+              },
+            ],
+          },
+        ],
+        concert: { primarySourceCount: 2, archivePublished: false },
+        setlist: { status: 'expected', records: [] },
+        showRecords: [],
+      }),
+    ).toEqual([]);
+  });
+
   it('audits the current published collection data rather than an empty fixture', async () => {
     const auditCurrentData = async (now: Date = new Date()) => {
       const dataDirectory = join(process.cwd(), 'src/data');
@@ -208,8 +357,11 @@ describe('content trust contract', () => {
           sourceFiles.map(async (file) => {
             const source = JSON.parse(
               await readFile(join(sourceDirectory, file), 'utf8'),
-            ) as { kind: string };
-            return [file.replace(/\.json$/, ''), source.kind] as const;
+            ) as { kind: string; lastCheckedAt: string };
+            return [
+              file.replace(/\.json$/, ''),
+              { kind: source.kind, lastCheckedAt: source.lastCheckedAt },
+            ] as const;
           }),
         ),
       );
@@ -226,6 +378,7 @@ describe('content trust contract', () => {
                 lastVerifiedAt: string;
                 sources: string[];
                 observedIn?: string[];
+                expectedOrder?: number;
                 archivePublished?: boolean;
                 showDate?: string;
                 songs?: Array<{ order: number }>;
@@ -251,10 +404,15 @@ describe('content trust contract', () => {
             const blockSources = metadata.match(
               /^sources:\n((?: {2}- .+\n)+)/m,
             )?.[1];
-            const sourceCount = inlineSources
-              ? inlineSources.split(',').filter(Boolean).length
-              : (blockSources?.match(/^ {2}- .+$/gm) ?? []).length;
-            if (!status || !lastVerifiedAt || sourceCount === 0) {
+            const sources = inlineSources
+              ? inlineSources
+                  .split(',')
+                  .map((source) => source.trim())
+                  .filter(Boolean)
+              : (blockSources?.match(/^ {2}- (.+)$/gm) ?? []).map((source) =>
+                  source.replace(/^ {2}- /, ''),
+                );
+            if (!status || !lastVerifiedAt || sources.length === 0) {
               throw new Error(`Incomplete audit metadata: ${file}`);
             }
             return {
@@ -262,7 +420,7 @@ describe('content trust contract', () => {
               data: {
                 status,
                 lastVerifiedAt,
-                sources: Array.from({ length: sourceCount }),
+                sources,
               },
             };
           }),
@@ -291,20 +449,31 @@ describe('content trust contract', () => {
             volatile:
               entry.id.startsWith('guides/') &&
               entry.data.status === 'practical',
+            sources: entry.data.sources.map((source) => {
+              const metadata = sourceKinds.get(source);
+              if (!metadata)
+                throw new Error(`Missing source audit record: ${source}`);
+              return {
+                id: source,
+                lastCheckedAt: parseSeoulDate(metadata.lastCheckedAt),
+              };
+            }),
           }),
         ),
         concert: {
           primarySourceCount: concert.data.sources.filter(
-            (source) => sourceKinds.get(source) === 'official',
+            (source) => sourceKinds.get(source)?.kind === 'official',
           ).length,
           archivePublished: concert.data.archivePublished ?? false,
         },
         setlist: {
           status: 'expected',
+          current: true,
           records: setlist.map((entry) => ({
             id: entry.id,
             status: entry.data.status,
             observedInCount: entry.data.observedIn?.length ?? 0,
+            expectedOrder: entry.data.expectedOrder,
           })),
         },
         showRecords: showRecords.map((record) => ({

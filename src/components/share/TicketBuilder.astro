@@ -60,11 +60,15 @@ const { showDates, showStarts, songs } = Astro.props;
     </p>
     <p class="status" aria-live="polite" data-status></p>
     <p class="error" role="alert" hidden data-error></p>
+    <div class="share-fallback">
+      <a href="/og/default.jpg">기본 공유 이미지 보기</a>
+      <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+    </div>
   </form>
 </section>
 
 <script>
-  import { getCountdownState } from '../../lib/countdown';
+  import { getSelectedShowLabel } from '../../lib/countdown';
   import { buildTicketLayout } from '../../lib/share/buildTicketLayout';
   import { renderCommands } from '../../lib/share/canvas';
   import { downloadBlob } from '../../lib/share/download';
@@ -84,6 +88,8 @@ const { showDates, showStarts, songs } = Astro.props;
       );
       const status = root.querySelector<HTMLElement>('[data-status]');
       const error = root.querySelector<HTMLElement>('[data-error]');
+      const copyShare =
+        root.querySelector<HTMLButtonElement>('[data-copy-share]');
 
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
 
@@ -112,6 +118,18 @@ const { showDates, showStarts, songs } = Astro.props;
       );
       refresh();
 
+      copyShare?.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard?.writeText(
+            'The Weeknd 고양 팬 가이드 — https://fan-guide.test',
+          );
+          status.textContent = '텍스트 공유 문구를 복사했습니다.';
+        } catch {
+          status.textContent =
+            '공유 문구를 직접 복사해 주세요: The Weeknd 고양 팬 가이드';
+        }
+      });
+
       button.addEventListener('click', async () => {
         const selected = selections();
         if (selected.length !== 3 || new Set(selected).size !== 3) {
@@ -124,12 +142,10 @@ const { showDates, showStarts, songs } = Astro.props;
           'input[name="show-date"]:checked',
         )?.value;
         const showStart = showDate === '2026-10-08' ? dayTwoStart : dayOneStart;
-        const dDayLabel = getCountdownState({
+        const dDayLabel = getSelectedShowLabel({
           now: new Date(),
-          dayOneStart: showStart,
-          dayTwoStart,
-          archivePublished: false,
-        }).primaryLabel;
+          showStart,
+        });
 
         try {
           button.disabled = true;
@@ -250,5 +266,15 @@ const { showDates, showStarts, songs } = Astro.props;
   .error {
     color: #ffbac0;
     margin: 0;
+  }
+  .share-fallback {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .share-fallback a {
+    color: var(--ivory);
+    font-weight: 800;
   }
 </style>
