@@ -5,16 +5,13 @@ import StatusBadge from '../components/content/StatusBadge.astro';
 import CareerTimeline from '../components/discover/CareerTimeline.astro';
 import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import type { SourceRecord } from '../lib/content/contracts';
-import { getDiscoverContent } from '../lib/content/queries';
+import {
+  getDiscoverContent,
+  resolveSourceReferences,
+} from '../lib/content/queries';
 
 const discover = await getDiscoverContent();
 const sources = await getCollection('sources');
-const sourceById = new Map(sources.map((source) => [source.id, source]));
-const getSources = (sourceIds: unknown) =>
-  (sourceIds as string[])
-    .map((id) => sourceById.get(id))
-    .filter((source): source is SourceRecord => Boolean(source));
 const intro = discover.find((entry) => entry.data.section === 'intro');
 const eras = discover.filter((entry) => entry.data.section === 'era');
 const glossary = discover.find((entry) => entry.data.section === 'glossary');
@@ -27,9 +24,9 @@ if (!intro || !glossary || !visual) {
 const { Content: IntroContent } = await render(intro);
 const { Content: GlossaryContent } = await render(glossary);
 const { Content: VisualContent } = await render(visual);
-const introSources = getSources(intro.data.sources);
-const glossarySources = getSources(glossary.data.sources);
-const visualSources = getSources(visual.data.sources);
+const introSources = resolveSourceReferences(intro.data.sources, sources);
+const glossarySources = resolveSourceReferences(glossary.data.sources, sources);
+const visualSources = resolveSourceReferences(visual.data.sources, sources);
 ---
 
 <BaseLayout

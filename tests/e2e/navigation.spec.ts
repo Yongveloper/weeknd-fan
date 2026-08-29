@@ -115,3 +115,31 @@ test('distinguishes the six studio albums from both trilogies', async ({
   ).toBeVisible();
   await expect(page.getByText('한 가지 해석')).toBeVisible();
 });
+
+test('shows checked primary sources when discover disclosures open', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+
+  const intro = page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
+  await intro.locator('summary').click();
+  await expect(
+    intro.getByRole('link', {
+      name: 'Universal Music Canada — Kiss Land 발표',
+    }),
+  ).toHaveAttribute(
+    'href',
+    'https://www.universalmusic.ca/press-releases/the-weeknds-kiss-land-to-arrive-september-10/',
+  );
+  await expect(intro.getByText('마지막 확인 2026.08.29').first()).toBeVisible();
+
+  const kissLand = page.getByRole('group', {
+    name: '2013 · Kiss Land 더 깊이 보기',
+  });
+  await kissLand.locator('summary').click();
+  await expect(
+    kissLand.getByRole('link', {
+      name: 'Universal Music Canada — Kiss Land 발표',
+    }),
+  ).toBeVisible();
+});

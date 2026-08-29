@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
 import type { SourceRecord } from '../../lib/content/contracts';
+import { resolveSourceReferences } from '../../lib/content/queries';
 
 interface Props {
   entries: CollectionEntry<'discover'>[];
@@ -10,14 +11,11 @@ interface Props {
 }
 
 const { entries, sources } = Astro.props;
-const sourceById = new Map(sources.map((source) => [source.id, source]));
 const renderedEntries = await Promise.all(
   entries.map(async (entry) => ({
     entry,
     Content: (await render(entry)).Content,
-    sources: (entry.data.sources as unknown as string[])
-      .map((id) => sourceById.get(id))
-      .filter((source): source is SourceRecord => Boolean(source)),
+    sources: resolveSourceReferences(entry.data.sources, sources),
   })),
 );
 ---
