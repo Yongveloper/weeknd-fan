@@ -8,6 +8,12 @@
   animation-timing-function: var(--ease-cinematic);
 }
 
+@media (prefers-reduced-motion: no-preference) {
+  [data-motion-scene='running'] .eclipse-countdown__moon {
+    will-change: transform;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

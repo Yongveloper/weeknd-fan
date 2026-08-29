@@ -1,0 +1,243 @@
+---
+import { getCountdownState } from '../../lib/countdown';
+
+interface Props {
+  dayOneStart: string;
+  dayTwoStart: string;
+  archivePublished: boolean;
+}
+
+const { dayOneStart, dayTwoStart, archivePublished } = Astro.props;
+const initial = getCountdownState({
+  now: new Date(),
+  dayOneStart,
+  dayTwoStart,
+  archivePublished,
+});
+const initialClock = [initial.hours, initial.minutes, initial.seconds]
+  .map((value) => String(value).padStart(2, '0'))
+  .join(' : ');
+---
+
+<eclipse-countdown
+  data-day-one={dayOneStart}
+  data-day-two={dayTwoStart}
+  data-archive-published={String(archivePublished)}
+  data-motion-scene
+  data-motion-state="static"
+>
+  <span class="sr-only" data-accessible-countdown aria-live="off"
+    >{initial.accessibleLabel}</span
+  >
+  <span class="eclipse-countdown__moon" aria-hidden="true">
+    <span data-primary>{initial.primaryLabel}</span>
+    <span data-shadow></span>
+  </span>
+  <time data-clock hidden={!initial.showClock} aria-hidden="true"
+    >{initialClock}</time
+  >
+</eclipse-countdown>
+
+<script>
+  import { getCountdownState } from '../../lib/countdown';
+
+  const formatClock = (hours: number, minutes: number, seconds: number) =>
+    [hours, minutes, seconds]
+      .map((value) => String(value).padStart(2, '0'))
+      .join(' : ');
+
+  class EclipseCountdown extends HTMLElement {
+    private intervalId?: ReturnType<typeof setInterval>;
+    private entranceControls?: {
+      stop: () => void;
+      finished: Promise<unknown>;
+    };
+    private lastPrimaryLabel = '';
+    private lastPhase = '';
+
+    connectedCallback() {
+      this.lastPrimaryLabel = this.primary.textContent ?? '';
+      this.lastPhase = this.state.phase;
+      this.update();
+
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        this.dataset.motionState = 'reduced';
+        return;
+      }
+
+      this.startEntrance();
+      this.intervalId = setInterval(() => this.update(), 1_000);
+    }
+
+    disconnectedCallback() {
+      if (this.intervalId) clearInterval(this.intervalId);
+      this.entranceControls?.stop();
+    }
+
+    private get primary() {
+      return this.querySelector<HTMLElement>('[data-primary]')!;
+    }
+
+    private get shadow() {
+      return this.querySelector<HTMLElement>('[data-shadow]')!;
+    }
+
+    private get clock() {
+      return this.querySelector<HTMLTimeElement>('[data-clock]')!;
+    }
+
+    private get accessibleCountdown() {
+      return this.querySelector<HTMLElement>('[data-accessible-countdown]')!;
+    }
+
+    private get state() {
+      return getCountdownState({
+        now: new Date(),
+        dayOneStart: this.dataset.dayOne ?? '',
+        dayTwoStart: this.dataset.dayTwo ?? '',
+        archivePublished: this.dataset.archivePublished === 'true',
+      });
+    }
+
+    private update() {
+      const state = this.state;
+      this.clock.hidden = !state.showClock;
+      this.clock.textContent = formatClock(
+        state.hours,
+        state.minutes,
+        state.seconds,
+      );
+
+      if (state.primaryLabel === this.lastPrimaryLabel) return;
+
+      const changeAccessibleLabel = () => {
+        this.primary.textContent = state.primaryLabel;
+        if (state.phase !== this.lastPhase) {
+          this.accessibleCountdown.textContent = state.accessibleLabel;
+        }
+        this.lastPrimaryLabel = state.primaryLabel;
+        this.lastPhase = state.phase;
+      };
+
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        changeAccessibleLabel();
+        return;
+      }
+
+      this.shadow.classList.remove('is-crossing');
+      void this.shadow.offsetWidth;
+      this.shadow.classList.add('is-crossing');
+      window.setTimeout(changeAccessibleLabel, 220);
+    }
+
+    private startEntrance() {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          observer.disconnect();
+          void this.animateEntrance();
+        },
+        { threshold: 0.25 },
+      );
+
+      observer.observe(this);
+    }
+
+    private async animateEntrance() {
+      const { animate } = await import('motion');
+      const hero = this.closest<HTMLElement>('[data-home-hero]');
+      const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
+      const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');
+
+      if (!moon || !fog || !this.isConnected) return;
+
+      this.dataset.motionState = 'running';
+      const sequence: import('motion').AnimationSequence = [
+        [moon, { transform: ['translate3d(0, 0, 0) scale(1)'] }],
+        [fog, { opacity: [1] }, { at: 0.12 }],
+      ];
+      this.entranceControls = animate(sequence, {
+        duration: 0.62,
+        defaultTransition: { ease: [0.22, 1, 0.36, 1] },
+      });
+      await this.entranceControls.finished;
+      if (this.isConnected) this.dataset.motionState = 'resting';
+    }
+  }
+
+  if (!customElements.get('eclipse-countdown')) {
+    customElements.define('eclipse-countdown', EclipseCountdown);
+  }
+</script>
+
+<style>
+  eclipse-countdown {
+    display: grid;
+    justify-items: center;
+    gap: 0.75rem;
+  }
+
+  .eclipse-countdown__moon {
+    position: relative;
+    display: grid;
+    width: var(--eclipse-size, clamp(10rem, 28vw, 19rem));
+    aspect-ratio: 1;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ivory);
+    font-family: var(--font-display);
+    font-size: clamp(3.6rem, 10vw, 7.4rem);
+    letter-spacing: 0.025em;
+    line-height: 1;
+  }
+
+  [data-primary] {
+    position: relative;
+    z-index: 1;
+    text-shadow: 0 0 1.5rem color-mix(in srgb, var(--night) 72%, transparent);
+  }
+
+  [data-shadow] {
+    position: absolute;
+    inset: -15%;
+    background: radial-gradient(
+      circle at 50% 50%,
+      transparent 0 39%,
+      color-mix(in srgb, var(--night) 90%, transparent) 57%
+    );
+    background-position: -180% 0;
+    pointer-events: none;
+  }
+
+  [data-shadow].is-crossing {
+    animation: eclipse-shadow 440ms var(--ease-cinematic) both;
+  }
+
+  [data-clock] {
+    color: var(--mist);
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+    letter-spacing: 0.12em;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  @keyframes eclipse-shadow {
+    from {
+      background-position: -180% 0;
+    }
+
+    to {
+      background-position: 180% 0;
+    }
+  }
+</style>

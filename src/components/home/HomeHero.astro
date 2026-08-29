@@ -1,0 +1,174 @@
+---
+import { Image } from 'astro:assets';
+import type { ConcertRecord } from '../../lib/content/contracts';
+import EclipseCountdown from '../visual/EclipseCountdown.astro';
+import dawnFog from '../../assets/visual/fog-dawn.png';
+import nightFog from '../../assets/visual/fog-night.png';
+import moonSurface from '../../assets/visual/moon-surface.png';
+
+interface Props {
+  concert: ConcertRecord;
+}
+
+const { concert } = Astro.props;
+const [dayOne, dayTwo] = concert.data.shows;
+
+if (!dayOne || !dayTwo) {
+  throw new Error('The Goyang countdown requires two show start times.');
+}
+---
+
+<section class="home-hero" data-home-hero aria-labelledby="home-title">
+  <div class="home-hero__visual" aria-hidden="true">
+    <Image
+      class="home-hero__moon-art"
+      data-moon-art
+      src={moonSurface}
+      widths={[320, 560, 720, 960, 1254]}
+      sizes="(max-width: 42rem) 76vw, 38vw"
+      alt=""
+    />
+    <Image
+      class="home-hero__fog home-hero__fog--night"
+      src={nightFog}
+      widths={[480, 768, 1024, 1280, 1536]}
+      sizes="100vw"
+      alt=""
+    />
+    <Image
+      class="home-hero__fog home-hero__fog--dawn"
+      data-hero-fog
+      src={dawnFog}
+      widths={[480, 768, 1024, 1280, 1536]}
+      sizes="100vw"
+      alt=""
+    />
+  </div>
+  <EclipseCountdown
+    dayOneStart={dayOne.startsAt}
+    dayTwoStart={dayTwo.startsAt}
+    archivePublished={concert.data.archivePublished}
+  />
+  <div class="home-hero__content shell-content">
+    <div class="home-hero__heading">
+      <p class="eyebrow">AFTER HOURS TIL DAWN / GOYANG</p>
+      <h1 id="home-title">AFTER HOURS <span>TIL DAWN</span></h1>
+      <p>2026.10.07—08 · {concert.data.venue}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .home-hero {
+    position: relative;
+    display: grid;
+    min-height: min(76vh, 58rem);
+    overflow: hidden;
+    isolation: isolate;
+    background: var(--night);
+  }
+
+  .home-hero__visual,
+  .home-hero__visual :global(img) {
+    position: absolute;
+    inset: 0;
+  }
+
+  .home-hero__visual {
+    z-index: -1;
+  }
+
+  .home-hero__moon-art {
+    width: min(49vw, 39rem);
+    height: auto;
+    inset: auto clamp(-8rem, 2vw, 4rem) clamp(4rem, 8vh, 9rem) auto !important;
+    border-radius: 50%;
+    mix-blend-mode: screen;
+    transform: translate3d(18vw, 18vh, 0) scale(0.86);
+  }
+
+  .home-hero__fog {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: screen;
+    opacity: 0.68;
+  }
+
+  .home-hero__fog--dawn {
+    opacity: 0;
+  }
+
+  .home-hero__content {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(2.5rem, 8vw, 8rem);
+    padding-block: var(--section-space);
+  }
+
+  .home-hero__heading {
+    align-self: center;
+  }
+
+  .home-hero :global(eclipse-countdown) {
+    --eclipse-size: min(49vw, 39rem);
+    position: absolute;
+    z-index: 0;
+    right: clamp(-8rem, 2vw, 4rem);
+    bottom: clamp(4rem, 8vh, 9rem);
+  }
+
+  h1 {
+    max-width: 11ch;
+    margin-top: 0.8rem;
+    font-family: var(--font-display);
+    font-size: clamp(5.5rem, 18vw, 15rem);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 0.72;
+    text-wrap: balance;
+  }
+
+  h1 span {
+    display: block;
+    background: linear-gradient(
+      90deg,
+      var(--red),
+      var(--blue) 64%,
+      var(--amber)
+    );
+    background-clip: text;
+    color: transparent;
+  }
+
+  h1 + p {
+    max-width: 34rem;
+    margin-top: clamp(2rem, 5vw, 4rem);
+    color: var(--mist);
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-weight: 700;
+  }
+
+  @media (max-width: 42rem) {
+    .home-hero {
+      min-height: 42rem;
+    }
+
+    .home-hero__content {
+      grid-template-columns: 1fr;
+      align-content: space-between;
+    }
+
+    .home-hero__moon-art {
+      width: 84vw;
+      inset: auto -10vw -4rem auto !important;
+    }
+
+    .home-hero :global(eclipse-countdown) {
+      --eclipse-size: 84vw;
+      right: -10vw;
+      bottom: -4rem;
+    }
+  }
+</style>
