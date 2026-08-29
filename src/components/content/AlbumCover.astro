@@ -1,0 +1,87 @@
+---
+import type { AlbumRecord } from '../../lib/content/contracts';
+
+interface Props {
+  album: AlbumRecord;
+  size: 32 | 72 | 120;
+}
+
+const { album, size } = Astro.props;
+const { title, era, spotifyUrl, cover } = album.data;
+---
+
+<a
+  class="album-cover"
+  href={spotifyUrl}
+  target="_blank"
+  rel="noreferrer"
+  data-era={era}
+  style={`--size: ${size}px`}
+>
+  <span class="album-cover__fallback" aria-hidden="true">{title}</span>
+  <img
+    src={cover.url}
+    width={cover.width}
+    height={cover.height}
+    alt={`${title} 앨범 커버 — Spotify에서 열기`}
+    loading="lazy"
+    decoding="async"
+    referrerpolicy="no-referrer"
+  />
+</a>
+
+<style>
+  .album-cover {
+    position: relative;
+    display: grid;
+    flex: 0 0 auto;
+    width: var(--size);
+    height: var(--size);
+    min-height: 0;
+    overflow: hidden;
+    color: var(--ivory);
+    background: var(--era-color, var(--night));
+    text-decoration: none;
+  }
+
+  .album-cover[data-era='night'] {
+    --era-color: #15151c;
+  }
+  .album-cover[data-era='red'] {
+    --era-color: color-mix(in srgb, var(--red) 55%, var(--night));
+  }
+  .album-cover[data-era='blue'] {
+    --era-color: color-mix(in srgb, var(--blue) 50%, var(--night));
+  }
+  .album-cover[data-era='amber'] {
+    --era-color: color-mix(in srgb, var(--amber) 45%, var(--night));
+  }
+
+  .album-cover__fallback {
+    display: grid;
+    place-items: center;
+    padding: 0.35em;
+    font-family: var(--font-display);
+    font-size: calc(var(--size) * 0.16);
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    word-break: break-word;
+  }
+
+  .album-cover__fallback,
+  .album-cover img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .album-cover img {
+    object-fit: cover;
+  }
+
+  .album-cover:focus-visible {
+    outline-offset: 2px;
+  }
+</style>

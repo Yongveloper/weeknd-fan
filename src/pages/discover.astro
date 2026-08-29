@@ -1,17 +1,21 @@
 ---
 import { getCollection, render } from 'astro:content';
+import AlbumCover from '../components/content/AlbumCover.astro';
 import SourceList from '../components/content/SourceList.astro';
 import StatusBadge from '../components/content/StatusBadge.astro';
 import CareerTimeline from '../components/discover/CareerTimeline.astro';
 import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import {
+  getAlbums,
   getDiscoverContent,
   resolveSourceReferences,
 } from '../lib/content/queries';
 
 const discover = await getDiscoverContent();
 const sources = await getCollection('sources');
+const albums = await getAlbums();
+const studioAlbums = albums.filter((album) => album.data.kind === 'studio');
 const intro = discover.find((entry) => entry.data.section === 'intro');
 const eras = discover.filter((entry) => entry.data.section === 'era');
 const glossary = discover.find((entry) => entry.data.section === 'glossary');
@@ -51,13 +55,17 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     <section class="discover__albums" aria-labelledby="studio-albums-title">
       <p class="eyebrow">DISCOGRAPHY, LIGHTLY</p>
       <h2 id="studio-albums-title">정규 앨범 6장</h2>
-      <ol>
-        <li>2013 · <em>Kiss Land</em></li>
-        <li>2015 · <em>Beauty Behind the Madness</em></li>
-        <li>2016 · <em>Starboy</em></li>
-        <li>2020 · <em>After Hours</em></li>
-        <li>2022 · <em>Dawn FM</em></li>
-        <li>2025 · <em>Hurry Up Tomorrow</em></li>
+      <ol aria-label="정규 앨범 6장">
+        {
+          studioAlbums.map((album) => (
+            <li>
+              <AlbumCover album={album} size={72} />
+              <span>
+                {album.data.year} · <em>{album.data.title}</em>
+              </span>
+            </li>
+          ))
+        }
       </ol>
       <p>
         2011년 세 믹스테이프, 2012년 <em>Trilogy</em> 컴필레이션, 2018년 <em
@@ -167,6 +175,9 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
   }
 
   .discover__albums li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
     color: var(--mist);
   }
 

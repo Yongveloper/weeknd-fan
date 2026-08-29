@@ -358,3 +358,26 @@ test('shows checked primary sources when discover disclosures open', async ({
     }),
   ).toBeVisible();
 });
+
+test('shows Spotify-linked official covers for the six studio albums', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+
+  const covers = page
+    .getByRole('list', { name: '정규 앨범 6장' })
+    .locator('a.album-cover');
+  await expect(covers).toHaveCount(6);
+  await expect(covers.first()).toHaveAttribute(
+    'href',
+    /^https:\/\/open\.spotify\.com\/album\//,
+  );
+  await expect(covers.first().locator('img')).toHaveAttribute(
+    'alt',
+    /앨범 커버 — Spotify에서 열기$/,
+  );
+  await expect(covers.first().locator('img')).toHaveAttribute(
+    'referrerpolicy',
+    'no-referrer',
+  );
+});
