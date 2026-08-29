@@ -401,6 +401,10 @@ test('hides the mobile menu scrollbar and keeps the last item reachable', async 
   expect(metrics.scrollbarWidth).toBe('none');
   expect(metrics.snap).toContain('x');
 
+  await expect
+    .poll(() => nav.evaluate((element) => element.scrollLeft))
+    .toBe(0);
+
   const last = nav.getByRole('link', { name: '출처·업데이트' });
   await last.scrollIntoViewIfNeeded();
   const box = await last.boundingBox();
