@@ -25,3 +25,25 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
     '/goyang/',
   );
 });
+
+test('keeps navigation targets touch-sized in every viewport', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  for (const link of await page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByRole('link')
+    .all()) {
+    const box = await link.boundingBox();
+    expect(box, `missing box for ${await link.textContent()}`).not.toBeNull();
+    expect(
+      box?.width,
+      `narrow target for ${await link.textContent()}`,
+    ).toBeGreaterThanOrEqual(44);
+    expect(
+      box?.height,
+      `short target for ${await link.textContent()}`,
+    ).toBeGreaterThanOrEqual(44);
+  }
+});
