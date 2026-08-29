@@ -98,3 +98,20 @@ test('links each Goyang shortcut to its stable guide anchor', async ({
     shortcuts.getByRole('link', { name: '귀가 확인' }),
   ).toHaveAttribute('href', '/goyang/#return');
 });
+
+test('distinguishes the six studio albums from both trilogies', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+
+  await expect(
+    page.getByRole('heading', { name: '정규 앨범 6장' }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('House of Balloons → Thursday → Echoes of Silence'),
+  ).toBeVisible();
+  await expect(
+    page.getByText('After Hours → Dawn FM → Hurry Up Tomorrow'),
+  ).toBeVisible();
+  await expect(page.getByText('한 가지 해석')).toBeVisible();
+});

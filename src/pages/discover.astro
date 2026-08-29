@@ -1,0 +1,233 @@
+---
+import { getCollection, render } from 'astro:content';
+import SourceList from '../components/content/SourceList.astro';
+import StatusBadge from '../components/content/StatusBadge.astro';
+import CareerTimeline from '../components/discover/CareerTimeline.astro';
+import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { SourceRecord } from '../lib/content/contracts';
+import { getDiscoverContent } from '../lib/content/queries';
+
+const discover = await getDiscoverContent();
+const sources = await getCollection('sources');
+const sourceById = new Map(sources.map((source) => [source.id, source]));
+const getSources = (sourceIds: unknown) =>
+  (sourceIds as string[])
+    .map((id) => sourceById.get(id))
+    .filter((source): source is SourceRecord => Boolean(source));
+const intro = discover.find((entry) => entry.data.section === 'intro');
+const eras = discover.filter((entry) => entry.data.section === 'era');
+const glossary = discover.find((entry) => entry.data.section === 'glossary');
+const visual = discover.find((entry) => entry.data.section === 'visual');
+
+if (!intro || !glossary || !visual) {
+  throw new Error('Missing required discover content');
+}
+
+const { Content: IntroContent } = await render(intro);
+const { Content: GlossaryContent } = await render(glossary);
+const { Content: VisualContent } = await render(visual);
+const introSources = getSources(intro.data.sources);
+const glossarySources = getSources(glossary.data.sources);
+const visualSources = getSources(visual.data.sources);
+---
+
+<BaseLayout
+  title="The Weeknd 알기 | The Weeknd 고양 팬 가이드"
+  description="공연 전 1분에 훑는 The Weeknd의 커리어, 앨범 구분, 그리고 두 3부작"
+>
+  <article class="discover shell-content">
+    <header class="discover__hero">
+      <p class="eyebrow">ONE MINUTE BEFORE THE SHOW</p>
+      <h1>The Weeknd를<br />한 장씩 넘겨 보기</h1>
+      <p>{intro.data.summary}</p>
+      <StatusBadge status={intro.data.status} />
+      <details aria-label="1분 입문 더 깊이 보기">
+        <summary>1분 입문 펼쳐보기</summary>
+        <div>
+          <IntroContent />
+          <SourceList sources={introSources} />
+        </div>
+      </details>
+    </header>
+
+    <section class="discover__albums" aria-labelledby="studio-albums-title">
+      <p class="eyebrow">DISCOGRAPHY, LIGHTLY</p>
+      <h2 id="studio-albums-title">정규 앨범 6장</h2>
+      <ol>
+        <li>2013 · <em>Kiss Land</em></li>
+        <li>2015 · <em>Beauty Behind the Madness</em></li>
+        <li>2016 · <em>Starboy</em></li>
+        <li>2020 · <em>After Hours</em></li>
+        <li>2022 · <em>Dawn FM</em></li>
+        <li>2025 · <em>Hurry Up Tomorrow</em></li>
+      </ol>
+      <p>
+        2011년 세 믹스테이프, 2012년 <em>Trilogy</em> 컴필레이션, 2018년 <em
+          >My Dear Melancholy,</em
+        > EP는 이 여섯 장과 따로 센다.
+      </p>
+    </section>
+
+    <TrilogyExplainer />
+
+    <section class="discover__timeline" aria-labelledby="timeline-title">
+      <p class="eyebrow">CAREER, AT A GLANCE</p>
+      <h2 id="timeline-title">연표는 가볍게,<br />필요하면 더 깊게</h2>
+      <CareerTimeline entries={eras} sources={sources} />
+    </section>
+
+    <section class="discover__closing" aria-labelledby="glossary-title">
+      <div>
+        <p class="eyebrow">GLOSSARY</p>
+        <h2 id="glossary-title">{glossary.data.title}</h2>
+        <p>{glossary.data.summary}</p>
+        <StatusBadge status={glossary.data.status} />
+        <details aria-label="용어 한 장 더 깊이 보기">
+          <summary>더 깊이 보기</summary>
+          <div>
+            <GlossaryContent />
+            <SourceList sources={glossarySources} />
+          </div>
+        </details>
+      </div>
+      <div>
+        <p class="eyebrow">VISUAL LANGUAGE</p>
+        <h2>{visual.data.title}</h2>
+        <p>{visual.data.summary}</p>
+        <StatusBadge status={visual.data.status} />
+        <details aria-label="보는 음악 더 깊이 보기">
+          <summary>더 깊이 보기</summary>
+          <div>
+            <VisualContent />
+            <SourceList sources={visualSources} />
+          </div>
+        </details>
+      </div>
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .discover {
+    padding-block: clamp(3rem, 9vw, 8rem) var(--section-space);
+  }
+
+  .discover__hero,
+  .discover__albums,
+  .discover__timeline,
+  .discover__closing {
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 20%, transparent);
+  }
+
+  .discover__hero {
+    display: grid;
+    gap: 1rem;
+    padding-block: 2rem var(--section-space);
+    border-top: 0;
+  }
+
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    line-height: 0.94;
+  }
+
+  h1 {
+    font-size: clamp(3.7rem, 11vw, 8.5rem);
+  }
+
+  h2 {
+    font-size: clamp(2.4rem, 5vw, 4.6rem);
+  }
+
+  .discover__hero > p:not(.eyebrow) {
+    max-width: 40rem;
+    color: var(--mist);
+    font-size: clamp(1.08rem, 2vw, 1.3rem);
+  }
+
+  details {
+    max-width: 42rem;
+  }
+
+  summary {
+    display: grid;
+    align-items: center;
+    min-height: 44px;
+    color: var(--amber);
+    cursor: pointer;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  details > div {
+    color: var(--mist);
+  }
+
+  .discover__albums {
+    display: grid;
+    gap: 1rem;
+    padding-block: var(--section-space);
+  }
+
+  .discover__albums ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem 1.5rem;
+    max-width: 58rem;
+    margin: 0;
+    padding: 1.25rem 0;
+    border-block: 1px solid color-mix(in srgb, var(--ivory) 20%, transparent);
+    list-style: none;
+  }
+
+  .discover__albums li {
+    color: var(--mist);
+  }
+
+  .discover__albums > p:last-child {
+    max-width: 48rem;
+    color: var(--mist);
+  }
+
+  .discover__timeline {
+    padding-top: var(--section-space);
+  }
+
+  .discover__timeline > .eyebrow,
+  .discover__timeline > h2 {
+    margin-bottom: 1rem;
+  }
+
+  .discover__closing {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2rem, 7vw, 7rem);
+    padding-top: var(--section-space);
+  }
+
+  .discover__closing > div {
+    display: grid;
+    gap: 0.8rem;
+    color: var(--mist);
+  }
+
+  .discover__closing :global(p) {
+    margin: 0;
+  }
+
+  .discover__closing h2 {
+    color: var(--ivory);
+  }
+
+  @media (max-width: 42rem) {
+    .discover__albums ol,
+    .discover__closing {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

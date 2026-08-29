@@ -1,0 +1,120 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SourceList from '../content/SourceList.astro';
+import StatusBadge from '../content/StatusBadge.astro';
+import type { SourceRecord } from '../../lib/content/contracts';
+
+interface Props {
+  entries: CollectionEntry<'discover'>[];
+  sources: SourceRecord[];
+}
+
+const { entries, sources } = Astro.props;
+const sourceById = new Map(sources.map((source) => [source.id, source]));
+const renderedEntries = await Promise.all(
+  entries.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+    sources: (entry.data.sources as unknown as string[])
+      .map((id) => sourceById.get(id))
+      .filter((source): source is SourceRecord => Boolean(source)),
+  })),
+);
+---
+
+<ol class="timeline" aria-label="The Weeknd 시대별 커리어">
+  {
+    renderedEntries.map(({ entry, Content, sources: entrySources }) => (
+      <li class="timeline__entry">
+        <div class="timeline__summary">
+          <p class="eyebrow">{entry.data.title.split('·')[0]?.trim()}</p>
+          <h2>{entry.data.title}</h2>
+          <p>{entry.data.summary}</p>
+          <StatusBadge status={entry.data.status} />
+        </div>
+        <details aria-label={`${entry.data.title} 더 깊이 보기`}>
+          <summary>더 깊이 보기</summary>
+          <div class="timeline__detail">
+            <Content />
+            <SourceList sources={entrySources} />
+          </div>
+        </details>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .timeline {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline__entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1.25rem 2rem;
+    padding-block: clamp(2rem, 6vw, 4rem);
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 20%, transparent);
+  }
+
+  .timeline__summary {
+    display: grid;
+    gap: 0.7rem;
+    max-width: 46rem;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4vw, 3.6rem);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    line-height: 0.98;
+  }
+
+  .timeline__summary > p:not(.eyebrow) {
+    color: var(--mist);
+  }
+
+  details {
+    align-self: end;
+    min-width: 11rem;
+  }
+
+  summary {
+    display: grid;
+    align-items: center;
+    min-height: 44px;
+    color: var(--amber);
+    cursor: pointer;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .timeline__detail {
+    display: grid;
+    gap: 0.85rem;
+    max-width: 44rem;
+    padding-block: 1rem 0.4rem;
+    color: var(--mist);
+  }
+
+  .timeline__detail :global(p) {
+    margin: 0;
+  }
+
+  @media (max-width: 42rem) {
+    .timeline__entry {
+      grid-template-columns: 1fr;
+      gap: 0.9rem;
+    }
+
+    details {
+      min-width: 0;
+    }
+  }
+</style>
