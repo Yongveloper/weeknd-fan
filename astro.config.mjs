@@ -2,7 +2,7 @@ import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 
 /* global process, URL */
-const publicSiteUrl = getPublicSiteUrl(process.env.PUBLIC_SITE_URL);
+const publicSiteUrl = resolvePublicSiteUrl(process.env.PUBLIC_SITE_URL);
 
 export default defineConfig({
   output: 'static',
@@ -14,15 +14,15 @@ export default defineConfig({
   },
 });
 
-function getPublicSiteUrl(value) {
+export function resolvePublicSiteUrl(value) {
   if (!value) return undefined;
 
   try {
     const url = new URL(value);
-    return ['http:', 'https:'].includes(url.protocol)
-      ? url.toString()
-      : undefined;
+    if (['http:', 'https:'].includes(url.protocol)) return url.toString();
   } catch {
-    return undefined;
+    // Normalize all invalid values to one actionable build-time error.
   }
+
+  throw new Error('PUBLIC_SITE_URL must be an absolute HTTP(S) URL');
 }
