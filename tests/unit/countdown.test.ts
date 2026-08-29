@@ -59,4 +59,26 @@ describe('getCountdownState', () => {
     expect(state.phase).toBe('archive');
     expect(state.primaryLabel).toBe('WE WERE HERE');
   });
+
+  it('keeps the day-one countdown when an editor publishes early', () => {
+    const state = getCountdownState({
+      ...schedule,
+      archivePublished: true,
+      now: new Date('2026-10-06T19:45:00+09:00'),
+    });
+
+    expect(state.phase).toBe('before-day-one');
+    expect(state.primaryLabel).toBe('D-1');
+  });
+
+  it('keeps the day-two countdown when an editor publishes during day one', () => {
+    const state = getCountdownState({
+      ...schedule,
+      archivePublished: true,
+      now: new Date('2026-10-07T20:00:00+09:00'),
+    });
+
+    expect(state.phase).toBe('before-day-two');
+    expect(state.primaryLabel).toBe('D-1');
+  });
 });

@@ -69,3 +69,42 @@ deprecation hint; neither is introduced by Task 4.
 ## Commit
 
 `feat(home): add Eclipse Count moon scene`
+
+## Fix round 1
+
+Reviewer findings were fixed in a separate follow-up commit.
+
+### TDD evidence
+
+- **RED:** the two new early-publication countdown cases failed because
+  `archivePublished: true` returned `archive` before either show threshold.
+- **GREEN:** archive now requires both editor publication and the second-show
+  threshold. `npm test -- countdown.test.ts` passed `7/7`.
+- **Visual/image regressions:** `npm run build && npm run test:e2e --
+  visual.spec.ts` passed `7`, skipped the desktop-inapplicable mobile bounds
+  assertion, and produced AVIF plus WebP `<picture>` sources for all three
+  scene images.
+
+### Fixes
+
+- Archive publication cannot override the pending day-one or day-two
+  countdown.
+- The mobile countdown group now reserves a positive in-hero bottom offset;
+  decorative moon art remains independently cropped while the 24-hour clock
+  stays inside the hero and viewport.
+- Moon and both fog layers use Astro `Picture` with `['avif', 'webp']`, while
+  retaining the native source-size caps and Night Black composition.
+
+### Visual recheck
+
+At a controlled `2026-10-07T19:40:00+09:00` mobile clock, inspected
+`/tmp/weeknd-goyang-task4/mobile-near-term.png`. The visible clock bbox was
+`y=719.875–757`, inside the hero bbox `y=105–777` and the Pixel 7 viewport
+height `839`; `00 : 05 : 00` is fully readable.
+
+### Final verification
+
+- `npm run verify` → passed: lint, format, Astro check, `10` unit tests,
+  build, and `13` desktop/mobile E2E tests (`1` desktop-inapplicable mobile
+  bounds test skipped).
+- `git diff --check` → passed.

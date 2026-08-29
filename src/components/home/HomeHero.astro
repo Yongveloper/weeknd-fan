@@ -1,5 +1,5 @@
 ---
-import { Image } from 'astro:assets';
+import { Picture } from 'astro:assets';
 import type { ConcertRecord } from '../../lib/content/contracts';
 import EclipseCountdown from '../visual/EclipseCountdown.astro';
 import dawnFog from '../../assets/visual/fog-dawn.png';
@@ -20,25 +20,28 @@ if (!dayOne || !dayTwo) {
 
 <section class="home-hero" data-home-hero aria-labelledby="home-title">
   <div class="home-hero__visual" aria-hidden="true">
-    <Image
+    <Picture
       class="home-hero__moon-art"
       data-moon-art
       src={moonSurface}
+      formats={['avif', 'webp']}
       widths={[320, 560, 720, 960, 1254]}
       sizes="(max-width: 42rem) 76vw, 38vw"
       alt=""
     />
-    <Image
+    <Picture
       class="home-hero__fog home-hero__fog--night"
       src={nightFog}
+      formats={['avif', 'webp']}
       widths={[480, 768, 1024, 1280, 1536]}
       sizes="100vw"
       alt=""
     />
-    <Image
+    <Picture
       class="home-hero__fog home-hero__fog--dawn"
       data-hero-fog
       src={dawnFog}
+      formats={['avif', 'webp']}
       widths={[480, 768, 1024, 1280, 1536]}
       sizes="100vw"
       alt=""
@@ -168,7 +171,7 @@ if (!dayOne || !dayTwo) {
     .home-hero :global(eclipse-countdown) {
       --eclipse-size: 84vw;
       right: -10vw;
-      bottom: -4rem;
+      bottom: 1.25rem;
     }
   }
 </style>

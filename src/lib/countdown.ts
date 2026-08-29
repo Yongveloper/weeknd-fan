@@ -52,7 +52,7 @@ export function getCountdownState(input: CountdownInput): CountdownState {
   const dayOne = dayOneDate.getTime();
   const dayTwo = dayTwoDate.getTime();
 
-  if (input.archivePublished) {
+  if (input.archivePublished && now >= dayTwo) {
     return {
       phase: 'archive',
       primaryLabel: 'WE WERE HERE',
