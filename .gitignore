@@ -13,3 +13,6 @@ coverage/
 playwright-report/
 test-results/
 .wrangler/
+
+# Session handoff notes (local only)
+docs/handoff-context.md
