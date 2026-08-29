@@ -41,3 +41,11 @@
 
 - Astro reports the existing empty `showRecords` collection during check/build. This is expected before either real post-show archive file exists; `archivePublished` remains false.
 - Astro check retains the pre-existing ESLint config deprecation hint; it reports no diagnostics errors or warnings.
+
+## Fix round 1
+
+- The current-data audit now reads every `src/data/archive/*.json` file (ignoring `.gitkeep`) and maps its show date, status, source count, and actual song orders. It will pass after `archivePublished` is enabled only when both valid dated records are present.
+- Archive records now reject duplicate, missing, or out-of-order positions with `archive-song-orders-invalid`; the two-date valid case and invalid-order cases are covered.
+- Date-only metadata is parsed as Seoul midnight through `parseSeoulDate`; exact seven-day and seven-day-plus-one-minute KST boundaries are covered.
+- `verify` runs `audit:content` once before build, then `test:unit` excludes that file; normal `npm test` remains the complete Vitest command.
+- `editorial-reference` records now render under `보조 참고` before the NamuWiki reference-only disclosure.

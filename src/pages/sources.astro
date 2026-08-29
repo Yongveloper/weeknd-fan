@@ -3,6 +3,9 @@ import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 
 const sources = await getCollection('sources');
+const supportingSources = sources.filter(
+  (source) => source.data.kind === 'editorial-reference',
+);
 const groups: Array<{
   title: string;
   description: string;
@@ -100,6 +103,16 @@ const checkpoints = [
           </p>
         </div>
         <ul>
+          {
+            supportingSources.map((source) => (
+              <li>
+                <a href={source.data.url} target="_blank" rel="noreferrer">
+                  {source.data.name}
+                </a>
+                <span>마지막 확인 {formatDate(source.data.lastCheckedAt)}</span>
+              </li>
+            ))
+          }
           <li>
             <span class="source-group__reference">나무위키 PDF</span>
             <span>누락 탐색용·핵심 사실 근거 아님</span>

@@ -5,6 +5,7 @@ import {
   auditCoreContent,
   auditPublishedContent,
   auditSetlistRecords,
+  parseSeoulDate,
 } from '../../src/lib/content/audit';
 import { STATUS_LABELS } from '../../src/lib/content/contracts';
 
@@ -61,6 +62,7 @@ describe('content trust contract', () => {
           showDate: '2026-10-07',
           status: 'post-show',
           songCount: 38,
+          songOrders: Array.from({ length: 38 }, (_, index) => index + 1),
           sourceCount: 2,
         },
       ],
@@ -106,6 +108,89 @@ describe('content trust contract', () => {
     expect(issues).toEqual([]);
   });
 
+  it('keeps a practical guide fresh through exactly seven Seoul calendar days', () => {
+    const transport = {
+      id: 'transport',
+      status: 'practical' as const,
+      lastVerifiedAt: parseSeoulDate('2026-09-28'),
+      sourceCount: 2,
+      volatile: true,
+    };
+    const baseInput = {
+      entries: [transport],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected' as const, records: [] },
+      showRecords: [],
+    };
+
+    expect(
+      auditPublishedContent({
+        ...baseInput,
+        now: new Date('2026-10-05T00:00:00+09:00'),
+      }),
+    ).toEqual([]);
+    expect(
+      auditPublishedContent({
+        ...baseInput,
+        entries: [
+          {
+            ...transport,
+            lastVerifiedAt: new Date('2026-09-27T23:59:00+09:00'),
+          },
+        ],
+        now: new Date('2026-10-05T00:00:00+09:00'),
+      }),
+    ).toEqual([{ id: 'transport', code: 'volatile-content-stale' }]);
+  });
+
+  it('accepts both complete Goyang archive dates when publication is enabled', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-10-09T00:00:00+09:00'),
+      entries: [],
+      concert: { primarySourceCount: 2, archivePublished: true },
+      setlist: { status: 'expected', records: [] },
+      showRecords: ['2026-10-07', '2026-10-08'].map((showDate) => ({
+        showDate,
+        status: 'post-show' as const,
+        songCount: 3,
+        songOrders: [1, 2, 3],
+        sourceCount: 2,
+      })),
+    });
+
+    expect(issues).toEqual([]);
+  });
+
+  it('rejects duplicate, noncontiguous, and out-of-order archive song positions', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-10-09T00:00:00+09:00'),
+      entries: [],
+      concert: { primarySourceCount: 2, archivePublished: true },
+      setlist: { status: 'expected', records: [] },
+      showRecords: [
+        {
+          showDate: '2026-10-07',
+          status: 'post-show',
+          songCount: 3,
+          songOrders: [1, 1, 3],
+          sourceCount: 2,
+        },
+        {
+          showDate: '2026-10-08',
+          status: 'post-show',
+          songCount: 3,
+          songOrders: [1, 3, 2],
+          sourceCount: 2,
+        },
+      ],
+    });
+
+    expect(issues).toEqual([
+      { id: 'archive:2026-10-07', code: 'archive-song-orders-invalid' },
+      { id: 'archive:2026-10-08', code: 'archive-song-orders-invalid' },
+    ]);
+  });
+
   it('audits the current published collection data rather than an empty fixture', async () => {
     const dataDirectory = join(process.cwd(), 'src/data');
     const sourceDirectory = join(dataDirectory, 'sources');
@@ -122,18 +207,22 @@ describe('content trust contract', () => {
     );
     const readJsonDirectory = async (directory: string) =>
       Promise.all(
-        (await readdir(join(dataDirectory, directory))).map(async (file) => ({
-          id: `${directory}/${file.replace(/\.json$/, '')}`,
-          data: JSON.parse(
-            await readFile(join(dataDirectory, directory, file), 'utf8'),
-          ) as {
-            status: 'official' | 'expected';
-            lastVerifiedAt: string;
-            sources: string[];
-            observedIn?: string[];
-            archivePublished?: boolean;
-          },
-        })),
+        (await readdir(join(dataDirectory, directory)))
+          .filter((file) => file.endsWith('.json'))
+          .map(async (file) => ({
+            id: `${directory}/${file.replace(/\.json$/, '')}`,
+            data: JSON.parse(
+              await readFile(join(dataDirectory, directory, file), 'utf8'),
+            ) as {
+              status: 'official' | 'expected' | 'post-show';
+              lastVerifiedAt: string;
+              sources: string[];
+              observedIn?: string[];
+              archivePublished?: boolean;
+              showDate?: string;
+              songs?: Array<{ order: number }>;
+            },
+          })),
       );
     const readMarkdownDirectory = async (directory: string) =>
       Promise.all(
@@ -169,12 +258,14 @@ describe('content trust contract', () => {
         }),
       );
 
-    const [concerts, setlist, discover, guides] = await Promise.all([
-      readJsonDirectory('concert'),
-      readJsonDirectory('setlist'),
-      readMarkdownDirectory('discover'),
-      readMarkdownDirectory('guides'),
-    ]);
+    const [concerts, setlist, discover, guides, showRecords] =
+      await Promise.all([
+        readJsonDirectory('concert'),
+        readJsonDirectory('setlist'),
+        readMarkdownDirectory('discover'),
+        readMarkdownDirectory('guides'),
+        readJsonDirectory('archive'),
+      ]);
     const concert = concerts[0];
     if (!concert) throw new Error('Missing concert audit record');
     const issues = auditPublishedContent({
@@ -185,7 +276,7 @@ describe('content trust contract', () => {
           status: entry.data.status as Parameters<
             typeof auditPublishedContent
           >[0]['entries'][number]['status'],
-          lastVerifiedAt: new Date(entry.data.lastVerifiedAt),
+          lastVerifiedAt: parseSeoulDate(entry.data.lastVerifiedAt),
           sourceCount: entry.data.sources.length,
           volatile:
             entry.id.startsWith('guides/') && entry.data.status === 'practical',
@@ -205,7 +296,13 @@ describe('content trust contract', () => {
           observedInCount: entry.data.observedIn?.length ?? 0,
         })),
       },
-      showRecords: [],
+      showRecords: showRecords.map((record) => ({
+        showDate: record.data.showDate ?? '',
+        status: record.data.status,
+        songCount: record.data.songs?.length ?? 0,
+        songOrders: record.data.songs?.map((song) => song.order) ?? [],
+        sourceCount: record.data.sources.length,
+      })),
     });
 
     expect(issues).toEqual([]);

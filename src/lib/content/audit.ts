@@ -25,6 +25,7 @@ type ArchiveAuditRecord = {
   showDate: string;
   status: TrustStatus;
   songCount: number;
+  songOrders: number[];
   sourceCount: number;
 };
 
@@ -35,6 +36,10 @@ export type PublishedContentAuditInput = {
   setlist: { status: TrustStatus; records: PublishedSetlistAuditRecord[] };
   showRecords: ArchiveAuditRecord[];
 };
+
+export function parseSeoulDate(date: string): Date {
+  return new Date(`${date}T00:00:00+09:00`);
+}
 
 export function auditCoreContent(input: ContentAuditInput): string[] {
   const issues: string[] = [];
@@ -129,6 +134,15 @@ export function auditPublishedContent(
         issues.push({
           id: `archive:${showDate}`,
           code: 'archive-record-invalid',
+        });
+      }
+      if (
+        record.songOrders.length !== record.songCount ||
+        record.songOrders.some((order, index) => order !== index + 1)
+      ) {
+        issues.push({
+          id: `archive:${showDate}`,
+          code: 'archive-song-orders-invalid',
         });
       }
     }
