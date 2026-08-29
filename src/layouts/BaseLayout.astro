@@ -41,7 +41,7 @@ const ogImageUrl = new URL(ogImage, site);
   <body>
     <a class="skip-link" href="#content">본문으로 건너뛰기</a>
     <SiteHeader />
-    <main id="content"><slot /></main>
+    <main id="content" tabindex="-1"><slot /></main>
     <SiteFooter />
   </body>
 </html>
