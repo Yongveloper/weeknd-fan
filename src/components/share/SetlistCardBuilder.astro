@@ -1,0 +1,139 @@
+---
+interface Props {
+  version: string;
+  songs: string[];
+}
+const { version, songs } = Astro.props;
+---
+
+<section
+  class="share-builder"
+  data-setlist-builder
+  data-version={version}
+  data-songs={JSON.stringify(songs)}
+>
+  <header>
+    <p class="eyebrow">PRIVATE EXPORT</p>
+    <h1>SETLIST CARD</h1>
+    <p>최근 공연 기록을 바탕으로 한 예상 목록을 포스터로 저장합니다.</p>
+  </header>
+  <div class="setlist-summary">
+    <p><strong>UPDATED {version.replaceAll('-', '.')}</strong></p>
+    <p>예상 · 보장 아님</p>
+  </div>
+  <button type="button" data-download-setlist>셋리스트 카드 저장</button>
+  <p class="privacy-note">
+    이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
+  </p>
+  <p class="status" aria-live="polite" data-status></p>
+  <p class="error" role="alert" hidden data-error></p>
+</section>
+
+<script>
+  import { buildSetlistCardLayout } from '../../lib/share/buildSetlistCardLayout';
+  import { renderCommands } from '../../lib/share/canvas';
+  import { downloadBlob } from '../../lib/share/download';
+
+  document
+    .querySelectorAll<HTMLElement>('[data-setlist-builder]')
+    .forEach((root) => {
+      const version = root.dataset.version ?? '';
+      const songs = JSON.parse(root.dataset.songs ?? '[]') as string[];
+      const button = root.querySelector<HTMLButtonElement>(
+        '[data-download-setlist]',
+      );
+      const status = root.querySelector<HTMLElement>('[data-status]');
+      const error = root.querySelector<HTMLElement>('[data-error]');
+      if (!button || !status || !error) return;
+
+      button.addEventListener('click', async () => {
+        try {
+          button.disabled = true;
+          error.hidden = true;
+          status.textContent = '이미지를 생성하고 있습니다…';
+          const blob = await renderCommands(
+            document.createElement('canvas'),
+            buildSetlistCardLayout({ version, songs }),
+          );
+          downloadBlob(blob, 'weeknd-goyang-expected-setlist.jpg');
+          status.textContent = 'JPEG 셋리스트 카드를 저장했습니다.';
+        } catch (caught) {
+          error.textContent =
+            caught instanceof Error
+              ? caught.message
+              : '이미지 생성에 실패했습니다. 다시 시도해 주세요.';
+          error.hidden = false;
+          status.textContent = '';
+        } finally {
+          button.disabled = false;
+        }
+      });
+    });
+</script>
+
+<style>
+  .share-builder {
+    display: grid;
+    gap: 1rem;
+    max-width: 58rem;
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+  header {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: clamp(1.5rem, 5vw, 3rem);
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 14vw, 10rem);
+    font-weight: 400;
+    line-height: 0.8;
+  }
+  header > p:last-child,
+  .privacy-note,
+  .status {
+    color: var(--mist);
+    margin: 0;
+  }
+  .setlist-summary {
+    border-block: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+    color: var(--ivory);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    padding: 1rem 0;
+  }
+  .setlist-summary p {
+    margin: 0;
+  }
+  .setlist-summary p:last-child {
+    color: var(--amber);
+    font-weight: 900;
+  }
+  button {
+    background: var(--amber);
+    border: 1px solid var(--amber);
+    border-radius: 0;
+    color: var(--night);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 900;
+    min-height: 48px;
+    padding: 0.55rem 0.8rem;
+  }
+  button:disabled {
+    opacity: 0.5;
+  }
+  button:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+  }
+  .status {
+    min-height: 1.5em;
+  }
+  .error {
+    color: #ffbac0;
+    margin: 0;
+  }
+</style>

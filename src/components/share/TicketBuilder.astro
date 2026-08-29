@@ -1,0 +1,254 @@
+---
+interface Props {
+  showDates: [string, string];
+  showStarts: [string, string];
+  songs: string[];
+}
+
+const { showDates, showStarts, songs } = Astro.props;
+---
+
+<section
+  class="share-builder"
+  data-ticket-builder
+  data-show-starts={JSON.stringify(showStarts)}
+  data-songs={JSON.stringify(songs)}
+>
+  <header>
+    <p class="eyebrow">PRIVATE EXPORT</p>
+    <h1>D-DAY TICKET</h1>
+    <p>관람일과 가장 기다리는 세 곡을 골라 나만의 티켓을 만드세요.</p>
+  </header>
+
+  <form novalidate>
+    <fieldset>
+      <legend>관람일</legend>
+      {
+        showDates.map((date, index) => (
+          <label class="choice">
+            <input
+              type="radio"
+              name="show-date"
+              value={date}
+              checked={index === 0}
+            />
+            <span>{date.replaceAll('-', '.')}</span>
+          </label>
+        ))
+      }
+    </fieldset>
+
+    <div class="song-fields">
+      {
+        ['첫 번째 곡', '두 번째 곡', '세 번째 곡'].map((label, index) => (
+          <label>
+            <span>{label}</span>
+            <select required aria-label={label} data-song-select={index}>
+              <option value="">곡을 선택해 주세요</option>
+              {songs.map((song) => (
+                <option value={song}>{song}</option>
+              ))}
+            </select>
+          </label>
+        ))
+      }
+    </div>
+
+    <button type="button" disabled data-download-ticket>D-day 티켓 저장</button>
+    <p class="privacy-note">
+      이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
+    </p>
+    <p class="status" aria-live="polite" data-status></p>
+    <p class="error" role="alert" hidden data-error></p>
+  </form>
+</section>
+
+<script>
+  import { getCountdownState } from '../../lib/countdown';
+  import { buildTicketLayout } from '../../lib/share/buildTicketLayout';
+  import { renderCommands } from '../../lib/share/canvas';
+  import { downloadBlob } from '../../lib/share/download';
+
+  document
+    .querySelectorAll<HTMLElement>('[data-ticket-builder]')
+    .forEach((root) => {
+      const showStarts = JSON.parse(
+        root.dataset.showStarts ?? '[]',
+      ) as string[];
+      const [dayOneStart, dayTwoStart] = showStarts;
+      const selects = [
+        ...root.querySelectorAll<HTMLSelectElement>('[data-song-select]'),
+      ];
+      const button = root.querySelector<HTMLButtonElement>(
+        '[data-download-ticket]',
+      );
+      const status = root.querySelector<HTMLElement>('[data-status]');
+      const error = root.querySelector<HTMLElement>('[data-error]');
+
+      if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
+
+      const selections = () =>
+        selects.map((select) => select.value).filter(Boolean);
+      const refresh = () => {
+        const selected = selections();
+        selects.forEach((select) => {
+          [...select.options].forEach((option) => {
+            option.disabled = Boolean(
+              option.value &&
+              option.value !== select.value &&
+              selected.includes(option.value),
+            );
+          });
+        });
+        button.disabled = selected.length !== 3 || new Set(selected).size !== 3;
+      };
+
+      selects.forEach((select) =>
+        select.addEventListener('change', () => {
+          error.hidden = true;
+          error.textContent = '';
+          refresh();
+        }),
+      );
+      refresh();
+
+      button.addEventListener('click', async () => {
+        const selected = selections();
+        if (selected.length !== 3 || new Set(selected).size !== 3) {
+          error.textContent = '서로 다른 세 곡을 선택해 주세요.';
+          error.hidden = false;
+          return;
+        }
+
+        const showDate = root.querySelector<HTMLInputElement>(
+          'input[name="show-date"]:checked',
+        )?.value;
+        const showStart = showDate === '2026-10-08' ? dayTwoStart : dayOneStart;
+        const dDayLabel = getCountdownState({
+          now: new Date(),
+          dayOneStart: showStart,
+          dayTwoStart,
+          archivePublished: false,
+        }).primaryLabel;
+
+        try {
+          button.disabled = true;
+          error.hidden = true;
+          error.textContent = '';
+          status.textContent = '이미지를 생성하고 있습니다…';
+          const canvas = document.createElement('canvas');
+          const blob = await renderCommands(
+            canvas,
+            buildTicketLayout({
+              showDate: showDate ?? '2026-10-07',
+              dDayLabel,
+              songs: selected,
+            }),
+          );
+          downloadBlob(blob, 'weeknd-goyang-dday-ticket.jpg');
+          status.textContent = 'JPEG 티켓을 저장했습니다.';
+        } catch (caught) {
+          error.textContent =
+            caught instanceof Error
+              ? caught.message
+              : '이미지 생성에 실패했습니다. 다시 시도해 주세요.';
+          error.hidden = false;
+          status.textContent = '';
+        } finally {
+          refresh();
+        }
+      });
+    });
+</script>
+
+<style>
+  .share-builder {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 5rem);
+    max-width: 58rem;
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+  header,
+  form,
+  fieldset,
+  .song-fields {
+    display: grid;
+    gap: 1rem;
+  }
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 14vw, 10rem);
+    font-weight: 400;
+    line-height: 0.8;
+  }
+  header > p:last-child,
+  .privacy-note {
+    margin: 0;
+    color: var(--mist);
+    max-width: 42rem;
+  }
+  fieldset {
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+  legend,
+  label > span {
+    color: var(--amber);
+    font-weight: 800;
+  }
+  .choice {
+    align-items: center;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+    color: var(--ivory);
+    display: flex;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.75rem 0;
+  }
+  .choice:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+  }
+  input {
+    inline-size: 1.2rem;
+    block-size: 1.2rem;
+  }
+  select,
+  button {
+    min-height: 48px;
+    border: 1px solid var(--ivory);
+    border-radius: 0;
+    font: inherit;
+    padding: 0.55rem 0.8rem;
+  }
+  select {
+    background: var(--night);
+    color: var(--ivory);
+  }
+  button {
+    background: var(--amber);
+    color: var(--night);
+    cursor: pointer;
+    font-weight: 900;
+  }
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+  select:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 3px solid var(--blue);
+    outline-offset: 3px;
+  }
+  .status {
+    color: var(--mist);
+    margin: 0;
+    min-height: 1.5em;
+  }
+  .error {
+    color: #ffbac0;
+    margin: 0;
+  }
+</style>
