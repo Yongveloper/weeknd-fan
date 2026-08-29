@@ -60,6 +60,18 @@ test('synchronizes stale server countdown markup and keeps polling under reduced
   );
 });
 
+test('synchronizes stale server countdown markup before normal-motion transitions', async ({
+  page,
+}) => {
+  await useClock(page, '2026-10-07T19:40:00+09:00');
+  await page.goto('/');
+  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
+  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
+    /고양 공연까지 0일/,
+  );
+  await expect(page.locator('[data-clock]')).toHaveText('00 : 05 : 00');
+});
+
 test('updates the reduced-motion target after day one and clears polling on disconnect', async ({
   page,
 }) => {

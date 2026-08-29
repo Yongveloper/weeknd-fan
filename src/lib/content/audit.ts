@@ -44,7 +44,13 @@ export type PublishedContentAuditInput = {
 };
 
 export function parseSeoulDate(date: string): Date {
-  return new Date(`${date}T00:00:00+09:00`);
+  if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return new Date(`${date}T00:00:00+09:00`);
+  }
+  if (/^\d{4}-\d{2}-\d{2}T.+(?:Z|[+-]\d{2}:\d{2})$/i.test(date)) {
+    return new Date(date);
+  }
+  return new Date(Number.NaN);
 }
 
 export function formatSeoulDate(date: Date): string {
@@ -103,10 +109,15 @@ export function auditPublishedContent(
   const staleAfterMilliseconds = 7 * 24 * 60 * 60 * 1000;
 
   for (const entry of input.entries) {
+    const hasValidContentDate = !Number.isNaN(entry.lastVerifiedAt.getTime());
+    if (!hasValidContentDate) {
+      issues.push({ id: entry.id, code: 'content-date-invalid' });
+    }
     if (entry.status !== 'unpublished' && entry.sourceCount < 1) {
       issues.push({ id: entry.id, code: 'published-content-missing-sources' });
     }
     if (
+      hasValidContentDate &&
       entry.status === 'practical' &&
       entry.volatile &&
       input.now.getTime() - entry.lastVerifiedAt.getTime() >
@@ -116,6 +127,13 @@ export function auditPublishedContent(
     }
     if (entry.status === 'practical' && entry.volatile && entry.sources) {
       if (
+        entry.sources.some((source) =>
+          Number.isNaN(source.lastCheckedAt.getTime()),
+        )
+      ) {
+        issues.push({ id: entry.id, code: 'volatile-source-date-invalid' });
+      } else if (
+        hasValidContentDate &&
         entry.sources.some(
           (source) =>
             input.now.getTime() - source.lastCheckedAt.getTime() >
@@ -165,6 +183,22 @@ export function auditPublishedContent(
       ))
   ) {
     issues.push({ id: 'setlist', code: 'setlist-expected-orders-invalid' });
+  }
+
+  const archiveDateCounts = new Map<string, number>();
+  for (const record of input.showRecords) {
+    archiveDateCounts.set(
+      record.showDate,
+      (archiveDateCounts.get(record.showDate) ?? 0) + 1,
+    );
+  }
+  for (const [showDate, count] of archiveDateCounts) {
+    if (count > 1 && ['2026-10-07', '2026-10-08'].includes(showDate)) {
+      issues.push({
+        id: `archive:${showDate}`,
+        code: 'archive-record-duplicate',
+      });
+    }
   }
 
   for (const record of input.showRecords) {

@@ -85,3 +85,21 @@ git diff --check
 Known non-failing build note: the intentionally empty `showRecords` collection
 is reported during static generation. The pre-existing corrected Task 13 report
 was preserved and excluded from this fix wave.
+
+## Follow-up round 1
+
+- Share fallback copy now uses the current absolute route (`Astro.url` in
+  server markup and `window.location.href` in the browser), renders it as
+  selectable manual text, and reports unavailable/rejected Clipboard access.
+  Browser coverage grants real clipboard permission and verifies the preview
+  origin/route, then covers the unavailable case.
+- The first countdown client synchronization is immediate in normal motion;
+  only later label changes use the eclipse animation. A fake-clock normal-motion
+  browser regression asserts primary, accessible, and clock text before any
+  delayed transition.
+- Archive auditing now emits `archive-record-duplicate` for duplicate supported
+  show dates regardless of publication state, while retaining the exact two-date
+  publication gate.
+- `parseSeoulDate` now accepts only date-only Seoul values or full offset ISO
+  values. Invalid content/source dates produce deterministic audit findings,
+  and offset-ISO stale/laundering paths are covered.

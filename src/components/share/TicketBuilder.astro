@@ -3,9 +3,10 @@ interface Props {
   showDates: [string, string];
   showStarts: [string, string];
   songs: string[];
+  shareUrl: string;
 }
 
-const { showDates, showStarts, songs } = Astro.props;
+const { showDates, showStarts, songs, shareUrl } = Astro.props;
 ---
 
 <section
@@ -63,6 +64,7 @@ const { showDates, showStarts, songs } = Astro.props;
     <div class="share-fallback">
       <a href="/og/default.jpg">기본 공유 이미지 보기</a>
       <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+      <code data-share-url>{shareUrl}</code>
     </div>
   </form>
 </section>
@@ -90,6 +92,7 @@ const { showDates, showStarts, songs } = Astro.props;
       const error = root.querySelector<HTMLElement>('[data-error]');
       const copyShare =
         root.querySelector<HTMLButtonElement>('[data-copy-share]');
+      const shareUrl = root.querySelector<HTMLElement>('[data-share-url]');
 
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
 
@@ -118,15 +121,21 @@ const { showDates, showStarts, songs } = Astro.props;
       );
       refresh();
 
+      const currentShareUrl = window.location.href;
+      if (shareUrl) shareUrl.textContent = currentShareUrl;
+
       copyShare?.addEventListener('click', async () => {
+        if (!navigator.clipboard?.writeText) {
+          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
+          return;
+        }
         try {
-          await navigator.clipboard?.writeText(
-            'The Weeknd 고양 팬 가이드 — https://fan-guide.test',
+          await navigator.clipboard.writeText(
+            `The Weeknd 고양 팬 가이드 — ${currentShareUrl}`,
           );
           status.textContent = '텍스트 공유 문구를 복사했습니다.';
         } catch {
-          status.textContent =
-            '공유 문구를 직접 복사해 주세요: The Weeknd 고양 팬 가이드';
+          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
         }
       });
 

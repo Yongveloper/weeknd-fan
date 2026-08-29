@@ -58,7 +58,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     connectedCallback() {
       this.lastPrimaryLabel = this.primary.textContent ?? '';
       this.lastAccessibleLabel = this.accessibleCountdown.textContent ?? '';
-      this.update();
+      this.update(true);
       this.intervalId = setInterval(() => this.update(), 1_000);
 
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -99,7 +99,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       });
     }
 
-    private update() {
+    private update(immediate = false) {
       const state = this.state;
       this.clock.hidden = !state.showClock;
       this.clock.textContent = formatClock(
@@ -124,7 +124,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         return;
       }
 
-      if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      if (immediate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
         changeAccessibleLabel();
         return;
       }

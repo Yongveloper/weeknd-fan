@@ -168,6 +168,63 @@ describe('content trust contract', () => {
     expect(issues).toEqual([]);
   });
 
+  it('rejects duplicate records for a supported archive date', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-10-09T00:00:00+09:00'),
+      entries: [],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected', records: [] },
+      showRecords: ['2026-10-07', '2026-10-07', '2026-10-08'].map(
+        (showDate) => ({
+          showDate,
+          status: 'post-show' as const,
+          songCount: 1,
+          songOrders: [1],
+          sourceCount: 2,
+        }),
+      ),
+    });
+
+    expect(issues).toEqual([
+      { id: 'archive:2026-10-07', code: 'archive-record-duplicate' },
+    ]);
+  });
+
+  it('parses date-only Seoul values and offset ISO timestamps without NaN bypasses', () => {
+    expect(parseSeoulDate('2026-10-05').toISOString()).toBe(
+      '2026-10-04T15:00:00.000Z',
+    );
+    expect(parseSeoulDate('2026-10-05T12:00:00+09:00').toISOString()).toBe(
+      '2026-10-05T03:00:00.000Z',
+    );
+    expect(
+      auditPublishedContent({
+        now: new Date('2026-10-05T12:00:00+09:00'),
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('not-a-date'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'transport-source',
+                lastCheckedAt: parseSeoulDate('not-a-date'),
+              },
+            ],
+          },
+        ],
+        concert: { primarySourceCount: 2, archivePublished: false },
+        setlist: { status: 'expected', records: [] },
+        showRecords: [],
+      }),
+    ).toEqual([
+      { id: 'transport', code: 'content-date-invalid' },
+      { id: 'transport', code: 'volatile-source-date-invalid' },
+    ]);
+  });
+
   it('rejects duplicate, noncontiguous, and out-of-order archive song positions', () => {
     const issues = auditPublishedContent({
       now: new Date('2026-10-09T00:00:00+09:00'),
@@ -345,6 +402,57 @@ describe('content trust contract', () => {
         showRecords: [],
       }),
     ).toEqual([]);
+  });
+
+  it('applies stale-source and laundering checks to full offset ISO timestamps', () => {
+    const base = {
+      now: new Date('2026-10-05T12:00:00+09:00'),
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected' as const, records: [] },
+      showRecords: [],
+    };
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('2026-10-05T10:00:00+09:00'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'stale-source',
+                lastCheckedAt: parseSeoulDate('2026-09-27T09:00:00+09:00'),
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([{ id: 'transport', code: 'volatile-sources-stale' }]);
+    expect(
+      auditPublishedContent({
+        ...base,
+        entries: [
+          {
+            id: 'transport',
+            status: 'practical',
+            lastVerifiedAt: parseSeoulDate('2026-10-05T10:00:00+09:00'),
+            sourceCount: 1,
+            volatile: true,
+            sources: [
+              {
+                id: 'older-source',
+                lastCheckedAt: parseSeoulDate('2026-10-05T09:00:00+09:00'),
+              },
+            ],
+          },
+        ],
+      }),
+    ).toEqual([
+      { id: 'transport', code: 'volatile-source-older-than-content' },
+    ]);
   });
 
   it('audits the current published collection data rather than an empty fixture', async () => {

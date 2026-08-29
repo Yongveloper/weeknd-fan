@@ -134,3 +134,33 @@ test('keeps setlist fallback alternatives available after JPEG failure', async (
     page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
   ).toBeVisible();
 });
+
+test('copies the current absolute share route and exposes it as manual fallback text', async ({
+  context,
+  page,
+}) => {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.goto('/share/ticket/');
+  const expectedUrl = new URL('/share/ticket/', page.url()).href;
+  await expect(page.locator('[data-share-url]')).toHaveText(expectedUrl);
+  await page.getByRole('button', { name: '텍스트 공유 문구 복사' }).click();
+  await expect(page.locator('[data-status]')).toHaveText(
+    '텍스트 공유 문구를 복사했습니다.',
+  );
+  await expect(
+    page.evaluate(() => navigator.clipboard.readText()),
+  ).resolves.toContain(expectedUrl);
+});
+
+test('explains the manual fallback when clipboard access is unavailable', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: undefined });
+  });
+  await page.goto('/share/setlist/');
+  await page.getByRole('button', { name: '텍스트 공유 문구 복사' }).click();
+  await expect(page.locator('[data-status]')).toContainText(
+    '직접 복사해 주세요',
+  );
+});
