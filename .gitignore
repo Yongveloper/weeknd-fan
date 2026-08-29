@@ -1,0 +1,10 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+.superpowers/
+tmp/
+node_modules/
+dist/
+.next/
+coverage/
