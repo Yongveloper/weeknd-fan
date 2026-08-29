@@ -1,0 +1,111 @@
+---
+interface Props {
+  url: string;
+  songTitle: string;
+}
+
+const { url, songTitle } = Astro.props;
+const allowedProviders = new Set([
+  'www.youtube.com',
+  'youtube.com',
+  'www.youtube-nocookie.com',
+  'youtube-nocookie.com',
+  'open.spotify.com',
+]);
+
+const provider = new URL(url);
+if (
+  provider.protocol !== 'https:' ||
+  !allowedProviders.has(provider.hostname)
+) {
+  throw new Error(`Unsupported official media provider: ${provider.hostname}`);
+}
+---
+
+<div class="official-embed" data-official-embed data-embed-url={url}>
+  <a href={url} target="_blank" rel="noreferrer">공식 원문에서 듣기</a>
+  <button type="button" data-load-embed>공식 영상 불러오기</button>
+</div>
+
+<script is:inline define:vars={{ songTitle }}>
+  const timeoutMs = 8_000;
+
+  document
+    .querySelectorAll<HTMLElement>('[data-official-embed]')
+    .forEach((embed) => {
+      const button =
+        embed.querySelector<HTMLButtonElement>('[data-load-embed]');
+      const url = embed.dataset.embedUrl;
+
+      if (!button || !url) return;
+
+      button.addEventListener('click', () => {
+        if (embed.querySelector('iframe')) return;
+
+        const mediaUrl = new URL(url);
+        const allowedProviders = new Set([
+          'www.youtube.com',
+          'youtube.com',
+          'www.youtube-nocookie.com',
+          'youtube-nocookie.com',
+          'open.spotify.com',
+        ]);
+
+        if (
+          mediaUrl.protocol !== 'https:' ||
+          !allowedProviders.has(mediaUrl.hostname)
+        ) {
+          return;
+        }
+
+        const iframe = document.createElement('iframe');
+        iframe.loading = 'lazy';
+        iframe.title = `${songTitle} 공식 미디어`;
+        iframe.src = mediaUrl.href;
+        iframe.allow =
+          'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+        iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+
+        const cleanup = () => iframe.remove();
+        const timeout = window.setTimeout(cleanup, timeoutMs);
+        iframe.addEventListener('load', () => window.clearTimeout(timeout), {
+          once: true,
+        });
+        iframe.addEventListener('error', cleanup, { once: true });
+
+        button.insertAdjacentElement('afterend', iframe);
+      });
+    });
+</script>
+
+<style>
+  .official-embed {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  a,
+  button {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ivory);
+    font: inherit;
+    font-weight: 800;
+  }
+
+  button {
+    padding: 0.4rem 0.7rem;
+    border: 1px solid color-mix(in srgb, var(--blue) 80%, transparent);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  iframe {
+    width: min(100%, 36rem);
+    min-height: 12rem;
+    border: 0;
+  }
+</style>

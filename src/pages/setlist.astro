@@ -1,0 +1,78 @@
+---
+import SetlistExplorer from '../components/setlist/SetlistExplorer.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import {
+  getConcert,
+  getExpectedSetlist,
+  getShowRecords,
+} from '../lib/content/queries';
+
+const [concert, entries, showRecords, sources] = await Promise.all([
+  getConcert(),
+  getExpectedSetlist(),
+  getShowRecords(),
+  getCollection('sources'),
+]);
+const archivePublished = concert.data.archivePublished;
+const title = archivePublished
+  ? 'WE WERE HERE | The Weeknd 고양 팬 가이드'
+  : '예상 셋리스트 | The Weeknd 고양 팬 가이드';
+---
+
+<BaseLayout
+  title={title}
+  description="최근 2026년 공연 3회 비교를 바탕으로 한 The Weeknd 고양 공연 예상 셋리스트"
+>
+  <section
+    class="setlist-page shell-content"
+    aria-labelledby="setlist-page-title"
+  >
+    <header>
+      <p class="eyebrow">EXPECTED SHOW GUIDE</p>
+      <h1 id="setlist-page-title">
+        {archivePublished ? 'WE WERE HERE' : 'EXPECTED SETLIST'}
+      </h1>
+      <p>
+        최근 무대의 반복 패턴을 참고한 비공식 예상 순서입니다. 실제 공연은
+        달라질 수 있어요.
+      </p>
+    </header>
+    <SetlistExplorer
+      entries={entries}
+      showRecords={showRecords}
+      sources={sources}
+      archivePublished={archivePublished}
+    />
+  </section>
+</BaseLayout>
+
+<style>
+  .setlist-page {
+    display: grid;
+    gap: clamp(3.5rem, 9vw, 7rem);
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  header {
+    display: grid;
+    gap: 1rem;
+    max-width: 56rem;
+  }
+
+  h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(4.5rem, 14vw, 11rem);
+    font-weight: 400;
+    letter-spacing: 0.015em;
+    line-height: 0.78;
+  }
+
+  header > p:last-child {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--mist);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+</style>

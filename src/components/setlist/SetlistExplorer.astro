@@ -1,0 +1,220 @@
+---
+import OfficialEmbed from '../content/OfficialEmbed.astro';
+import SourceList from '../content/SourceList.astro';
+import StatusBadge from '../content/StatusBadge.astro';
+import type {
+  SetlistRecord,
+  ShowRecord,
+  SourceRecord,
+} from '../../lib/content/contracts';
+import { resolveSourceReferences } from '../../lib/content/queries';
+
+interface Props {
+  entries: SetlistRecord[];
+  showRecords: ShowRecord[];
+  sources: SourceRecord[];
+  archivePublished: boolean;
+}
+
+const { entries, showRecords, sources, archivePublished } = Astro.props;
+const twoDigits = (value: number) => String(value).padStart(2, '0');
+const dayLabel = (showDate: string) =>
+  showDate.endsWith('-07') ? '1일차 공연 후 확인' : '2일차 공연 후 확인';
+---
+
+<div class="setlist-explorer">
+  {
+    showRecords.length > 0 && (
+      <section class="actual-setlist" aria-labelledby="actual-setlist-title">
+        <p class="eyebrow">POST-SHOW RECORD</p>
+        <h2 id="actual-setlist-title">공연 후 확인된 셋리스트</h2>
+        {showRecords.map((record) => (
+          <article>
+            <div class="actual-setlist__heading">
+              <h3>
+                {archivePublished
+                  ? record.data.showDate
+                  : dayLabel(record.data.showDate)}
+              </h3>
+              <StatusBadge status="post-show" />
+            </div>
+            <ol>
+              {record.data.songs
+                .slice()
+                .sort((a, b) => a.order - b.order)
+                .map((song) => (
+                  <li>
+                    {song.title}
+                    {song.note && ` — ${song.note}`}
+                  </li>
+                ))}
+            </ol>
+            <SourceList
+              sources={resolveSourceReferences(record.data.sources, sources)}
+            />
+          </article>
+        ))}
+      </section>
+    )
+  }
+
+  <section class="expected-setlist" aria-labelledby="expected-setlist-title">
+    <div class="expected-setlist__heading">
+      <div>
+        <p class="eyebrow">A PATTERN, NOT A PROMISE</p>
+        <h2 id="expected-setlist-title">예상 셋리스트</h2>
+      </div>
+      <StatusBadge status="expected" />
+    </div>
+    <p class="expected-setlist__comparison">최근 2026년 공연 3회 비교</p>
+    <ol class="expected-setlist__list">
+      {
+        entries.map((entry) => (
+          <li>
+            <details>
+              <summary>
+                {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+              </summary>
+              <div class="expected-setlist__detail">
+                <p class="expected-setlist__metadata">
+                  <span>{entry.data.album}</span>
+                  <span>신뢰도 {entry.data.confidence}</span>
+                  <StatusBadge status={entry.data.status} />
+                </p>
+                <h3>공연 전에 알면 좋은 한 문장</h3>
+                <p>{entry.data.summary}</p>
+                <h3>무대에서 볼 것</h3>
+                <p>{entry.data.liveNote}</p>
+                <h3>떼창 포인트</h3>
+                <p>{entry.data.singAlongNote}</p>
+                {entry.data.officialListenUrl && (
+                  <OfficialEmbed
+                    url={entry.data.officialListenUrl}
+                    songTitle={entry.data.songTitle}
+                  />
+                )}
+                <h3>출처</h3>
+                <SourceList
+                  sources={resolveSourceReferences(
+                    entry.data.observedIn,
+                    sources,
+                  )}
+                />
+              </div>
+            </details>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+</div>
+
+<style>
+  .setlist-explorer {
+    display: grid;
+    gap: clamp(3rem, 8vw, 6rem);
+  }
+
+  .expected-setlist,
+  .actual-setlist {
+    max-width: 62rem;
+  }
+
+  .expected-setlist__heading,
+  .actual-setlist__heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: end;
+    justify-content: space-between;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.88;
+  }
+
+  .expected-setlist__comparison {
+    margin: 1rem 0 1.5rem;
+    color: var(--mist);
+    font-weight: 800;
+  }
+
+  .expected-setlist__list,
+  .actual-setlist ol {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  details,
+  .actual-setlist article {
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+
+  .expected-setlist__list li:last-child details,
+  .actual-setlist article:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.9rem 0.2rem;
+    color: var(--ivory);
+    cursor: pointer;
+    font-size: clamp(1.05rem, 2.4vw, 1.45rem);
+    font-weight: 800;
+  }
+
+  .expected-setlist__detail {
+    display: grid;
+    gap: 0.65rem;
+    padding: 0.2rem 0.2rem 1.5rem;
+  }
+
+  .expected-setlist__detail h3,
+  .actual-setlist h3 {
+    margin: 0.85rem 0 0;
+    color: var(--amber);
+    font-size: 0.85rem;
+  }
+
+  .expected-setlist__detail p {
+    margin: 0;
+    color: var(--mist);
+  }
+
+  .expected-setlist__metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    align-items: center;
+    color: var(--ivory) !important;
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+  .actual-setlist article {
+    padding: 1.25rem 0;
+  }
+
+  .actual-setlist ol {
+    gap: 0.35rem;
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    list-style: decimal;
+  }
+
+  .actual-setlist li::marker {
+    color: var(--amber);
+    font-family: var(--font-display);
+  }
+</style>

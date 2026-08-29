@@ -19,6 +19,7 @@ const remainingEntries = entries.slice(previewCount);
       <h2 id="setlist-preview-title">예상 셋리스트</h2>
       <StatusBadge status="expected" />
     </div>
+    <p class="setlist-preview__comparison">최근 2026년 공연 3회 비교</p>
     {
       previewEntries.length > 0 ? (
         <ol class="setlist-preview__list">
@@ -92,6 +93,12 @@ const remainingEntries = entries.slice(previewCount);
     color: var(--ivory);
     font-size: clamp(1rem, 2vw, 1.2rem);
     font-weight: 700;
+  }
+
+  .setlist-preview__comparison {
+    margin: -0.9rem 0 0;
+    color: var(--mist);
+    font-weight: 800;
   }
 
   .setlist-preview__list li::marker {

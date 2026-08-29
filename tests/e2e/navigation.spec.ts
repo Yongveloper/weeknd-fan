@@ -100,6 +100,88 @@ test('shows six predicted titles before the complete collapsed list', async ({
   await expect(preview.getByText('예상 · 보장 아님')).toBeVisible();
 });
 
+test('presents the setlist as a prediction with expandable song context', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+
+  await expect(
+    page.getByRole('heading', { name: '예상 셋리스트' }),
+  ).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(page.getByText('최근 2026년 공연 3회 비교')).toBeVisible();
+
+  const firstSong = page.locator('.expected-setlist summary').first();
+  await expect(firstSong).toHaveAccessibleName('01 Baptized in Fear');
+  await firstSong.click();
+
+  await expect(
+    page.getByRole('heading', { name: '공연 전에 알면 좋은 한 문장' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '무대에서 볼 것' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '떼창 포인트' }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: '출처' })).toBeVisible();
+});
+
+test('keeps expected songs ordered and keyboard-operable without media controls', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+
+  const explorer = page.locator('.expected-setlist');
+  const firstSong = explorer.locator('summary').first();
+  const secondSong = explorer.locator('summary').nth(1);
+
+  await expect(firstSong).toBeVisible();
+  await expect(secondSong).toBeVisible();
+  await expect(firstSong).toHaveAccessibleName('01 Baptized in Fear');
+  await expect(secondSong).toHaveAccessibleName('02 Open Hearts');
+  await expect(explorer.locator('details')).toHaveCount(38);
+  await expect(explorer.locator('details').first()).not.toHaveAttribute(
+    'open',
+    '',
+  );
+  await expect(explorer.getByText('공식 영상 불러오기')).toHaveCount(0);
+
+  await firstSong.focus();
+  await page.keyboard.press('Space');
+  await expect(explorer.locator('details').first()).toHaveAttribute('open', '');
+  await secondSong.focus();
+  await page.keyboard.press('Enter');
+  await expect(explorer.locator('details').nth(1)).toHaveAttribute('open', '');
+});
+
+test('keeps the ordered prediction and trust label usable without JavaScript', async ({
+  browser,
+}) => {
+  const context = await browser.newContext({ javaScriptEnabled: false });
+  const page = await context.newPage();
+
+  await page.goto('http://127.0.0.1:4321/setlist/');
+
+  const explorer = page.locator('.expected-setlist');
+  await expect(explorer.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(explorer.locator('summary').first()).toHaveText(
+    '01 Baptized in Fear',
+  );
+  await expect(explorer.locator('summary').nth(37)).toHaveText(
+    '38 Moth to a Flame',
+  );
+  expect(
+    await explorer
+      .locator('details')
+      .evaluateAll((items) =>
+        items.every((item) => !item.hasAttribute('open')),
+      ),
+  ).toBe(true);
+
+  await context.close();
+});
+
 test('links each Goyang shortcut to its stable guide anchor', async ({
   page,
 }) => {
