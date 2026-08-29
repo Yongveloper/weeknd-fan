@@ -1,0 +1,31 @@
+{
+  "title": "The Weeknd: After Hours Til Dawn Tour — Goyang",
+  "summary": "2026년 10월 7–8일 고양종합운동장 주경기장에서 열리는 내한 공연",
+  "status": "official",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "live-nation-goyang",
+    "nol-notice",
+    "hyundai-card-announcement",
+    "the-weeknd-tour"
+  ],
+  "relatedAlbums": ["After Hours", "Dawn FM", "Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "none",
+  "venue": "고양종합운동장 주경기장",
+  "ageRestriction": "만 19세 이상",
+  "opener": { "name": "Creepy Nuts" },
+  "shows": [
+    {
+      "dateLabel": "2026.10.07 WED",
+      "openerStartsAt": "2026-10-07T18:45:00+09:00",
+      "startsAt": "2026-10-07T19:45:00+09:00"
+    },
+    {
+      "dateLabel": "2026.10.08 THU",
+      "openerStartsAt": "2026-10-08T18:45:00+09:00",
+      "startsAt": "2026-10-08T19:45:00+09:00"
+    }
+  ],
+  "archivePublished": false
+}
