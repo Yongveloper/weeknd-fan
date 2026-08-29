@@ -110,7 +110,7 @@ body {
 }
 
 @supports (animation-timeline: scroll()) {
-  body {
+  body[data-dawn-sky] {
     background: none;
   }
 
