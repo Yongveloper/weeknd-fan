@@ -33,7 +33,7 @@ test('keeps Discover summaries and sources readable without JavaScript', async (
 
   const disclosure = page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
   await expect(disclosure.getByText('1분 입문 펼쳐보기')).toBeVisible();
-  await disclosure.getByText('1분 입문 펼쳐보기').click();
+  await expect(disclosure).toHaveAttribute('open', '');
   await expect(
     disclosure.getByRole('link', { name: /Universal Music Canada/ }).first(),
   ).toBeVisible();
