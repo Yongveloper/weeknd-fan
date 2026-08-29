@@ -338,3 +338,52 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
   expect(metrics.introWeight).toBe('900');
   expect(metrics.introLineHeight).toBeGreaterThan(1);
 });
+
+test('turns the fixed sky from night to dawn as the home page scrolls', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const sky = page.locator('.dawn-sky');
+  await expect(sky).toHaveAttribute('aria-hidden', 'true');
+
+  const supportsScrollTimeline = await page.evaluate(() =>
+    CSS.supports('animation-timeline: scroll()'),
+  );
+  test.skip(!supportsScrollTimeline, 'static fallback browser');
+
+  const sample = () =>
+    page.evaluate(() => {
+      const element = document.querySelector('.dawn-sky')!;
+      return getComputedStyle(element).backgroundColor;
+    });
+  const top = await sample();
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
+  await page.waitForTimeout(200);
+  const bottom = await sample();
+
+  expect(top).not.toBe(bottom);
+  const [r, , b] = bottom.match(/\d+/g)!.map(Number);
+  expect(r!).toBeGreaterThan(b!);
+});
+
+test('keeps every home section transparent so the sky shows through', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const opaqueSections = await page.evaluate(
+    () =>
+      Array.from(document.querySelectorAll('main > section')).filter(
+        (section) => {
+          const { backgroundColor, backgroundImage } =
+            getComputedStyle(section);
+          return (
+            backgroundImage !== 'none' ||
+            !/rgba\(0, 0, 0, 0\)|transparent/.test(backgroundColor)
+          );
+        },
+      ).length,
+  );
+  expect(opaqueSections).toBe(0);
+});

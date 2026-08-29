@@ -100,7 +100,7 @@ if (!dayOne || !dayTwo) {
     min-height: min(76vh, 58rem);
     overflow: hidden;
     isolation: isolate;
-    background: var(--night);
+    background: transparent;
   }
 
   .home-hero__visual,
@@ -111,6 +111,8 @@ if (!dayOne || !dayTwo) {
 
   .home-hero__visual {
     z-index: -1;
+    background: var(--night);
+    mask-image: linear-gradient(180deg, #000 78%, transparent);
   }
 
   .home-hero__moon-art {

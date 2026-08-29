@@ -13,7 +13,10 @@ const previewEntries = entries.slice(0, previewCount);
 const remainingEntries = entries.slice(previewCount);
 ---
 
-<section class="setlist-preview" aria-labelledby="setlist-preview-title">
+<section
+  class="setlist-preview fold fold--reverse"
+  aria-labelledby="setlist-preview-title"
+>
   <div class="shell-content setlist-preview__inner">
     <div class="setlist-preview__heading">
       <p class="eyebrow">A PATTERN, NOT A PROMISE</p>
@@ -64,11 +67,6 @@ const remainingEntries = entries.slice(previewCount);
 <style>
   .setlist-preview {
     padding-block: var(--section-space);
-    background: linear-gradient(
-      115deg,
-      #0d173b,
-      color-mix(in srgb, var(--night) 82%, var(--blue))
-    );
   }
 
   .setlist-preview__inner {

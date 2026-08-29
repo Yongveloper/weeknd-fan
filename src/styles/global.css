@@ -9,47 +9,189 @@ html {
 }
 
 body {
+  position: relative;
   min-width: 20rem;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
-  background:
-    linear-gradient(
-      180deg,
-      var(--night) 0 27%,
-      #21090d 42%,
-      #101936 67%,
-      #402717 100%
-    ),
-    var(--night);
+  isolation: isolate;
+  background: linear-gradient(
+    180deg,
+    var(--night) 0 18%,
+    #1a080c 38%,
+    #0b1633 64%,
+    #2a1a10 100%
+  );
   color: var(--ivory);
   font-family: var(--font-body);
   font-optical-sizing: auto;
   line-height: 1.6;
 }
 
-body::before {
-  position: fixed;
-  z-index: -1;
-  inset: 0;
-  background:
-    linear-gradient(
-      90deg,
-      transparent 0 18%,
-      color-mix(in srgb, var(--red) 17%, transparent) 44%,
-      transparent 64%
-    ),
-    linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--amber) 10%, transparent),
-      transparent 27%
+/* 하늘 레이어: scroll-driven animation 지원 브라우저에서만 켠다 */
+.dawn-sky {
+  display: none;
+}
+
+@property --dawn-sky {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #050507;
+}
+@property --dawn-horizon-y {
+  syntax: '<length-percentage>';
+  inherits: true;
+  initial-value: 64%;
+}
+@property --dawn-horizon-color {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #d7d8dc;
+}
+@property --dawn-glow-red {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+@property --dawn-glow-blue {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@keyframes dawn-progress {
+  0% {
+    --dawn-sky: #050507;
+    --dawn-horizon-y: 64%;
+    --dawn-horizon-color: #d7d8dc;
+    --dawn-glow-red: 0;
+    --dawn-glow-blue: 0;
+  }
+  30% {
+    --dawn-sky: #1a080c;
+    --dawn-horizon-y: 60%;
+    --dawn-horizon-color: #a61f27;
+    --dawn-glow-red: 1;
+    --dawn-glow-blue: 0;
+  }
+  62% {
+    --dawn-sky: #0b1633;
+    --dawn-horizon-y: 52%;
+    --dawn-horizon-color: #2f63d8;
+    --dawn-glow-red: 0.25;
+    --dawn-glow-blue: 1;
+  }
+  100% {
+    --dawn-sky: #2a1a10;
+    --dawn-horizon-y: 40%;
+    --dawn-horizon-color: #e6a359;
+    --dawn-glow-red: 0;
+    --dawn-glow-blue: 0.2;
+  }
+}
+
+@keyframes dawn-progress-reduced {
+  0% {
+    --dawn-sky: #050507;
+    --dawn-horizon-color: #d7d8dc;
+  }
+  30% {
+    --dawn-sky: #1a080c;
+    --dawn-horizon-color: #a61f27;
+  }
+  62% {
+    --dawn-sky: #0b1633;
+    --dawn-horizon-color: #2f63d8;
+  }
+  100% {
+    --dawn-sky: #2a1a10;
+    --dawn-horizon-color: #e6a359;
+  }
+}
+
+@supports (animation-timeline: scroll()) {
+  body {
+    background: none;
+  }
+
+  .dawn-sky {
+    position: fixed;
+    z-index: -1;
+    inset: 0;
+    display: block;
+    background-color: var(--dawn-sky);
+    background-image: linear-gradient(
+      180deg,
+      transparent calc(var(--dawn-horizon-y) - 1px),
+      color-mix(in srgb, var(--dawn-horizon-color) 60%, transparent)
+        var(--dawn-horizon-y),
+      color-mix(in srgb, var(--dawn-horizon-color) 22%, transparent)
+        calc(var(--dawn-horizon-y) + 2px),
+      transparent calc(var(--dawn-horizon-y) + 16vh)
     );
-  content: '';
-  pointer-events: none;
+    animation: dawn-progress linear both;
+    animation-timeline: scroll(root block);
+    pointer-events: none;
+  }
+
+  .dawn-sky::before,
+  .dawn-sky::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+  }
+
+  .dawn-sky::before {
+    background: radial-gradient(
+      ellipse 70% 55% at 18% 30%,
+      color-mix(in srgb, var(--red) 34%, transparent),
+      transparent 70%
+    );
+    opacity: var(--dawn-glow-red);
+  }
+
+  .dawn-sky::after {
+    background: linear-gradient(
+      112deg,
+      transparent 42%,
+      color-mix(in srgb, var(--blue) 30%, transparent) 58%,
+      transparent 74%
+    );
+    opacity: var(--dawn-glow-blue);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dawn-sky {
+      animation-name: dawn-progress-reduced;
+    }
+  }
 }
 
 main {
   min-height: 60vh;
+}
+
+/* 팜플렛 접힘 면: 섹션 경계를 수평선 대신 대각선 빛 면으로 */
+.fold {
+  position: relative;
+}
+
+.fold::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: clamp(3rem, 8vw, 7rem);
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--ivory) 5%, transparent),
+    transparent
+  );
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 32%);
+  content: '';
+  pointer-events: none;
+}
+
+.fold--reverse::before {
+  clip-path: polygon(0 0, 100% 0, 100% 32%, 0 100%);
 }
 
 h1,
