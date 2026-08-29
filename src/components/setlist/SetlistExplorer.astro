@@ -92,6 +92,7 @@ const editorial = getSetlistEditorialMetadata(entries);
                 <span>
                   {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
                 </span>
+                {/* Visual density hint only — album is announced in the expanded metadata below. */}
                 <span class="expected-setlist__album-tag" aria-hidden="true">
                   {entry.data.album}
                 </span>
@@ -216,7 +217,7 @@ const editorial = getSetlistEditorialMetadata(entries);
   }
 
   summary::after {
-    content: attr(data-affordance);
+    content: attr(data-affordance) / '';
     color: var(--amber);
     font-family: var(--font-display);
     font-size: 1.4em;
@@ -229,11 +230,18 @@ const editorial = getSetlistEditorialMetadata(entries);
   }
 
   .expected-setlist__album-tag {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    overflow: hidden;
+    max-width: 40%;
     color: var(--mist);
     font-size: 0.72rem;
     font-weight: 800;
     letter-spacing: 0.16em;
+    text-align: end;
+    text-overflow: ellipsis;
     text-transform: lowercase;
+    white-space: nowrap;
   }
 
   .expected-setlist__detail {
