@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
+  auditAlbums,
   auditCoreContent,
   auditPublishedContent,
   auditSetlistRecords,
@@ -704,5 +705,82 @@ describe('content trust contract', () => {
       { id: 'two', code: 'setlist-must-be-expected' },
       { id: 'two', code: 'setlist-observations-below-3' },
     ]);
+  });
+});
+
+describe('album cover contract', () => {
+  const now = new Date('2026-10-01T00:00:00+09:00');
+
+  it('flags foreign hosts, stale or future fetches, and unregistered Spotify links', () => {
+    const issues = auditAlbums({
+      now,
+      officialSourceUrls: ['https://open.spotify.com/album/ok'],
+      albums: [
+        {
+          id: 'foreign',
+          spotifyUrl: 'https://open.spotify.com/album/ok',
+          coverUrl: 'https://example.com/cover.jpg',
+          coverFetchedAt: new Date('2026-09-01T00:00:00+09:00'),
+        },
+        {
+          id: 'stale',
+          spotifyUrl: 'https://open.spotify.com/album/ok',
+          coverUrl: 'https://image-cdn-ak.spotifycdn.com/image/abc',
+          coverFetchedAt: new Date('2026-06-01T00:00:00+09:00'),
+        },
+        {
+          id: 'future',
+          spotifyUrl: 'https://open.spotify.com/album/ok',
+          coverUrl: 'https://i.scdn.co/image/abc',
+          coverFetchedAt: new Date('2026-10-02T00:00:00+09:00'),
+        },
+        {
+          id: 'unregistered',
+          spotifyUrl: 'https://open.spotify.com/album/missing',
+          coverUrl: 'https://image-cdn-fa.spotifycdn.com/image/abc',
+          coverFetchedAt: new Date('2026-09-01T00:00:00+09:00'),
+        },
+      ],
+    });
+
+    expect(issues).toEqual([
+      { id: 'foreign', code: 'album-cover-host-invalid' },
+      { id: 'stale', code: 'album-cover-stale' },
+      { id: 'future', code: 'album-cover-fetched-in-future' },
+      { id: 'unregistered', code: 'album-spotify-source-missing' },
+    ]);
+  });
+
+  it('audits the committed album data against the committed sources', async () => {
+    const dataDirectory = join(process.cwd(), 'src/data');
+    const readJsonDirectory = async (directory: string) =>
+      Promise.all(
+        (await readdir(join(dataDirectory, directory)))
+          .filter((file) => file.endsWith('.json'))
+          .map(async (file) => ({
+            id: file.replace(/\.json$/, ''),
+            data: JSON.parse(
+              await readFile(join(dataDirectory, directory, file), 'utf8'),
+            ),
+          })),
+      );
+    const albums = await readJsonDirectory('albums');
+    const sources = await readJsonDirectory('sources');
+
+    expect(albums).toHaveLength(10);
+    expect(
+      auditAlbums({
+        now: new Date('2026-08-29T00:00:00Z'),
+        albums: albums.map(({ id, data }) => ({
+          id,
+          spotifyUrl: data.spotifyUrl,
+          coverUrl: data.cover.url,
+          coverFetchedAt: parseSeoulDate(data.cover.fetchedAt),
+        })),
+        officialSourceUrls: sources
+          .filter(({ data }) => data.kind === 'official')
+          .map(({ data }) => data.url),
+      }),
+    ).toEqual([]);
   });
 });

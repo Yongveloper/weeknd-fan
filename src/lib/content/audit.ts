@@ -293,3 +293,40 @@ export function auditPublishedContent(
 
   return issues;
 }
+
+type AlbumAuditRecord = {
+  id: string;
+  spotifyUrl: string;
+  coverUrl: string;
+  coverFetchedAt: Date;
+};
+
+const COVER_HOST =
+  /^https:\/\/(image-cdn-[a-z]+\.spotifycdn\.com|i\.scdn\.co)\//;
+const COVER_STALE_AFTER_MS = 90 * 24 * 60 * 60 * 1000;
+
+export function auditAlbums(input: {
+  now: Date;
+  albums: AlbumAuditRecord[];
+  officialSourceUrls: string[];
+}): AuditIssue[] {
+  const issues: AuditIssue[] = [];
+  const registered = new Set(input.officialSourceUrls);
+
+  for (const album of input.albums) {
+    if (!COVER_HOST.test(album.coverUrl)) {
+      issues.push({ id: album.id, code: 'album-cover-host-invalid' });
+    }
+    const fetchedAt = album.coverFetchedAt.getTime();
+    if (Number.isNaN(fetchedAt) || fetchedAt > input.now.getTime()) {
+      issues.push({ id: album.id, code: 'album-cover-fetched-in-future' });
+    } else if (input.now.getTime() - fetchedAt > COVER_STALE_AFTER_MS) {
+      issues.push({ id: album.id, code: 'album-cover-stale' });
+    }
+    if (!registered.has(album.spotifyUrl)) {
+      issues.push({ id: album.id, code: 'album-spotify-source-missing' });
+    }
+  }
+
+  return issues;
+}
