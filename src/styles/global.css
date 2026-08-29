@@ -58,12 +58,18 @@ body {
   inherits: true;
   initial-value: 0;
 }
+@property --dawn-horizon-alpha {
+  syntax: '<percentage>';
+  inherits: true;
+  initial-value: 35%;
+}
 
 @keyframes dawn-progress {
   0% {
     --dawn-sky: #050507;
     --dawn-horizon-y: 64%;
     --dawn-horizon-color: #d7d8dc;
+    --dawn-horizon-alpha: 35%;
     --dawn-glow-red: 0;
     --dawn-glow-blue: 0;
   }
@@ -71,6 +77,7 @@ body {
     --dawn-sky: #1a080c;
     --dawn-horizon-y: 60%;
     --dawn-horizon-color: #a61f27;
+    --dawn-horizon-alpha: 35%;
     --dawn-glow-red: 1;
     --dawn-glow-blue: 0;
   }
@@ -78,6 +85,7 @@ body {
     --dawn-sky: #0b1633;
     --dawn-horizon-y: 52%;
     --dawn-horizon-color: #2f63d8;
+    --dawn-horizon-alpha: 35%;
     --dawn-glow-red: 0.25;
     --dawn-glow-blue: 1;
   }
@@ -85,6 +93,7 @@ body {
     --dawn-sky: #2a1a10;
     --dawn-horizon-y: 40%;
     --dawn-horizon-color: #e6a359;
+    --dawn-horizon-alpha: 0%;
     --dawn-glow-red: 0;
     --dawn-glow-blue: 0.2;
   }
@@ -94,18 +103,22 @@ body {
   0% {
     --dawn-sky: #050507;
     --dawn-horizon-color: #d7d8dc;
+    --dawn-horizon-alpha: 35%;
   }
   30% {
     --dawn-sky: #1a080c;
     --dawn-horizon-color: #a61f27;
+    --dawn-horizon-alpha: 35%;
   }
   62% {
     --dawn-sky: #0b1633;
     --dawn-horizon-color: #2f63d8;
+    --dawn-horizon-alpha: 35%;
   }
   100% {
     --dawn-sky: #2a1a10;
     --dawn-horizon-color: #e6a359;
+    --dawn-horizon-alpha: 0%;
   }
 }
 
@@ -123,9 +136,17 @@ body {
     background-image: linear-gradient(
       180deg,
       transparent calc(var(--dawn-horizon-y) - 1vh),
-      color-mix(in srgb, var(--dawn-horizon-color) 35%, transparent)
+      color-mix(
+          in srgb,
+          var(--dawn-horizon-color) var(--dawn-horizon-alpha),
+          transparent
+        )
         var(--dawn-horizon-y),
-      color-mix(in srgb, var(--dawn-horizon-color) 10%, transparent)
+      color-mix(
+          in srgb,
+          var(--dawn-horizon-color) calc(var(--dawn-horizon-alpha) / 3.5),
+          transparent
+        )
         calc(var(--dawn-horizon-y) + 2px),
       transparent calc(var(--dawn-horizon-y) + 16vh)
     );
