@@ -1,7 +1,7 @@
 ---
 title: 귀가 확인
 summary: 공연 종료 시각은 연장될 수 있으니 귀가 경로를 따로 준비하세요.
-status: unpublished
+status: practical
 lastVerifiedAt: 2026-08-29
 sources:
   - goyang-bis

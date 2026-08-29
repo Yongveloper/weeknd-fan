@@ -44,3 +44,8 @@
 ## Limitations
 
 - Transit schedules and event operations remain volatile. Users must recheck live services and organizer notices immediately before travel.
+
+## Fix round 1
+
+- Added the global `practical` trust status (`실용 안내`) to the typed contract and content schema. Transport, return, and packing now use it; confirmed core facts remain `공식 확정`, while operation-dependent arrival and pending items remain `미공개 · 확인 필요`.
+- Added RED/GREEN browser coverage for all three displayed labels and for transport, packing, and return headings settling fully inside both desktop and mobile viewports after fragment navigation.

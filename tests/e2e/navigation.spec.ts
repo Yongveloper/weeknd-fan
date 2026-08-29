@@ -1,5 +1,28 @@
 import { expect, test } from '@playwright/test';
 
+async function expectAnchorHeadingInViewport(
+  page: import('@playwright/test').Page,
+  heading: string,
+) {
+  await expect
+    .poll(
+      async () => {
+        const box = await page
+          .getByRole('heading', { name: heading })
+          .boundingBox();
+        const viewport = page.viewportSize();
+        return Boolean(
+          box &&
+          viewport &&
+          box.y >= 0 &&
+          box.y + box.height <= viewport.height,
+        );
+      },
+      { message: `${heading} heading should settle inside the viewport` },
+    )
+    .toBe(true);
+}
+
 test('serves the Korean fan-guide shell', async ({ page }) => {
   await page.goto('/');
   await expect(page).toHaveTitle(/The Weeknd 고양 팬 가이드/);
@@ -213,6 +236,8 @@ test('opens transport and return information within two actions', async ({
   await expect(
     page.locator('#transport .guide-section__body').getByText('대화역'),
   ).toBeVisible();
+  await expect(page.locator('#transport .status')).toHaveText('실용 안내');
+  await expect(page.locator('#official .status')).toHaveText('공식 확정');
   await expect(page.getByText('공연 직전 막차 재확인')).toBeVisible();
 });
 
@@ -230,6 +255,7 @@ test('keeps every home guide shortcut on a stable visible anchor', async ({
     await expect(page).toHaveURL(new RegExp(`/goyang/#${id}$`));
     await expect(page.locator(`#${id}`)).toBeVisible();
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    await expectAnchorHeadingInViewport(page, heading);
     await page.goto('/');
   }
 });

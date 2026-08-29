@@ -1,7 +1,7 @@
 ---
 title: 가는 길
 summary: 출발지별로 대화역, GTX-A 환승, 버스 검색을 비교해 보세요.
-status: official
+status: practical
 lastVerifiedAt: 2026-08-29
 sources:
   - goyang-sports-facilities

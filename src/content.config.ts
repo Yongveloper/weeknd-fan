@@ -4,6 +4,7 @@ import { z } from 'astro/zod';
 
 const status = z.enum([
   'official',
+  'practical',
   'post-show',
   'pattern',
   'expected',
