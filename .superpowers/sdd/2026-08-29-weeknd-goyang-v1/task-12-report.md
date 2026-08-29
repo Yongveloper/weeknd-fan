@@ -16,9 +16,15 @@
 
 - Method: built-in ImageGen generated a text-free background, then deterministic Node/Sharp SVG typography composited the required exact text. No Python image editing was used.
 - Source: `/Users/yong/.codex/generated_images/01a04a6d-7425-7000-af43-5aa2d6c693db/exec-314d8f78-02af-4901-85f0-22e279f35588.png`.
-- Final: `public/og/default.jpg`, JPEG, 1200×630, 29,282 bytes.
+- Original final: `public/og/default.jpg`, JPEG, 1200×630, 29,282 bytes; superseded by the fix-round composition below.
 - Prompt: “Original DAWNFOLD abstract cinematic night-to-dawn scene: deep Night Black field, a large soft eclipse-like moon glow slightly right of center, restrained deep-red horizon haze in the lower third, a narrow cobalt-blue light seam, and a subtle dawn-amber edge along the horizon. Leave the left third and upper-left quadrant visibly uncluttered for later typography. Background only; no typography, people, artist likeness, logos, XO mark, official tour lockup, album artwork, sponsor marks, checkerboard, watermark, frame, border, or recognizable promotional artwork.”
 - Inspection: viewed the generated 1731×909 source and final JPEG at original resolution. The final contains readable required text and no prohibited marks, portrait, checkerboard, or official-art imitation.
+
+## Fix round 1
+
+- `PUBLIC_SITE_URL` remains optional for local builds, but every nonempty malformed or non-HTTP(S) value now stops configuration with `PUBLIC_SITE_URL must be an absolute HTTP(S) URL`; invalid values are no longer silently treated as absent.
+- Regression coverage proves missing, valid HTTPS, malformed, and FTP values. Fresh build invocations verified all four paths: missing omits sitemap; valid HTTPS emits it; malformed and FTP fail with the clear error.
+- Recomposed `public/og/default.jpg` from the same ImageGen background with deterministic Sharp/SVG typography. The exact visible title is now `THE WEEKND · GOYANG` on one line. Final output: 1200×630 JPEG, 26,366 bytes, SHA-256 `7a096049089ab9a347940f6ae595e1d2638134775749d559fd4544eb745099d6`; original-resolution inspection passed.
 
 ## Build and metadata evidence
 
@@ -41,4 +47,6 @@
 
 ## Commit
 
-- Pending final commit: `feat(seo): add event metadata and OG preview`.
+- Initial Task 12: `83b60d3 feat(seo): add event metadata and OG preview`.
+- Fix round 1: `b78621f fix(seo): reject invalid public origins`.
+- Status immediately after the fix commit: clean worktree before this report-evidence update.
