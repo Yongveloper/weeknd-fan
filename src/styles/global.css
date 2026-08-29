@@ -122,10 +122,10 @@ body {
     background-color: var(--dawn-sky);
     background-image: linear-gradient(
       180deg,
-      transparent calc(var(--dawn-horizon-y) - 1px),
-      color-mix(in srgb, var(--dawn-horizon-color) 60%, transparent)
+      transparent calc(var(--dawn-horizon-y) - 1vh),
+      color-mix(in srgb, var(--dawn-horizon-color) 35%, transparent)
         var(--dawn-horizon-y),
-      color-mix(in srgb, var(--dawn-horizon-color) 22%, transparent)
+      color-mix(in srgb, var(--dawn-horizon-color) 10%, transparent)
         calc(var(--dawn-horizon-y) + 2px),
       transparent calc(var(--dawn-horizon-y) + 16vh)
     );
@@ -182,8 +182,8 @@ main {
   height: clamp(3rem, 8vw, 7rem);
   background: linear-gradient(
     180deg,
-    color-mix(in srgb, var(--ivory) 5%, transparent),
-    transparent
+    transparent,
+    color-mix(in srgb, var(--ivory) 5%, transparent)
   );
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 32%);
   content: '';

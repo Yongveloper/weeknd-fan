@@ -358,14 +358,21 @@ test('turns the fixed sky from night to dawn as the home page scrolls', async ({
     });
   const top = await sample();
   await page.evaluate(() =>
-    window.scrollTo(0, document.documentElement.scrollHeight),
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: 'instant',
+    }),
   );
-  await page.waitForTimeout(200);
-  const bottom = await sample();
 
+  await expect
+    .poll(async () => {
+      const [r = 0, , b = 0] = (await sample()).match(/\d+/g)!.map(Number);
+      return r > b;
+    })
+    .toBe(true);
+
+  const bottom = await sample();
   expect(top).not.toBe(bottom);
-  const [r, , b] = bottom.match(/\d+/g)!.map(Number);
-  expect(r!).toBeGreaterThan(b!);
 });
 
 test('keeps every home section transparent so the sky shows through', async ({
