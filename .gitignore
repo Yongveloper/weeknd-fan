@@ -9,3 +9,6 @@ node_modules/
 dist/
 .next/
 coverage/
+.astro/
+playwright-report/
+test-results/
