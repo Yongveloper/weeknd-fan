@@ -1,0 +1,123 @@
+<figure class="venue-map" aria-labelledby="venue-map-caption">
+  <svg
+    id="venue-map"
+    viewBox="0 0 720 300"
+    role="img"
+    aria-labelledby="venue-map-title venue-map-desc"
+  >
+    <title id="venue-map-title">대화역과 고양종합운동장 위치 관계 개략도</title>
+    <desc id="venue-map-desc"
+      >실제 입장 게이트가 아닌 이동 방향 참고용 개략도</desc
+    >
+    <path class="route" d="M164 155 C278 75 403 74 540 144"></path>
+    <path class="arrow" d="M525 132 L548 145 L521 157"></path>
+    <g class="station"
+      ><rect x="62" y="110" width="122" height="90" rx="4"></rect><path
+        d="M83 132 H163 M83 152 H163 M83 172 H133"></path><text
+        x="123"
+        y="236"
+        text-anchor="middle">대화역</text
+      ></g
+    >
+    <g class="stadium"
+      ><path d="M520 119 C564 86 647 86 686 119 V185 C647 218 564 218 520 185 Z"
+      ></path><path
+        d="M547 133 C580 114 628 114 660 133 V171 C628 190 580 190 547 171 Z"
+      ></path><text x="603" y="236" text-anchor="middle">고양종합운동장</text
+      ></g
+    >
+    <text class="direction" x="358" y="72" text-anchor="middle"
+      >도보 이동 방향 참고</text
+    >
+    <text class="gate-note" x="603" y="276" text-anchor="middle"
+      >입장 게이트 추후 공식 확인</text
+    >
+  </svg>
+  <figcaption id="venue-map-caption">
+    실제 지도가 아닌 관계 개략도입니다. 입장 게이트를 표시하지 않습니다.
+  </figcaption>
+  <p class="venue-map__links">
+    <a
+      href="https://map.kakao.com/?q=%EA%B3%A0%EC%96%91%EC%A2%85%ED%95%A9%EC%9A%B4%EB%8F%99%EC%9E%A5"
+      target="_blank"
+      rel="noreferrer">공개 지도에서 위치 확인</a
+    ><a href="https://bis.goyang.go.kr/m" target="_blank" rel="noreferrer"
+      >고양시 BIS에서 버스 확인</a
+    >
+  </p>
+</figure>
+
+<style>
+  .venue-map {
+    display: grid;
+    gap: 0.8rem;
+    max-width: 56rem;
+    margin: 0;
+    padding: clamp(1rem, 3vw, 2rem);
+    border-top: 1px solid color-mix(in srgb, var(--amber) 58%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--amber) 36%, transparent);
+    background: linear-gradient(
+      130deg,
+      color-mix(in srgb, var(--amber) 12%, transparent),
+      transparent 55%
+    );
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .route,
+  .arrow {
+    fill: none;
+    stroke: var(--amber);
+    stroke-width: 4;
+  }
+  .station rect {
+    fill: color-mix(in srgb, var(--blue) 32%, var(--night));
+    stroke: var(--mist);
+    stroke-width: 2;
+  }
+  .station path,
+  .stadium path:first-child {
+    fill: none;
+    stroke: var(--ivory);
+    stroke-width: 3;
+  }
+  .stadium path:last-child {
+    fill: color-mix(in srgb, var(--red) 38%, var(--night));
+    stroke: var(--amber);
+    stroke-width: 2;
+  }
+  text {
+    fill: var(--ivory);
+    font-family: var(--font-body);
+    font-size: 18px;
+    font-weight: 800;
+  }
+  .direction {
+    fill: var(--amber);
+    font-size: 15px;
+  }
+  .gate-note {
+    fill: var(--mist);
+    font-size: 14px;
+  }
+  figcaption {
+    color: var(--mist);
+    font-size: 0.9rem;
+  }
+  .venue-map__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem 1.25rem;
+    margin: 0;
+  }
+  .venue-map__links a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--ivory);
+    font-weight: 800;
+  }
+</style>

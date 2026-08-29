@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import GuideSection from '../components/guide/GuideSection.astro';
+import VenueMap from '../components/guide/VenueMap.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getGuideContent } from '../lib/content/queries';
+
+const [guides, sources] = await Promise.all([
+  getGuideContent(),
+  getCollection('sources'),
+]);
+---
+
+<BaseLayout
+  title="고양 가이드 | The Weeknd 고양 팬 가이드"
+  description="The Weeknd 2026 고양 공연을 위한 당일 이동·준비·귀가 안내와 공식 발표 대기 항목"
+>
+  <section
+    class="guide-page shell-content"
+    aria-labelledby="goyang-guide-title"
+  >
+    <header>
+      <p class="eyebrow">DAWNFOLD / GOYANG 2026</p><h1 id="goyang-guide-title">
+        GOYANG<br />DAY-OF GUIDE
+      </h1><p>
+        확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 둔 비공식 팬
+        가이드입니다.
+      </p>
+    </header>
+    {
+      guides.map((entry) => (
+        <>
+          <GuideSection entry={entry} sources={sources} />
+          {entry.data.section === 'transport' && <VenueMap />}
+        </>
+      ))
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .guide-page {
+    display: grid;
+    gap: clamp(4rem, 11vw, 9rem);
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+  header {
+    display: grid;
+    gap: 1rem;
+    max-width: 58rem;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(4.8rem, 15vw, 11rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.74;
+  }
+  header > p:last-child {
+    max-width: 44rem;
+    color: var(--mist);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+</style>

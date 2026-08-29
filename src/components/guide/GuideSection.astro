@@ -1,0 +1,149 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SourceList from '../content/SourceList.astro';
+import StatusBadge from '../content/StatusBadge.astro';
+import type { SourceRecord } from '../../lib/content/contracts';
+import { resolveSourceReferences } from '../../lib/content/queries';
+
+interface Props {
+  entry: CollectionEntry<'guides'>;
+  sources: SourceRecord[];
+}
+
+const { entry, sources } = Astro.props;
+const { Content } = await render(entry);
+const entrySources = resolveSourceReferences(entry.data.sources, sources);
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .format(date)
+    .replace(/\. /g, '.')
+    .replace(/\.$/, '');
+const pendingItems = [
+  '입장 게이트',
+  '반입 금지 물품',
+  '셔틀·교통 통제',
+  '접근성 지원',
+  '스탠딩·Early Entry 운영',
+];
+---
+
+<section
+  id={entry.data.section}
+  class="guide-section"
+  aria-labelledby={`${entry.data.section}-title`}
+>
+  <div class="guide-section__heading">
+    <p class="eyebrow">GOYANG DAY-OF GUIDE</p>
+    <h2 id={`${entry.data.section}-title`}>{entry.data.title}</h2>
+    <p>{entry.data.summary}</p>
+  </div>
+
+  {
+    entry.data.section === 'pending' ? (
+      <ul class="pending-list" aria-label="공식 발표 대기 항목">
+        {pendingItems.map((item) => (
+          <li>
+            <strong>{item}</strong>
+            <StatusBadge status="unpublished" />
+            <span>마지막 확인 {formatDate(entry.data.lastVerifiedAt)}</span>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="guide-section__meta">
+        <StatusBadge status={entry.data.status} />
+        <span>마지막 확인 {formatDate(entry.data.lastVerifiedAt)}</span>
+      </p>
+    )
+  }
+
+  <div class="guide-section__body"><Content /></div>
+  <SourceList sources={entrySources} />
+</section>
+
+<style>
+  .guide-section {
+    display: grid;
+    gap: 1.25rem;
+    scroll-margin-top: 1rem;
+  }
+  .guide-section__heading {
+    display: grid;
+    gap: 0.7rem;
+    max-width: 55rem;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(3.4rem, 9vw, 7.3rem);
+    font-weight: 400;
+    letter-spacing: 0.025em;
+    line-height: 0.82;
+  }
+  .guide-section__heading > p:last-child,
+  .guide-section__body {
+    color: var(--mist);
+  }
+  .guide-section__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    align-items: center;
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .guide-section__body {
+    display: grid;
+    gap: 1rem;
+    max-width: 46rem;
+    font-size: clamp(1rem, 2vw, 1.15rem);
+  }
+  .guide-section__body :global(p),
+  .guide-section__body :global(ul) {
+    margin: 0;
+  }
+  .guide-section__body :global(ul) {
+    display: grid;
+    gap: 0.45rem;
+    padding-left: 1.25rem;
+  }
+  .guide-section__body :global(h2) {
+    margin-top: 0.75rem;
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  .pending-list {
+    display: grid;
+    max-width: 52rem;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    list-style: none;
+  }
+  .pending-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem 0.9rem;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+  .pending-list strong {
+    min-width: min(100%, 13rem);
+  }
+  .pending-list span:last-child {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+</style>

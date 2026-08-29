@@ -202,6 +202,59 @@ test('links each Goyang shortcut to its stable guide anchor', async ({
   ).toHaveAttribute('href', '/goyang/#return');
 });
 
+test('opens transport and return information within two actions', async ({
+  page,
+}) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: '가는 길' }).click();
+
+  await expect(page).toHaveURL(/\/goyang\/#transport$/);
+  await expect(page.getByRole('heading', { name: '가는 길' })).toBeVisible();
+  await expect(
+    page.locator('#transport .guide-section__body').getByText('대화역'),
+  ).toBeVisible();
+  await expect(page.getByText('공연 직전 막차 재확인')).toBeVisible();
+});
+
+test('keeps every home guide shortcut on a stable visible anchor', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  for (const [name, id, heading] of [
+    ['가는 길', 'transport', '가는 길'],
+    ['준비물', 'packing', '준비물'],
+    ['귀가 확인', 'return', '귀가 확인'],
+  ] as const) {
+    await page.getByRole('link', { name }).click();
+    await expect(page).toHaveURL(new RegExp(`/goyang/#${id}$`));
+    await expect(page.locator(`#${id}`)).toBeVisible();
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    await page.goto('/');
+  }
+});
+
+test('renders exact unpublished operations and an accessible schematic map', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+
+  await expect(page.locator('#pending .status')).toHaveCount(5);
+  await expect(page.locator('#pending .status')).toHaveText([
+    '미공개 · 확인 필요',
+    '미공개 · 확인 필요',
+    '미공개 · 확인 필요',
+    '미공개 · 확인 필요',
+    '미공개 · 확인 필요',
+  ]);
+  await expect(page.locator('#venue-map title')).toHaveText(
+    '대화역과 고양종합운동장 위치 관계 개략도',
+  );
+  await expect(page.locator('#venue-map desc')).toHaveText(
+    '실제 입장 게이트가 아닌 이동 방향 참고용 개략도',
+  );
+});
+
 test('distinguishes the six studio albums from both trilogies', async ({
   page,
 }) => {
