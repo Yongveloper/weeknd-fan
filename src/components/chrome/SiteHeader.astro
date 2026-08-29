@@ -41,7 +41,7 @@ const navigation = [
 <style>
   .site-header {
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
-    background: color-mix(in srgb, var(--night) 86%, transparent);
+    background: color-mix(in srgb, var(--night) 70%, transparent);
     backdrop-filter: blur(16px);
   }
 
@@ -75,7 +75,12 @@ const navigation = [
 
   nav {
     overflow-x: auto;
-    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
   }
 
   .site-header__nav-list {
@@ -88,7 +93,12 @@ const navigation = [
     list-style: none;
   }
 
+  .site-header__nav-list li {
+    scroll-snap-align: start;
+  }
+
   .site-header__nav-list a {
+    position: relative;
     display: grid;
     place-items: center;
     min-inline-size: 44px;
@@ -103,14 +113,26 @@ const navigation = [
       background var(--motion-fast) var(--ease-cinematic);
   }
 
+  .site-header__nav-list a::after {
+    position: absolute;
+    inset: auto 0.65rem 0.4rem;
+    height: 2px;
+    background: var(--amber);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--motion-fast) var(--ease-cinematic);
+  }
+
   .site-header__nav-list a:hover,
   .site-header__nav-list a[aria-current='page'] {
-    background: linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--red) 40%, transparent),
-      color-mix(in srgb, var(--blue) 32%, transparent)
-    );
     color: var(--ivory);
+  }
+
+  .site-header__nav-list a:hover::after,
+  .site-header__nav-list a:focus-visible::after,
+  .site-header__nav-list a[aria-current='page']::after {
+    transform: scaleX(1);
   }
 
   @media (max-width: 44rem) {
@@ -121,7 +143,14 @@ const navigation = [
 
     nav {
       margin-inline: calc(var(--gutter) * -1);
-      padding-inline: var(--gutter);
+      padding-inline: var(--gutter) 3rem;
+      mask-image: linear-gradient(
+        90deg,
+        transparent,
+        #000 var(--gutter),
+        #000 calc(100% - 3rem),
+        transparent
+      );
     }
   }
 </style>

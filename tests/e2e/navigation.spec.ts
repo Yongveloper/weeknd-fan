@@ -381,3 +381,29 @@ test('shows Spotify-linked official covers for the six studio albums', async ({
     'no-referrer',
   );
 });
+
+test('hides the mobile menu scrollbar and keeps the last item reachable', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile-chromium', 'mobile only');
+  await page.goto('/');
+
+  const nav = page.getByRole('navigation', { name: '주요 메뉴' });
+  const metrics = await nav.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      overflow: element.scrollWidth > element.clientWidth,
+      scrollbarWidth: style.scrollbarWidth,
+      snap: style.scrollSnapType,
+    };
+  });
+  expect(metrics.overflow).toBe(true);
+  expect(metrics.scrollbarWidth).toBe('none');
+  expect(metrics.snap).toContain('x');
+
+  const last = nav.getByRole('link', { name: '출처·업데이트' });
+  await last.scrollIntoViewIfNeeded();
+  const box = await last.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+});

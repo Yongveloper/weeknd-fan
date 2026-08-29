@@ -189,6 +189,21 @@ const editorial = getSetlistEditorialMetadata(entries);
     padding: 0.2rem 0.2rem 1.5rem;
   }
 
+  details[open] > .expected-setlist__detail {
+    animation: detail-reveal 180ms var(--ease-cinematic) both;
+  }
+
+  @keyframes detail-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
   .expected-setlist__detail h3,
   .actual-setlist h3 {
     margin: 0.85rem 0 0;

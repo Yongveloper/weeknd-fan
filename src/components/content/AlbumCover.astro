@@ -84,4 +84,19 @@ const { title, era, spotifyUrl, cover } = album.data;
   .album-cover:focus-visible {
     outline-offset: 2px;
   }
+
+  @media (hover: hover) {
+    .album-cover {
+      transition:
+        transform 160ms var(--ease-cinematic),
+        box-shadow 160ms var(--ease-cinematic);
+    }
+
+    .album-cover:hover,
+    .album-cover:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px
+        color-mix(in srgb, var(--era-color) 70%, transparent);
+    }
+  }
 </style>
