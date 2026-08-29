@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
 import type { SourceRecord } from '../../lib/content/contracts';
+import { formatSeoulDate } from '../../lib/content/audit';
 import { resolveSourceReferences } from '../../lib/content/queries';
 
 interface Props {
@@ -13,15 +14,6 @@ interface Props {
 const { entry, sources } = Astro.props;
 const { Content } = await render(entry);
 const entrySources = resolveSourceReferences(entry.data.sources, sources);
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(date)
-    .replace(/\. /g, '.')
-    .replace(/\.$/, '');
 const pendingItems = [
   '입장 게이트',
   '반입 금지 물품',
@@ -49,14 +41,16 @@ const pendingItems = [
           <li>
             <strong>{item}</strong>
             <StatusBadge status="unpublished" />
-            <span>마지막 확인 {formatDate(entry.data.lastVerifiedAt)}</span>
+            <span>
+              마지막 확인 {formatSeoulDate(entry.data.lastVerifiedAt)}
+            </span>
           </li>
         ))}
       </ul>
     ) : (
       <p class="guide-section__meta">
         <StatusBadge status={entry.data.status} />
-        <span>마지막 확인 {formatDate(entry.data.lastVerifiedAt)}</span>
+        <span>마지막 확인 {formatSeoulDate(entry.data.lastVerifiedAt)}</span>
       </p>
     )
   }

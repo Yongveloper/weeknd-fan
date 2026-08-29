@@ -6,6 +6,7 @@ import {
   auditPublishedContent,
   auditSetlistRecords,
   parseSeoulDate,
+  formatSeoulDate,
 } from '../../src/lib/content/audit';
 import { STATUS_LABELS } from '../../src/lib/content/contracts';
 
@@ -143,6 +144,12 @@ describe('content trust contract', () => {
     ).toEqual([{ id: 'transport', code: 'volatile-content-stale' }]);
   });
 
+  it('formats date-only content using Seoul time in every process timezone', () => {
+    expect(formatSeoulDate(new Date('2026-08-29T00:00:00Z'))).toBe(
+      '2026.08.29',
+    );
+  });
+
   it('accepts both complete Goyang archive dates when publication is enabled', () => {
     const issues = auditPublishedContent({
       now: new Date('2026-10-09T00:00:00+09:00'),
@@ -192,120 +199,128 @@ describe('content trust contract', () => {
   });
 
   it('audits the current published collection data rather than an empty fixture', async () => {
-    const dataDirectory = join(process.cwd(), 'src/data');
-    const sourceDirectory = join(dataDirectory, 'sources');
-    const sourceFiles = await readdir(sourceDirectory);
-    const sourceKinds = new Map(
-      await Promise.all(
-        sourceFiles.map(async (file) => {
-          const source = JSON.parse(
-            await readFile(join(sourceDirectory, file), 'utf8'),
-          ) as { kind: string };
-          return [file.replace(/\.json$/, ''), source.kind] as const;
-        }),
-      ),
-    );
-    const readJsonDirectory = async (directory: string) =>
-      Promise.all(
-        (await readdir(join(dataDirectory, directory)))
-          .filter((file) => file.endsWith('.json'))
-          .map(async (file) => ({
-            id: `${directory}/${file.replace(/\.json$/, '')}`,
-            data: JSON.parse(
-              await readFile(join(dataDirectory, directory, file), 'utf8'),
-            ) as {
-              status: 'official' | 'expected' | 'post-show';
-              lastVerifiedAt: string;
-              sources: string[];
-              observedIn?: string[];
-              archivePublished?: boolean;
-              showDate?: string;
-              songs?: Array<{ order: number }>;
-            },
+    const auditCurrentData = async (now: Date = new Date()) => {
+      const dataDirectory = join(process.cwd(), 'src/data');
+      const sourceDirectory = join(dataDirectory, 'sources');
+      const sourceFiles = await readdir(sourceDirectory);
+      const sourceKinds = new Map(
+        await Promise.all(
+          sourceFiles.map(async (file) => {
+            const source = JSON.parse(
+              await readFile(join(sourceDirectory, file), 'utf8'),
+            ) as { kind: string };
+            return [file.replace(/\.json$/, ''), source.kind] as const;
+          }),
+        ),
+      );
+      const readJsonDirectory = async (directory: string) =>
+        Promise.all(
+          (await readdir(join(dataDirectory, directory)))
+            .filter((file) => file.endsWith('.json'))
+            .map(async (file) => ({
+              id: `${directory}/${file.replace(/\.json$/, '')}`,
+              data: JSON.parse(
+                await readFile(join(dataDirectory, directory, file), 'utf8'),
+              ) as {
+                status: 'official' | 'expected' | 'post-show';
+                lastVerifiedAt: string;
+                sources: string[];
+                observedIn?: string[];
+                archivePublished?: boolean;
+                showDate?: string;
+                songs?: Array<{ order: number }>;
+              },
+            })),
+        );
+      const readMarkdownDirectory = async (directory: string) =>
+        Promise.all(
+          (await readdir(join(dataDirectory, directory))).map(async (file) => {
+            const text = await readFile(
+              join(dataDirectory, directory, file),
+              'utf8',
+            );
+            const frontmatter = text.match(/^---\n([\s\S]*?)\n---/);
+            if (!frontmatter) throw new Error(`Missing frontmatter: ${file}`);
+            const metadata = frontmatter[1];
+            if (!metadata) throw new Error(`Empty frontmatter: ${file}`);
+            const status = metadata.match(/^status: (.+)$/m)?.[1];
+            const lastVerifiedAt = metadata.match(
+              /^lastVerifiedAt: (.+)$/m,
+            )?.[1];
+            const inlineSources = metadata.match(/^sources: \[(.*)\]$/m)?.[1];
+            const blockSources = metadata.match(
+              /^sources:\n((?: {2}- .+\n)+)/m,
+            )?.[1];
+            const sourceCount = inlineSources
+              ? inlineSources.split(',').filter(Boolean).length
+              : (blockSources?.match(/^ {2}- .+$/gm) ?? []).length;
+            if (!status || !lastVerifiedAt || sourceCount === 0) {
+              throw new Error(`Incomplete audit metadata: ${file}`);
+            }
+            return {
+              id: `${directory}/${file.replace(/\.md$/, '')}`,
+              data: {
+                status,
+                lastVerifiedAt,
+                sources: Array.from({ length: sourceCount }),
+              },
+            };
+          }),
+        );
+
+      const [concerts, setlist, discover, guides, showRecords] =
+        await Promise.all([
+          readJsonDirectory('concert'),
+          readJsonDirectory('setlist'),
+          readMarkdownDirectory('discover'),
+          readMarkdownDirectory('guides'),
+          readJsonDirectory('archive'),
+        ]);
+      const concert = concerts[0];
+      if (!concert) throw new Error('Missing concert audit record');
+      return auditPublishedContent({
+        now,
+        entries: [...concerts, ...setlist, ...discover, ...guides].map(
+          (entry) => ({
+            id: entry.id,
+            status: entry.data.status as Parameters<
+              typeof auditPublishedContent
+            >[0]['entries'][number]['status'],
+            lastVerifiedAt: parseSeoulDate(entry.data.lastVerifiedAt),
+            sourceCount: entry.data.sources.length,
+            volatile:
+              entry.id.startsWith('guides/') &&
+              entry.data.status === 'practical',
+          }),
+        ),
+        concert: {
+          primarySourceCount: concert.data.sources.filter(
+            (source) => sourceKinds.get(source) === 'official',
+          ).length,
+          archivePublished: concert.data.archivePublished ?? false,
+        },
+        setlist: {
+          status: 'expected',
+          records: setlist.map((entry) => ({
+            id: entry.id,
+            status: entry.data.status,
+            observedInCount: entry.data.observedIn?.length ?? 0,
           })),
-      );
-    const readMarkdownDirectory = async (directory: string) =>
-      Promise.all(
-        (await readdir(join(dataDirectory, directory))).map(async (file) => {
-          const text = await readFile(
-            join(dataDirectory, directory, file),
-            'utf8',
-          );
-          const frontmatter = text.match(/^---\n([\s\S]*?)\n---/);
-          if (!frontmatter) throw new Error(`Missing frontmatter: ${file}`);
-          const metadata = frontmatter[1];
-          if (!metadata) throw new Error(`Empty frontmatter: ${file}`);
-          const status = metadata.match(/^status: (.+)$/m)?.[1];
-          const lastVerifiedAt = metadata.match(/^lastVerifiedAt: (.+)$/m)?.[1];
-          const inlineSources = metadata.match(/^sources: \[(.*)\]$/m)?.[1];
-          const blockSources = metadata.match(
-            /^sources:\n((?: {2}- .+\n)+)/m,
-          )?.[1];
-          const sourceCount = inlineSources
-            ? inlineSources.split(',').filter(Boolean).length
-            : (blockSources?.match(/^ {2}- .+$/gm) ?? []).length;
-          if (!status || !lastVerifiedAt || sourceCount === 0) {
-            throw new Error(`Incomplete audit metadata: ${file}`);
-          }
-          return {
-            id: `${directory}/${file.replace(/\.md$/, '')}`,
-            data: {
-              status,
-              lastVerifiedAt,
-              sources: Array.from({ length: sourceCount }),
-            },
-          };
-        }),
-      );
-
-    const [concerts, setlist, discover, guides, showRecords] =
-      await Promise.all([
-        readJsonDirectory('concert'),
-        readJsonDirectory('setlist'),
-        readMarkdownDirectory('discover'),
-        readMarkdownDirectory('guides'),
-        readJsonDirectory('archive'),
-      ]);
-    const concert = concerts[0];
-    if (!concert) throw new Error('Missing concert audit record');
-    const issues = auditPublishedContent({
-      now: new Date('2026-08-29T12:00:00+09:00'),
-      entries: [...concerts, ...setlist, ...discover, ...guides].map(
-        (entry) => ({
-          id: entry.id,
-          status: entry.data.status as Parameters<
-            typeof auditPublishedContent
-          >[0]['entries'][number]['status'],
-          lastVerifiedAt: parseSeoulDate(entry.data.lastVerifiedAt),
-          sourceCount: entry.data.sources.length,
-          volatile:
-            entry.id.startsWith('guides/') && entry.data.status === 'practical',
-        }),
-      ),
-      concert: {
-        primarySourceCount: concert.data.sources.filter(
-          (source) => sourceKinds.get(source) === 'official',
-        ).length,
-        archivePublished: concert.data.archivePublished ?? false,
-      },
-      setlist: {
-        status: 'expected',
-        records: setlist.map((entry) => ({
-          id: entry.id,
-          status: entry.data.status,
-          observedInCount: entry.data.observedIn?.length ?? 0,
+        },
+        showRecords: showRecords.map((record) => ({
+          showDate: record.data.showDate ?? '',
+          status: record.data.status,
+          songCount: record.data.songs?.length ?? 0,
+          songOrders: record.data.songs?.map((song) => song.order) ?? [],
+          sourceCount: record.data.sources.length,
         })),
-      },
-      showRecords: showRecords.map((record) => ({
-        showDate: record.data.showDate ?? '',
-        status: record.data.status,
-        songCount: record.data.songs?.length ?? 0,
-        songOrders: record.data.songs?.map((song) => song.order) ?? [],
-        sourceCount: record.data.sources.length,
-      })),
-    });
+      });
+    };
 
-    expect(issues).toEqual([]);
+    expect(
+      await auditCurrentData(new Date('2026-08-29T12:00:00+09:00')),
+    ).toEqual([]);
+    expect(await auditCurrentData()).toEqual([]);
   });
 
   it('keeps expected content visibly non-official', () => {

@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { formatSeoulDate } from '../lib/content/audit';
 
 const sources = await getCollection('sources');
 const supportingSources = sources.filter(
@@ -28,16 +29,6 @@ const groups: Array<{
     kinds: ['crowd-sourced'],
   },
 ];
-
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(date)
-    .replace(/\. /g, '.')
-    .replace(/\.$/, '');
 
 const checkpoints = [
   ['Tokyo', '9월 19–20일 이후', '첫 아시아 구성 확인'],
@@ -85,7 +76,7 @@ const checkpoints = [
                       {source.data.name}
                     </a>
                     <span>
-                      마지막 확인 {formatDate(source.data.lastCheckedAt)}
+                      마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
                     </span>
                   </li>
                 ))}
@@ -109,7 +100,9 @@ const checkpoints = [
                 <a href={source.data.url} target="_blank" rel="noreferrer">
                   {source.data.name}
                 </a>
-                <span>마지막 확인 {formatDate(source.data.lastCheckedAt)}</span>
+                <span>
+                  마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+                </span>
               </li>
             ))
           }

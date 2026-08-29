@@ -49,3 +49,9 @@
 - Date-only metadata is parsed as Seoul midnight through `parseSeoulDate`; exact seven-day and seven-day-plus-one-minute KST boundaries are covered.
 - `verify` runs `audit:content` once before build, then `test:unit` excludes that file; normal `npm test` remains the complete Vitest command.
 - `editorial-reference` records now render under `보조 참고` before the NamuWiki reference-only disclosure.
+
+## Fix round 2
+
+- The current-data audit uses its execution-time clock by default while retaining an injected clock for deterministic fixtures. After seven Seoul calendar days, stale practical guidance will fail until its source and verification dates are refreshed.
+- `formatSeoulDate` fixes all source and guide verification-date output to `Asia/Seoul`; the regression case passes when the process timezone is America/Los_Angeles.
+- Verification also passed with `TZ=America/Los_Angeles` for the representative audit and static build.

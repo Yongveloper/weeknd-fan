@@ -41,6 +41,18 @@ export function parseSeoulDate(date: string): Date {
   return new Date(`${date}T00:00:00+09:00`);
 }
 
+export function formatSeoulDate(date: Date): string {
+  return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .format(date)
+    .replace(/\. /g, '.')
+    .replace(/\.$/, '');
+}
+
 export function auditCoreContent(input: ContentAuditInput): string[] {
   const issues: string[] = [];
   if (input.concertPrimarySourceCount < 2) {

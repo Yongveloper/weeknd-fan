@@ -1,20 +1,12 @@
 ---
 import type { SourceRecord } from '../../lib/content/contracts';
+import { formatSeoulDate } from '../../lib/content/audit';
 
 interface Props {
   sources: SourceRecord[];
 }
 
 const { sources } = Astro.props;
-const formatDate = (date: Date) =>
-  new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  })
-    .format(date)
-    .replace(/\. /g, '.')
-    .replace(/\.$/, '');
 ---
 
 <ul class="source-list" aria-label="출처">
@@ -24,7 +16,7 @@ const formatDate = (date: Date) =>
         <a href={source.data.url} target="_blank" rel="noreferrer">
           {source.data.name}
         </a>
-        <span>마지막 확인 {formatDate(source.data.lastCheckedAt)}</span>
+        <span>마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}</span>
       </li>
     ))
   }
