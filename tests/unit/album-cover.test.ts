@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
-// @ts-expect-error plain ESM script module without type declarations
-import { coverFromOEmbed } from '../../scripts/lib/album-cover.mjs';
+import {
+  coverFromOEmbed,
+  coverIdentity,
+} from '../../scripts/lib/album-cover.mjs';
 
 const payload = {
   title: 'House Of Balloons (Original)',
@@ -32,5 +34,49 @@ describe('coverFromOEmbed', () => {
         'House of Balloons',
       ),
     ).toThrow(/cover host/);
+  });
+
+  it('rejects a payload with no thumbnail_url', () => {
+    expect(() =>
+      coverFromOEmbed(
+        { ...payload, thumbnail_url: undefined },
+        'House of Balloons',
+      ),
+    ).toThrow(/thumbnail_url/);
+  });
+
+  it('rejects a payload missing thumbnail_width', () => {
+    expect(() =>
+      coverFromOEmbed(
+        { ...payload, thumbnail_width: undefined },
+        'House of Balloons',
+      ),
+    ).toThrow(/invalid cover dimensions/);
+  });
+});
+
+describe('coverIdentity', () => {
+  it('treats different Spotify CDN edge subdomains with the same image id as the same identity', () => {
+    const ak = coverIdentity(
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02274b406a7e18acebcf743079',
+    );
+    const fa = coverIdentity(
+      'https://image-cdn-fa.spotifycdn.com/image/ab67616d00001e02274b406a7e18acebcf743079',
+    );
+    const scdn = coverIdentity(
+      'https://i.scdn.co/image/ab67616d00001e02274b406a7e18acebcf743079',
+    );
+    expect(ak).toBe(fa);
+    expect(ak).toBe(scdn);
+  });
+
+  it('treats different image ids as different identities', () => {
+    const a = coverIdentity(
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e02274b406a7e18acebcf743079',
+    );
+    const b = coverIdentity(
+      'https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e028863bc11d2aa12b54f5aeb36',
+    );
+    expect(a).not.toBe(b);
   });
 });

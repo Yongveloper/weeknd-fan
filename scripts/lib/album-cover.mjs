@@ -1,3 +1,5 @@
+import { URL } from 'node:url';
+
 const COVER_HOST =
   /^https:\/\/(image-cdn-[a-z]+\.spotifycdn\.com|i\.scdn\.co)\//;
 
@@ -7,6 +9,14 @@ export function normalizeTitle(title) {
     .toLowerCase()
     .replace(/\(original\)/g, '')
     .replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
+export function coverIdentity(url) {
+  return new URL(url).pathname;
+}
+
+function isPositiveInteger(value) {
+  return Number.isInteger(value) && value > 0;
 }
 
 export function coverFromOEmbed(payload, expectedTitle) {
@@ -21,9 +31,16 @@ export function coverFromOEmbed(payload, expectedTitle) {
       `title mismatch: expected "${expectedTitle}", got "${payload.title}"`,
     );
   }
+  const width = Number(payload.thumbnail_width);
+  const height = Number(payload.thumbnail_height);
+  if (!isPositiveInteger(width) || !isPositiveInteger(height)) {
+    throw new Error(
+      `invalid cover dimensions: width=${payload.thumbnail_width}, height=${payload.thumbnail_height}`,
+    );
+  }
   return {
     url: payload.thumbnail_url,
-    width: Number(payload.thumbnail_width),
-    height: Number(payload.thumbnail_height),
+    width,
+    height,
   };
 }

@@ -1,7 +1,7 @@
 /* global console, fetch, process */
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { coverFromOEmbed } from './lib/album-cover.mjs';
+import { coverFromOEmbed, coverIdentity } from './lib/album-cover.mjs';
 
 const albumsDirectory = path.resolve('src/data/albums');
 const verifyOnly = process.argv.includes('--verify');
@@ -22,12 +22,19 @@ for (const file of files) {
     throw new Error(`${file}: oEmbed responded ${response.status}`);
   }
   const cover = coverFromOEmbed(await response.json(), album.title);
+  const sameIdentity =
+    album.cover?.url != null &&
+    coverIdentity(cover.url) === coverIdentity(album.cover.url);
   if (verifyOnly) {
-    const changed = cover.url !== album.cover?.url ? 'CHANGED' : 'same';
-    console.log(`${file}\t${changed}\t${cover.url}`);
+    console.log(`${file}\t${sameIdentity ? 'same' : 'CHANGED'}\t${cover.url}`);
     continue;
   }
-  album.cover = { ...cover, fetchedAt: today };
+  album.cover = {
+    url: sameIdentity ? album.cover.url : cover.url,
+    width: cover.width,
+    height: cover.height,
+    fetchedAt: today,
+  };
   await writeFile(filePath, `${JSON.stringify(album, null, 2)}\n`);
   console.log(`${file}\tupdated`);
 }
