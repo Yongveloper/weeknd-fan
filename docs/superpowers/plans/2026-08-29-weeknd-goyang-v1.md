@@ -6,7 +6,7 @@
 
 **Architecture:** Astro 6 generates a static multi-page site from schema-validated local content. Server-rendered Astro components provide all essential reading and navigation without JavaScript; small browser scripts enhance the countdown, setlist exploration, page choreography, and Canvas share cards. Native CSS and cross-document View Transitions handle common motion, while the vanilla `motion` package is loaded only for the moon/Eclipse choreography that needs sequenced transforms, masks, and CSS-variable animation.
 
-**Tech Stack:** Node.js 22.12+, npm, Astro 6, TypeScript strict mode, Astro Content Collections with Zod, Motion for vanilla JavaScript, Vitest, Playwright, axe-core, ESLint, Prettier, Netlify static hosting.
+**Tech Stack:** Node.js 22.12+, npm, Astro 6, TypeScript strict mode, Astro Content Collections with Zod, Motion for vanilla JavaScript, Vitest, Playwright, axe-core, ESLint, Prettier, Cloudflare Workers Static Assets.
 
 **Spec:** `docs/superpowers/specs/2026-08-29-weeknd-goyang-fan-guide-design.md`
 
@@ -26,7 +26,8 @@
 - Use responsive Astro image output with AVIF and WebP. Lazy-load below-fold generated textures and all official media embeds.
 - D-day ticket and setlist poster selections stay in memory. Do not store selections on a server, in cookies, or in analytics identifiers.
 - v1 includes no analytics. Revisit anonymous aggregate analytics only after launch demand exists.
-- Netlify is the first hosting target; the static output remains portable to another host without application changes.
+- Cloudflare Workers Static Assets is the hosting target. Configure only the static asset directory and explicitly keep `run_worker_first` false; do not add a Worker entrypoint, SSR adapter, or Functions.
+- Static-asset requests must bypass Worker execution so they remain within Cloudflare's free and unlimited static-asset path. Reassess Workers quotas only if a server feature is added later.
 
 ## File Structure
 
@@ -35,13 +36,14 @@
 ├── .github/workflows/ci.yml                 # repeatable quality gate
 ├── astro.config.mjs                         # static output, site URL, sitemap, image policy
 ├── eslint.config.js                         # JS/TS/Astro lint rules
-├── netlify.toml                             # build, publish, security/cache headers
+├── wrangler.jsonc                           # Cloudflare static-asset deployment only
 ├── package.json                             # scripts and pinned dependency ranges
 ├── playwright.config.ts                     # production-preview E2E matrix
 ├── tsconfig.json                            # Astro strict TypeScript
 ├── vitest.config.ts                         # unit tests through Astro/Vite config
 ├── public/
 │   ├── favicon.svg                          # original DAWNFOLD eclipse mark
+│   ├── _headers                             # static security and cache headers
 │   └── og/default.jpg                       # 1200×630 original share preview
 ├── scripts/
 │   └── check-performance-budget.mjs         # built-asset gzip/image budget gate
@@ -166,7 +168,7 @@ Run:
 ```bash
 npm init -y
 npm install astro@^6 motion @astrojs/sitemap @fontsource/bebas-neue @fontsource-variable/noto-sans-kr
-npm install -D @astrojs/check @playwright/test @axe-core/playwright vitest typescript eslint @eslint/js typescript-eslint eslint-plugin-astro prettier prettier-plugin-astro
+npm install -D @astrojs/check @playwright/test @axe-core/playwright vitest typescript eslint @eslint/js typescript-eslint eslint-plugin-astro prettier prettier-plugin-astro wrangler
 npx playwright install chromium
 ```
 
@@ -1664,17 +1666,21 @@ git commit -m "test: enforce access and performance budgets"
 
 ---
 
-### Task 14: CI, Netlify Static Delivery, and Launch Verification
+### Task 14: CI, Cloudflare Static Delivery, and Launch Verification
 
 **Files:**
 - Create: `.github/workflows/ci.yml`
-- Create: `netlify.toml`
+- Create: `wrangler.jsonc`
+- Create: `public/_headers`
+- Modify: `.gitignore`
+- Modify: `package.json`
+- Modify: `package-lock.json`
 - Modify: `README.md`
 - Modify: `docs/content-update-runbook.md`
 
 **Interfaces:**
 - Consumes: `npm run verify`, static `dist/`, and `PUBLIC_SITE_URL`.
-- Produces: repeatable CI, preview/production hosting configuration, security headers, cache policy, and launch checklist.
+- Produces: repeatable CI, Cloudflare Workers Static Assets configuration, security/cache headers, dry-run validation, and launch checklist.
 
 - [ ] **Step 1: Add CI that proves a clean clone can build**
 
@@ -1698,37 +1704,44 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run verify
       - run: npm run budget
+      - run: npx wrangler deploy --dry-run
 ```
 
-- [ ] **Step 2: Configure portable Netlify static hosting**
+- [ ] **Step 2: Configure Cloudflare Workers Static Assets without Worker execution**
 
-```toml
-# netlify.toml
-[build]
-  command = "npm run build"
-  publish = "dist"
-
-[build.environment]
-  NODE_VERSION = "22.12.0"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Content-Type-Options = "nosniff"
-    Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
-
-[[headers]]
-  for = "/_astro/*"
-  [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+```jsonc
+// wrangler.jsonc
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "weeknd-goyang-guide",
+  "compatibility_date": "2026-08-29",
+  "assets": {
+    "directory": "./dist",
+    "run_worker_first": false
+  }
+}
 ```
 
-Set `PUBLIC_SITE_URL` in Netlify to the final HTTPS origin before the production build. No Netlify adapter is installed because output is fully static.
+Do not add `main`, an assets binding, or `@astrojs/cloudflare`; a fully static Astro build needs no adapter. Keeping `run_worker_first` false ensures matching asset requests do not consume Workers request quota.
+
+```text
+# public/_headers
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+```
+
+Add `.wrangler/` to `.gitignore`. Add `"deploy": "npm run build && wrangler deploy"` to `package.json`; CI and local verification may use `wrangler deploy --dry-run` only. Running deploy without `--dry-run` changes external production state and requires separate production authorization.
 
 - [ ] **Step 3: Document local and launch operations**
 
-README commands are exactly `npm ci`, `npm run dev`, `npm run verify`, and `PUBLIC_SITE_URL=https://fan-guide.test npm run build` for local production-shape verification. Netlify's production environment replaces `PUBLIC_SITE_URL` with the HTTPS origin assigned to the deployed site. The launch checklist requires: official disclaimer visible; Oct 7/8 dates correct; ticket link official; expected label visible on page and generated poster; pending guide facts unpublished; OG preview inspected in Kakao/X tools; mobile and reduced-motion smoke tests; content audit check date current.
+README local commands are exactly `npm ci`, `npm run dev`, `npm run verify`, `PUBLIC_SITE_URL=https://fan-guide.test npm run build`, and `npx wrangler deploy --dry-run`. Production deployment requires an authenticated Cloudflare account and explicit production authorization. On the first authorized deployment, capture the HTTPS origin printed by Wrangler, set that value as `PUBLIC_SITE_URL`, rebuild, and deploy again so canonical, sitemap, and OG URLs use the real origin.
+
+The launch checklist requires: `run_worker_first` remains false; no Worker entrypoint or Functions route exists; official disclaimer visible; Oct 7/8 dates correct; ticket link official; expected label visible on page and generated poster; pending guide facts unpublished; OG preview inspected in Kakao/X tools; mobile and reduced-motion smoke tests; content audit check date current.
 
 - [ ] **Step 4: Verify production output from a clean install**
 
@@ -1739,16 +1752,17 @@ npm ci
 npx playwright install chromium
 PUBLIC_SITE_URL=https://fan-guide.test npm run verify
 npm run budget
+npx wrangler deploy --dry-run
 git status --short
 ```
 
-Expected: all checks exit `0`; `git status --short` is empty; built canonical and OG URLs use the HTTPS origin.
+Expected: all checks exit `0`; Wrangler validates `./dist` as the only static asset directory without a Worker entrypoint; `git status --short` is empty; built canonical and OG URLs use the test HTTPS origin.
 
 - [ ] **Step 5: Commit**
 
 ```bash
-git add .github/workflows/ci.yml netlify.toml README.md docs/content-update-runbook.md
-git commit -m "ci: add static launch pipeline"
+git add .github/workflows/ci.yml wrangler.jsonc public/_headers .gitignore package.json package-lock.json README.md docs/content-update-runbook.md
+git commit -m "ci: add Cloudflare static delivery"
 ```
 
 ---
@@ -1768,4 +1782,7 @@ git commit -m "ci: add static launch pipeline"
 - [Astro testing with Vitest and Playwright](https://v6.docs.astro.build/en/guides/testing/)
 - [Motion JavaScript `animate()`](https://motion.dev/docs/animate)
 - [Motion reduced-motion guidance](https://motion.dev/docs/react-accessibility)
-- [Netlify static Astro deployment](https://v6.docs.astro.build/en/guides/deploy/netlify/)
+- [Astro static deployment on Cloudflare](https://v6.docs.astro.build/en/guides/deploy/cloudflare/)
+- [Cloudflare Workers Static Assets configuration](https://developers.cloudflare.com/workers/wrangler/configuration/#assets)
+- [Cloudflare static-asset billing and limits](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/)
+- [Cloudflare static response headers](https://developers.cloudflare.com/workers/static-assets/headers/)
