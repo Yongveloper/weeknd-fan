@@ -1,0 +1,59 @@
+<footer class="site-footer">
+  <div class="shell-content site-footer__inner">
+    <div>
+      <p class="eyebrow">DAWNFOLD / GOYANG 2026</p>
+      <p class="site-footer__disclaimer">비공식·비영리 팬 가이드</p>
+    </div>
+    <a
+      class="site-footer__ticket-link"
+      href="https://tickets.interpark.com/contents/notice/detail/14180"
+      rel="noreferrer"
+    >
+      공식 티켓 공지 보기 <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: var(--section-space);
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 17%, transparent);
+    background: linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--red) 25%, var(--night)),
+      color-mix(in srgb, var(--blue) 22%, var(--night)),
+      color-mix(in srgb, var(--amber) 20%, var(--night))
+    );
+  }
+
+  .site-footer__inner {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-block: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .site-footer__disclaimer {
+    margin-top: 0.5rem;
+    color: var(--ivory);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 700;
+  }
+
+  .site-footer__ticket-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    color: var(--ivory);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  @media (max-width: 38rem) {
+    .site-footer__inner {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+</style>

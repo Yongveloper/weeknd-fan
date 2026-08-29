@@ -1,0 +1,17 @@
+:root {
+  --night: #050507;
+  --red: #a61f27;
+  --blue: #2f63d8;
+  --amber: #e6a359;
+  --ivory: #f0e8da;
+  --mist: #d7d8dc;
+  --ink-muted: color-mix(in srgb, var(--ivory) 70%, transparent);
+  --font-display: 'Bebas Neue', Impact, sans-serif;
+  --font-body: 'Noto Sans KR Variable', system-ui, sans-serif;
+  --content-max: 74rem;
+  --gutter: clamp(1rem, 4vw, 4rem);
+  --section-space: clamp(5rem, 13vw, 11rem);
+  --motion-fast: 180ms;
+  --motion-scene: 620ms;
+  --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+}
