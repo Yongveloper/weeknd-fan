@@ -149,6 +149,10 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         (entries) => {
           if (!entries.some((entry) => entry.isIntersecting)) return;
           observer.disconnect();
+          this.dataset.reveal = 'pending';
+          window.setTimeout(() => {
+            if (this.dataset.reveal !== 'done') this.dataset.reveal = 'done';
+          }, 3_000);
           this.animateEntrance().catch(() => {
             this.dataset.reveal = 'done';
           });
@@ -161,7 +165,6 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
 
     private async animateEntrance() {
       const { animate } = await import('motion');
-      this.dataset.reveal = 'pending';
       const hero = this.closest<HTMLElement>('[data-home-hero]');
       const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
       const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');

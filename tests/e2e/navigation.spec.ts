@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { useClock } from './helpers/clock';
 
 async function expectAnchorHeadingInViewport(
   page: import('@playwright/test').Page,
@@ -441,6 +442,7 @@ test('places covers beside every album mention on home, discover, and setlist', 
 test('states what the site is, who it is for, and where the official notice lives', async ({
   page,
 }) => {
+  await useClock(page, '2026-08-29T09:00:00+09:00');
   await page.goto('/');
 
   await expect(page.getByText('THE WEEKND · 비공식 팬 팜플렛')).toBeVisible();

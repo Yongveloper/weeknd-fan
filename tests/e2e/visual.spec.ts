@@ -1,27 +1,5 @@
 import { expect, test } from '@playwright/test';
-
-async function useClock(page: import('@playwright/test').Page, now: string) {
-  await page.addInitScript((timestamp) => {
-    const NativeDate = Date;
-
-    class ControlledDate extends NativeDate {
-      constructor(...args: [] | [string | number]) {
-        if (args.length === 0) {
-          super(timestamp);
-          return;
-        }
-
-        super(args[0]);
-      }
-
-      static now() {
-        return timestamp;
-      }
-    }
-
-    window.Date = ControlledDate as DateConstructor;
-  }, new Date(now).getTime());
-}
+import { useClock } from './helpers/clock';
 
 test('renders Eclipse Count inside the retained moon scene', async ({
   page,
