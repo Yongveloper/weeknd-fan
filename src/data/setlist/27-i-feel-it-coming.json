@@ -1,0 +1,26 @@
+{
+  "title": "I Feel It Coming",
+  "summary": "밝은 신스 팝으로 시야를 넓히는 Starboy 수록곡",
+  "body": "공연의 밀도를 잠시 환하게 바꾸는 대표적인 팝 순간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Starboy"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 27,
+  "songTitle": "I Feel It Coming",
+  "album": "Starboy",
+  "liveNote": "넓게 퍼지는 조명과 관객 손동작을 본다.",
+  "singAlongNote": "후렴 멜로디를 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

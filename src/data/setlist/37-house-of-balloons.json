@@ -1,0 +1,26 @@
+{
+  "title": "House of Balloons",
+  "summary": "초기 믹스테이프의 세계를 응축해 들려주는 곡",
+  "body": "The Weeknd의 출발점인 2011년의 질감을 후반부에 다시 만난다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["House of Balloons"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 37,
+  "songTitle": "House of Balloons",
+  "album": "House of Balloons",
+  "liveNote": "무대가 어두워지는 전환을 본다.",
+  "singAlongNote": "가사 대신 곡의 공기와 리듬을 따른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

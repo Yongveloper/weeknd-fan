@@ -1,0 +1,26 @@
+{
+  "title": "Less Than Zero",
+  "summary": "새벽의 아쉬움을 맑은 멜로디로 감싸는 Dawn FM 수록곡",
+  "body": "후반부로 갈수록 커지는 감정의 파도를 만든다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Dawn FM"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 34,
+  "songTitle": "Less Than Zero",
+  "album": "Dawn FM",
+  "liveNote": "따뜻한 빛과 관객의 움직임을 본다.",
+  "singAlongNote": "후렴 멜로디를 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

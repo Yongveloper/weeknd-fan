@@ -1,0 +1,26 @@
+{
+  "title": "São Paulo",
+  "summary": "브라질리언 펑크의 추진력으로 분위기를 흔드는 곡",
+  "body": "앨범의 어두운 결에 춤추는 리듬을 더하는 순간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 9,
+  "songTitle": "São Paulo",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "리듬에 맞춰 바뀌는 조명과 동선을 본다.",
+  "singAlongNote": "박자에 맞춰 손뼉으로 반응한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

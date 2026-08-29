@@ -1,0 +1,26 @@
+{
+  "title": "Niagara Falls",
+  "summary": "느슨한 그루브로 협업 구간의 색을 이어 가는 곡",
+  "body": "다른 아티스트의 앨범에서 들려준 보컬 결을 만난다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 23,
+  "songTitle": "Niagara Falls",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "낮은 빛과 느린 동선의 조합을 본다.",
+  "singAlongNote": "리듬을 타며 조용히 듣는다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Wicked Games",
+  "summary": "초기 믹스테이프의 어두운 공기를 대표하는 곡",
+  "body": "2011년의 공간감 있는 사운드가 거대한 경기장에서 어떻게 들리는지 본다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["House of Balloons"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 30,
+  "songTitle": "Wicked Games",
+  "album": "House of Balloons",
+  "liveNote": "조명이 절제되는 순간을 본다.",
+  "singAlongNote": "익숙한 멜로디만 조용히 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

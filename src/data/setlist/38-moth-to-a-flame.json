@@ -1,0 +1,26 @@
+{
+  "title": "Moth to a Flame",
+  "summary": "전자음과 보컬이 맞물리는 협업곡으로 마무리를 잇는 곡",
+  "body": "다른 전자음악 세계와 연결된 보컬의 질감을 듣는다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Paradise Again"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 38,
+  "songTitle": "Moth to a Flame",
+  "album": "Paradise Again",
+  "liveNote": "피날레 전후의 빛과 화면 변화를 본다.",
+  "singAlongNote": "제목이 들리는 짧은 지점만 함께 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "After Hours",
+  "summary": "밤의 여운을 길게 끌고 가는 After Hours의 중심곡",
+  "body": "최근 앨범 3부작의 출발점으로, 느린 호흡에 집중해 듣는다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["After Hours"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 4,
+  "songTitle": "After Hours",
+  "album": "After Hours",
+  "liveNote": "무대의 빈 공간과 붉은 빛 변화를 본다.",
+  "singAlongNote": "길게 이어지는 멜로디를 조용히 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "title": "Often",
+  "summary": "초기 미스터리를 유지한 채 리듬을 끌어올리는 곡",
+  "body": "Beauty Behind the Madness 시기의 더 거친 분위기를 만난다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Beauty Behind the Madness"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 16,
+  "songTitle": "Often",
+  "album": "Beauty Behind the Madness",
+  "liveNote": "비트가 두드러지는 조명 전환을 본다.",
+  "singAlongNote": "반복되는 리듬에 맞춰 반응한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

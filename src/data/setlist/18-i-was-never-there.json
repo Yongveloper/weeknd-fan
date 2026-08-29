@@ -1,0 +1,26 @@
+{
+  "title": "I Was Never There",
+  "summary": "My Dear Melancholy,의 고립감을 선명하게 드러내는 곡",
+  "body": "전자음의 긴장과 감정의 낙차를 함께 듣는다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["My Dear Melancholy,"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 18,
+  "songTitle": "I Was Never There",
+  "album": "My Dear Melancholy,",
+  "liveNote": "공간감 있는 조명과 정면 화면을 본다.",
+  "singAlongNote": "익숙한 멜로디만 조용히 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

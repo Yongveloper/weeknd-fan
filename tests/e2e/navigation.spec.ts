@@ -79,6 +79,27 @@ test('keeps the complete predicted list collapsed by default', async ({
   await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
 });
 
+test('shows six predicted titles before the complete collapsed list', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const preview = page.locator('.setlist-preview');
+  await expect(preview.locator('> .shell-content > ol > li')).toHaveText([
+    'Baptized in Fear',
+    'Open Hearts',
+    'Wake Me Up',
+    'After Hours',
+    'Starboy',
+    'Heartless',
+  ]);
+
+  const disclosure = page.getByRole('group', { name: '전체 예상 셋리스트' });
+  await expect(disclosure).not.toHaveAttribute('open', '');
+  await expect(disclosure.locator('li')).toHaveCount(32);
+  await expect(preview.getByText('예상 · 보장 아님')).toBeVisible();
+});
+
 test('links each Goyang shortcut to its stable guide anchor', async ({
   page,
 }) => {

@@ -1,0 +1,26 @@
+{
+  "title": "Save Your Tears",
+  "summary": "밝은 멜로디와 쓸쓸한 정서가 교차하는 대표곡",
+  "body": "After Hours의 팝 감각이 가장 넓게 열리는 순간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["After Hours"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 33,
+  "songTitle": "Save Your Tears",
+  "album": "After Hours",
+  "liveNote": "관객 합창과 빛의 색 변화를 본다.",
+  "singAlongNote": "익숙한 후렴을 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

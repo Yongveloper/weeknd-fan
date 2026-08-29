@@ -1,0 +1,26 @@
+{
+  "title": "Lost in the Fire",
+  "summary": "낮게 깔린 비트로 온도를 다시 낮추는 협업 싱글",
+  "body": "중반부의 팝 히트곡들과 어두운 질감을 이어 준다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Lost in the Fire"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 15,
+  "songTitle": "Lost in the Fire",
+  "album": "Lost in the Fire",
+  "liveNote": "그림자처럼 변하는 화면 톤을 본다.",
+  "singAlongNote": "리듬만 가볍게 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

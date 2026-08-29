@@ -1,0 +1,26 @@
+{
+  "title": "Open Hearts",
+  "summary": "차가운 신스 위로 감정을 밀어 올리는 최근 앨범 수록곡",
+  "body": "첫 곡의 긴장을 팝 멜로디로 이어 주는 구간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 2,
+  "songTitle": "Open Hearts",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "푸른 조명과 무대 이동의 대비를 본다.",
+  "singAlongNote": "짧은 후렴의 리듬만 가볍게 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

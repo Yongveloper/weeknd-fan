@@ -1,0 +1,26 @@
+{
+  "title": "Starboy",
+  "summary": "차가운 비트로 공연의 에너지를 단번에 올리는 대표곡",
+  "body": "초기 팝 확장기의 감각이 현재 투어의 스케일과 만나는 지점이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Starboy"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 5,
+  "songTitle": "Starboy",
+  "album": "Starboy",
+  "liveNote": "박자에 맞춘 큰 조명 전환을 본다.",
+  "singAlongNote": "제목이 반복되는 지점을 함께 외친다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

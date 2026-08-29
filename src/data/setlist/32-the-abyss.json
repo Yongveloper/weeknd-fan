@@ -1,0 +1,26 @@
+{
+  "title": "The Abyss",
+  "summary": "최근 3부작의 마지막 장을 더 깊은 어둠으로 이끄는 곡",
+  "body": "Hurry Up Tomorrow의 서사적 분위기를 무대 전환으로 느낀다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 32,
+  "songTitle": "The Abyss",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "어두운 화면과 다음 곡 사이의 연결을 본다.",
+  "singAlongNote": "가사 대신 분위기 변화에 집중한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

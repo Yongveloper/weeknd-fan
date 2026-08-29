@@ -1,0 +1,26 @@
+{
+  "title": "Sacrifice",
+  "summary": "긴장된 그루브로 관객의 박자를 묶는 Dawn FM 수록곡",
+  "body": "전자음의 반복과 보컬의 밀고 당김을 듣는 구간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Dawn FM"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 12,
+  "songTitle": "Sacrifice",
+  "album": "Dawn FM",
+  "liveNote": "박자에 맞춘 조명 컷을 본다.",
+  "singAlongNote": "짧은 제목 반복에 맞춰 반응한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

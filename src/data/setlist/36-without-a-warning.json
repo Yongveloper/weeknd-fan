@@ -1,0 +1,26 @@
+{
+  "title": "Without a Warning",
+  "summary": "협업 앨범의 긴장감을 무대로 끌어오는 곡",
+  "body": "짧은 출연 구간도 투어의 장르 폭을 보여 주는 장면이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 36,
+  "songTitle": "Without a Warning",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "낮은 베이스와 화면 전환을 본다.",
+  "singAlongNote": "리듬에 맞춰 반응한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

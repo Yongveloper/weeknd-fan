@@ -1,0 +1,26 @@
+{
+  "title": "Call Out My Name",
+  "summary": "절제된 보컬이 감정의 무게를 만드는 EP 수록곡",
+  "body": "큰 비트보다 보컬의 여백에 집중하기 좋은 순간이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["My Dear Melancholy,"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 31,
+  "songTitle": "Call Out My Name",
+  "album": "My Dear Melancholy,",
+  "liveNote": "무대가 비워지는 듯한 조명 구성을 본다.",
+  "singAlongNote": "제목이 들리는 지점만 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

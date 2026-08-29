@@ -1,0 +1,26 @@
+{
+  "title": "Blinding Lights",
+  "summary": "질주하는 신스와 박자로 경기장을 하나로 묶는 대표곡",
+  "body": "처음 온 관객도 바로 반응할 수 있는 공연의 큰 전환점이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["After Hours"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 35,
+  "songTitle": "Blinding Lights",
+  "album": "After Hours",
+  "liveNote": "가장 넓게 터지는 조명과 관객 반응을 본다.",
+  "singAlongNote": "익숙한 후렴을 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { auditCoreContent } from '../../src/lib/content/audit';
+import {
+  auditCoreContent,
+  auditSetlistRecords,
+} from '../../src/lib/content/audit';
 import { STATUS_LABELS } from '../../src/lib/content/contracts';
 
 describe('content trust contract', () => {
@@ -25,6 +28,19 @@ describe('content trust contract', () => {
     expect(issues).toEqual([
       'setlist:snapshots-below-3',
       'setlist:must-not-be-official',
+    ]);
+  });
+
+  it('rejects duplicate orders, official status, and fewer than three observations', () => {
+    const issues = auditSetlistRecords([
+      { id: 'one', expectedOrder: 1, status: 'expected', observedInCount: 3 },
+      { id: 'two', expectedOrder: 1, status: 'official', observedInCount: 2 },
+    ]);
+
+    expect(issues).toEqual([
+      { id: 'two', code: 'duplicate-expected-order' },
+      { id: 'two', code: 'setlist-must-be-expected' },
+      { id: 'two', code: 'setlist-observations-below-3' },
     ]);
   });
 });

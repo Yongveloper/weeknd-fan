@@ -1,0 +1,26 @@
+{
+  "title": "Stargirl Interlude",
+  "summary": "짧은 길이로도 Starboy의 밤을 환기하는 인터루드",
+  "body": "독립된 대형곡보다 다음 전환을 준비하는 색채로 듣는다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Starboy"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 25,
+  "songTitle": "Stargirl Interlude",
+  "album": "Starboy",
+  "liveNote": "짧은 영상 전환과 조명 톤을 본다.",
+  "singAlongNote": "가사 대신 분위기 전환에 집중한다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

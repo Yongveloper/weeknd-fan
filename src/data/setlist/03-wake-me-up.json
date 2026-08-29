@@ -1,0 +1,26 @@
+{
+  "title": "Wake Me Up",
+  "summary": "긴장과 해방을 번갈아 만드는 대형 전환곡",
+  "body": "최근 3부작의 드라마를 무대 규모로 느끼기 좋은 곡이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 3,
+  "songTitle": "Wake Me Up",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "조명 변화가 넓게 퍼지는 순간을 본다.",
+  "singAlongNote": "반복되는 제목 구간만 기억해 둔다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

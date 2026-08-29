@@ -1,0 +1,26 @@
+{
+  "title": "Creepin'",
+  "summary": "협업곡의 익숙한 멜로디로 흐름을 넓히는 곡",
+  "body": "The Weeknd의 보컬이 다른 프로듀서 세계와 만나는 장면이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Heroes & Villains"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 22,
+  "songTitle": "Creepin'",
+  "album": "Heroes & Villains",
+  "liveNote": "관객이 따라 부르는 구간의 밀도를 본다.",
+  "singAlongNote": "짧은 후렴의 멜로디만 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

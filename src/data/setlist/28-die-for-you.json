@@ -1,0 +1,26 @@
+{
+  "title": "Die for You",
+  "summary": "시간이 지나 더 크게 사랑받은 Starboy의 발라드",
+  "body": "공연 중반 이후의 감정선을 한 번 더 깊게 만드는 곡이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Starboy"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 28,
+  "songTitle": "Die for You",
+  "album": "Starboy",
+  "liveNote": "관객 합창이 커지는 장면을 본다.",
+  "singAlongNote": "익숙한 후렴을 함께 부른다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

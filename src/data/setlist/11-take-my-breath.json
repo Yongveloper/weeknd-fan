@@ -1,0 +1,26 @@
+{
+  "title": "Take My Breath",
+  "summary": "새벽 라디오의 질주감을 무대까지 끌고 오는 곡",
+  "body": "Dawn FM의 댄스 플로어 감각을 가장 선명하게 보여 준다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Dawn FM"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 11,
+  "songTitle": "Take My Breath",
+  "album": "Dawn FM",
+  "liveNote": "속도감 있는 빛의 이동을 본다.",
+  "singAlongNote": "익숙한 후렴의 리듬을 함께 탄다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

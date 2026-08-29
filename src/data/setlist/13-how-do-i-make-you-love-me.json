@@ -1,0 +1,26 @@
+{
+  "title": "How Do I Make You Love Me?",
+  "summary": "Dawn FM의 질문을 경쾌한 신스로 밀어붙이는 곡",
+  "body": "빠른 흐름 속에서도 앨범의 라디오 콘셉트를 떠올릴 수 있다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Dawn FM"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 13,
+  "songTitle": "How Do I Make You Love Me?",
+  "album": "Dawn FM",
+  "liveNote": "연속되는 조명 전환을 본다.",
+  "singAlongNote": "질문처럼 들리는 제목 구간만 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

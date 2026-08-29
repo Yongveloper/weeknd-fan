@@ -1,0 +1,26 @@
+{
+  "title": "Heartless",
+  "summary": "After Hours의 거친 자신감을 압축한 곡",
+  "body": "어두운 서사에서 더 직접적인 리듬으로 넘어가는 장면이다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["After Hours"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 6,
+  "songTitle": "Heartless",
+  "album": "After Hours",
+  "liveNote": "강한 대비의 화면과 관객 반응을 본다.",
+  "singAlongNote": "짧은 제목 반복만 따라간다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

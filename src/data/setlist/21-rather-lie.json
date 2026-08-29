@@ -1,0 +1,26 @@
+{
+  "title": "RATHER LIE",
+  "summary": "유럽 공연에서는 Playboi Carti의 동행이 이 곡의 무대를 이끌었지만, 고양 포함은 불확실하다.",
+  "body": "게스트 동선에 따라 달라질 수 있는 낮은 신뢰도의 가능성으로만 본다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["MUSIC"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 21,
+  "songTitle": "RATHER LIE",
+  "album": "MUSIC",
+  "liveNote": "게스트 유무와 곡 시작 전 무대 변화를 확인한다.",
+  "singAlongNote": "가사 대신 제목이 들리는 순간만 반응한다.",
+  "confidence": "low",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}

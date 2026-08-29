@@ -1,0 +1,26 @@
+{
+  "title": "Until We're Skin & Bones",
+  "summary": "짧지만 다음 장면을 단단히 잇는 Hurry Up Tomorrow 수록곡",
+  "body": "독립된 긴 해설보다 이어지는 흐름 안에서 듣는 편이 좋다.",
+  "status": "expected",
+  "lastVerifiedAt": "2026-08-29",
+  "sources": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedSongs": [],
+  "spoilerLevel": "titles",
+  "expectedOrder": 10,
+  "songTitle": "Until We're Skin & Bones",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "전환 직전의 정적과 조명 변화를 본다.",
+  "singAlongNote": "짧은 제목 구간만 기억해 둔다.",
+  "confidence": "high",
+  "observedIn": [
+    "setlist-manchester-2026-06-12",
+    "setlist-london-2026-08-14",
+    "setlist-london-2026-08-15"
+  ]
+}
