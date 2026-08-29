@@ -118,7 +118,29 @@ const setlist = defineCollection({
   }),
 });
 
+const albums = defineCollection({
+  loader: glob({ base: './src/data/albums', pattern: '**/*.json' }),
+  schema: z.object({
+    title: z.string(),
+    year: z.number().int().min(2011),
+    kind: z.enum(['mixtape', 'studio', 'ep']),
+    era: z.enum(['night', 'red', 'blue', 'amber']),
+    spotifyUrl: z
+      .url()
+      .regex(/^https:\/\/open\.spotify\.com\/album\/[A-Za-z0-9]+$/),
+    cover: z.object({
+      url: z
+        .url()
+        .regex(/^https:\/\/(image-cdn-[a-z]+\.spotifycdn\.com|i\.scdn\.co)\//),
+      width: z.number().int().positive(),
+      height: z.number().int().positive(),
+      fetchedAt: editorialDate,
+    }),
+  }),
+});
+
 export const collections = {
+  albums,
   concert,
   discover,
   guides,

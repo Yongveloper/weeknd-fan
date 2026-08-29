@@ -164,7 +164,7 @@ const albums = defineCollection({
   }),
 });
 ```
-- `setlist.album: z.string()` → `reference('albums')`, `common.relatedAlbums` → `z.array(reference('albums'))`. 기존 38+11개 파일의 문자열을 slug로 일괄 치환(스크립트 1회).
+- `setlist.album`·`relatedAlbums`는 문자열을 유지한다. 실제 데이터에 정규 디스코그래피 밖 발매(`Heroes & Villains`, `The Highlights` 등)가 있어 `findAlbumByTitle()`(제목 정규화 매칭)로 일치하는 앨범만 커버를 붙이고, 나머지는 텍스트로 남긴다.
 - `scripts/refresh-album-covers.mjs`: 각 앨범 `spotifyUrl`로 `https://open.spotify.com/oembed?url=` 호출 → `thumbnail_url/width/height` 갱신, `fetchedAt` 오늘. 빌드·테스트는 이 스크립트를 호출하지 않는다(오프라인 빌드 유지). 실측: 300×300 JPEG ≈ 25KB/장.
 - `audit.ts`에 규칙 추가: 모든 앨범 `cover.fetchedAt`이 90일 이내, `spotifyUrl`은 `sources` 컬렉션에 `official` 항목으로도 존재(출처 체계 일관).
 

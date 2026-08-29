@@ -1,0 +1,13 @@
+{
+  "title": "Dawn FM",
+  "year": 2022,
+  "kind": "studio",
+  "era": "blue",
+  "spotifyUrl": "https://open.spotify.com/album/2nLOHgzXzwFEpl62zAgCEC",
+  "cover": {
+    "url": "https://image-cdn-ak.spotifycdn.com/image/ab67616d00001e024ab2520c2c77a1d66b9ee21d",
+    "width": 300,
+    "height": 300,
+    "fetchedAt": "2026-08-29"
+  }
+}

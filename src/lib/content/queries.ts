@@ -80,3 +80,9 @@ export async function getGuideContent() {
     (a, b) => a.data.order - b.data.order,
   );
 }
+
+export async function getAlbums() {
+  return (await getCollection('albums')).sort(
+    (a, b) => a.data.year - b.data.year,
+  );
+}

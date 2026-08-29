@@ -21,6 +21,7 @@ export const STATUS_LABELS: Record<TrustStatus, string> = {
 };
 
 export type SourceRecord = CollectionEntry<'sources'>;
+export type AlbumRecord = CollectionEntry<'albums'>;
 export type ConcertRecord = CollectionEntry<'concert'>;
 export type SetlistRecord = CollectionEntry<'setlist'>;
 export type ShowRecord = CollectionEntry<'showRecords'>;
