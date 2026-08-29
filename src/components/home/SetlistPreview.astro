@@ -1,0 +1,138 @@
+---
+import StatusBadge from '../content/StatusBadge.astro';
+import type { SetlistRecord } from '../../lib/content/contracts';
+
+interface Props {
+  entries: SetlistRecord[];
+  previewCount: number;
+}
+
+const { entries, previewCount } = Astro.props;
+const previewEntries = entries.slice(0, previewCount);
+const remainingEntries = entries.slice(previewCount);
+---
+
+<section class="setlist-preview" aria-labelledby="setlist-preview-title">
+  <div class="shell-content setlist-preview__inner">
+    <div class="setlist-preview__heading">
+      <p class="eyebrow">A PATTERN, NOT A PROMISE</p>
+      <h2 id="setlist-preview-title">예상 셋리스트</h2>
+      <StatusBadge status="expected" />
+    </div>
+    {
+      previewEntries.length > 0 ? (
+        <ol class="setlist-preview__list">
+          {previewEntries.map((entry) => (
+            <li>{entry.data.songTitle}</li>
+          ))}
+        </ol>
+      ) : (
+        <p class="setlist-preview__empty">
+          최신 공연 구성을 확인 중이에요. 확인된 곡 순서는 곧 여기에 이어집니다.
+        </p>
+      )
+    }
+    <details aria-label="전체 예상 셋리스트">
+      <summary>전체 목록 펼쳐보기</summary>
+      {
+        remainingEntries.length > 0 ? (
+          <ol class="setlist-preview__list" start={previewEntries.length + 1}>
+            {remainingEntries.map((entry) => (
+              <li>{entry.data.songTitle}</li>
+            ))}
+          </ol>
+        ) : (
+          <p>전체 예상 셋리스트는 최신 공연 기록을 확인한 뒤 공개합니다.</p>
+        )
+      }
+    </details>
+    <a class="setlist-preview__link" href="/setlist/"
+      >곡별 관람 포인트 보기 <span aria-hidden="true">→</span></a
+    >
+  </div>
+</section>
+
+<style>
+  .setlist-preview {
+    padding-block: var(--section-space);
+    background: linear-gradient(
+      115deg,
+      #0d173b,
+      color-mix(in srgb, var(--night) 82%, var(--blue))
+    );
+  }
+
+  .setlist-preview__inner {
+    display: grid;
+    gap: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .setlist-preview__heading {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem 1.25rem;
+    align-items: end;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 8vw, 6.5rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.88;
+  }
+
+  .setlist-preview__list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.25rem 2rem;
+    max-width: 52rem;
+    margin: 0;
+    padding-left: 1.75rem;
+    color: var(--ivory);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    font-weight: 700;
+  }
+
+  .setlist-preview__list li::marker {
+    color: var(--amber);
+    font-family: var(--font-display);
+  }
+
+  .setlist-preview__empty,
+  details p {
+    max-width: 42rem;
+    color: var(--mist);
+  }
+
+  details {
+    max-width: 52rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 32%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 32%, transparent);
+  }
+
+  summary,
+  .setlist-preview__link {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 44px;
+    color: var(--ivory);
+    font-weight: 800;
+  }
+
+  summary {
+    cursor: pointer;
+  }
+
+  details .setlist-preview__list,
+  details p {
+    margin-block: 0.75rem 1.25rem;
+  }
+
+  @media (max-width: 36rem) {
+    .setlist-preview__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

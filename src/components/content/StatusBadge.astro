@@ -1,0 +1,30 @@
+---
+import { STATUS_LABELS, type TrustStatus } from '../../lib/content/contracts';
+
+interface Props {
+  status: TrustStatus;
+}
+
+const { status } = Astro.props;
+---
+
+<span class="status" data-status={status}>{STATUS_LABELS[status]}</span>
+
+<style>
+  .status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid color-mix(in srgb, currentcolor 46%, transparent);
+    color: var(--mist);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .status[data-status='expected'] {
+    border-color: color-mix(in srgb, var(--amber) 72%, transparent);
+    color: var(--amber);
+  }
+</style>

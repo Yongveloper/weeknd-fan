@@ -1,0 +1,55 @@
+---
+import type { SourceRecord } from '../../lib/content/contracts';
+
+interface Props {
+  sources: SourceRecord[];
+}
+
+const { sources } = Astro.props;
+const formatDate = (date: Date) =>
+  new Intl.DateTimeFormat('ko-KR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+    .format(date)
+    .replace(/\. /g, '.')
+    .replace(/\.$/, '');
+---
+
+<ul class="source-list" aria-label="출처">
+  {
+    sources.map((source) => (
+      <li>
+        <a href={source.data.url} target="_blank" rel="noreferrer">
+          {source.data.name}
+        </a>
+        <span>마지막 확인 {formatDate(source.data.lastCheckedAt)}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .source-list {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0;
+    padding: 0;
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+    list-style: none;
+  }
+
+  .source-list li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+    align-items: baseline;
+  }
+
+  .source-list a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+</style>

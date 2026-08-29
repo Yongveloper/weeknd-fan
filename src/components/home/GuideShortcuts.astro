@@ -1,0 +1,66 @@
+<section class="guide-shortcuts" aria-labelledby="guide-shortcuts-title">
+  <div class="shell-content guide-shortcuts__inner">
+    <div>
+      <p class="eyebrow">GOYANG, BEFORE THE LIGHTS</p>
+      <h2 id="guide-shortcuts-title">고양 가이드</h2>
+    </div>
+    <nav aria-label="고양 가이드 바로가기">
+      <a href="/goyang/#getting-there"
+        >가는 길 <span aria-hidden="true">→</span></a
+      >
+      <a href="/goyang/#packing">준비물 <span aria-hidden="true">→</span></a>
+      <a href="/goyang/#return-home"
+        >귀가 확인 <span aria-hidden="true">→</span></a
+      >
+    </nav>
+  </div>
+</section>
+
+<style>
+  .guide-shortcuts {
+    padding-block: var(--section-space);
+  }
+
+  .guide-shortcuts__inner {
+    display: grid;
+    gap: clamp(2rem, 6vw, 5rem);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: end;
+  }
+
+  h2 {
+    margin-top: 0.75rem;
+    font-family: var(--font-display);
+    font-size: clamp(3.2rem, 8vw, 6.5rem);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 0.88;
+  }
+
+  nav {
+    display: grid;
+  }
+
+  a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 44px;
+    padding-block: 0.9rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    color: var(--ivory);
+    font-size: clamp(1.15rem, 2vw, 1.4rem);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  a:last-child {
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+
+  @media (max-width: 42rem) {
+    .guide-shortcuts__inner {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

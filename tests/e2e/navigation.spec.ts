@@ -47,3 +47,34 @@ test('keeps navigation targets touch-sized in every viewport', async ({
     ).toBeGreaterThanOrEqual(44);
   }
 });
+
+test('shows concert facts and four lightweight entry blocks', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  await expect(page.getByText('2026.10.07—08')).toBeVisible();
+  await expect(page.getByText('고양종합운동장 주경기장')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '3분 만에 The Weeknd 알기' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '예상 셋리스트' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '고양 가이드' }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: '팬의 한마디' }),
+  ).toBeVisible();
+});
+
+test('keeps the complete predicted list collapsed by default', async ({
+  page,
+}) => {
+  await page.goto('/');
+
+  const disclosure = page.getByRole('group', { name: '전체 예상 셋리스트' });
+  await expect(disclosure).not.toHaveAttribute('open', '');
+  await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
+});

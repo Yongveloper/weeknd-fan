@@ -1,10 +1,15 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import FanNote from '../components/home/FanNote.astro';
+import GuideShortcuts from '../components/home/GuideShortcuts.astro';
 import HomeHero from '../components/home/HomeHero.astro';
-import { getConcert } from '../lib/content/queries';
+import IntroSummary from '../components/home/IntroSummary.astro';
+import SetlistPreview from '../components/home/SetlistPreview.astro';
+import { getConcert, getExpectedSetlist } from '../lib/content/queries';
 
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();
+const setlist = await getExpectedSetlist();
 ---
 
 <BaseLayout
@@ -12,4 +17,8 @@ const concert = await getConcert();
   description="The Weeknd 2026 고양 공연을 위한 비공식·비영리 팬 가이드"
 >
   <HomeHero concert={concert} />
+  <IntroSummary />
+  <SetlistPreview entries={setlist} previewCount={6} />
+  <GuideShortcuts />
+  <FanNote />
 </BaseLayout>
