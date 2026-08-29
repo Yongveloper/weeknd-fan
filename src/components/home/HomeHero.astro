@@ -1,10 +1,6 @@
 ---
-import { Picture } from 'astro:assets';
 import type { ConcertRecord } from '../../lib/content/contracts';
 import EclipseCountdown from '../visual/EclipseCountdown.astro';
-import dawnFog from '../../assets/visual/fog-dawn.png';
-import nightFog from '../../assets/visual/fog-night.png';
-import moonSurface from '../../assets/visual/moon-surface.png';
 
 interface Props {
   concert: ConcertRecord;
@@ -20,32 +16,41 @@ if (!dayOne || !dayTwo) {
 
 <section class="home-hero" data-home-hero aria-labelledby="home-title">
   <div class="home-hero__visual" aria-hidden="true">
-    <Picture
-      class="home-hero__moon-art"
-      data-moon-art
-      src={moonSurface}
-      formats={['avif', 'webp']}
-      widths={[320, 560, 720, 960, 1254]}
-      sizes="(max-width: 42rem) 76vw, 38vw"
-      alt=""
-    />
-    <Picture
-      class="home-hero__fog home-hero__fog--night"
-      src={nightFog}
-      formats={['avif', 'webp']}
-      widths={[480, 768, 1024, 1280, 1536]}
-      sizes="100vw"
-      alt=""
-    />
-    <Picture
-      class="home-hero__fog home-hero__fog--dawn"
-      data-hero-fog
-      src={dawnFog}
-      formats={['avif', 'webp']}
-      widths={[480, 768, 1024, 1280, 1536]}
-      sizes="100vw"
-      alt=""
-    />
+    <picture>
+      <source srcset="/visual/moon.avif" type="image/avif" />
+      <source srcset="/visual/moon.webp" type="image/webp" />
+      <img
+        class="home-hero__moon-art"
+        data-moon-art
+        src="/visual/moon.webp"
+        width="720"
+        height="720"
+        alt=""
+      />
+    </picture>
+    <picture>
+      <source srcset="/visual/fog-night.avif" type="image/avif" />
+      <source srcset="/visual/fog-night.webp" type="image/webp" />
+      <img
+        class="home-hero__fog home-hero__fog--night"
+        src="/visual/fog-night.webp"
+        width="480"
+        height="320"
+        alt=""
+      />
+    </picture>
+    <picture>
+      <source srcset="/visual/fog-dawn.avif" type="image/avif" />
+      <source srcset="/visual/fog-dawn.webp" type="image/webp" />
+      <img
+        class="home-hero__fog home-hero__fog--dawn"
+        data-hero-fog
+        src="/visual/fog-dawn.webp"
+        width="480"
+        height="320"
+        alt=""
+      />
+    </picture>
   </div>
   <EclipseCountdown
     dayOneStart={dayOne.startsAt}

@@ -70,6 +70,8 @@ test('records 390 by 844 home transfer, layout-shift, and long-task evidence', a
   );
 
   await page.setViewportSize({ width: 390, height: 844 });
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Network.setCacheDisabled', { cacheDisabled: true });
   await page.addInitScript(() => {
     const evidence = {
       cls: 0,

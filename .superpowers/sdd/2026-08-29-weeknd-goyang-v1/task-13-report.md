@@ -66,7 +66,7 @@ and a 500 px scroll:
 {
   "cls": 0,
   "longTasks": [],
-  "rasterBytes": 11698,
+  "rasterBytes": 58562,
   "javascriptBytes": 26795,
   "scrollY": 500
 }
@@ -87,3 +87,27 @@ moves the document.
 
 Known pre-existing build notes remain non-failing: an empty `showRecords`
 collection warning and the ESLint TypeScript deprecation hint.
+
+## Fix round 1 — complete built-asset inventory
+
+The original aggregate gate counted only page-selected assets, which omitted
+the emitted PNG fallbacks and the unreferenced default OG image. A fresh full
+`walk(dist)` inventory measured `15,033,080` raster bytes before this fix.
+
+- The aggregate gate now scans every built `.js` (gzip size) and every
+  `.avif`, `.webp`, `.png`, `.jpg`, and `.jpeg` file, including
+  `dist/og/default.jpg` whether or not an HTML page references it.
+- The page gate resolves the `390px × DPR 3` AVIF candidate from `srcset` and
+  `sizes`, and rejects missing, remote, malformed, or unparseable image
+  references instead of discarding them.
+- Hero visual assets now use six explicit, small `public/visual` AVIF/WebP
+  derivatives. This prevents Astro from emitting large PNG fallback families
+  while retaining the responsive semantic `<picture>` AVIF/WebP contract.
+- Regression tests use isolated temporary build fixtures: an unreferenced
+  raster exceeding 1100 KiB fails the aggregate gate, and a missing `<img>`
+  candidate fails the page gate.
+
+Fresh production build values: aggregate JavaScript gzip `28.3 KiB`, aggregate
+raster `128.8 KiB`; home initial JavaScript gzip `2.3 KiB` and selected mobile
+raster `56.3 KiB`. All non-home routes have zero raster bytes and at most
+`2.6 KiB` initial JavaScript gzip.
