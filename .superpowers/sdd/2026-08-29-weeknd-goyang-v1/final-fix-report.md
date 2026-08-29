@@ -118,3 +118,12 @@ was preserved and excluded from this fix wave.
 - Regression coverage includes impossible date-only/offset timestamps, leap
   validity, future content, future sources, aligned future values, and the
   existing current-data adapter pass.
+
+## Date compatibility round 3
+
+- Strict offset validation now accepts arbitrary nonempty fractional seconds,
+  matching the collection schema. Calendar, clock, and offset checks still run
+  on the original input; fractions beyond native millisecond precision are
+  truncated only for `Date` construction.
+- Regression coverage accepts six-digit and twelve-digit fractions while the
+  existing impossible-date and future-timestamp checks remain green.

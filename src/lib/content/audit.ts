@@ -55,7 +55,7 @@ export function parseSeoulDate(date: string): Date {
   }
 
   const timestamp = date.match(
-    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?(Z|[+-](\d{2}):(\d{2}))$/i,
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?(Z|[+-](\d{2}):(\d{2}))$/i,
   );
   if (!timestamp) return new Date(Number.NaN);
 
@@ -65,6 +65,7 @@ export function parseSeoulDate(date: string): Date {
   const hours = timestamp[4] ?? '';
   const minutes = timestamp[5] ?? '';
   const seconds = timestamp[6] ?? '0';
+  const fraction = timestamp[7] ?? '';
   const offset = timestamp[8] ?? '';
   const offsetHours = timestamp[9] ?? '';
   const offsetMinutes = timestamp[10] ?? '';
@@ -79,7 +80,11 @@ export function parseSeoulDate(date: string): Date {
     return new Date(Number.NaN);
   }
 
-  const parsed = new Date(date);
+  const parsed = new Date(
+    fraction.length > 3
+      ? date.replace(`.${fraction}`, `.${fraction.slice(0, 3)}`)
+      : date,
+  );
   return Number.isNaN(parsed.getTime()) ? new Date(Number.NaN) : parsed;
 }
 

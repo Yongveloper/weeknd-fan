@@ -239,6 +239,12 @@ describe('content trust contract', () => {
     expect(
       Number.isNaN(parseSeoulDate('2024-02-29T23:59:59.123+09:00').getTime()),
     ).toBe(false);
+    for (const value of [
+      '2024-02-29T23:59:59.123456+09:00',
+      '2024-02-29T23:59:59.123456789012+09:00',
+    ]) {
+      expect(Number.isNaN(parseSeoulDate(value).getTime())).toBe(false);
+    }
   });
 
   it('rejects future content and source checks, including aligned future timestamps', () => {
