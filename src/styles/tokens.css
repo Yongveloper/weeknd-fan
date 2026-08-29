@@ -12,6 +12,8 @@
   --content-max: 74rem;
   --gutter: clamp(1rem, 4vw, 4rem);
   --section-space: clamp(5rem, 13vw, 11rem);
+  /* 본문 타입 스케일. 홈은 0.9(텍스트만 10% 축소, 간격·위치는 그대로) */
+  --type-scale: 1;
   --motion-fast: 180ms;
   --motion-scene: 620ms;
   --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);

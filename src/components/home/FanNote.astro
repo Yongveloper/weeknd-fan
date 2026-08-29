@@ -28,7 +28,7 @@
 
   p:not(.eyebrow) {
     color: var(--ivory);
-    font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+    font-size: calc(var(--type-scale) * clamp(1.1rem, 2.5vw, 1.4rem));
     font-weight: 700;
     line-height: 1.7;
   }
@@ -40,6 +40,6 @@
 
   .fan-note__hint {
     color: var(--mist);
-    font-size: 0.85rem;
+    font-size: calc(var(--type-scale) * 0.85rem);
   }
 </style>

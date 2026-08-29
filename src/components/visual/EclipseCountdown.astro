@@ -31,7 +31,6 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
   >
   <span class="eclipse-countdown__moon" aria-hidden="true">
     <span data-primary>{initial.primaryLabel}</span>
-    <span data-shadow></span>
   </span>
   <p data-caption aria-hidden="true" hidden={!initial.captionLabel}>
     {initial.captionLabel}
@@ -61,7 +60,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     connectedCallback() {
       this.lastPrimaryLabel = this.primary.textContent ?? '';
       this.lastAccessibleLabel = this.accessibleCountdown.textContent ?? '';
-      this.update(true);
+      this.update();
       this.intervalId = setInterval(() => this.update(), 1_000);
 
       if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -81,10 +80,6 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       return this.querySelector<HTMLElement>('[data-primary]')!;
     }
 
-    private get shadow() {
-      return this.querySelector<HTMLElement>('[data-shadow]')!;
-    }
-
     private get clock() {
       return this.querySelector<HTMLTimeElement>('[data-clock]')!;
     }
@@ -102,7 +97,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       });
     }
 
-    private update(immediate = false) {
+    private update() {
       const state = this.state;
       this.clock.hidden = !state.showClock;
       this.clock.textContent = formatClock(
@@ -126,22 +121,14 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         this.lastAccessibleLabel = state.accessibleLabel;
       };
 
-      if (state.primaryLabel === this.lastPrimaryLabel) {
-        if (state.accessibleLabel !== this.lastAccessibleLabel) {
-          changeAccessibleLabel();
-        }
+      if (
+        state.primaryLabel === this.lastPrimaryLabel &&
+        state.accessibleLabel === this.lastAccessibleLabel
+      ) {
         return;
       }
 
-      if (immediate || matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        changeAccessibleLabel();
-        return;
-      }
-
-      this.shadow.classList.remove('is-crossing');
-      void this.shadow.offsetWidth;
-      this.shadow.classList.add('is-crossing');
-      window.setTimeout(changeAccessibleLabel, 220);
+      changeAccessibleLabel();
     }
 
     private startEntrance() {
@@ -167,30 +154,21 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
       const { animate } = await import('motion');
       const hero = this.closest<HTMLElement>('[data-home-hero]');
       const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
-      const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');
 
-      if (!moon || !fog || !this.isConnected) {
+      if (!moon || !this.isConnected) {
         this.dataset.reveal = 'done';
         return;
       }
 
       this.dataset.motionState = 'running';
-      const sequence: import('motion').AnimationSequence = [
-        [moon, { transform: ['translate3d(0, 0, 0) scale(1)'] }],
-        [fog, { opacity: [1] }, { at: 0.12 }],
-      ];
-      this.entranceControls = animate(sequence, {
-        duration: 0.62,
-        defaultTransition: { ease: [0.22, 1, 0.36, 1] },
-      });
+      this.entranceControls = animate(
+        moon,
+        { transform: 'translate3d(0, 0, 0) scale(1)' },
+        { duration: 0.62, ease: [0.22, 1, 0.36, 1] },
+      );
       await this.entranceControls.finished;
       if (!this.isConnected) return;
-      this.shadow.classList.remove('is-crossing');
-      void this.shadow.offsetWidth;
-      this.shadow.classList.add('is-crossing');
-      window.setTimeout(() => {
-        this.dataset.reveal = 'done';
-      }, 220);
+      this.dataset.reveal = 'done';
       this.dataset.motionState = 'resting';
     }
   }
@@ -201,10 +179,17 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
 </script>
 
 <style>
+  /* 라벨(숫자·캡션·시계)은 모두 디스크 안에 놓인다. 호스트가
+     --eclipse-label-x/y 로 묶음을 디스크 중심에서 밀어낼 수 있다. */
   eclipse-countdown {
+    --eclipse-label-x: 0px;
+    --eclipse-label-y: 0px;
+    --eclipse-number-size: calc(
+      var(--type-scale) * clamp(3.6rem, 10vw, 7.4rem)
+    );
+    position: relative;
     display: grid;
     justify-items: center;
-    gap: 0.75rem;
   }
 
   .eclipse-countdown__moon {
@@ -218,7 +203,7 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     background: transparent;
     color: var(--ivory);
     font-family: var(--font-display);
-    font-size: clamp(3.6rem, 10vw, 7.4rem);
+    font-size: var(--eclipse-number-size);
     letter-spacing: 0.025em;
     line-height: 1;
   }
@@ -232,35 +217,39 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     z-index: 1;
     text-shadow: 0 0 1.5rem color-mix(in srgb, var(--night) 72%, transparent);
     transition: opacity 180ms var(--ease-cinematic);
+    translate: var(--eclipse-label-x) var(--eclipse-label-y);
   }
 
-  [data-shadow] {
+  [data-caption],
+  [data-clock] {
     position: absolute;
-    inset: -15%;
-    background: radial-gradient(
-      circle at 50% 50%,
-      transparent 0 39%,
-      color-mix(in srgb, var(--night) 90%, transparent) 57%
-    );
-    background-position: -180% 0;
-    pointer-events: none;
-  }
-
-  [data-shadow].is-crossing {
-    animation: eclipse-shadow 440ms var(--ease-cinematic) both;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
+    margin: 0;
+    white-space: nowrap;
+    transform: translate(-50%, -50%)
+      translate(
+        var(--eclipse-label-x),
+        calc(
+          var(--eclipse-label-y) + var(--eclipse-number-size) *
+            var(--label-drop)
+        )
+      );
   }
 
   [data-clock] {
+    --label-drop: 1.15;
     color: var(--mist);
     font-family: var(--font-display);
-    font-size: clamp(1.45rem, 3.5vw, 2.2rem);
+    font-size: calc(var(--type-scale) * clamp(1.45rem, 3.5vw, 2.2rem));
     letter-spacing: 0.12em;
   }
 
   [data-caption] {
-    margin: -0.35rem 0 0;
+    --label-drop: 0.72;
     color: var(--mist);
-    font-size: 0.78rem;
+    font-size: calc(var(--type-scale) * 0.78rem);
     font-weight: 800;
     letter-spacing: 0.12em;
   }
@@ -272,15 +261,5 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     overflow: hidden;
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
-  }
-
-  @keyframes eclipse-shadow {
-    from {
-      background-position: -180% 0;
-    }
-
-    to {
-      background-position: 180% 0;
-    }
   }
 </style>

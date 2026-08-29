@@ -24,60 +24,21 @@ if (!dayOne || !dayTwo) {
   <div class="home-hero__visual" aria-hidden="true">
     <picture>
       <source
-        srcset="/visual/moon-320.avif 320w, /visual/moon-560.avif 560w, /visual/moon-720.avif 720w, /visual/moon-960.avif 960w, /visual/moon-1254.avif 1254w"
-        sizes="(max-width: 42rem) 84vw, 49vw"
+        srcset="/visual/eclipse-400.avif 400w, /visual/eclipse-700.avif 700w, /visual/eclipse-1000.avif 1000w, /visual/eclipse-1400.avif 1400w, /visual/eclipse-2000.avif 2000w"
+        sizes="103vw"
         type="image/avif"
       />
       <source
-        srcset="/visual/moon-320.webp 320w, /visual/moon-560.webp 560w, /visual/moon-720.webp 720w, /visual/moon-960.webp 960w, /visual/moon-1254.webp 1254w"
-        sizes="(max-width: 42rem) 84vw, 49vw"
+        srcset="/visual/eclipse-700.webp 700w, /visual/eclipse-1400.webp 1400w"
+        sizes="103vw"
         type="image/webp"
       />
       <img
         class="home-hero__moon-art"
         data-moon-art
-        src="/visual/moon-1254.webp"
-        width="1254"
-        height="1254"
-        alt=""
-      />
-    </picture>
-    <picture>
-      <source
-        srcset="/visual/fog-night-480.avif 480w, /visual/fog-night-768.avif 768w, /visual/fog-night-1024.avif 1024w, /visual/fog-night-1280.avif 1280w, /visual/fog-night-1536.avif 1536w"
-        sizes="(max-width: 42rem) 150vw, 100vw"
-        type="image/avif"
-      />
-      <source
-        srcset="/visual/fog-night-480.webp 480w, /visual/fog-night-768.webp 768w, /visual/fog-night-1024.webp 1024w, /visual/fog-night-1280.webp 1280w, /visual/fog-night-1536.webp 1536w"
-        sizes="(max-width: 42rem) 150vw, 100vw"
-        type="image/webp"
-      />
-      <img
-        class="home-hero__fog home-hero__fog--night"
-        src="/visual/fog-night-1536.webp"
-        width="1536"
-        height="1024"
-        alt=""
-      />
-    </picture>
-    <picture>
-      <source
-        srcset="/visual/fog-dawn-480.avif 480w, /visual/fog-dawn-768.avif 768w, /visual/fog-dawn-1024.avif 1024w, /visual/fog-dawn-1280.avif 1280w, /visual/fog-dawn-1536.avif 1536w"
-        sizes="(max-width: 42rem) 150vw, 100vw"
-        type="image/avif"
-      />
-      <source
-        srcset="/visual/fog-dawn-480.webp 480w, /visual/fog-dawn-768.webp 768w, /visual/fog-dawn-1024.webp 1024w, /visual/fog-dawn-1280.webp 1280w, /visual/fog-dawn-1536.webp 1536w"
-        sizes="(max-width: 42rem) 150vw, 100vw"
-        type="image/webp"
-      />
-      <img
-        class="home-hero__fog home-hero__fog--dawn"
-        data-hero-fog
-        src="/visual/fog-dawn-1536.webp"
-        width="1536"
-        height="1024"
+        src="/visual/eclipse-1400.webp"
+        width="2000"
+        height="2000"
         alt=""
       />
     </picture>
@@ -108,6 +69,20 @@ if (!dayOne || !dayTwo) {
 
 <style>
   .home-hero {
+    /* 일식 프레임은 h1 크기에 비례: 디스크(프레임의 56.6%) ≈ "AFTER HOURS" 폭 × 0.85.
+       이미지와 카운트다운이 같은 변수로 배치되어 중심이 일치한다. */
+    --hero-h1: clamp(3.8rem, 16.5vw, 15rem);
+    /* 디스크 지름 = 2.807em(6.2em×0.566에서 20% 축소한 값, 유지). 프레임은 디스크의
+       1/0.45 — 코로나 광선(≈2.2R)을 담기 위해 여유를 둔다. 중심: x = 텍스트 시작 + 4.2em,
+       y = 히어로 44% */
+    --hero-frame: calc(6.24 * var(--hero-h1));
+    --hero-disc-cx: calc(
+      max(var(--gutter), (100% - var(--content-max)) / 2) + 4.2 * var(--hero-h1)
+    );
+    --hero-frame-top: calc(44% - var(--hero-frame) / 2);
+    --hero-frame-right: calc(
+      100% - var(--hero-disc-cx) - var(--hero-frame) / 2
+    );
     position: relative;
     display: grid;
     min-height: min(76vh, 58rem);
@@ -124,29 +99,14 @@ if (!dayOne || !dayTwo) {
 
   .home-hero__visual {
     z-index: -1;
-    background: var(--night);
-    mask-image: linear-gradient(180deg, #000 78%, transparent);
   }
 
   .home-hero__moon-art {
-    width: min(49vw, 39rem);
+    z-index: 1;
+    width: var(--hero-frame);
     height: auto;
-    inset: auto clamp(-8rem, 2vw, 4rem) clamp(4rem, 8vh, 9rem) auto !important;
-    border-radius: 50%;
-    mix-blend-mode: screen;
+    inset: var(--hero-frame-top) var(--hero-frame-right) auto auto !important;
     transform: translate3d(18vw, 18vh, 0) scale(0.86);
-  }
-
-  .home-hero__fog {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    mix-blend-mode: screen;
-    opacity: 0.68;
-  }
-
-  .home-hero__fog--dawn {
-    opacity: 0;
   }
 
   .home-hero__content {
@@ -198,16 +158,19 @@ if (!dayOne || !dayTwo) {
   }
 
   .home-hero :global(eclipse-countdown) {
-    --eclipse-size: min(49vw, 39rem);
+    --eclipse-size: var(--hero-frame);
+    /* 디스크 중심이 h1과 겹치므로 라벨 묶음을 우하향으로 밀어 텍스트를 피한다 */
+    --eclipse-label-x: calc(var(--hero-frame) * 0.09);
+    --eclipse-label-y: calc(var(--hero-frame) * 0.16);
     position: absolute;
+    top: var(--hero-frame-top);
+    right: var(--hero-frame-right);
     z-index: 0;
-    right: clamp(-8rem, 2vw, 4rem);
-    bottom: clamp(4rem, 8vh, 9rem);
   }
 
   h1 {
     margin-top: 0.8rem;
-    font-size: clamp(3.8rem, 16.5vw, 15rem);
+    font-size: calc(var(--type-scale) * var(--hero-h1));
     letter-spacing: 0.01em;
     line-height: 0.82;
     text-wrap: initial;
@@ -218,15 +181,22 @@ if (!dayOne || !dayTwo) {
     white-space: nowrap;
   }
 
+  /* 아웃라인 텍스트. 획 색 = 코로나 림 그라데이션(금 → 주황 → 갈색).
+     background-clip: text 는 stroke 영역까지 칠하고, 채움색(--night)이 안쪽 절반을 덮어
+     바깥 절반만 그라데이션 획으로 남는다 → 획 폭을 2배로 둔다. */
   .home-hero__dawn {
+    -webkit-text-stroke: max(2px, 0.028em) transparent;
     background: linear-gradient(
       90deg,
-      var(--red),
-      var(--blue) 64%,
-      var(--amber)
+      #f6d78a,
+      #f0b352 30%,
+      #e08a3a 60%,
+      #b8642c 85%,
+      #7a4a2c
     );
+    -webkit-background-clip: text;
     background-clip: text;
-    color: transparent;
+    color: var(--night);
   }
 
   .home-hero__facts {
@@ -237,7 +207,7 @@ if (!dayOne || !dayTwo) {
     max-width: 34rem;
     margin-top: clamp(2rem, 5vw, 4rem);
     color: var(--mist);
-    font-size: clamp(1rem, 2vw, 1.25rem);
+    font-size: calc(var(--type-scale) * clamp(1rem, 2vw, 1.25rem));
     font-weight: 700;
     text-shadow: 0 1px 12px var(--night);
   }
@@ -260,15 +230,17 @@ if (!dayOne || !dayTwo) {
       align-content: space-between;
     }
 
-    .home-hero__moon-art {
-      width: 84vw;
-      inset: auto -10vw -4rem auto !important;
+    .home-hero {
+      /* 세로: 이전 디스크 중심(100% + 5rem − 3.1em) 유지. 가로: 정중앙 */
+      --hero-frame-top: calc(
+        100% + 5rem - 3.1 * var(--hero-h1) - var(--hero-frame) / 2
+      );
+      --hero-frame-right: calc(50% - var(--hero-frame) / 2);
     }
 
     .home-hero :global(eclipse-countdown) {
-      --eclipse-size: 84vw;
-      right: -10vw;
-      bottom: 1.25rem;
+      --eclipse-label-x: 0px;
+      --eclipse-label-y: 0px;
     }
   }
 </style>

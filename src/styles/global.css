@@ -28,168 +28,95 @@ body {
   line-height: 1.6;
 }
 
-/* 하늘 레이어: scroll-driven animation 지원 브라우저에서만 켠다 */
-.dawn-sky {
-  display: none;
+/* 우주 레이어: 홈 전용 고정 별밭. 스크롤과 무관한 정적 배경 */
+body[data-space-sky] {
+  --type-scale: 0.9;
+  background: var(--night);
 }
 
-@property --dawn-sky {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #050507;
-}
-@property --dawn-horizon-y {
-  syntax: '<length-percentage>';
-  inherits: true;
-  initial-value: 64%;
-}
-@property --dawn-horizon-color {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #d7d8dc;
-}
-@property --dawn-glow-red {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-@property --dawn-glow-blue {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-@property --dawn-horizon-alpha {
-  syntax: '<percentage>';
-  inherits: true;
-  initial-value: 35%;
-}
-
-@keyframes dawn-progress {
-  0% {
-    --dawn-sky: #050507;
-    --dawn-horizon-y: 64%;
-    --dawn-horizon-color: #d7d8dc;
-    --dawn-horizon-alpha: 35%;
-    --dawn-glow-red: 0;
-    --dawn-glow-blue: 0;
-  }
-  30% {
-    --dawn-sky: #1a080c;
-    --dawn-horizon-y: 60%;
-    --dawn-horizon-color: #a61f27;
-    --dawn-horizon-alpha: 35%;
-    --dawn-glow-red: 1;
-    --dawn-glow-blue: 0;
-  }
-  62% {
-    --dawn-sky: #0b1633;
-    --dawn-horizon-y: 52%;
-    --dawn-horizon-color: #2f63d8;
-    --dawn-horizon-alpha: 35%;
-    --dawn-glow-red: 0.25;
-    --dawn-glow-blue: 1;
-  }
-  100% {
-    --dawn-sky: #2a1a10;
-    --dawn-horizon-y: 40%;
-    --dawn-horizon-color: #e6a359;
-    --dawn-horizon-alpha: 0%;
-    --dawn-glow-red: 0;
-    --dawn-glow-blue: 0.2;
-  }
-}
-
-@keyframes dawn-progress-reduced {
-  0% {
-    --dawn-sky: #050507;
-    --dawn-horizon-color: #d7d8dc;
-    --dawn-horizon-alpha: 35%;
-  }
-  30% {
-    --dawn-sky: #1a080c;
-    --dawn-horizon-color: #a61f27;
-    --dawn-horizon-alpha: 35%;
-  }
-  62% {
-    --dawn-sky: #0b1633;
-    --dawn-horizon-color: #2f63d8;
-    --dawn-horizon-alpha: 35%;
-  }
-  100% {
-    --dawn-sky: #2a1a10;
-    --dawn-horizon-color: #e6a359;
-    --dawn-horizon-alpha: 0%;
-  }
-}
-
-@supports (animation-timeline: scroll()) {
-  body[data-dawn-sky] {
-    background: none;
-  }
-
-  .dawn-sky {
-    position: fixed;
-    z-index: -1;
-    inset: 0;
-    display: block;
-    background-color: var(--dawn-sky);
-    background-image: linear-gradient(
-      180deg,
-      transparent calc(var(--dawn-horizon-y) - 1vh),
-      color-mix(
-          in srgb,
-          var(--dawn-horizon-color) var(--dawn-horizon-alpha),
-          transparent
-        )
-        var(--dawn-horizon-y),
-      color-mix(
-          in srgb,
-          var(--dawn-horizon-color) calc(var(--dawn-horizon-alpha) / 3.5),
-          transparent
-        )
-        calc(var(--dawn-horizon-y) + 2px),
-      transparent calc(var(--dawn-horizon-y) + 16vh)
+.space-sky {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  background-color: var(--night);
+  background-image:
+    radial-gradient(
+      ellipse 62% 48% at 76% 22%,
+      color-mix(in srgb, var(--mist) 7%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 58% 44% at 18% 82%,
+      color-mix(in srgb, var(--blue) 9%, transparent),
+      transparent 72%
+    ),
+    url('/visual/starfield-2048.webp');
+  background-image:
+    radial-gradient(
+      ellipse 62% 48% at 76% 22%,
+      color-mix(in srgb, var(--mist) 7%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 58% 44% at 18% 82%,
+      color-mix(in srgb, var(--blue) 9%, transparent),
+      transparent 72%
+    ),
+    image-set(
+      url('/visual/starfield-2048.avif') type('image/avif'),
+      url('/visual/starfield-2048.webp') type('image/webp')
     );
-    animation: dawn-progress linear both;
-    animation-timeline: scroll(root block);
-    pointer-events: none;
-  }
+  background-position: center;
+  background-size: cover;
+  pointer-events: none;
+}
 
-  .dawn-sky::before,
-  .dawn-sky::after {
+/* 스크롤할수록 별이 늘어남: 투명 별 레이어 2장을 스크롤 진행도에 따라 드러낸다.
+   최하단 합성 커버리지는 빌드 스크립트가 20% 상한으로 검사(현재 ≈1%). */
+@supports (animation-timeline: scroll()) {
+  .space-sky::before,
+  .space-sky::after {
     position: absolute;
     inset: 0;
+    background-position: center;
+    background-size: cover;
     content: '';
+    opacity: 0;
+    animation: space-stars-reveal linear both;
+    animation-timeline: scroll(root block);
   }
 
-  .dawn-sky::before {
-    background: radial-gradient(
-      ellipse 70% 55% at 18% 30%,
-      color-mix(in srgb, var(--red) 34%, transparent),
-      transparent 70%
+  .space-sky::before {
+    background-image: url('/visual/stars-mid-2048.webp');
+    background-image: image-set(
+      url('/visual/stars-mid-2048.avif') type('image/avif'),
+      url('/visual/stars-mid-2048.webp') type('image/webp')
     );
-    opacity: var(--dawn-glow-red);
+    animation-range: 0% 60%;
   }
 
-  .dawn-sky::after {
-    background: linear-gradient(
-      112deg,
-      transparent 42%,
-      color-mix(in srgb, var(--blue) 30%, transparent) 58%,
-      transparent 74%
+  .space-sky::after {
+    background-image: url('/visual/stars-dense-2048.webp');
+    background-image: image-set(
+      url('/visual/stars-dense-2048.avif') type('image/avif'),
+      url('/visual/stars-dense-2048.webp') type('image/webp')
     );
-    opacity: var(--dawn-glow-blue);
+    animation-range: 35% 100%;
   }
+}
 
-  @media (prefers-reduced-motion: reduce) {
-    .dawn-sky {
-      animation-name: dawn-progress-reduced;
-    }
+@keyframes space-stars-reveal {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
 main {
   min-height: 60vh;
+  font-size: calc(var(--type-scale) * 1rem);
 }
 
 /* 팜플렛 접힘 면: 섹션 경계를 수평선 대신 대각선 빛 면으로 */
@@ -234,15 +161,15 @@ h3 {
 }
 
 h1 {
-  font-size: clamp(2.6rem, 7.5vw, 5.4rem);
+  font-size: calc(var(--type-scale) * clamp(2.6rem, 7.5vw, 5.4rem));
 }
 
 h2 {
-  font-size: clamp(2.1rem, 5.5vw, 4rem);
+  font-size: calc(var(--type-scale) * clamp(2.1rem, 5.5vw, 4rem));
 }
 
 h3 {
-  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  font-size: calc(var(--type-scale) * clamp(1.2rem, 2.4vw, 1.5rem));
 }
 
 .display-latin,
@@ -304,7 +231,7 @@ summary {
 
 .eyebrow {
   color: var(--amber);
-  font-size: 0.72rem;
+  font-size: calc(var(--type-scale) * 0.72rem);
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;

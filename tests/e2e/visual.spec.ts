@@ -226,14 +226,14 @@ test('serves every home-scene image as AVIF and WebP derivatives', async ({
   await page.goto('/');
 
   await expect(page.locator('picture source[type="image/avif"]')).toHaveCount(
-    3,
+    1,
   );
   await expect(page.locator('picture source[type="image/webp"]')).toHaveCount(
-    3,
+    1,
   );
 });
 
-test('selects native-capped moon and cover fog candidates on Pixel 7', async ({
+test('selects the native-capped eclipse candidate on Pixel 7', async ({
   page,
 }) => {
   test.skip(
@@ -246,17 +246,7 @@ test('selects native-capped moon and cover fog candidates on Pixel 7', async ({
     page
       .locator('[data-moon-art]')
       .evaluate((image) => (image as HTMLImageElement).currentSrc),
-  ).resolves.toMatch(/moon-960\.avif$/);
-  await expect(
-    page
-      .locator('.home-hero__fog--night')
-      .evaluate((image) => (image as HTMLImageElement).currentSrc),
-  ).resolves.toMatch(/fog-night-1536\.avif$/);
-  await expect(
-    page
-      .locator('.home-hero__fog--dawn')
-      .evaluate((image) => (image as HTMLImageElement).currentSrc),
-  ).resolves.toMatch(/fog-dawn-1536\.avif$/);
+  ).resolves.toMatch(/eclipse-1400\.avif$/);
 });
 
 test('keeps the hero title on two lines and renders Korean headings in Noto Sans KR', async ({
@@ -317,45 +307,50 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
   expect(metrics.introLineHeight).toBeGreaterThan(1);
 });
 
-test('turns the fixed sky from night to dawn as the home page scrolls', async ({
+test('reveals more stars as the home page scrolls, over a fixed base sky', async ({
   page,
 }) => {
   await page.goto('/');
-  const sky = page.locator('.dawn-sky');
+  const sky = page.locator('.space-sky');
   await expect(sky).toHaveAttribute('aria-hidden', 'true');
+
+  const sample = () =>
+    page.evaluate(() => {
+      const element = document.querySelector('.space-sky')!;
+      const style = getComputedStyle(element);
+      return {
+        position: style.position,
+        backgroundImage: style.backgroundImage,
+        mid: Number(getComputedStyle(element, '::before').opacity),
+        dense: Number(getComputedStyle(element, '::after').opacity),
+      };
+    });
+  const top = await sample();
+  expect(top.position).toBe('fixed');
+  expect(top.backgroundImage).toMatch(/starfield-2048\.(?:avif|webp)/);
 
   const supportsScrollTimeline = await page.evaluate(() =>
     CSS.supports('animation-timeline: scroll()'),
   );
   test.skip(!supportsScrollTimeline, 'static fallback browser');
+  expect(top.mid).toBe(0);
+  expect(top.dense).toBe(0);
 
-  const sample = () =>
-    page.evaluate(() => {
-      const element = document.querySelector('.dawn-sky')!;
-      return getComputedStyle(element).backgroundColor;
-    });
-  const top = await sample();
   await page.evaluate(() =>
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: 'instant',
     }),
   );
-
-  await expect
-    .poll(async () => {
-      const [r = 0, , b = 0] = (await sample()).match(/\d+/g)!.map(Number);
-      return r > b;
-    })
-    .toBe(true);
-
+  await expect.poll(async () => (await sample()).dense).toBe(1);
   const bottom = await sample();
-  expect(top).not.toBe(bottom);
+  expect(bottom.mid).toBe(1);
+  expect(bottom.backgroundImage).toBe(top.backgroundImage);
 });
 
-test('does not mount the dawn sky on sub-pages', async ({ page }) => {
+test('does not mount the space sky on sub-pages', async ({ page }) => {
   await page.goto('/discover/');
-  await expect(page.locator('.dawn-sky')).toHaveCount(0);
+  await expect(page.locator('.space-sky')).toHaveCount(0);
   const bodyBackgroundImage = await page.evaluate(
     () => getComputedStyle(document.body).backgroundImage,
   );
@@ -421,7 +416,7 @@ test('plays each scene transition once and leaves nothing running afterwards', a
             animation.playState === 'running' &&
             !(
               animation.effect as KeyframeEffect | null
-            )?.target?.classList.contains('dawn-sky'),
+            )?.target?.classList.contains('space-sky'),
         ).length,
   );
   expect(running).toBe(0);

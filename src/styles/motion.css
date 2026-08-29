@@ -24,7 +24,9 @@
     transition-duration: 0.01ms !important;
   }
 
-  .dawn-sky {
+  /* 스크롤 연동 레이어는 duration이 auto여야 한다(자율 모션 아님) */
+  .space-sky::before,
+  .space-sky::after {
     animation-duration: auto !important;
   }
 }
