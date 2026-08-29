@@ -102,6 +102,8 @@ async function collectPageRasters(html, htmlFile) {
     if (pictureImages.has(image)) continue;
     const src = readAttribute(image, 'src');
     if (!src) throw new Error(`Malformed img without src in ${htmlFile}`);
+    // Hotlinked images (e.g. Spotify album covers) are not local raster assets and are excluded from the budget.
+    if (/^https?:/i.test(src)) continue;
     const asset = resolveReferencedAsset(src, htmlFile);
     if (!isRasterAsset(asset))
       throw new Error(`Unparseable raster asset reference: ${src}`);
