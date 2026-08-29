@@ -69,7 +69,6 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
         return;
       }
 
-      this.dataset.reveal = 'pending';
       this.startEntrance();
     }
 
@@ -159,34 +158,39 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
     }
 
     private async animateEntrance() {
-      const { animate } = await import('motion');
-      const hero = this.closest<HTMLElement>('[data-home-hero]');
-      const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
-      const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');
+      try {
+        const { animate } = await import('motion');
+        this.dataset.reveal = 'pending';
+        const hero = this.closest<HTMLElement>('[data-home-hero]');
+        const moon = hero?.querySelector<HTMLElement>('[data-moon-art]');
+        const fog = hero?.querySelector<HTMLElement>('[data-hero-fog]');
 
-      if (!moon || !fog || !this.isConnected) {
+        if (!moon || !fog || !this.isConnected) {
+          this.dataset.reveal = 'done';
+          return;
+        }
+
+        this.dataset.motionState = 'running';
+        const sequence: import('motion').AnimationSequence = [
+          [moon, { transform: ['translate3d(0, 0, 0) scale(1)'] }],
+          [fog, { opacity: [1] }, { at: 0.12 }],
+        ];
+        this.entranceControls = animate(sequence, {
+          duration: 0.62,
+          defaultTransition: { ease: [0.22, 1, 0.36, 1] },
+        });
+        await this.entranceControls.finished;
+        if (!this.isConnected) return;
+        this.shadow.classList.remove('is-crossing');
+        void this.shadow.offsetWidth;
+        this.shadow.classList.add('is-crossing');
+        window.setTimeout(() => {
+          this.dataset.reveal = 'done';
+        }, 220);
+        this.dataset.motionState = 'resting';
+      } catch {
         this.dataset.reveal = 'done';
-        return;
       }
-
-      this.dataset.motionState = 'running';
-      const sequence: import('motion').AnimationSequence = [
-        [moon, { transform: ['translate3d(0, 0, 0) scale(1)'] }],
-        [fog, { opacity: [1] }, { at: 0.12 }],
-      ];
-      this.entranceControls = animate(sequence, {
-        duration: 0.62,
-        defaultTransition: { ease: [0.22, 1, 0.36, 1] },
-      });
-      await this.entranceControls.finished;
-      if (!this.isConnected) return;
-      this.shadow.classList.remove('is-crossing');
-      void this.shadow.offsetWidth;
-      this.shadow.classList.add('is-crossing');
-      window.setTimeout(() => {
-        this.dataset.reveal = 'done';
-      }, 220);
-      this.dataset.motionState = 'resting';
     }
   }
 
