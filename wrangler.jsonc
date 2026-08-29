@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "weeknd-goyang-guide",
+  "compatibility_date": "2026-08-29",
+  "assets": {
+    "directory": "./dist",
+    "run_worker_first": false,
+  },
+}

@@ -21,3 +21,10 @@
 2. 각 파일은 `post-show` 상태, 실제 공연 곡의 순서 목록, 최소 두 개의 검증 출처, 실제 확인 날짜를 포함해야 한다.
 3. 두 파일이 모두 존재하고 감사에 통과하기 전에는 `src/data/concert/goyang-2026.json`의 `archivePublished`를 `true`로 바꾸지 않는다.
 4. 두 파일을 추가한 뒤 `npm run audit:content && npm run build`를 다시 실행한다. 두 게이트가 모두 통과한 경우에만 양일 아카이브를 공개한다.
+
+## Cloudflare 정적 배포 운영
+
+1. 배포 전 Node.js 22.14.0에서 `npm ci`, `PUBLIC_SITE_URL=https://fan-guide.test npm run verify`, `npx wrangler deploy --dry-run`을 순서대로 실행한다. dry-run은 구성과 `dist/`만 검증하며 게시하지 않는다.
+2. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
+3. 실제 배포는 인증된 Cloudflare 계정과 명시적 프로덕션 권한이 있을 때만 `PUBLIC_SITE_URL=https://<실제-origin> npm run deploy`로 실행한다. 권한 없는 자동화와 콘텐츠 갱신은 실제 배포를 실행하지 않는다.
+4. 최초 승인 배포에서 Wrangler가 출력한 HTTPS origin을 기록하고, 해당 값을 `PUBLIC_SITE_URL`로 지정해 다시 빌드·배포한다. 두 번째 배포 뒤 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 실제 HTTPS origin에서 점검한다.
