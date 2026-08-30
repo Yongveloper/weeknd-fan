@@ -1,0 +1,96 @@
+---
+interface Props {
+  label?: string;
+  openLabel?: string;
+  ariaLabel?: string;
+  id?: string;
+  open?: boolean;
+  class?: string;
+}
+
+const {
+  label,
+  openLabel = '접기',
+  ariaLabel,
+  id,
+  open = false,
+  class: className,
+} = Astro.props;
+const hasSummarySlot = Astro.slots.has('summary');
+---
+
+<details
+  class:list={['disclosure', className]}
+  data-disclosure
+  id={id}
+  open={open || undefined}
+  aria-label={ariaLabel}
+>
+  <summary>
+    {
+      hasSummarySlot ? (
+        <slot name="summary" />
+      ) : (
+        <span
+          class="disclosure__label"
+          data-label-closed={label}
+          data-label-open={openLabel}
+        >
+          {label}
+        </span>
+      )
+    }
+    <slot name="meta" />
+    <svg
+      class="disclosure__chevron"
+      aria-hidden="true"
+      viewBox="0 0 16 16"
+      width="16"
+      height="16"
+    >
+      <path
+        d="M3 6l5 5 5-5"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"></path>
+    </svg>
+  </summary>
+  <div class="disclosure__panel"><slot /></div>
+</details>
+
+<script src="../../scripts/disclosure.ts"></script>
+
+<style>
+  .disclosure {
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-height: 44px;
+    padding: 0.9rem 0.2rem;
+    color: var(--ivory);
+    cursor: pointer;
+    font-weight: 800;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .disclosure__chevron {
+    flex: 0 0 auto;
+    margin-inline-start: auto;
+    color: var(--amber);
+    transition: transform var(--motion-fast) var(--ease-cinematic);
+  }
+  .disclosure[open]:not([data-closing]) > summary .disclosure__chevron {
+    transform: rotate(180deg);
+  }
+  .disclosure__panel {
+    padding-block: 0.2rem 1.5rem;
+  }
+</style>

@@ -3,6 +3,7 @@ import AlbumCover from '../content/AlbumCover.astro';
 import OfficialEmbed from '../content/OfficialEmbed.astro';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
+import Disclosure from '../ui/Disclosure.astro';
 import type {
   AlbumRecord,
   SetlistRecord,
@@ -87,49 +88,69 @@ const editorial = getSetlistEditorialMetadata(entries);
       {
         entries.map((entry) => (
           <li>
-            <details>
-              <summary data-affordance="+">
-                <span>
-                  {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
-                </span>
-                {/* Visual density hint only — album is announced in the expanded metadata below. */}
-                <span class="expected-setlist__album-tag" aria-hidden="true">
-                  {entry.data.album}
-                </span>
-              </summary>
+            <Disclosure class="expected-setlist__item">
+              <span slot="summary" class="expected-setlist__song">
+                {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+              </span>
+              {/* Visual density hint only — album is announced in the expanded metadata below. */}
+              <span
+                slot="meta"
+                class="expected-setlist__album-tag"
+                aria-hidden="true"
+              >
+                {entry.data.album}
+              </span>
               <div class="expected-setlist__detail">
-                <p class="expected-setlist__metadata">
+                <div class="song-meta">
                   {(() => {
                     const album = findAlbumByTitle(albums, entry.data.album);
                     return album ? (
-                      <AlbumCover album={album} size={32} />
+                      <AlbumCover album={album} size={48} />
                     ) : null;
                   })()}
-                  <span>{entry.data.album}</span>
-                  <span>신뢰도 {entry.data.confidence}</span>
+                  <span class="song-meta__album">{entry.data.album}</span>
+                  <span class="song-meta__pill">
+                    신뢰도 {entry.data.confidence}
+                  </span>
                   <StatusBadge status={entry.data.status} />
-                </p>
-                <h3>공연 전에 알면 좋은 한 문장</h3>
-                <p>{entry.data.summary}</p>
-                <h3>무대에서 볼 것</h3>
-                <p>{entry.data.liveNote}</p>
-                <h3>떼창 포인트</h3>
-                <p>{entry.data.singAlongNote}</p>
+                </div>
+
+                <div class="song-block">
+                  <p class="eyebrow">BEFORE</p>
+                  <h3>공연 전에 알면 좋은 한 문장</h3>
+                  <p>{entry.data.summary}</p>
+                </div>
+                <div class="song-block">
+                  <p class="eyebrow">ON STAGE</p>
+                  <h3>무대에서 볼 것</h3>
+                  <p>{entry.data.liveNote}</p>
+                </div>
+                <div class="song-block">
+                  <p class="eyebrow">SING ALONG</p>
+                  <h3>떼창 포인트</h3>
+                  <p>{entry.data.singAlongNote}</p>
+                </div>
+
                 {entry.data.officialListenUrl && (
-                  <OfficialEmbed
-                    url={entry.data.officialListenUrl}
-                    songTitle={entry.data.songTitle}
-                  />
+                  <div class="song-embed">
+                    <OfficialEmbed
+                      url={entry.data.officialListenUrl}
+                      songTitle={entry.data.songTitle}
+                    />
+                  </div>
                 )}
-                <h3>출처</h3>
-                <SourceList
-                  sources={resolveSourceReferences(
-                    entry.data.observedIn,
-                    sources,
-                  )}
-                />
+
+                <div class="song-sources">
+                  <h3>출처</h3>
+                  <SourceList
+                    sources={resolveSourceReferences(
+                      entry.data.observedIn,
+                      sources,
+                    )}
+                  />
+                </div>
               </div>
-            </details>
+            </Disclosure>
           </li>
         ))
       }
@@ -188,50 +209,26 @@ const editorial = getSetlistEditorialMetadata(entries);
     list-style: none;
   }
 
-  details,
+  .expected-setlist__list :global(.expected-setlist__item),
   .actual-setlist article {
     border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }
 
-  .expected-setlist__list li:last-child details,
+  .expected-setlist__list :global(.expected-setlist__item) {
+    border-bottom: 0;
+  }
+
+  .expected-setlist__list li:last-child :global(.expected-setlist__item),
   .actual-setlist article:last-child {
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }
 
-  summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-height: 44px;
-    padding: 0.9rem 0.2rem;
-    color: var(--ivory);
-    cursor: pointer;
+  .expected-setlist__song {
     font-size: clamp(1.05rem, 2.4vw, 1.45rem);
-    font-weight: 800;
-    list-style: none;
-  }
-
-  summary::-webkit-details-marker {
-    display: none;
-  }
-
-  summary::after {
-    content: attr(data-affordance) / '';
-    color: var(--amber);
-    font-family: var(--font-display);
-    font-size: 1.4em;
-    line-height: 1;
-    transition: transform var(--motion-fast) var(--ease-cinematic);
-  }
-
-  details[open] > summary::after {
-    transform: rotate(45deg);
   }
 
   .expected-setlist__album-tag {
     flex-shrink: 0;
-    margin-inline-start: auto;
     overflow: hidden;
     max-width: 40%;
     color: var(--mist);
@@ -246,49 +243,99 @@ const editorial = getSetlistEditorialMetadata(entries);
 
   .expected-setlist__detail {
     display: grid;
-    gap: 0.65rem;
-    padding: 0.2rem 0.2rem 1.5rem;
+    gap: 1.25rem;
+    padding: 0 0.2rem;
   }
 
-  details[open] > .expected-setlist__detail {
-    animation: detail-reveal 180ms var(--ease-cinematic) both;
-  }
-
-  @keyframes detail-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
-  }
-
-  .expected-setlist__detail h3,
-  .actual-setlist h3 {
-    margin: 0.85rem 0 0;
-    color: var(--amber);
-    font-size: 0.85rem;
-  }
-
-  .expected-setlist__detail p {
-    margin: 0;
-    color: var(--mist);
-  }
-
-  .expected-setlist__metadata {
+  .song-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem 1rem;
+    gap: 0.6rem 0.9rem;
     align-items: center;
-    color: var(--ivory) !important;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    color: var(--ivory);
     font-size: 0.84rem;
     font-weight: 800;
   }
 
+  .song-meta__album {
+    font-weight: 900;
+  }
+
+  .song-meta__pill {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--mist) 40%, transparent);
+    border-radius: 999px;
+    color: var(--mist);
+    font-size: 0.76rem;
+  }
+
+  .song-block {
+    display: grid;
+    gap: 0.35rem;
+    padding-inline-start: 0.9rem;
+    border-inline-start: 2px solid var(--amber);
+  }
+
+  .song-block .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+  }
+
+  .song-block h3 {
+    margin: 0;
+    color: var(--ivory);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .song-block p:not(.eyebrow) {
+    margin: 0;
+    color: var(--mist);
+  }
+
+  .song-embed {
+    padding-inline-start: calc(0.9rem + 2px);
+  }
+
+  .song-sources {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+
+  .song-sources h3 {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .song-sources :global(.source-list) {
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--mist) 60%, transparent);
+  }
+
+  /* .song-sources doubled to out-specificity SourceList's own
+     `.source-list a { color: var(--ivory) }` rule, which ties otherwise. */
+  .song-sources.song-sources :global(.source-list a) {
+    color: var(--mist);
+  }
+
   .actual-setlist article {
     padding: 1.25rem 0;
+  }
+
+  .actual-setlist h3 {
+    margin: 0.85rem 0 0;
+    color: var(--amber);
+    font-size: 0.85rem;
   }
 
   .actual-setlist ol {
