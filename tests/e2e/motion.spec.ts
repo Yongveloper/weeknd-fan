@@ -13,8 +13,49 @@ test('hides data-enter elements until they scroll into view, then reveals them o
   await fanNote.scrollIntoViewIfNeeded();
   await expect(fanNote).toHaveAttribute('data-enter', 'in');
   await expect
+    .poll(
+      async () => {
+        const opacity = Number(
+          await fanNote.evaluate((el) => getComputedStyle(el).opacity),
+        );
+        return opacity > 0 && opacity < 1;
+      },
+      { timeout: 600 },
+    )
+    .toBe(true);
+  await expect
     .poll(() => fanNote.evaluate((el) => getComputedStyle(el).opacity))
     .toBe('1');
+});
+
+test('staggers data-enter-group children via --enter-i and transition-delay', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const group = page.locator('.site-footer__inner');
+  await expect(group).toHaveAttribute('data-enter-group', '');
+  const children = group.locator(':scope > *');
+
+  await group.scrollIntoViewIfNeeded();
+  await expect(group).toHaveAttribute('data-enter', 'in');
+
+  const [firstIndex, secondIndex] = await Promise.all([
+    children
+      .nth(0)
+      .evaluate((el) => getComputedStyle(el).getPropertyValue('--enter-i').trim()),
+    children
+      .nth(1)
+      .evaluate((el) => getComputedStyle(el).getPropertyValue('--enter-i').trim()),
+  ]);
+  expect(firstIndex).toBe('0');
+  expect(secondIndex).toBe('1');
+
+  const [firstDelay, secondDelay] = await Promise.all([
+    children.nth(0).evaluate((el) => getComputedStyle(el).transitionDelay),
+    children.nth(1).evaluate((el) => getComputedStyle(el).transitionDelay),
+  ]);
+  expect(firstDelay).toBe('0s');
+  expect(secondDelay).toBe('0.06s');
 });
 
 test('shows everything immediately under reduced motion', async ({ page }) => {

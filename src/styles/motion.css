@@ -21,6 +21,10 @@
   animation: none;
 }
 
+::view-transition-group(site-header) {
+  animation: none;
+}
+
 @keyframes vt-out {
   to {
     opacity: 0;
@@ -47,7 +51,7 @@ html[data-motion-ready] [data-enter-group]:not([data-enter='in']) > * {
    빠지는 첫 프레임에는 transition이 붙지 않도록 한다(그렇지 않으면 화면 밖
    요소가 로드 시 opacity 1→0으로 보이지 않게 애니메이션 재생됨). */
 html[data-motion-ready] [data-enter='in'],
-html[data-motion-ready] [data-enter-group='in'] > * {
+html[data-motion-ready] [data-enter-group][data-enter='in'] > * {
   transition:
     opacity var(--motion-scene) var(--ease-out-expo),
     transform var(--motion-scene) var(--ease-out-expo),
