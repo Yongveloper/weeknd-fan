@@ -294,3 +294,5 @@ html[data-js] [data-reveal-group]:not([data-reveal='in']) > * {
 6. **소유권 추가**: `tests/e2e/navigation.spec.ts` → B (고양 관련 단언 갱신; 셋리스트 단언은 A가 호환 유지), `tests/e2e/no-js.spec.ts` → 수정 금지(A·B 모두 호환 유지), `src/styles/global.css` → C.
 7. **CTA glow**는 공통 CTA 클래스가 없어 생략. 마이크로 인터랙션은 본문 링크 밑줄 드로우만.
 8. **마이너**: `Disclosure`에 `ariaLabel` prop 추가(기존 `details aria-label` 유지용 — `no-js.spec.ts`가 `getByRole('group', { name: '1분 입문 더 깊이 보기' })`로 조회).
+9. **토큰명**: §3.1의 `--reveal-y / --reveal-blur / --reveal-stagger` → **`--enter-y / --enter-blur / --enter-stagger`** (속성명 개명과 일치).
+10. **계획 문서**: `docs/superpowers/plans/2026-08-30-{a-disclosure,c-motion,b-goyang-guide}.md`. B의 리서치 입력은 각 worktree의 `.superpowers/tmp/b-inputs/`(gitignored)에 둔다.

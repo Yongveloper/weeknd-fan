@@ -100,6 +100,8 @@ const guides = defineCollection({
       'return',
       'packing',
       'pending',
+      'seating',
+      'tips',
     ]),
   }),
 });

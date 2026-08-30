@@ -17,4 +17,10 @@
   --motion-fast: 180ms;
   --motion-scene: 620ms;
   --ease-cinematic: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-slow: 900ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  /* 등장 애니메이션(data-enter) 규약 값 */
+  --enter-y: 14px;
+  --enter-blur: 6px;
+  --enter-stagger: 60ms;
 }
