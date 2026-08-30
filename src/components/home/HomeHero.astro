@@ -57,12 +57,13 @@ if (!dayOne || !dayTwo) {
       </h1>
       <p class="home-hero__facts">
         <span>2026.10.07—08</span>
-        <span aria-hidden="true">·</span>
         <span>{concert.data.venue}</span>
-        <span aria-hidden="true">·</span>
         <span>{concert.data.ageRestriction}</span>
-        <a href={officialNoticeUrl} rel="noreferrer">공식 공지 ↗</a>
+        <a href={officialNoticeUrl} rel="noreferrer">공식 공지</a>
       </p>
+      <a class="home-hero__next" href="#intro"
+        >3분 만에 The Weeknd 알기 <span aria-hidden="true">↓</span></a
+      >
     </div>
   </div>
 </section>
@@ -212,12 +213,39 @@ if (!dayOne || !dayTwo) {
     text-shadow: 0 1px 12px var(--night);
   }
 
+  .home-hero__facts span + span::before {
+    margin-right: 0.6rem;
+    content: '·' / '';
+  }
+
   .home-hero__facts a {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
     color: var(--amber);
     font-weight: 800;
+  }
+
+  /* inline-flex drops the leading space of the global external-link arrow */
+  .home-hero__facts a::after {
+    margin-left: 0.3em;
+  }
+
+  .home-hero__next {
+    display: inline-flex;
+    gap: 0.4rem;
+    align-items: center;
+    min-height: 44px;
+    margin-top: 0.75rem;
+    color: var(--ivory);
+    font-size: calc(var(--type-scale) * 0.95rem);
+    font-weight: 800;
+    text-shadow: 0 1px 12px var(--night);
+  }
+
+  .home-hero__next:hover,
+  .home-hero__next:focus-visible {
+    color: var(--amber);
   }
 
   @media (max-width: 42rem) {

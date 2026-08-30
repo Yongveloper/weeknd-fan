@@ -25,11 +25,18 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
     오는 길 안내 출처:
     <a href={INTERPARK} target="_blank" rel="noreferrer"
       >인터파크 티켓 공연 상세</a
-    > (2026-08-29 확인). 탭하면 원본 이미지가 새 탭에서 열립니다.
+    >
+    <span class="nowrap">(2026-08-29 확인)</span>. 탭하면 원본 이미지가 새
+    탭에서 열립니다.
   </figcaption>
 </figure>
 
 <style>
+  /* "(2026-08-29 확인)" would otherwise split at the hyphen on narrow screens */
+  .nowrap {
+    white-space: nowrap;
+  }
+
   .access-map {
     display: grid;
     gap: 0.6rem;

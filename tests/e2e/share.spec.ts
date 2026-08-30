@@ -42,14 +42,18 @@ test('creates a ticket download without submission or browser storage', async ({
   await page.goto('/share/ticket/');
 
   const button = page.getByRole('button', { name: 'D-day 티켓 저장' });
-  await expect(button).toBeDisabled();
+  await expect(button).toBeEnabled();
+  await button.click();
+  await expect(page.getByRole('alert')).toHaveText(
+    '서로 다른 세 곡을 선택해 주세요.',
+  );
   await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
   await expect(
     page.getByLabel('두 번째 곡').locator('option').nth(1),
   ).toHaveAttribute('disabled', '');
   await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
   await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
-  await expect(button).toBeEnabled();
+  await expect(page.getByRole('alert')).toBeHidden();
 
   const download = page.waitForEvent('download');
   await button.click();

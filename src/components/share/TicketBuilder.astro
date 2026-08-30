@@ -55,15 +55,19 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       }
     </div>
 
-    <button type="button" disabled data-download-ticket>D-day 티켓 저장</button>
+    <button type="button" data-download-ticket>D-day 티켓 저장</button>
     <p class="privacy-note">
-      이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
+      서로 다른 세 곡을 고르면 티켓에 담겨요. 이미지는 이 브라우저 안에서만
+      생성되며 선택값을 저장하지 않습니다.
     </p>
     <p class="status" aria-live="polite" data-status></p>
     <p class="error" role="alert" hidden data-error></p>
     <div class="share-fallback">
-      <a href="/og/default.jpg">기본 공유 이미지 보기</a>
-      <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+      <p class="share-fallback__title">이미지 저장이 안 되면</p>
+      <div class="share-fallback__actions">
+        <a href="/og/default.jpg">기본 공유 이미지 보기</a>
+        <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+      </div>
       <code data-share-url>{shareUrl}</code>
     </div>
   </form>
@@ -109,7 +113,6 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
             );
           });
         });
-        button.disabled = selected.length !== 3 || new Set(selected).size !== 3;
       };
 
       selects.forEach((select) =>
@@ -180,6 +183,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           error.hidden = false;
           status.textContent = '';
         } finally {
+          button.disabled = false;
           refresh();
         }
       });
@@ -278,13 +282,36 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     margin: 0;
   }
   .share-fallback {
-    align-items: center;
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .share-fallback__title {
+    margin: 0;
+    color: var(--ivory);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+  .share-fallback__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.7rem 1rem;
+    align-items: center;
   }
-  .share-fallback a {
+  .share-fallback__actions a {
     color: var(--ivory);
     font-weight: 800;
+  }
+  .share-fallback button {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--amber) 60%, transparent);
+    color: var(--ivory);
+    min-height: 44px;
+  }
+  .share-fallback code {
+    overflow-wrap: anywhere;
+    color: var(--mist);
+    font-size: 0.85rem;
   }
 </style>

@@ -41,37 +41,41 @@ const jump = [
         확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 두고, 다른 공연
         후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.
       </p>
+    </header>
+    <div class="guide-body">
       <nav class="guide-jump" aria-label="가이드 섹션">
         {jump.map((item) => <a href={`#${item.id}`}>{item.label}</a>)}
       </nav>
-    </header>
-    {
-      sections.map((entry) => (
-        <>
-          <GuideSection entry={entry} sources={sources}>
-            {entry.data.section === 'transport' && (
-              <div class="guide-transport">
-                <AccessTable />
-                <AccessMap />
-                <DirectionsLinks />
-                <LiveMap />
-              </div>
+      {
+        sections.map((entry) => (
+          <>
+            <GuideSection entry={entry} sources={sources}>
+              {entry.data.section === 'transport' && (
+                <AccessTable slot="lead" />
+              )}
+              {entry.data.section === 'transport' && (
+                <div class="guide-transport">
+                  <AccessMap />
+                  <DirectionsLinks />
+                  <LiveMap />
+                </div>
+              )}
+              {entry.data.section === 'seating' && <SeatMap />}
+            </GuideSection>
+            {entry.data.section === 'seating' && (
+              <TipsTabs entries={tips} sources={sources} />
             )}
-            {entry.data.section === 'seating' && <SeatMap />}
-          </GuideSection>
-          {entry.data.section === 'seating' && (
-            <TipsTabs entries={tips} sources={sources} />
-          )}
-        </>
-      ))
-    }
+          </>
+        ))
+      }
+    </div>
   </section>
 </BaseLayout>
 
 <style>
   .guide-page {
     display: grid;
-    gap: clamp(4rem, 11vw, 9rem);
+    gap: 2rem;
     padding-block: clamp(4rem, 10vw, 8rem);
   }
   header {
@@ -79,14 +83,44 @@ const jump = [
     gap: 1rem;
     max-width: 58rem;
   }
+  /* The jump nav sticks for the whole body, so a 9,000px page stays navigable
+     without scrolling back to the top. Sections offset their anchors to clear it. */
+  .guide-body {
+    display: grid;
+    gap: clamp(4rem, 11vw, 9rem);
+  }
   .guide-jump {
+    position: sticky;
+    top: 0;
+    z-index: 2;
     display: flex;
-    flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 0.5rem;
+    margin-inline: calc(var(--gutter) * -1);
+    padding: 0.6rem var(--gutter);
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
+    background: color-mix(in srgb, var(--night) 82%, transparent);
+    backdrop-filter: blur(14px);
+  }
+  .guide-jump::-webkit-scrollbar {
+    display: none;
+  }
+  @media (max-width: 44rem) {
+    .guide-jump {
+      scroll-padding-inline: var(--gutter) 3rem;
+      mask-image: linear-gradient(
+        90deg,
+        transparent,
+        #000 var(--gutter),
+        #000 calc(100% - 3rem),
+        transparent
+      );
+    }
   }
   .guide-jump a {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     min-height: 44px;
     padding: 0.45rem 0.9rem;
@@ -96,6 +130,7 @@ const jump = [
     font-size: 0.85rem;
     font-weight: 800;
     text-decoration: none;
+    white-space: nowrap;
   }
   .guide-jump a:hover,
   .guide-jump a:focus-visible {

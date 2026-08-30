@@ -17,7 +17,7 @@ if (!reduce) {
           sceneObserver.unobserve(entry.target);
         }
       },
-      { threshold: 0.35 },
+      { threshold: 0.2 },
     );
     scenes.forEach((scene) => sceneObserver.observe(scene));
   }

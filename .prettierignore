@@ -2,3 +2,4 @@
 .superpowers/
 dist/
 docs/superpowers/
+.playwright-mcp/

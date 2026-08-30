@@ -7,6 +7,15 @@ const sources = await getCollection('sources');
 const supportingSources = sources.filter(
   (source) => source.data.kind === 'editorial-reference',
 );
+type SourceEntry = (typeof sources)[number];
+/** One shared date per group keeps 40+ identical "마지막 확인" lines out of the list. */
+const sharedCheckedDate = (records: SourceEntry[]) => {
+  const dates = new Set(
+    records.map((source) => formatSeoulDate(source.data.lastCheckedAt)),
+  );
+  return dates.size === 1 ? [...dates][0] : undefined;
+};
+const supportingDate = sharedCheckedDate(supportingSources);
 const groups: Array<{
   title: string;
   description: string;
@@ -60,6 +69,7 @@ const checkpoints = [
           const records = sources.filter((source) =>
             group.kinds.includes(source.data.kind),
           );
+          const sharedDate = sharedCheckedDate(records);
           return (
             <section
               class="source-group"
@@ -68,6 +78,11 @@ const checkpoints = [
               <div>
                 <h2 id={`source-group-${group.title}`}>{group.title}</h2>
                 <p>{group.description}</p>
+                {sharedDate && (
+                  <p class="source-group__checked">
+                    전체 마지막 확인 {sharedDate}
+                  </p>
+                )}
               </div>
               <ul>
                 {records.map((source) => (
@@ -75,9 +90,11 @@ const checkpoints = [
                     <a href={source.data.url} target="_blank" rel="noreferrer">
                       {source.data.name}
                     </a>
-                    <span>
-                      마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
-                    </span>
+                    {!sharedDate && (
+                      <span>
+                        마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -92,6 +109,13 @@ const checkpoints = [
             후보와 용어를 찾는 보조 자료이며, 핵심 사실은 위 원문으로 다시
             확인합니다.
           </p>
+          {
+            supportingDate && (
+              <p class="source-group__checked">
+                전체 마지막 확인 {supportingDate}
+              </p>
+            )
+          }
         </div>
         <ul>
           {
@@ -100,9 +124,11 @@ const checkpoints = [
                 <a href={source.data.url} target="_blank" rel="noreferrer">
                   {source.data.name}
                 </a>
-                <span>
-                  마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
-                </span>
+                {!supportingDate && (
+                  <span>
+                    마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+                  </span>
+                )}
               </li>
             ))
           }
@@ -203,9 +229,13 @@ const checkpoints = [
     color: var(--ivory);
     font-weight: 800;
   }
-  .source-group li > span {
+  .source-group li > span,
+  .source-group__checked {
     color: var(--ink-muted);
     font-size: 0.86rem;
+  }
+  .source-group__checked {
+    font-weight: 700;
   }
 
   .sources-page__checkpoints {

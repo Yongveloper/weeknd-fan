@@ -248,10 +248,11 @@ const initialClock = [initial.hours, initial.minutes, initial.seconds]
 
   [data-caption] {
     --label-drop: 0.72;
-    color: var(--mist);
-    font-size: calc(var(--type-scale) * 0.78rem);
+    color: var(--ivory);
+    font-size: calc(var(--type-scale) * clamp(0.82rem, 1.1vw, 1rem));
     font-weight: 800;
     letter-spacing: 0.12em;
+    text-shadow: 0 0 1rem color-mix(in srgb, var(--night) 80%, transparent);
   }
 
   .sr-only {

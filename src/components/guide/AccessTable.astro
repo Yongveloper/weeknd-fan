@@ -77,11 +77,17 @@ const buses = [
     오는 길 정보 출처:
     <a href={INTERPARK} target="_blank" rel="noreferrer"
       >인터파크 티켓 공연 상세</a
-    > (2026-08-29 확인)
+    >
+    <span class="nowrap">(2026-08-29 확인)</span>
   </p>
 </div>
 
 <style>
+  /* "(2026-08-29 확인)" would otherwise split at the hyphen on narrow screens */
+  .nowrap {
+    white-space: nowrap;
+  }
+
   .access-table {
     display: grid;
     gap: 1rem;

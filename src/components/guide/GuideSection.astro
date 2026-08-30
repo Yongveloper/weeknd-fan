@@ -56,6 +56,7 @@ const pendingItems = [
     )
   }
 
+  <slot name="lead" />
   <div class="guide-section__body"><Content /></div>
   <slot />
   <SourceList sources={entrySources} />
@@ -65,7 +66,7 @@ const pendingItems = [
   .guide-section {
     display: grid;
     gap: 1.25rem;
-    scroll-margin-top: 1rem;
+    scroll-margin-top: 5.5rem;
   }
   .guide-section__heading {
     display: grid;
@@ -95,6 +96,11 @@ const pendingItems = [
   .guide-section__body :global(p),
   .guide-section__body :global(ul) {
     margin: 0;
+  }
+  /* "**대화역 3번 출구**로 나오면…" — the bold opener is the scan anchor of each
+     paragraph; color it like the section's h3 so the eye can skip between them. */
+  .guide-section__body :global(p > strong:first-child) {
+    color: var(--amber);
   }
   .guide-section__body :global(ul) {
     display: grid;
