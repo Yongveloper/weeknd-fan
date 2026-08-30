@@ -41,14 +41,13 @@ test('links to Kakao, Naver, and Google directions', async ({ page }) => {
   }
 });
 
-test('loads the live map iframe only after a click', async ({ page }) => {
+test('renders the live map iframe on load', async ({ page }) => {
   await page.goto('/goyang/');
-  await expect(page.locator('#transport iframe')).toHaveCount(0);
-  await page.getByRole('button', { name: '실제 지도 불러오기' }).click();
   const frame = page.locator('#transport iframe');
   await expect(frame).toHaveCount(1);
   await expect(frame).toHaveAttribute('src', /google\.com\/maps/);
   await expect(frame).toHaveAttribute('title', '고양종합운동장 지도');
+  await expect(frame).toHaveAttribute('loading', 'lazy');
 });
 
 test('draws the rebuilt schematic map with both stations', async ({ page }) => {
