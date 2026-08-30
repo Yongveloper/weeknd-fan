@@ -139,3 +139,20 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
   );
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
 });
+
+test('keeps every tips tab inside the viewport on mobile', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'mobile-chromium',
+    'narrow-viewport layout only',
+  );
+  await page.goto('/goyang/');
+  const viewport = page.viewportSize();
+  expect(viewport).not.toBeNull();
+  const tabs = page.locator('#tips [role="tab"]');
+  await expect(tabs).toHaveCount(5);
+  const fifth = await tabs.nth(4).boundingBox();
+  expect(fifth).not.toBeNull();
+  expect(fifth!.x + fifth!.width).toBeLessThanOrEqual(viewport!.width);
+});

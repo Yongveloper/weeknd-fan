@@ -188,6 +188,12 @@ const latest = entries.reduce(
     background: color-mix(in srgb, var(--amber) 16%, transparent);
     color: var(--ivory);
   }
+  @media (max-width: 36rem) {
+    .tips__tabs [role='tablist'] {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
   .tips__panel {
     display: grid;
     gap: 0.9rem;
