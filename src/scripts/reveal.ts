@@ -1,0 +1,48 @@
+export {};
+
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+if (!reduce) {
+  document.documentElement.dataset.motionReady = 'true';
+
+  const scenes = document.querySelectorAll<HTMLElement>(
+    '[data-motion-scene-enter]',
+  );
+  if (scenes.length > 0) {
+    const sceneObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          (entry.target as HTMLElement).dataset.motionState = 'entered';
+          sceneObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.35 },
+    );
+    scenes.forEach((scene) => sceneObserver.observe(scene));
+  }
+
+  const groups = document.querySelectorAll<HTMLElement>('[data-enter-group]');
+  for (const group of groups) {
+    Array.from(group.children).forEach((child, index) => {
+      (child as HTMLElement).style.setProperty('--enter-i', String(index));
+    });
+  }
+
+  const targets = document.querySelectorAll<HTMLElement>(
+    '[data-enter]:not([data-enter="in"]), [data-enter-group]:not([data-enter="in"])',
+  );
+  if (targets.length > 0) {
+    const enterObserver = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          (entry.target as HTMLElement).dataset.enter = 'in';
+          enterObserver.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -10% 0px' },
+    );
+    targets.forEach((target) => enterObserver.observe(target));
+  }
+}

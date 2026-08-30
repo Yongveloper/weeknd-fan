@@ -8,6 +8,23 @@
   animation-timing-function: var(--ease-cinematic);
 }
 
+/* 등장: 새벽 안개 걷힘. html[data-motion-ready]가 없으면(JS 없음·reduced-motion) 항상 보인다. */
+html[data-motion-ready] [data-enter]:not([data-enter='in']),
+html[data-motion-ready] [data-enter-group]:not([data-enter='in']) > * {
+  opacity: 0;
+  transform: translateY(var(--enter-y));
+  filter: blur(var(--enter-blur));
+}
+
+html[data-motion-ready] [data-enter],
+html[data-motion-ready] [data-enter-group] > * {
+  transition:
+    opacity var(--motion-scene) var(--ease-out-expo),
+    transform var(--motion-scene) var(--ease-out-expo),
+    filter var(--motion-scene) var(--ease-out-expo);
+  transition-delay: calc(var(--enter-i, 0) * var(--enter-stagger));
+}
+
 @media (prefers-reduced-motion: no-preference) {
   [data-motion-scene='running'] .eclipse-countdown__moon {
     will-change: transform;
