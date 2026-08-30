@@ -417,9 +417,7 @@ test('plays each scene transition once and leaves nothing running afterwards', a
             !(
               animation.effect as KeyframeEffect | null
             )?.target?.classList.contains('space-sky') &&
-            !(animation.effect as KeyframeEffect | null)?.target?.closest?.(
-              '[data-enter]',
-            ),
+            !(animation instanceof CSSTransition),
         ).length,
   );
   expect(running).toBe(0);

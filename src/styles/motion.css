@@ -16,11 +16,6 @@
   animation-delay: calc(var(--motion-scene) * 0.35);
 }
 
-::view-transition-old(site-header),
-::view-transition-new(site-header) {
-  animation: none;
-}
-
 ::view-transition-group(site-header) {
   animation: none;
 }

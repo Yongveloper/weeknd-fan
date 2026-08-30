@@ -29,6 +29,8 @@ if (!reduce) {
     });
   }
 
+  // 로드 후 삽입된 노드는 관찰되지 않음(정적 사이트, ClientRouter 없음).
+  // data-enter와 data-enter-group을 같은 요소에 함께 쓰지 않는다(불투명도 중복).
   const targets = document.querySelectorAll<HTMLElement>(
     '[data-enter]:not([data-enter="in"]), [data-enter-group]:not([data-enter="in"])',
   );
@@ -41,7 +43,7 @@ if (!reduce) {
           enterObserver.unobserve(entry.target);
         }
       },
-      { threshold: 0.1, rootMargin: '0px 0px -10% 0px' },
+      { threshold: 0, rootMargin: '0px 0px -10% 0px' },
     );
     targets.forEach((target) => enterObserver.observe(target));
   }
