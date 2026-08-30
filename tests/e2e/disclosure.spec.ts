@@ -118,7 +118,7 @@ test('scopes adopter styles (max-width/min-width/color) to the parent, not Discl
   await expect(intro(page)).toHaveCSS('color', 'rgb(215, 216, 220)');
 
   const timelineFirst = page.locator('.timeline details').first();
-  await expect(timelineFirst).toHaveCSS('min-width', '176px');
+  await expect(timelineFirst).toHaveCSS('max-width', '736px');
 
   await page.goto('/');
   const preview = page.getByRole('group', { name: '전체 예상 셋리스트' });

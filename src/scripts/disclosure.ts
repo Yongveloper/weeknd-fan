@@ -52,13 +52,23 @@ function animatePanel(
 ) {
   panel.style.overflow = 'hidden';
   panel.style.height = `${from}px`;
+  // 패널은 border-box 라 height 가 0 이어도 padding 만큼 남는다(약 27px).
+  // 닫힐 때 padding 도 0 으로 접어야 open=false 순간 점프가 없다. 열릴 때는 반대.
+  const { paddingTop, paddingBottom } = getComputedStyle(panel);
+  const openPad = { paddingTop, paddingBottom };
+  const closedPad = { paddingTop: '0px', paddingBottom: '0px' };
   const animation = panel.animate(
     [
       {
         height: `${from}px`,
         opacity: willOpen ? fromOpacity : fromOpacity || 1,
+        ...(willOpen ? closedPad : openPad),
       },
-      { height: `${to}px`, opacity: willOpen ? 1 : 0 },
+      {
+        height: `${to}px`,
+        opacity: willOpen ? 1 : 0,
+        ...(willOpen ? openPad : closedPad),
+      },
     ],
     {
       duration: readDuration('--motion-scene', 620),
@@ -93,7 +103,9 @@ document.addEventListener('click', (event) => {
   if (!panel) return;
 
   event.preventDefault();
-  const currentHeight = panel.getBoundingClientRect().height;
+  // 닫힌 <details>의 내용은 Chromium에서 content-visibility: hidden 으로 감춰져
+  // getBoundingClientRect 가 마지막 레이아웃 값을 돌려준다(0이 아님). 닫힌 상태는 0으로 고정.
+  const currentHeight = details.open ? panel.getBoundingClientRect().height : 0;
   const fromOpacity = Number(getComputedStyle(panel).opacity) || 0;
   running.get(details)?.cancel();
 
