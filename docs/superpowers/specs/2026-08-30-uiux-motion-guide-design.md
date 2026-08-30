@@ -297,3 +297,4 @@ html[data-js] [data-reveal-group]:not([data-reveal='in']) > * {
 9. **토큰명**: §3.1의 `--reveal-y / --reveal-blur / --reveal-stagger` → **`--enter-y / --enter-blur / --enter-stagger`** (속성명 개명과 일치).
 10. **계획 문서**: `docs/superpowers/plans/2026-08-30-{a-disclosure,c-motion,b-goyang-guide}.md`. B의 리서치 입력은 각 worktree의 `.superpowers/tmp/b-inputs/`(gitignored)에 둔다.
 11. **좌석 안내(§6.4) 사용자 결정**: 자체 제작 구조 개략 SVG·등급 범례 표·"구역 코드 읽는 법"은 넣지 않는다. 인터파크 원본 좌석도 이미지를 재인코딩 없이 그대로 사용하고(탭 시 원본 새 탭), 출처 캡션만 단다. 이를 위해 래스터 예산 상한을 1100→1300KiB로 올린다.
+12. **실제 지도(§6.3-3) 사용자 결정**: 클릭 로드 패턴을 쓰지 않는다. 구글 지도 iframe을 페이지 로드 시 바로 렌더한다(`loading="lazy"`, `referrerpolicy="no-referrer-when-downgrade"`). 서드파티 요청이 로드 시 발생함을 사용자가 수용했다.
