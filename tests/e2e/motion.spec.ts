@@ -71,7 +71,7 @@ test('draws body link underlines with a background-size transition', async ({
   page,
 }) => {
   await page.goto('/sources/');
-  const link = page.locator('main a:not([class])').first();
+  const link = page.locator('main :is(p, li) a:not([class])').first();
   const styles = await link.evaluate((el) => {
     const cs = getComputedStyle(el);
     return {
@@ -83,6 +83,29 @@ test('draws body link underlines with a background-size transition', async ({
   expect(styles.decoration).toBe('none');
   expect(styles.transition).toContain('background-size');
   expect(styles.size).toMatch(/^0(px)? /);
+
+  await link.hover();
+  await expect
+    .poll(() => link.evaluate((el) => getComputedStyle(el).backgroundSize))
+    .toBe('100% 1px');
+});
+
+test('excludes structural links like nav shortcuts from the underline draw', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const navLink = page
+    .locator('nav[aria-label="고양 가이드 바로가기"] a')
+    .first();
+  const styles = await navLink.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return {
+      size: cs.backgroundSize,
+      transition: cs.transitionProperty,
+    };
+  });
+  expect(styles.size).not.toMatch(/^0(px)? /);
+  expect(styles.transition).not.toContain('background-size');
 });
 
 test('shows everything immediately under reduced motion', async ({ page }) => {
