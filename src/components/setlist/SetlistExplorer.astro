@@ -187,16 +187,16 @@ const editorial = getSetlistEditorialMetadata(entries);
     list-style: none;
   }
 
-  .expected-setlist__item,
+  .expected-setlist__list :global(.expected-setlist__item),
   .actual-setlist article {
     border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }
 
-  .expected-setlist__item {
+  .expected-setlist__list :global(.expected-setlist__item) {
     border-bottom: 0;
   }
 
-  .expected-setlist__list li:last-child .expected-setlist__item,
+  .expected-setlist__list li:last-child :global(.expected-setlist__item),
   .actual-setlist article:last-child {
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }

@@ -39,8 +39,8 @@ function animatePanel(
   from: number,
   to: number,
   willOpen: boolean,
+  fromOpacity: number,
 ) {
-  const fromOpacity = Number(getComputedStyle(panel).opacity) || 0;
   panel.style.overflow = 'hidden';
   panel.style.height = `${from}px`;
   const animation = panel.animate(
@@ -70,8 +70,7 @@ document.addEventListener('click', (event) => {
   const details = summary?.parentElement;
   if (
     !(details instanceof HTMLDetailsElement) ||
-    !details.hasAttribute('data-disclosure') ||
-    summary?.parentElement !== details
+    !details.hasAttribute('data-disclosure')
   )
     return;
   const panel = details.querySelector<HTMLElement>(
@@ -81,12 +80,13 @@ document.addEventListener('click', (event) => {
 
   event.preventDefault();
   const currentHeight = panel.getBoundingClientRect().height;
+  const fromOpacity = Number(getComputedStyle(panel).opacity) || 0;
   running.get(details)?.cancel();
 
   if (details.open && details.dataset.closing !== 'true') {
     details.dataset.closing = 'true';
     setLabel(details, false);
-    animatePanel(details, panel, currentHeight, 0, false);
+    animatePanel(details, panel, currentHeight, 0, false, fromOpacity);
     return;
   }
 
@@ -95,5 +95,5 @@ document.addEventListener('click', (event) => {
   setLabel(details, true);
   panel.style.height = 'auto';
   const target = panel.scrollHeight;
-  animatePanel(details, panel, currentHeight, target, true);
+  animatePanel(details, panel, currentHeight, target, true, fromOpacity);
 });

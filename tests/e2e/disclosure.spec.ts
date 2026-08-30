@@ -95,10 +95,28 @@ test('keeps the song summary name clean and animates the setlist explorer', asyn
     '01 Baptized in Fear',
   );
   await expect(first.locator('summary .disclosure__chevron')).toHaveCount(1);
-  await expect(first.locator('summary')).not.toHaveAttribute(
-    'data-affordance',
-    /.+/,
-  );
+  await expect(first).toHaveCSS('border-bottom-width', '0px');
+  const last = page.locator('.expected-setlist details').last();
+  await expect(last).toHaveCSS('border-bottom-width', '1px');
   await first.locator('summary').click();
   await expect(first).toHaveAttribute('data-state', 'open');
+});
+
+test('scopes adopter styles (max-width/min-width/color) to the parent, not Disclosure', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'desktop-chromium',
+    'these px values assume the desktop viewport',
+  );
+  await page.goto('/discover/');
+  await expect(intro(page)).toHaveCSS('max-width', '672px');
+  await expect(intro(page)).toHaveCSS('color', 'rgb(215, 216, 220)');
+
+  const timelineFirst = page.locator('.timeline details').first();
+  await expect(timelineFirst).toHaveCSS('min-width', '176px');
+
+  await page.goto('/');
+  const preview = page.getByRole('group', { name: '전체 예상 셋리스트' });
+  await expect(preview).toHaveCSS('max-width', '832px');
 });

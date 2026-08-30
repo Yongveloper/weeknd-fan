@@ -176,12 +176,12 @@ const remainingEntries = entries.slice(previewCount);
   }
 
   .setlist-preview__empty,
-  .setlist-preview__more p {
+  .setlist-preview__inner :global(.setlist-preview__more) p {
     max-width: 42rem;
     color: var(--mist);
   }
 
-  .setlist-preview__more {
+  .setlist-preview__inner :global(.setlist-preview__more) {
     max-width: 52rem;
   }
 
@@ -194,8 +194,8 @@ const remainingEntries = entries.slice(previewCount);
     font-weight: 800;
   }
 
-  .setlist-preview__more .setlist-preview__list,
-  .setlist-preview__more p {
+  .setlist-preview__inner :global(.setlist-preview__more) .setlist-preview__list,
+  .setlist-preview__inner :global(.setlist-preview__more) p {
     margin-block: 0.75rem 1.25rem;
   }
 

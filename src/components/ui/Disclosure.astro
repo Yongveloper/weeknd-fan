@@ -87,7 +87,7 @@ const hasSummarySlot = Astro.slots.has('summary');
     color: var(--amber);
     transition: transform var(--motion-fast) var(--ease-cinematic);
   }
-  .disclosure[open] > summary .disclosure__chevron {
+  .disclosure[open]:not([data-closing]) > summary .disclosure__chevron {
     transform: rotate(180deg);
   }
   .disclosure__panel {

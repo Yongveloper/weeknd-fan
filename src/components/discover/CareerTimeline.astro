@@ -104,7 +104,7 @@ const renderedEntries = await Promise.all(
     list-style: none;
   }
 
-  .timeline__disclosure {
+  .timeline__entry :global(.timeline__disclosure) {
     align-self: end;
     min-width: 11rem;
   }
@@ -113,7 +113,6 @@ const renderedEntries = await Promise.all(
     display: grid;
     gap: 0.85rem;
     max-width: 44rem;
-    padding-block: 1rem 0.4rem;
     color: var(--mist);
   }
 
@@ -127,7 +126,7 @@ const renderedEntries = await Promise.all(
       gap: 0.9rem;
     }
 
-    .timeline__disclosure {
+    .timeline__entry :global(.timeline__disclosure) {
       min-width: 0;
     }
   }
