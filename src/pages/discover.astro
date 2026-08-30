@@ -6,6 +6,7 @@ import StatusBadge from '../components/content/StatusBadge.astro';
 import CareerTimeline from '../components/discover/CareerTimeline.astro';
 import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Disclosure from '../components/ui/Disclosure.astro';
 import {
   getAlbums,
   getDiscoverContent,
@@ -43,13 +44,15 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
       <h1><span class="latin">The Weeknd</span>를 한 장씩 넘겨 보기</h1>
       <p>{intro.data.summary}</p>
       <StatusBadge status={intro.data.status} />
-      <details aria-label="1분 입문 더 깊이 보기" open>
-        <summary>1분 입문 펼쳐보기</summary>
-        <div>
-          <IntroContent />
-          <SourceList sources={introSources} />
-        </div>
-      </details>
+      <Disclosure
+        ariaLabel="1분 입문 더 깊이 보기"
+        label="1분 입문 펼쳐보기"
+        open
+        class="discover__disclosure"
+      >
+        <IntroContent />
+        <SourceList sources={introSources} />
+      </Disclosure>
     </header>
 
     <section class="discover__albums" aria-labelledby="studio-albums-title">
@@ -88,26 +91,28 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         <h2 id="glossary-title">{glossary.data.title}</h2>
         <p>{glossary.data.summary}</p>
         <StatusBadge status={glossary.data.status} />
-        <details aria-label="용어 한 장 더 깊이 보기">
-          <summary>더 깊이 보기</summary>
-          <div>
-            <GlossaryContent />
-            <SourceList sources={glossarySources} />
-          </div>
-        </details>
+        <Disclosure
+          ariaLabel="용어 한 장 더 깊이 보기"
+          label="더 깊이 보기"
+          class="discover__disclosure"
+        >
+          <GlossaryContent />
+          <SourceList sources={glossarySources} />
+        </Disclosure>
       </div>
       <div>
         <p class="eyebrow">VISUAL LANGUAGE</p>
         <h2>{visual.data.title}</h2>
         <p>{visual.data.summary}</p>
         <StatusBadge status={visual.data.status} />
-        <details aria-label="보는 음악 더 깊이 보기">
-          <summary>더 깊이 보기</summary>
-          <div>
-            <VisualContent />
-            <SourceList sources={visualSources} />
-          </div>
-        </details>
+        <Disclosure
+          ariaLabel="보는 음악 더 깊이 보기"
+          label="더 깊이 보기"
+          class="discover__disclosure"
+        >
+          <VisualContent />
+          <SourceList sources={visualSources} />
+        </Disclosure>
       </div>
     </section>
   </article>
@@ -138,22 +143,8 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     font-size: clamp(1.08rem, 2vw, 1.3rem);
   }
 
-  details {
+  .discover__disclosure {
     max-width: 42rem;
-  }
-
-  summary {
-    display: grid;
-    align-items: center;
-    min-height: 44px;
-    color: var(--amber);
-    cursor: pointer;
-    font-weight: 800;
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
-  }
-
-  details > div {
     color: var(--mist);
   }
 
