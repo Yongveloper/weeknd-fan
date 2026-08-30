@@ -5,7 +5,8 @@ import { gzipSync } from 'node:zlib';
 
 const distRoot = path.resolve(process.env.PERFORMANCE_BUDGET_DIST ?? 'dist');
 const javascriptBudget = 75 * 1024;
-const aggregateRasterBudget = 1100 * 1024;
+// 좌석 안내도 원본 PNG(사용자 결정: 재인코딩 없이 그대로 사용) 수용을 위해 1100→1300
+const aggregateRasterBudget = 1300 * 1024;
 const pageRasterBudgets = { home: 700 * 1024, other: 400 * 1024 };
 const viewport = { width: 390, deviceScaleFactor: 3 };
 const files = await walk(distRoot);
