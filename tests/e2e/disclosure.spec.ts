@@ -10,7 +10,9 @@ test('renders a chevron anchor and swaps the label when toggled', async ({
   const details = intro(page);
   await expect(details).toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__chevron')).toHaveCount(1);
-  await expect(details.locator('summary .disclosure__label')).toHaveText('접기');
+  await expect(details.locator('summary .disclosure__label')).toHaveText(
+    '접기',
+  );
 
   await details.locator('summary').click();
   await expect(details).toHaveAttribute('data-state', 'closed');
@@ -22,7 +24,9 @@ test('renders a chevron anchor and swaps the label when toggled', async ({
   await details.locator('summary').click();
   await expect(details).toHaveAttribute('data-state', 'open');
   await expect(details).toHaveAttribute('open', '');
-  await expect(details.locator('summary .disclosure__label')).toHaveText('접기');
+  await expect(details.locator('summary .disclosure__label')).toHaveText(
+    '접기',
+  );
 });
 
 test('leaves no inline height on the panel after the animation ends', async ({
@@ -131,7 +135,9 @@ test('lays out the song detail as meta header, three labelled blocks, then sourc
 
   const detail = first.locator('.expected-setlist__detail');
   await expect(detail.locator('.song-meta')).toHaveCount(1);
-  await expect(detail.locator('.song-meta .status')).toHaveText('예상 · 보장 아님');
+  await expect(detail.locator('.song-meta .status')).toHaveText(
+    '예상 · 보장 아님',
+  );
   await expect(detail.locator('.song-block .eyebrow')).toHaveText([
     'BEFORE',
     'ON STAGE',
@@ -143,5 +149,7 @@ test('lays out the song detail as meta header, three labelled blocks, then sourc
     '떼창 포인트',
   ]);
   await expect(detail.locator('.song-sources h3')).toHaveText('출처');
-  await expect(detail.locator('.song-sources .source-list li').first()).toBeVisible();
+  await expect(
+    detail.locator('.song-sources .source-list li').first(),
+  ).toBeVisible();
 });

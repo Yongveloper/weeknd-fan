@@ -93,7 +93,11 @@ const editorial = getSetlistEditorialMetadata(entries);
                 {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
               </span>
               {/* Visual density hint only — album is announced in the expanded metadata below. */}
-              <span slot="meta" class="expected-setlist__album-tag" aria-hidden="true">
+              <span
+                slot="meta"
+                class="expected-setlist__album-tag"
+                aria-hidden="true"
+              >
                 {entry.data.album}
               </span>
               <div class="expected-setlist__detail">
@@ -242,11 +246,7 @@ const editorial = getSetlistEditorialMetadata(entries);
     gap: 1.25rem;
     padding: 0 0.2rem;
   }
-  .actual-setlist h3 {
-    margin: 0.85rem 0 0;
-    color: var(--amber);
-    font-size: 0.85rem;
-  }
+
   .song-meta {
     display: flex;
     flex-wrap: wrap;
@@ -258,9 +258,11 @@ const editorial = getSetlistEditorialMetadata(entries);
     font-size: 0.84rem;
     font-weight: 800;
   }
+
   .song-meta__album {
     font-weight: 900;
   }
+
   .song-meta__pill {
     padding: 0.25rem 0.6rem;
     border: 1px solid color-mix(in srgb, var(--mist) 40%, transparent);
@@ -268,37 +270,44 @@ const editorial = getSetlistEditorialMetadata(entries);
     color: var(--mist);
     font-size: 0.76rem;
   }
+
   .song-block {
     display: grid;
     gap: 0.35rem;
     padding-inline-start: 0.9rem;
     border-inline-start: 2px solid var(--amber);
   }
+
   .song-block .eyebrow {
     font-family: var(--font-display);
     font-size: 0.8rem;
     font-weight: 400;
     letter-spacing: 0.18em;
   }
+
   .song-block h3 {
     margin: 0;
     color: var(--ivory);
     font-size: 0.95rem;
     font-weight: 800;
   }
+
   .song-block p:not(.eyebrow) {
     margin: 0;
     color: var(--mist);
   }
+
   .song-embed {
-    padding-inline-start: 0.9rem;
+    padding-inline-start: calc(0.9rem + 2px);
   }
+
   .song-sources {
     display: grid;
     gap: 0.5rem;
     padding-top: 1rem;
     border-top: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
   }
+
   .song-sources h3 {
     margin: 0;
     color: var(--ink-muted);
@@ -307,13 +316,26 @@ const editorial = getSetlistEditorialMetadata(entries);
     letter-spacing: 0.12em;
     text-transform: uppercase;
   }
+
   .song-sources :global(.source-list) {
     font-size: 0.78rem;
     color: color-mix(in srgb, var(--mist) 60%, transparent);
   }
 
+  /* .song-sources doubled to out-specificity SourceList's own
+     `.source-list a { color: var(--ivory) }` rule, which ties otherwise. */
+  .song-sources.song-sources :global(.source-list a) {
+    color: var(--mist);
+  }
+
   .actual-setlist article {
     padding: 1.25rem 0;
+  }
+
+  .actual-setlist h3 {
+    margin: 0.85rem 0 0;
+    color: var(--amber);
+    font-size: 0.85rem;
   }
 
   .actual-setlist ol {
