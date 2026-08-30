@@ -16,11 +16,19 @@ const [guides, sources] = await Promise.all([
 ]);
 const tips = guides.filter((entry) => entry.data.section === 'tips');
 const sections = guides.filter((entry) => entry.data.section !== 'tips');
+const jump = [
+  ...sections.map((entry) => ({
+    id: entry.data.section,
+    label: entry.data.title,
+    order: entry.data.order,
+  })),
+  { id: 'tips', label: '현장 팁', order: tips[0]?.data.order ?? 30 },
+].sort((a, b) => a.order - b.order);
 ---
 
 <BaseLayout
   title="고양 가이드 | The Weeknd 고양 팬 가이드"
-  description="The Weeknd 2026 고양 공연을 위한 당일 이동·준비·귀가 안내와 공식 발표 대기 항목"
+  description="The Weeknd 2026 고양 공연 당일 가이드 — 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물"
 >
   <section
     class="guide-page shell-content"
@@ -30,9 +38,12 @@ const sections = guides.filter((entry) => entry.data.section !== 'tips');
       <p class="eyebrow">GOYANG DAY-OF GUIDE</p><h1 id="goyang-guide-title">
         고양 당일 가이드
       </h1><p>
-        확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 둔 비공식 팬
-        가이드입니다.
+        확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 두고, 다른 공연
+        후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.
       </p>
+      <nav class="guide-jump" aria-label="가이드 섹션">
+        {jump.map((item) => <a href={`#${item.id}`}>{item.label}</a>)}
+      </nav>
     </header>
     {
       sections.map((entry) => (
@@ -67,6 +78,29 @@ const sections = guides.filter((entry) => entry.data.section !== 'tips');
     display: grid;
     gap: 1rem;
     max-width: 58rem;
+  }
+  .guide-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  .guide-jump a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 24%, transparent);
+    border-radius: 999px;
+    color: var(--mist);
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .guide-jump a:hover,
+  .guide-jump a:focus-visible {
+    border-color: var(--amber);
+    color: var(--ivory);
   }
   .guide-transport {
     display: grid;

@@ -116,3 +116,26 @@ test.describe('without JavaScript', () => {
     for (let i = 0; i < 5; i += 1) await expect(panels.nth(i)).toBeVisible();
   });
 });
+
+test('orders the seven sections and offers a jump nav', async ({ page }) => {
+  await page.goto('/goyang/');
+  const ids = await page
+    .locator('main section[id]')
+    .evaluateAll((els) => els.map((el) => el.id));
+  expect(ids).toEqual([
+    'official',
+    'transport',
+    'seating',
+    'tips',
+    'return',
+    'packing',
+    'pending',
+  ]);
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  await expect(jump.getByRole('link')).toHaveCount(7);
+  await expect(jump.getByRole('link', { name: '좌석 안내' })).toHaveAttribute(
+    'href',
+    '#seating',
+  );
+  await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
+});
