@@ -416,7 +416,8 @@ test('plays each scene transition once and leaves nothing running afterwards', a
             animation.playState === 'running' &&
             !(
               animation.effect as KeyframeEffect | null
-            )?.target?.classList.contains('space-sky'),
+            )?.target?.classList.contains('space-sky') &&
+            !(animation instanceof CSSTransition),
         ).length,
   );
   expect(running).toBe(0);

@@ -193,6 +193,22 @@ a {
   text-underline-offset: 0.22em;
 }
 
+/* 본문 링크: 밑줄이 왼쪽에서 그려진다. 헤더·푸터·버튼형·구조적(nav 등) 링크,
+   그리고 p/li 안에 깊이 중첩된(직계 자식이 아닌) 링크(예: official-embed)는 제외. */
+main :is(p, li) > a:not([class]) {
+  background-image: linear-gradient(currentcolor, currentcolor);
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  background-size: 0 1px;
+  text-decoration: none;
+  transition: background-size var(--motion-fast) var(--ease-cinematic);
+}
+
+main :is(p, li) > a:not([class]):hover,
+main :is(p, li) > a:not([class]):focus-visible {
+  background-size: 100% 1px;
+}
+
 button,
 a,
 input,
