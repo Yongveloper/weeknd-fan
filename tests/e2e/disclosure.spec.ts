@@ -153,3 +153,53 @@ test('lays out the song detail as meta header, three labelled blocks, then sourc
     detail.locator('.song-sources .source-list li').first(),
   ).toBeVisible();
 });
+
+test('animates with the configured duration, not a mis-parsed millisecond value', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
+  const panel = glossary.locator('.disclosure__panel');
+  await glossary.locator('summary').click();
+  const duration = await panel.evaluate(
+    (el) => el.getAnimations()[0]?.effect?.getTiming().duration,
+  );
+  expect(duration).toBeGreaterThan(100);
+});
+
+test('cleans up fully after closing: no open, no data-closing, no inline height/overflow', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  const details = intro(page);
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('data-state', 'closed');
+  await expect(details).not.toHaveAttribute('open', '');
+  await expect(details).not.toHaveAttribute('data-closing', /.+/);
+  const panel = details.locator('.disclosure__panel');
+  await expect(panel).not.toHaveAttribute('style', /height/);
+  await expect(panel).not.toHaveAttribute('style', /overflow/);
+});
+
+test('stays consistent under rapid repeated clicks', async ({ page }) => {
+  await page.goto('/discover/');
+  const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
+  const summary = glossary.locator('summary');
+
+  await summary.click();
+  await page.waitForTimeout(100);
+  await summary.click();
+  await page.waitForTimeout(100);
+  await summary.click();
+
+  await expect.poll(() => glossary.getAttribute('data-state')).not.toBeNull();
+
+  const [openAttr, state] = await Promise.all([
+    glossary.getAttribute('open'),
+    glossary.getAttribute('data-state'),
+  ]);
+  expect(openAttr !== null).toBe(state === 'open');
+
+  const panel = glossary.locator('.disclosure__panel');
+  await expect(panel).not.toHaveAttribute('style', /height/);
+});

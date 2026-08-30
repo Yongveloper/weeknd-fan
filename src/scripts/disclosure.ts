@@ -10,6 +10,13 @@ function readToken(name: string, fallback: string) {
   return value || fallback;
 }
 
+function readDuration(name: string, fallbackMs: number) {
+  const raw = readToken(name, `${fallbackMs}ms`);
+  const n = parseFloat(raw);
+  if (Number.isNaN(n)) return fallbackMs;
+  return /ms\s*$/.test(raw) ? n : n * 1000;
+}
+
 function setLabel(details: HTMLDetailsElement, open: boolean) {
   const label = details.querySelector<HTMLElement>(
     ':scope > summary .disclosure__label',
@@ -23,7 +30,9 @@ function finish(
   details: HTMLDetailsElement,
   panel: HTMLElement,
   willOpen: boolean,
+  animation: Animation,
 ) {
+  if (running.get(details) !== animation) return;
   running.delete(details);
   panel.style.removeProperty('height');
   panel.style.removeProperty('overflow');
@@ -45,17 +54,22 @@ function animatePanel(
   panel.style.height = `${from}px`;
   const animation = panel.animate(
     [
-      { height: `${from}px`, opacity: willOpen ? fromOpacity : 1 },
+      {
+        height: `${from}px`,
+        opacity: willOpen ? fromOpacity : fromOpacity || 1,
+      },
       { height: `${to}px`, opacity: willOpen ? 1 : 0 },
     ],
     {
-      duration: parseFloat(readToken('--motion-scene', '620ms')),
+      duration: readDuration('--motion-scene', 620),
       easing: readToken('--ease-cinematic', 'ease-out'),
     },
   );
   running.set(details, animation);
-  animation.onfinish = () => finish(details, panel, willOpen);
-  animation.oncancel = () => running.delete(details);
+  animation.onfinish = () => finish(details, panel, willOpen, animation);
+  animation.oncancel = () => {
+    if (running.get(details) === animation) running.delete(details);
+  };
 }
 
 if (!reduceMotion.matches) {
