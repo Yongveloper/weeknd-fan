@@ -39,7 +39,7 @@ test('rejects an unreferenced built raster that exceeds the aggregate budget', a
   const fixture = await createFixture(
     '<!doctype html><html><body></body></html>',
   );
-  await writeFile(path.join(fixture, 'og.jpg'), Buffer.alloc(1100 * 1024 + 1));
+  await writeFile(path.join(fixture, 'og.jpg'), Buffer.alloc(1300 * 1024 + 1));
 
   await expect(runBudget(fixture)).rejects.toThrow(
     'Aggregate raster budget exceeded',
