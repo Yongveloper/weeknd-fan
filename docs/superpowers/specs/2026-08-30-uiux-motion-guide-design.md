@@ -38,7 +38,7 @@
 
 ### 3.2 등장 애니메이션 규약
 
-- `data-reveal` — 단일 요소. 뷰포트 진입 시 C의 스크립트가 `data-reveal="in"`으로 바꾼다.
+- `data-reveal`(→ §9에서 `data-enter`로 개명) — 단일 요소. 뷰포트 진입 시 C의 스크립트가 `data-reveal="in"`으로 바꾼다.
 - `data-reveal-group` — 컨테이너. 직계 자식이 순서대로 `--reveal-i` 인덱스를 받아 stagger 된다. 자식에 `data-reveal`을 붙이지 않는다.
 - CSS는 `html[data-js] [data-reveal]:not([data-reveal='in'])`만 숨긴다. JS 미실행 시 전부 보인다.
 - A·B는 자기 파일에 **속성만** 붙인다. 스크립트·CSS는 C 소유.
@@ -283,3 +283,14 @@ html[data-js] [data-reveal-group]:not([data-reveal='in']) > * {
 - 좌석 구역별 등급 매핑 표·"내 구역 찾기" 검색 — 오표기 리스크로 제외.
 - 서브페이지 배경 우주 통일 여부 — 별도 결정.
 - 10월 초 저녁 실측 기온 — 근거 없음, 기재 안 함.
+
+## 9. 구현 조정 (계획 작성 중 확정 — 위 본문보다 우선)
+
+1. **속성명** `data-reveal` → **`data-enter`**, `data-reveal-group` → **`data-enter-group`**. 홈 `eclipse-countdown`이 이미 `data-reveal="done"`을 쓰고 있어 충돌한다. 진입 상태 값은 `data-enter="in"`.
+2. **게이트** `html[data-js]` → 기존 **`html[data-motion-ready]`** 재사용. `reveal.ts`가 JS 실행 + reduced-motion 아님일 때만 설정한다(기존 `home-motion.ts` 의미 유지, `visual.spec.ts` "reduced motion never marks the document motion-ready" 통과). reduced-motion에서는 속성이 없으므로 CSS 숨김이 적용되지 않아 별도 `in` 마킹이 불필요하다.
+3. **`reveal.ts`가 `home-motion.ts`를 대체**한다. 기존 `[data-motion-scene-enter]` → `data-motion-state="entered"` 동작을 그대로 흡수하고(`IntersectionObserver`, threshold 0.35), `motion`의 `inView` 의존을 제거한다. `BaseLayout`에서 전 페이지 로드. `index.astro`의 `home-motion.ts` 스크립트 태그와 파일은 삭제.
+4. **현장 팁 데이터**: `30-tips.md` 하나가 아니라 **탭당 md 1개** (`30-tips-standing.md`, `31-tips-seating.md`, `32-tips-entry.md`, `33-tips-return.md`, `34-tips-packing.md`, 모두 `section: 'tips'`). 각 파일이 자기 `sources`를 가져 콘텐츠 감사를 통과하고, `goyang.astro`가 `section === 'tips'` 항목을 모아 `TipsTabs` 하나로 렌더한다. 후기 항목의 개별 출처는 본문 불릿 끝 인라인 링크로 표기한다.
+5. **Disclosure 단위 테스트**는 두지 않는다(프로젝트에 Astro 컨테이너 렌더 테스트 패턴 없음). 속성 단언은 e2e `disclosure.spec.ts`에서 한다.
+6. **소유권 추가**: `tests/e2e/navigation.spec.ts` → B (고양 관련 단언 갱신; 셋리스트 단언은 A가 호환 유지), `tests/e2e/no-js.spec.ts` → 수정 금지(A·B 모두 호환 유지), `src/styles/global.css` → C.
+7. **CTA glow**는 공통 CTA 클래스가 없어 생략. 마이크로 인터랙션은 본문 링크 밑줄 드로우만.
+8. **마이너**: `Disclosure`에 `ariaLabel` prop 추가(기존 `details aria-label` 유지용 — `no-js.spec.ts`가 `getByRole('group', { name: '1분 입문 더 깊이 보기' })`로 조회).
