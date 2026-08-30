@@ -71,7 +71,7 @@ test('draws body link underlines with a background-size transition', async ({
   page,
 }) => {
   await page.goto('/sources/');
-  const link = page.locator('main :is(p, li) a:not([class])').first();
+  const link = page.locator('main :is(p, li) > a:not([class])').first();
   const styles = await link.evaluate((el) => {
     const cs = getComputedStyle(el);
     return {
@@ -103,6 +103,29 @@ test('excludes structural links like nav shortcuts from the underline draw', asy
       size: cs.backgroundSize,
       transition: cs.transitionProperty,
     };
+  });
+  expect(styles.size).not.toMatch(/^0(px)? /);
+  expect(styles.transition).not.toContain('background-size');
+});
+
+test('excludes the official-embed link nested inside a setlist entry', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+  await page.locator('.expected-setlist details summary').first().click();
+
+  const embedLinks = page.locator('official-embed a');
+  const embedCount = await embedLinks.count();
+  test.skip(
+    embedCount === 0,
+    'no officialListenUrl in the current content data, so official-embed never renders; ' +
+      "the broader 'main li details a:not([class])' fallback resolves to SourceList's own " +
+      'direct-child links instead (which are correctly underlined), so it cannot stand in here',
+  );
+
+  const styles = await embedLinks.first().evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return { size: cs.backgroundSize, transition: cs.transitionProperty };
   });
   expect(styles.size).not.toMatch(/^0(px)? /);
   expect(styles.transition).not.toContain('background-size');
