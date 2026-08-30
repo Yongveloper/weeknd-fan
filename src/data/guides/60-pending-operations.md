@@ -9,8 +9,10 @@ sources:
 relatedAlbums: []
 relatedSongs: []
 spoilerLevel: none
-order: 50
+order: 60
 section: pending
 ---
 
 다른 공연의 규정·운영 사례를 이 공연의 확정 정보로 옮기지 않습니다. 주최·예매처 공지가 나오면 이 항목을 갱신합니다.
+
+타 공연 후기에서 반복된 경험은 현장 팁에 "후기 기반 · 이 공연 미확정"으로 따로 모았습니다.

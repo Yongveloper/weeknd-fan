@@ -1,0 +1,231 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import SourceList from '../content/SourceList.astro';
+import type { SourceRecord } from '../../lib/content/contracts';
+import { formatSeoulDate } from '../../lib/content/audit';
+import { resolveSourceReferences } from '../../lib/content/queries';
+
+interface Props {
+  entries: CollectionEntry<'guides'>[];
+  sources: SourceRecord[];
+}
+
+const { entries, sources } = Astro.props;
+const panels = await Promise.all(
+  entries.map(async (entry) => ({
+    entry,
+    Content: (await render(entry)).Content,
+    sources: resolveSourceReferences(entry.data.sources, sources),
+  })),
+);
+const latest = entries.reduce(
+  (max, entry) =>
+    entry.data.lastVerifiedAt > max ? entry.data.lastVerifiedAt : max,
+  entries[0]!.data.lastVerifiedAt,
+);
+---
+
+<section id="tips" class="tips" aria-labelledby="tips-title" data-enter>
+  <div class="tips__heading">
+    <p class="eyebrow">FROM PEOPLE WHO WERE THERE</p>
+    <h2 id="tips-title">현장 팁</h2>
+    <p>
+      고양종합운동장에서 열린 다른 공연의 관람 후기와 기사에서 반복된
+      경험입니다. 이 공연의 운영 공지가 아니며, 공지가 나오면 그 내용이
+      우선합니다.
+    </p>
+    <p class="tips__meta">
+      <span class="tips__badge">후기 기반 · 이 공연 미확정</span>
+      <span>마지막 확인 {formatSeoulDate(latest)}</span>
+    </p>
+  </div>
+
+  <tips-tabs class="tips__tabs">
+    <div role="tablist" aria-label="현장 팁 주제">
+      {
+        panels.map(({ entry }, index) => (
+          <button
+            type="button"
+            role="tab"
+            id={`tips-tab-${entry.data.order}`}
+            aria-controls={`tips-panel-${entry.data.order}`}
+            aria-selected={index === 0 ? 'true' : 'false'}
+            tabindex="0"
+          >
+            {entry.data.title}
+          </button>
+        ))
+      }
+    </div>
+    {
+      panels.map(({ entry, Content, sources: panelSources }) => (
+        <div
+          role="tabpanel"
+          id={`tips-panel-${entry.data.order}`}
+          aria-labelledby={`tips-tab-${entry.data.order}`}
+          tabindex="0"
+          class="tips__panel"
+        >
+          <h3>{entry.data.title}</h3>
+          <p class="tips__summary">{entry.data.summary}</p>
+          <div class="tips__body">
+            <Content />
+          </div>
+          <SourceList sources={panelSources} />
+        </div>
+      ))
+    }
+  </tips-tabs>
+</section>
+
+<script>
+  class TipsTabs extends HTMLElement {
+    connectedCallback() {
+      const tabs = Array.from(
+        this.querySelectorAll<HTMLButtonElement>('[role="tab"]'),
+      );
+      const panels = Array.from(
+        this.querySelectorAll<HTMLElement>('[role="tabpanel"]'),
+      );
+      const select = (index: number, focus = false) => {
+        tabs.forEach((tab, i) => {
+          const active = i === index;
+          tab.setAttribute('aria-selected', String(active));
+          tab.tabIndex = active ? 0 : -1;
+          panels[i]!.hidden = !active;
+          if (active && focus) tab.focus();
+        });
+      };
+      tabs.forEach((tab, i) => {
+        tab.addEventListener('click', () => select(i));
+        tab.addEventListener('keydown', (event) => {
+          const delta =
+            event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+          if (delta === 0 && event.key !== 'Home' && event.key !== 'End')
+            return;
+          event.preventDefault();
+          const next =
+            event.key === 'Home'
+              ? 0
+              : event.key === 'End'
+                ? tabs.length - 1
+                : (i + delta + tabs.length) % tabs.length;
+          select(next, true);
+        });
+      });
+      this.dataset.ready = 'true';
+      select(0);
+    }
+  }
+  if (!customElements.get('tips-tabs'))
+    customElements.define('tips-tabs', TipsTabs);
+</script>
+
+<style>
+  .tips {
+    display: grid;
+    gap: 1.5rem;
+    scroll-margin-top: 1rem;
+  }
+  .tips__heading {
+    display: grid;
+    gap: 0.7rem;
+    max-width: 55rem;
+  }
+  .tips__heading > p:not(.eyebrow):not(.tips__meta) {
+    color: var(--mist);
+  }
+  .tips__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem 1rem;
+    align-items: center;
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .tips__badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2rem;
+    padding: 0.3rem 0.65rem;
+    border: 1px solid color-mix(in srgb, var(--red) 70%, transparent);
+    color: var(--ivory);
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  .tips__tabs {
+    display: grid;
+    gap: 1.25rem;
+    max-width: 56rem;
+  }
+  .tips__tabs [role='tablist'] {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+  .tips__tabs [role='tab'] {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0.55rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 24%, transparent);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--mist);
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+    transition:
+      color var(--motion-fast) var(--ease-cinematic),
+      background var(--motion-fast) var(--ease-cinematic);
+  }
+  .tips__tabs [role='tab'][aria-selected='true'] {
+    border-color: var(--amber);
+    background: color-mix(in srgb, var(--amber) 16%, transparent);
+    color: var(--ivory);
+  }
+  @media (max-width: 36rem) {
+    .tips__tabs [role='tablist'] {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
+  .tips__panel {
+    display: grid;
+    gap: 0.9rem;
+  }
+  /* `display: grid` above outranks the UA `[hidden] { display: none }` rule,
+     so the script's `panel.hidden = true` needs this to actually hide a panel. */
+  .tips__panel[hidden] {
+    display: none;
+  }
+  .tips__panel h3 {
+    font-size: 1.1rem;
+  }
+  .tips__tabs[data-ready] .tips__panel h3 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+  .tips__summary {
+    margin: 0;
+    color: var(--mist);
+  }
+  .tips__body :global(ul) {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+    padding-left: 1.25rem;
+    color: var(--mist);
+  }
+  .tips__body :global(a) {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+</style>

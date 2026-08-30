@@ -1,0 +1,55 @@
+---
+// 좌표 확인: https://en.wikipedia.org/wiki/Goyang_Stadium (37.6763528, 126.7432083), 2026-08-29 확인.
+// 기준값 37.6755 / 126.7448 과의 차이는 위도 0.0009°, 경도 0.0016° 로 허용 범위(±0.003°) 안입니다.
+const LAT = 37.6764;
+const LNG = 126.7432;
+const NAME = '고양종합운동장';
+const links = [
+  {
+    label: '카카오맵 길찾기',
+    href: `https://map.kakao.com/link/to/${encodeURIComponent(NAME)},${LAT},${LNG}`,
+  },
+  {
+    label: '네이버지도에서 열기',
+    href: `https://map.naver.com/p/search/${encodeURIComponent(NAME)}`,
+  },
+  {
+    label: '구글맵 길찾기',
+    href: `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}&travelmode=transit`,
+  },
+];
+---
+
+<nav class="directions" aria-label="길찾기 앱 열기" data-enter-group>
+  {
+    links.map((link) => (
+      <a href={link.href} target="_blank" rel="noreferrer">
+        {link.label} <span aria-hidden="true">↗</span>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .directions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+  .directions a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--amber) 60%, transparent);
+    color: var(--ivory);
+    font-weight: 800;
+    text-decoration: none;
+    transition: background var(--motion-fast) var(--ease-cinematic);
+  }
+  .directions a:hover,
+  .directions a:focus-visible {
+    background: color-mix(in srgb, var(--amber) 16%, transparent);
+  }
+</style>

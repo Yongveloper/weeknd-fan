@@ -27,6 +27,7 @@ const pendingItems = [
   id={entry.data.section}
   class="guide-section"
   aria-labelledby={`${entry.data.section}-title`}
+  data-enter
 >
   <div class="guide-section__heading">
     <p class="eyebrow">GOYANG DAY-OF GUIDE</p>
@@ -56,6 +57,7 @@ const pendingItems = [
   }
 
   <div class="guide-section__body"><Content /></div>
+  <slot />
   <SourceList sources={entrySources} />
 </section>
 
@@ -99,7 +101,8 @@ const pendingItems = [
     gap: 0.45rem;
     padding-left: 1.25rem;
   }
-  .guide-section__body :global(h2) {
+  .guide-section__body :global(h2),
+  .guide-section__body :global(h3) {
     margin-top: 0.75rem;
     color: var(--amber);
     font-family: var(--font-body);

@@ -268,11 +268,13 @@ test('opens transport and return information within two actions', async ({
   await expect(page).toHaveURL(/\/goyang\/#transport$/);
   await expect(page.getByRole('heading', { name: '가는 길' })).toBeVisible();
   await expect(
-    page.locator('#transport .guide-section__body').getByText('대화역'),
+    page
+      .locator('#transport .guide-section__body')
+      .getByText('대화역(3호선) 3번 출구'),
   ).toBeVisible();
   await expect(page.locator('#transport .status')).toHaveText('실용 안내');
   await expect(page.locator('#official .status')).toHaveText('공식 확정');
-  await expect(page.getByText('공연 직전 막차 재확인')).toBeVisible();
+  await expect(page.getByText('막차와 귀가 동선')).toBeVisible();
 });
 
 test('keeps every home guide shortcut on a stable visible anchor', async ({
@@ -308,10 +310,10 @@ test('renders exact unpublished operations and an accessible schematic map', asy
     '미공개 · 확인 필요',
   ]);
   await expect(page.locator('#venue-map title')).toHaveText(
-    '대화역과 고양종합운동장 위치 관계 개략도',
+    '고양종합운동장 주변 간이 지도',
   );
   await expect(page.locator('#venue-map desc')).toHaveText(
-    '실제 입장 게이트가 아닌 이동 방향 참고용 개략도',
+    '대화역·킨텍스역·킨텍스 전시장과 경기장의 위치 관계를 단순화한 개략도. 인터파크 공연 상세 도면을 바탕으로 다시 그림.',
   );
 });
 

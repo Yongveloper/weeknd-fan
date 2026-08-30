@@ -1,0 +1,56 @@
+---
+import { Picture } from 'astro:assets';
+import seatMap from '../../assets/guide/seat-map-interpark.png';
+
+const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
+---
+
+<figure class="seat-map" data-enter>
+  <a
+    href={seatMap.src}
+    target="_blank"
+    rel="noreferrer"
+    aria-label="좌석 안내도 원본 이미지 열기"
+  >
+    <Picture
+      src={seatMap}
+      widths={[445]}
+      sizes="(max-width: 34rem) 100vw, 445px"
+      formats={['avif', 'webp']}
+      quality={70}
+      alt="고양종합운동장 좌석 안내도. 상단 무대, 플로어 스탠딩 A·B, 십자형 런웨이, 1~3층 스탠드 구역과 등급 색상 범례."
+    />
+  </a>
+  <figcaption>
+    좌석 안내도 출처:
+    <a href={INTERPARK} target="_blank" rel="noreferrer"
+      >인터파크 티켓 공연 상세</a
+    > (2026-08-29 확인). 탭하면 원본 이미지가 새 탭에서 열립니다.
+  </figcaption>
+</figure>
+
+<style>
+  .seat-map {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 32rem;
+    margin: 0;
+  }
+  .seat-map > a {
+    display: block;
+  }
+  .seat-map :global(img) {
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #fff;
+  }
+  figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  figcaption a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+</style>
