@@ -6,6 +6,7 @@ import StatusBadge from '../content/StatusBadge.astro';
 import type { AlbumRecord, SourceRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
 import { resolveSourceReferences } from '../../lib/content/queries';
+import Disclosure from '../ui/Disclosure.astro';
 
 interface Props {
   entries: CollectionEntry<'discover'>[];
@@ -48,13 +49,16 @@ const renderedEntries = await Promise.all(
           )}
           <StatusBadge status={entry.data.status} />
         </div>
-        <details aria-label={`${entry.data.title} 더 깊이 보기`}>
-          <summary>더 깊이 보기</summary>
+        <Disclosure
+          ariaLabel={`${entry.data.title} 더 깊이 보기`}
+          label="더 깊이 보기"
+          class="timeline__disclosure"
+        >
           <div class="timeline__detail">
             <Content />
             <SourceList sources={entrySources} />
           </div>
-        </details>
+        </Disclosure>
       </li>
     ))
   }
@@ -100,20 +104,9 @@ const renderedEntries = await Promise.all(
     list-style: none;
   }
 
-  details {
+  .timeline__disclosure {
     align-self: end;
     min-width: 11rem;
-  }
-
-  summary {
-    display: grid;
-    align-items: center;
-    min-height: 44px;
-    color: var(--amber);
-    cursor: pointer;
-    font-weight: 800;
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
   }
 
   .timeline__detail {
@@ -134,7 +127,7 @@ const renderedEntries = await Promise.all(
       gap: 0.9rem;
     }
 
-    details {
+    .timeline__disclosure {
       min-width: 0;
     }
   }
