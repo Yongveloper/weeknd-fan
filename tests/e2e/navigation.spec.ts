@@ -214,11 +214,14 @@ test('keeps expected songs ordered and keyboard-operable without media controls'
 
 test('keeps the ordered prediction and trust label usable without JavaScript', async ({
   browser,
-}) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
+}, testInfo) => {
+  const context = await browser.newContext({
+    javaScriptEnabled: false,
+    baseURL: testInfo.project.use.baseURL,
+  });
   const page = await context.newPage();
 
-  await page.goto('http://127.0.0.1:4321/setlist/');
+  await page.goto('/setlist/');
 
   const explorer = page.locator('.expected-setlist');
   await expect(explorer.getByText('예상 · 보장 아님').first()).toBeVisible();
