@@ -296,3 +296,4 @@ html[data-js] [data-reveal-group]:not([data-reveal='in']) > * {
 8. **마이너**: `Disclosure`에 `ariaLabel` prop 추가(기존 `details aria-label` 유지용 — `no-js.spec.ts`가 `getByRole('group', { name: '1분 입문 더 깊이 보기' })`로 조회).
 9. **토큰명**: §3.1의 `--reveal-y / --reveal-blur / --reveal-stagger` → **`--enter-y / --enter-blur / --enter-stagger`** (속성명 개명과 일치).
 10. **계획 문서**: `docs/superpowers/plans/2026-08-30-{a-disclosure,c-motion,b-goyang-guide}.md`. B의 리서치 입력은 각 worktree의 `.superpowers/tmp/b-inputs/`(gitignored)에 둔다.
+11. **좌석 안내(§6.4) 사용자 결정**: 자체 제작 구조 개략 SVG·등급 범례 표·"구역 코드 읽는 법"은 넣지 않는다. 인터파크 원본 좌석도 이미지를 재인코딩 없이 그대로 사용하고(탭 시 원본 새 탭), 출처 캡션만 단다. 이를 위해 래스터 예산 상한을 1100→1300KiB로 올린다.
