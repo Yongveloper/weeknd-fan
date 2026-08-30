@@ -5,6 +5,7 @@ import DirectionsLinks from '../components/guide/DirectionsLinks.astro';
 import GuideSection from '../components/guide/GuideSection.astro';
 import LiveMap from '../components/guide/LiveMap.astro';
 import SeatMap from '../components/guide/SeatMap.astro';
+import TipsTabs from '../components/guide/TipsTabs.astro';
 import VenueMap from '../components/guide/VenueMap.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getGuideContent } from '../lib/content/queries';
@@ -13,6 +14,8 @@ const [guides, sources] = await Promise.all([
   getGuideContent(),
   getCollection('sources'),
 ]);
+const tips = guides.filter((entry) => entry.data.section === 'tips');
+const sections = guides.filter((entry) => entry.data.section !== 'tips');
 ---
 
 <BaseLayout
@@ -32,18 +35,23 @@ const [guides, sources] = await Promise.all([
       </p>
     </header>
     {
-      guides.map((entry) => (
-        <GuideSection entry={entry} sources={sources}>
-          {entry.data.section === 'transport' && (
-            <div class="guide-transport">
-              <AccessTable />
-              <VenueMap />
-              <DirectionsLinks />
-              <LiveMap />
-            </div>
+      sections.map((entry) => (
+        <>
+          <GuideSection entry={entry} sources={sources}>
+            {entry.data.section === 'transport' && (
+              <div class="guide-transport">
+                <AccessTable />
+                <VenueMap />
+                <DirectionsLinks />
+                <LiveMap />
+              </div>
+            )}
+            {entry.data.section === 'seating' && <SeatMap />}
+          </GuideSection>
+          {entry.data.section === 'seating' && (
+            <TipsTabs entries={tips} sources={sources} />
           )}
-          {entry.data.section === 'seating' && <SeatMap />}
-        </GuideSection>
+        </>
       ))
     }
   </section>

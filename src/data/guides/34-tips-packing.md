@@ -1,5 +1,5 @@
 ---
-title: 준비물
+title: 챙길 것
 summary: 타 공연 후기에서 반복된 화장실·기온·소지품 경험입니다.
 status: practical
 lastVerifiedAt: 2026-08-29

@@ -82,3 +82,37 @@ test('shows the official seat map with source, a schematic, and the grade legend
   await expect(seating.locator('.seat-legend tbody tr')).toHaveCount(13);
   await expect(seating.getByText('스탠딩 Early Entry Package')).toBeVisible();
 });
+
+test('groups the five review-based tips into keyboard-operable tabs', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  const tips = page.locator('#tips');
+  await expect(tips.getByText('후기 기반 · 이 공연 미확정')).toBeVisible();
+  const tabs = tips.getByRole('tab');
+  await expect(tabs).toHaveText([
+    '스탠딩',
+    '좌석과 시야',
+    '입장',
+    '귀가',
+    '챙길 것',
+  ]);
+  await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+  await expect(tips.getByRole('tabpanel')).toHaveCount(1);
+
+  await tabs.nth(0).focus();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(1)).toBeFocused();
+  await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(tips.getByRole('tabpanel')).toContainText('본부석');
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+  test('shows every tips panel in order', async ({ page }) => {
+    await page.goto('/goyang/');
+    const panels = page.locator('#tips [role="tabpanel"]');
+    await expect(panels).toHaveCount(5);
+    for (let i = 0; i < 5; i += 1) await expect(panels.nth(i)).toBeVisible();
+  });
+});
