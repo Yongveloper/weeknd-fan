@@ -1,22 +1,18 @@
 const DAY_MS = 86_400_000;
-
-const seoulDate = new Intl.DateTimeFormat('en-CA', {
-  timeZone: 'Asia/Seoul',
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-});
+// Asia/Seoul is a fixed UTC+9 with no DST, so shifting the timestamp is enough
+// to read the Seoul calendar day. Intl.DateTimeFormat with a timeZone costs
+// tens of milliseconds on first construction (ICU tz data), which pushed the
+// home page's countdown module evaluation past the 50ms long-task budget.
+const SEOUL_OFFSET_MS = 9 * 3_600_000;
 
 function calendarDaysUntil(now: Date, target: Date): number {
   const toUtcDay = (date: Date) => {
-    const parts = Object.fromEntries(
-      seoulDate.formatToParts(date).map(({ type, value }) => [type, value]),
-    );
+    const shifted = new Date(date.getTime() + SEOUL_OFFSET_MS);
 
     return Date.UTC(
-      Number(parts.year),
-      Number(parts.month) - 1,
-      Number(parts.day),
+      shifted.getUTCFullYear(),
+      shifted.getUTCMonth(),
+      shifted.getUTCDate(),
     );
   };
 

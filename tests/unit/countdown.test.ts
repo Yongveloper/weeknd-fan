@@ -42,6 +42,23 @@ describe('getCountdownState', () => {
     expect(state.primaryLabel).toBe('D-DAY');
   });
 
+  it('follows the Seoul calendar date even while UTC is still the day before', () => {
+    // 00:30 KST on show day is 15:30 UTC on the previous day.
+    const state = getCountdownState({
+      ...schedule,
+      now: new Date('2026-10-07T00:30:00+09:00'),
+    });
+
+    expect(state.primaryLabel).toBe('D-DAY');
+
+    const eve = getCountdownState({
+      ...schedule,
+      now: new Date('2026-10-06T23:30:00+09:00'),
+    });
+
+    expect(eve.primaryLabel).toBe('D-1');
+  });
+
   it('does not claim the archive before the editor publishes it', () => {
     const state = getCountdownState({
       ...schedule,

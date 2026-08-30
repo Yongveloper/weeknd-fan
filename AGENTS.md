@@ -58,6 +58,7 @@ docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배�
 - tsconfig `strict` + `noUncheckedIndexedAccess`. 배열 인덱스 접근은 `undefined` 처리 필요.
 - e2e는 `baseURL` 사용(`http://127.0.0.1:4321` 하드코딩 금지).
 - Astro image: `layout: 'constrained'`, `responsiveStyles: true` 전역. `<picture>`는 AVIF 우선.
+- 홈 long task 예산 50ms(`tests/e2e/visual.spec.ts` 모바일 evidence). `Intl.DateTimeFormat`에 `timeZone` 주면 첫 생성이 20~60ms — 클라이언트 번들에서 쓰지 않는다(`src/lib/countdown.ts`는 고정 UTC+9). Noto Sans KR은 `astro.config.mjs` Vite 플러그인이 `font-display: optional`로 바꿔 swap 재레이아웃 제거 — 첫 방문은 시스템 한글 폰트로 렌더될 수 있음.
 
 ## 커밋
 
