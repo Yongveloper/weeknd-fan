@@ -1,0 +1,144 @@
+---
+const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
+const rows = [
+  { label: '주소', value: ['경기도 고양시 일산서구 중앙로 1601 (대화동)'] },
+  {
+    label: '지하철',
+    value: [
+      '3호선 대화역 3번 출구 · 도보 약 3분',
+      'GTX-A 킨텍스역 1번 출구 · 도보 약 20분',
+    ],
+  },
+];
+const buses = [
+  {
+    stop: '대화역 정류장',
+    routes: [
+      'M7731',
+      '55',
+      '66',
+      '67',
+      '75',
+      '83',
+      '88A',
+      '88B',
+      '89',
+      '97',
+      '98',
+      '999',
+      '1000',
+      '1001',
+      '1500',
+      '3300',
+      '3800',
+      '9700',
+    ],
+  },
+  {
+    stop: '고양종합운동장·일산서구청 정류장',
+    routes: ['55', '88A', '88B', '999', '1100'],
+  },
+];
+---
+
+<div class="access-table" data-enter>
+  <dl>
+    {
+      rows.map((row) => (
+        <div class="access-table__row">
+          <dt>{row.label}</dt>
+          <dd>
+            {row.value.map((line) => (
+              <span class="access-table__line">{line}</span>
+            ))}
+          </dd>
+        </div>
+      ))
+    }
+    {
+      buses.map((bus) => (
+        <div class="access-table__row">
+          <dt>버스 · {bus.stop}</dt>
+          <dd>
+            <ul
+              class="access-table__routes"
+              aria-label={`${bus.stop} 정차 노선`}
+            >
+              {bus.routes.map((route) => (
+                <li>{route}</li>
+              ))}
+            </ul>
+          </dd>
+        </div>
+      ))
+    }
+  </dl>
+  <p class="access-table__source">
+    오는 길 정보 출처:
+    <a href={INTERPARK} target="_blank" rel="noreferrer"
+      >인터파크 티켓 공연 상세</a
+    > (2026-08-29 확인)
+  </p>
+</div>
+
+<style>
+  .access-table {
+    display: grid;
+    gap: 1rem;
+    max-width: 56rem;
+  }
+  dl {
+    display: grid;
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+  .access-table__row {
+    display: grid;
+    grid-template-columns: minmax(7rem, 12rem) minmax(0, 1fr);
+    gap: 0.5rem 1.25rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  dt {
+    color: var(--amber);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  dd {
+    margin: 0;
+    color: var(--ivory);
+    font-weight: 700;
+  }
+  .access-table__line {
+    display: block;
+  }
+  .access-table__routes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .access-table__routes li {
+    padding: 0.2rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--mist) 40%, transparent);
+    border-radius: 999px;
+    font-size: 0.82rem;
+  }
+  .access-table__source {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  .access-table__source a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+  @media (max-width: 36rem) {
+    .access-table__row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

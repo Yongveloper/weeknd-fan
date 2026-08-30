@@ -1,0 +1,71 @@
+---
+const EMBED =
+  'https://www.google.com/maps?q=%EA%B3%A0%EC%96%91%EC%A2%85%ED%95%A9%EC%9A%B4%EB%8F%99%EC%9E%A5&z=16&hl=ko&output=embed';
+---
+
+<live-map class="live-map" data-src={EMBED}>
+  <div class="live-map__placeholder">
+    <p>지도는 버튼을 누른 뒤에만 불러옵니다(구글 지도, 외부 요청).</p>
+    <button type="button">실제 지도 불러오기</button>
+  </div>
+</live-map>
+
+<script>
+  class LiveMap extends HTMLElement {
+    connectedCallback() {
+      this.querySelector('button')?.addEventListener(
+        'click',
+        () => {
+          const frame = document.createElement('iframe');
+          frame.src = this.dataset.src ?? '';
+          frame.title = '고양종합운동장 지도';
+          frame.loading = 'lazy';
+          frame.referrerPolicy = 'no-referrer-when-downgrade';
+          frame.setAttribute('allowfullscreen', '');
+          this.replaceChildren(frame);
+        },
+        { once: true },
+      );
+    }
+  }
+  if (!customElements.get('live-map'))
+    customElements.define('live-map', LiveMap);
+</script>
+
+<style>
+  .live-map {
+    display: block;
+    max-width: 56rem;
+    aspect-ratio: 16 / 10;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .live-map :global(iframe) {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+  .live-map__placeholder {
+    display: grid;
+    place-content: center;
+    gap: 1rem;
+    height: 100%;
+    padding: 1.5rem;
+    text-align: center;
+    background: radial-gradient(
+      ellipse at 50% 40%,
+      color-mix(in srgb, var(--blue) 18%, transparent),
+      transparent 70%
+    );
+    color: var(--mist);
+  }
+  .live-map__placeholder button {
+    justify-self: center;
+    min-height: 44px;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--amber);
+    background: transparent;
+    color: var(--ivory);
+    font-weight: 800;
+    cursor: pointer;
+  }
+</style>
