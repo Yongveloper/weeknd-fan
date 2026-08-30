@@ -2,10 +2,37 @@
   navigation: auto;
 }
 
-::view-transition-old(root),
+/* 페이지 전환: 일식처럼 빛이 가려지고(검은 배경) 돌아온다. 헤더는 별도 그룹으로 고정. */
+::view-transition-group(root) {
+  background: var(--night);
+}
+
+::view-transition-old(root) {
+  animation: vt-out var(--motion-scene) var(--ease-cinematic) both;
+}
+
 ::view-transition-new(root) {
-  animation-duration: var(--motion-scene);
-  animation-timing-function: var(--ease-cinematic);
+  animation: vt-in var(--motion-scene) var(--ease-out-expo) both;
+  animation-delay: calc(var(--motion-scene) * 0.35);
+}
+
+::view-transition-old(site-header),
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+@keyframes vt-out {
+  to {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+}
+
+@keyframes vt-in {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
 }
 
 /* 등장: 새벽 안개 걷힘. html[data-motion-ready]가 없으면(JS 없음·reduced-motion) 항상 보인다. */

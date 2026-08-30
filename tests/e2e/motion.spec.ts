@@ -41,3 +41,28 @@ test('marks every page motion-ready, not just home', async ({ page }) => {
   await page.goto('/discover/');
   await expect(page.locator('html')).toHaveAttribute('data-motion-ready', 'true');
 });
+
+test('pins the header across view transitions and dips through black', async ({
+  page,
+}) => {
+  await page.goto('/');
+  expect(
+    await page
+      .locator('header.site-header')
+      .evaluate((el) => getComputedStyle(el).viewTransitionName),
+  ).toBe('site-header');
+  const css = await page.evaluate(() =>
+    Array.from(document.styleSheets)
+      .flatMap((sheet) => {
+        try {
+          return Array.from(sheet.cssRules).map((rule) => rule.cssText);
+        } catch {
+          return [];
+        }
+      })
+      .join('\n'),
+  );
+  expect(css).toContain('::view-transition-group(root)');
+  expect(css).toMatch(/@keyframes vt-out/);
+  expect(css).toMatch(/@keyframes vt-in/);
+});
