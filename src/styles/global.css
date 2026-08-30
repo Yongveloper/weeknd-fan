@@ -26,6 +26,17 @@ body {
   font-family: var(--font-body);
   font-optical-sizing: auto;
   line-height: 1.6;
+  /* Korean wraps between words, never inside one ("코레 / 일"). break-word is the
+     last resort for long unspaced runs so nothing overflows. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+p,
+li,
+dd,
+figcaption {
+  text-wrap: pretty;
 }
 
 /* 우주 레이어: 홈 전용 고정 별밭. 스크롤과 무관한 정적 배경 */
