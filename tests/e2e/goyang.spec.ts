@@ -50,17 +50,21 @@ test('renders the live map iframe on load', async ({ page }) => {
   await expect(frame).toHaveAttribute('loading', 'lazy');
 });
 
-test('draws the rebuilt schematic map with both stations', async ({ page }) => {
+test('shows the Interpark access map image with its source', async ({
+  page,
+}) => {
   await page.goto('/goyang/');
-  await expect(page.locator('#venue-map title')).toHaveText(
-    '고양종합운동장 주변 간이 지도',
+  const map = page.locator('#transport .access-map');
+  await expect(map.locator('picture img')).toHaveCount(1);
+  await expect(map.locator('picture img')).toHaveAttribute(
+    'alt',
+    /대화역.*킨텍스역.*고양종합운동장/,
   );
-  // `#venue-map` 안의 <desc>/<title>도 같은 단어를 담고 있어 getByText는 strict mode에서
-  // 두 개를 잡습니다. 실제로 그려진 라벨만 보도록 <text> 요소로 좁힙니다.
-  const labels = page.locator('#venue-map text');
-  await expect(labels.filter({ hasText: '대화역' })).toBeVisible();
-  await expect(labels.filter({ hasText: '킨텍스역' })).toBeVisible();
-  await expect(labels.filter({ hasText: '고양종합운동장' })).toBeVisible();
+  await expect(map.locator('figcaption a')).toHaveAttribute(
+    'href',
+    /tickets\.interpark\.com/,
+  );
+  await expect(map.locator('> a')).toHaveAttribute('target', '_blank');
 });
 
 test('shows the official seat map image with its Interpark source', async ({

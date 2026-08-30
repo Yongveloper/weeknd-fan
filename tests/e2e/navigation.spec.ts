@@ -312,11 +312,9 @@ test('renders exact unpublished operations and an accessible schematic map', asy
     '미공개 · 확인 필요',
     '미공개 · 확인 필요',
   ]);
-  await expect(page.locator('#venue-map title')).toHaveText(
-    '고양종합운동장 주변 간이 지도',
-  );
-  await expect(page.locator('#venue-map desc')).toHaveText(
-    '대화역·킨텍스역·킨텍스 전시장과 경기장의 위치 관계를 단순화한 개략도. 인터파크 공연 상세 도면을 바탕으로 다시 그림.',
+  await expect(page.locator('#transport .access-map img')).toHaveAttribute(
+    'alt',
+    /인터파크 오는 길 안내/,
   );
 });
 

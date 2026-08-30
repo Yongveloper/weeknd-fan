@@ -1,0 +1,56 @@
+---
+import { Picture } from 'astro:assets';
+import accessMap from '../../assets/guide/access-map-interpark.png';
+
+const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
+---
+
+<figure class="access-map" data-enter>
+  <a
+    href={accessMap.src}
+    target="_blank"
+    rel="noreferrer"
+    aria-label="오는 길 안내 원본 이미지 열기"
+  >
+    <Picture
+      src={accessMap}
+      widths={[499]}
+      sizes="(max-width: 34rem) 100vw, 499px"
+      formats={['avif', 'webp']}
+      quality={70}
+      alt="인터파크 오는 길 안내. 3호선 대화역과 GTX-A 킨텍스역 사이 격자 도로 위에 고양종합운동장(현대카드 슈퍼콘서트 28 위켄드), 보조경기장, 킨텍스 제1·제2 전시장, 일산백병원, 대화마을 위치를 표시한 약도와 주소·지하철·버스 안내."
+    />
+  </a>
+  <figcaption>
+    오는 길 안내 출처:
+    <a href={INTERPARK} target="_blank" rel="noreferrer"
+      >인터파크 티켓 공연 상세</a
+    > (2026-08-29 확인). 탭하면 원본 이미지가 새 탭에서 열립니다.
+  </figcaption>
+</figure>
+
+<style>
+  .access-map {
+    display: grid;
+    gap: 0.6rem;
+    max-width: 32rem;
+    margin: 0;
+  }
+  .access-map > a {
+    display: block;
+  }
+  .access-map :global(img) {
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #fff;
+  }
+  figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  figcaption a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+</style>
