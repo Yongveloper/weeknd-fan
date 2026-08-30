@@ -254,6 +254,7 @@ git commit -m "content(goyang): rewrite guide data with sourced access, seating,
 - Test: `tests/e2e/goyang.spec.ts`
 
 **Interfaces:**
+- `GuideSection` gains a default `<slot />` rendered after `<SourceList>` inside its `<section id={section}>`, so page-level extras land **inside** the section element (tests query `#transport .access-table`, `#seating .seat-map`).
 - `AccessTable` no props. `DirectionsLinks` no props (constants inside). `LiveMap` no props. `VenueMap` no props; SVG keeps `id="venue-map"` with `<title id="venue-map-title">고양종합운동장 주변 간이 지도</title>` and `<desc id="venue-map-desc">대화역·킨텍스역·킨텍스 전시장과 경기장의 위치 관계를 단순화한 개략도. 인터파크 공연 상세 도면을 바탕으로 다시 그림.</desc>`.
 
 - [ ] **Step 1: Verify the coordinates**
@@ -488,19 +489,30 @@ Replace the SVG with a 720×520 viewBox schematic reproducing the Interpark draw
 
 - [ ] **Step 8: Update `navigation.spec.ts`** Goyang map assertions to the new title/desc text (only those two `toHaveText` calls).
 
-- [ ] **Step 9: Wire the transport block in `goyang.astro`**
+- [ ] **Step 9: Add a slot to `GuideSection.astro` and wire the transport block in `goyang.astro`**
 
-Replace `{entry.data.section === 'transport' && <VenueMap />}` with:
+In `src/components/guide/GuideSection.astro` add `<slot />` on its own line right after `<SourceList sources={entrySources} />` (still inside the `<section>`).
+
+In `goyang.astro` replace
 
 ```astro
-{entry.data.section === 'transport' && (
-  <div class="guide-transport">
-    <AccessTable />
-    <VenueMap />
-    <DirectionsLinks />
-    <LiveMap />
-  </div>
-)}
+<GuideSection entry={entry} sources={sources} />
+{entry.data.section === 'transport' && <VenueMap />}
+```
+
+with
+
+```astro
+<GuideSection entry={entry} sources={sources}>
+  {entry.data.section === 'transport' && (
+    <div class="guide-transport">
+      <AccessTable />
+      <VenueMap />
+      <DirectionsLinks />
+      <LiveMap />
+    </div>
+  )}
+</GuideSection>
 ```
 
 Add imports and `.guide-transport { display: grid; gap: clamp(1.5rem, 4vw, 2.5rem); }`. Full page assembly happens in Task 5; for now this keeps the page rendering.
@@ -648,6 +660,8 @@ const legend = [
 Legend chips keep the original colour families so they match the photo the reader is looking at (the spec's "재해석" is limited to the schematic).
 
 - [ ] **Step 6: Wire into `goyang.astro`**
+
+Inside the `<GuideSection …>` children (next to the transport branch):
 
 ```astro
 {entry.data.section === 'seating' && <SeatMap />}
@@ -852,7 +866,7 @@ Without JS every panel stays visible with its `h3` (the heading is visually hidd
 
 - [ ] **Step 4: Wire into `goyang.astro`**
 
-Compute `const tips = guides.filter((entry) => entry.data.section === 'tips');` and `const sections = guides.filter((entry) => entry.data.section !== 'tips');`. Render `<TipsTabs entries={tips} sources={sources} />` in place of the first `tips` entry position (i.e. after `seating`, before `return`). Task 5 finalises ordering; a simple approach now: iterate `sections`, and after the `seating` section render `TipsTabs`.
+Compute `const tips = guides.filter((entry) => entry.data.section === 'tips');` and `const sections = guides.filter((entry) => entry.data.section !== 'tips');`. Render `<TipsTabs entries={tips} sources={sources} />` as a **sibling right after** the seating `<GuideSection>` closes (so `#tips` is not nested inside `#seating`). Task 5 shows the final shape.
 
 - [ ] **Step 5: Run tests**
 
@@ -934,20 +948,19 @@ const jump = [
     {
       sections.map((entry) => (
         <>
-          <GuideSection entry={entry} sources={sources} />
-          {entry.data.section === 'transport' && (
-            <div class="guide-transport">
-              <AccessTable />
-              <VenueMap />
-              <DirectionsLinks />
-              <LiveMap />
-            </div>
-          )}
+          <GuideSection entry={entry} sources={sources}>
+            {entry.data.section === 'transport' && (
+              <div class="guide-transport">
+                <AccessTable />
+                <VenueMap />
+                <DirectionsLinks />
+                <LiveMap />
+              </div>
+            )}
+            {entry.data.section === 'seating' && <SeatMap />}
+          </GuideSection>
           {entry.data.section === 'seating' && (
-            <>
-              <SeatMap />
-              <TipsTabs entries={tips} sources={sources} />
-            </>
+            <TipsTabs entries={tips} sources={sources} />
           )}
         </>
       ))
@@ -971,7 +984,7 @@ Keep the existing `<style>` block; add:
 
 Note the page header sentence still contains `아직 발표되지 않은 운영 정보` (no-js.spec).
 
-The `section[id]` order test counts `GuideSection` roots plus `#tips`; the `SeatMap`/transport wrappers are `div`s so they do not appear. `TipsTabs` renders after `SeatMap` inside the `seating` branch — the DOM order becomes official, transport, seating, tips, return, packing, pending as required.
+The `section[id]` order test counts `GuideSection` roots plus `#tips`; the `SeatMap`/transport wrappers are `div`s so they do not appear. `TipsTabs` renders as a sibling after the seating section — the DOM order becomes official, transport, seating, tips, return, packing, pending as required.
 
 - [ ] **Step 4: `GuideSection.astro`**
 

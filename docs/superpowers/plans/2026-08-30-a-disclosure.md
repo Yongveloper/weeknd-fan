@@ -77,9 +77,9 @@ test('leaves no inline height on the panel after the animation ends', async ({
   const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
   await glossary.locator('summary').click();
   await expect(glossary).toHaveAttribute('data-state', 'open');
-  await expect(glossary.locator('.disclosure__panel')).toHaveAttribute(
+  await expect(glossary.locator('.disclosure__panel')).not.toHaveAttribute(
     'style',
-    '',
+    /height/,
   );
   await expect(glossary.locator('.disclosure__panel')).toBeVisible();
 });
