@@ -161,14 +161,14 @@ const latest = entries.reduce(
     gap: 1.25rem;
     max-width: 56rem;
   }
-  [role='tablist'] {
+  .tips__tabs [role='tablist'] {
     display: flex;
     gap: 0.4rem;
     overflow-x: auto;
     padding-bottom: 0.25rem;
     scrollbar-width: none;
   }
-  [role='tab'] {
+  .tips__tabs [role='tab'] {
     flex: 0 0 auto;
     min-height: 44px;
     padding: 0.55rem 1rem;
@@ -183,7 +183,7 @@ const latest = entries.reduce(
       color var(--motion-fast) var(--ease-cinematic),
       background var(--motion-fast) var(--ease-cinematic);
   }
-  [role='tab'][aria-selected='true'] {
+  .tips__tabs [role='tab'][aria-selected='true'] {
     border-color: var(--amber);
     background: color-mix(in srgb, var(--amber) 16%, transparent);
     color: var(--ivory);
