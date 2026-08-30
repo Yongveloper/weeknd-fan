@@ -67,7 +67,7 @@ test('staggers data-enter-group children via --enter-i and transition-delay', as
   expect(secondDelay).toBe('0.06s');
 });
 
-test('draws body link underlines with a background-size transition', async ({
+test('keeps body links visible at rest and draws the full underline on hover', async ({
   page,
 }) => {
   await page.goto('/sources/');
@@ -75,14 +75,20 @@ test('draws body link underlines with a background-size transition', async ({
   const styles = await link.evaluate((el) => {
     const cs = getComputedStyle(el);
     return {
+      color: cs.color,
       decoration: cs.textDecorationLine,
       transition: cs.transitionProperty,
       size: cs.backgroundSize,
+      marker: getComputedStyle(el, '::after').content,
+      external: /^https?:/.test(el.getAttribute('href') ?? ''),
     };
   });
-  expect(styles.decoration).toBe('none');
+  // 쉬는 상태: hover 없이도 링크임이 보여야 한다(밝은 글자 + 옅은 밑줄), 드로우 선은 0.
+  expect(styles.color).toBe('rgb(240, 232, 218)');
+  expect(styles.decoration).toBe('underline');
   expect(styles.transition).toContain('background-size');
   expect(styles.size).toMatch(/^0(px)? /);
+  if (styles.external) expect(styles.marker).toContain('↗');
 
   await link.hover();
   await expect
