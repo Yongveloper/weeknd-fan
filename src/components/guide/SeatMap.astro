@@ -1,0 +1,199 @@
+---
+import { Picture } from 'astro:assets';
+import seatMap from '../../assets/guide/seat-map-interpark.png';
+import SeatMapSchematic from './SeatMapSchematic.astro';
+
+const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
+const legend = [
+  ['지정석 P', 'p'],
+  ['지정석 R', 'r'],
+  ['지정석 S', 's'],
+  ['지정석 A', 'a'],
+  ['지정석 B', 'b'],
+  ['지정석 C', 'c'],
+  ['지정석 D', 'd'],
+  ['스탠딩', 'standing'],
+  ['스탠딩 Early Entry Package', 'early'],
+  ['시야제한석 1', 'rv1'],
+  ['시야제한석 2', 'rv2'],
+  ['시야제한석 3', 'rv3'],
+  ['시야제한석 4', 'rv4'],
+] as const;
+---
+
+<div class="seat-map-wrap" data-enter>
+  <figure class="seat-map">
+    <a
+      href={seatMap.src}
+      target="_blank"
+      rel="noreferrer"
+      aria-label="좌석 안내도 원본 크게 보기"
+    >
+      <Picture
+        src={seatMap}
+        widths={[445, 890]}
+        sizes="(max-width: 48rem) 100vw, 480px"
+        formats={['avif', 'webp']}
+        quality={70}
+        alt="고양종합운동장 좌석 안내도. 상단 무대, 플로어 스탠딩 A·B, 십자형 런웨이, 1~3층 스탠드 구역과 등급 색상 범례."
+      />
+    </a>
+    <figcaption>
+      좌석 안내도 출처:
+      <a href={INTERPARK} target="_blank" rel="noreferrer"
+        >인터파크 티켓 공연 상세</a
+      > (2026-08-29 확인). 탭하면 원본이 새 탭에서 열립니다.
+    </figcaption>
+  </figure>
+
+  <div class="seat-map__aside">
+    <SeatMapSchematic />
+    <div class="seat-code">
+      <h3>구역 코드 읽는 법</h3>
+      <ul>
+        <li>앞 글자는 방향 계열입니다 — E·W·N·T·S.</li>
+        <li>1F·2F·3F 층 표기는 원본 좌석도 좌상단에 있습니다.</li>
+        <li>무대 좌우 상단 코너가 시야제한석입니다.</li>
+      </ul>
+    </div>
+    <table class="seat-legend">
+      <caption>등급 범례 — 구역별 등급은 원본 좌석도와 예매 페이지 기준</caption
+      >
+      <thead><tr><th scope="col">색</th><th scope="col">등급</th></tr></thead>
+      <tbody>
+        {
+          legend.map(([label, key]) => (
+            <tr>
+              <td>
+                <span
+                  class={`seat-legend__chip seat-legend__chip--${key}`}
+                  aria-hidden="true"
+                />
+              </td>
+              <td>{label}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<style>
+  .seat-map-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(1.25rem, 3vw, 2.5rem);
+    max-width: 62rem;
+  }
+  .seat-map {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    margin: 0;
+  }
+  .seat-map a {
+    display: block;
+  }
+  .seat-map :global(img) {
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #fff;
+  }
+  figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  figcaption a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+  .seat-map__aside {
+    display: grid;
+    gap: 1.25rem;
+    align-content: start;
+  }
+  .seat-code h3 {
+    margin: 0 0 0.5rem;
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    font-weight: 800;
+    letter-spacing: 0;
+  }
+  .seat-code ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding-left: 1.15rem;
+    color: var(--mist);
+    font-size: 0.88rem;
+  }
+  .seat-legend {
+    border-collapse: collapse;
+    font-size: 0.85rem;
+  }
+  .seat-legend caption {
+    padding-bottom: 0.5rem;
+    color: var(--ink-muted);
+    font-size: 0.78rem;
+    text-align: start;
+  }
+  .seat-legend th,
+  .seat-legend td {
+    padding: 0.3rem 0.6rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
+    text-align: start;
+  }
+  .seat-legend__chip {
+    display: inline-block;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 3px;
+  }
+  .seat-legend__chip--p {
+    background: #6f6fe6;
+  }
+  .seat-legend__chip--r {
+    background: #2e8b57;
+  }
+  .seat-legend__chip--s {
+    background: #37a7e6;
+  }
+  .seat-legend__chip--a {
+    background: #f28c5c;
+  }
+  .seat-legend__chip--b {
+    background: #9ccc65;
+  }
+  .seat-legend__chip--c {
+    background: #f2a33a;
+  }
+  .seat-legend__chip--d {
+    background: #e64c8a;
+  }
+  .seat-legend__chip--standing {
+    background: #6d2fa8;
+  }
+  .seat-legend__chip--early {
+    background: #a8e6c1;
+  }
+  .seat-legend__chip--rv1 {
+    background: #1f2fbf;
+  }
+  .seat-legend__chip--rv2 {
+    background: #d9302c;
+  }
+  .seat-legend__chip--rv3 {
+    background: #f7c8a8;
+  }
+  .seat-legend__chip--rv4 {
+    background: #f7a8c8;
+  }
+  @media (max-width: 48rem) {
+    .seat-map-wrap {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

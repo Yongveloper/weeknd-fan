@@ -63,3 +63,22 @@ test('draws the rebuilt schematic map with both stations', async ({ page }) => {
   await expect(labels.filter({ hasText: '킨텍스역' })).toBeVisible();
   await expect(labels.filter({ hasText: '고양종합운동장' })).toBeVisible();
 });
+
+test('shows the official seat map with source, a schematic, and the grade legend', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  const seating = page.locator('#seating');
+  await expect(
+    seating.getByRole('heading', { name: '좌석 안내' }),
+  ).toBeVisible();
+  await expect(seating.locator('.seat-map picture img')).toHaveCount(1);
+  await expect(seating.locator('.seat-map figcaption')).toContainText(
+    '인터파크',
+  );
+  await expect(seating.locator('#seat-schematic title')).toHaveText(
+    '고양종합운동장 공연 좌석 구조 개략도',
+  );
+  await expect(seating.locator('.seat-legend tbody tr')).toHaveCount(13);
+  await expect(seating.getByText('스탠딩 Early Entry Package')).toBeVisible();
+});
