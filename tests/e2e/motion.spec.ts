@@ -58,6 +58,24 @@ test('staggers data-enter-group children via --enter-i and transition-delay', as
   expect(secondDelay).toBe('0.06s');
 });
 
+test('draws body link underlines with a background-size transition', async ({
+  page,
+}) => {
+  await page.goto('/sources/');
+  const link = page.locator('main a:not([class])').first();
+  const styles = await link.evaluate((el) => {
+    const cs = getComputedStyle(el);
+    return {
+      decoration: cs.textDecorationLine,
+      transition: cs.transitionProperty,
+      size: cs.backgroundSize,
+    };
+  });
+  expect(styles.decoration).toBe('none');
+  expect(styles.transition).toContain('background-size');
+  expect(styles.size).toMatch(/^0(px)? /);
+});
+
 test('shows everything immediately under reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
