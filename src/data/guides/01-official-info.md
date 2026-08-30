@@ -7,6 +7,7 @@ sources:
   - live-nation-goyang
   - nol-notice
   - hyundai-card-announcement
+  - gys-goyang-sports
 relatedAlbums: []
 relatedSongs: []
 spoilerLevel: none
@@ -18,5 +19,6 @@ section: official
 - 장소: 고양종합운동장 주경기장
 - Creepy Nuts: 18:45 예정 / The Weeknd: 19:45 예정
 - 관람: 만 19세 이상 / 예매: NOL 티켓 공식 공지
+- 규모: 주경기장 41,311석 (고양도시관리공사 시설 안내 기준)
 
 변동 가능성이 있는 운영 정보는 아래 `공식 발표 대기`에서 따로 표시합니다.
