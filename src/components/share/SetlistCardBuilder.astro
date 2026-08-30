@@ -5,6 +5,7 @@ interface Props {
   shareUrl: string;
 }
 const { version, songs, shareUrl } = Astro.props;
+const updated = version.replaceAll('-', '.');
 ---
 
 <section
@@ -14,24 +15,66 @@ const { version, songs, shareUrl } = Astro.props;
   data-songs={JSON.stringify(songs)}
 >
   <header>
-    <p class="eyebrow">PRIVATE EXPORT</p>
+    <p class="eyebrow">SHARE · 예상 셋리스트를 이미지로</p>
     <h1>SETLIST CARD</h1>
-    <p>최근 공연 기록을 바탕으로 한 예상 목록을 포스터로 저장합니다.</p>
+    <p class="lead">
+      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1350)으로
+      만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에
+      넣어 두세요.
+    </p>
   </header>
-  <div class="setlist-summary">
-    <p><strong>UPDATED {version.replaceAll('-', '.')}</strong></p>
-    <p>예상 · 보장 아님</p>
-  </div>
-  <button type="button" data-download-setlist>셋리스트 카드 저장</button>
-  <p class="privacy-note">
-    이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
-  </p>
-  <p class="status" aria-live="polite" data-status></p>
-  <p class="error" role="alert" hidden data-error></p>
-  <div class="share-fallback">
-    <a href="/og/default.jpg">기본 공유 이미지 보기</a>
-    <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
-    <code data-share-url>{shareUrl}</code>
+
+  <div class="share-builder__grid">
+    <figure class="card-preview">
+      <canvas
+        data-preview
+        width="1080"
+        height="1350"
+        role="img"
+        aria-label="예상 셋리스트 카드 미리보기"
+      >
+        미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
+        이미지와 같은 카드입니다.
+      </canvas>
+      <figcaption>미리보기 · 저장되는 이미지와 같습니다</figcaption>
+    </figure>
+
+    <div class="share-builder__controls">
+      <dl class="card-facts">
+        <div>
+          <dt>담기는 곡</dt>
+          <dd>{songs.length}곡</dd>
+        </div>
+        <div>
+          <dt>기준</dt>
+          <dd>최근 2026년 공연 기록 · UPDATED {updated}</dd>
+        </div>
+        <div>
+          <dt>정확도</dt>
+          <dd class="card-facts__caveat">예상 · 보장 아님</dd>
+        </div>
+      </dl>
+
+      <button type="button" data-download-setlist>셋리스트 카드 저장</button>
+      <p class="privacy-note">
+        이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
+      </p>
+      <p class="status" aria-live="polite" data-status></p>
+      <p class="error" role="alert" hidden data-error></p>
+
+      <div class="share-fallback">
+        <p class="share-fallback__title">이미지 저장이 안 되면</p>
+        <div class="share-fallback__actions">
+          <a href="/og/default.jpg">기본 공유 이미지 보기</a>
+          <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+        </div>
+        <code data-share-url>{shareUrl}</code>
+      </div>
+
+      <a class="share-builder__back" href="/setlist/"
+        >곡별 관람 포인트 보기 <span aria-hidden="true">→</span></a
+      >
+    </div>
   </div>
 </section>
 
@@ -48,12 +91,21 @@ const { version, songs, shareUrl } = Astro.props;
       const button = root.querySelector<HTMLButtonElement>(
         '[data-download-setlist]',
       );
+      const preview = root.querySelector<HTMLCanvasElement>('[data-preview]');
       const status = root.querySelector<HTMLElement>('[data-status]');
       const error = root.querySelector<HTMLElement>('[data-error]');
       const copyShare =
         root.querySelector<HTMLButtonElement>('[data-copy-share]');
       const shareUrl = root.querySelector<HTMLElement>('[data-share-url]');
       if (!button || !status || !error) return;
+
+      const layout = buildSetlistCardLayout({ version, songs });
+
+      // 미리보기: 저장되는 카드와 같은 명령을 화면 캔버스에 그린다.
+      // renderCommands 는 그린 뒤 JPEG blob 까지 만들므로 blob 실패는 무시한다(그림은 이미 남아 있다).
+      if (preview) {
+        renderCommands(preview, layout).catch(() => {});
+      }
 
       const currentShareUrl = window.location.href;
       if (shareUrl) shareUrl.textContent = currentShareUrl;
@@ -80,7 +132,7 @@ const { version, songs, shareUrl } = Astro.props;
           status.textContent = '이미지를 생성하고 있습니다…';
           const blob = await renderCommands(
             document.createElement('canvas'),
-            buildSetlistCardLayout({ version, songs }),
+            layout,
           );
           downloadBlob(blob, 'weeknd-goyang-expected-setlist.jpg');
           status.textContent = 'JPEG 셋리스트 카드를 저장했습니다.';
@@ -101,14 +153,13 @@ const { version, songs, shareUrl } = Astro.props;
 <style>
   .share-builder {
     display: grid;
-    gap: 1rem;
-    max-width: 58rem;
+    gap: clamp(2rem, 5vw, 3.5rem);
     padding-block: clamp(4rem, 10vw, 8rem);
   }
   header {
     display: grid;
     gap: 1rem;
-    margin-bottom: clamp(1.5rem, 5vw, 3rem);
+    max-width: 58rem;
   }
   h1 {
     margin: 0;
@@ -118,27 +169,73 @@ const { version, songs, shareUrl } = Astro.props;
     letter-spacing: normal;
     line-height: 0.8;
   }
-  header > p:last-child,
-  .privacy-note,
-  .status {
+  .lead {
+    max-width: 40rem;
+    margin: 0;
     color: var(--mist);
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+  }
+
+  .share-builder__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+    max-width: 64rem;
+  }
+
+  .card-preview {
+    display: grid;
+    gap: 0.6rem;
     margin: 0;
   }
-  .setlist-summary {
-    border-block: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+  .card-preview canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #050507;
+    color: var(--mist);
+  }
+  .card-preview figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+
+  .share-builder__controls {
+    display: grid;
+    gap: 1rem;
+    max-width: 34rem;
+  }
+
+  .card-facts {
+    display: grid;
+    margin: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+  }
+  .card-facts > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .card-facts dt {
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  .card-facts dd {
+    margin: 0;
     color: var(--ivory);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 2rem;
-    padding: 1rem 0;
+    font-weight: 700;
   }
-  .setlist-summary p {
-    margin: 0;
+  .card-facts__caveat {
+    color: var(--amber) !important;
+    font-weight: 900 !important;
   }
-  .setlist-summary p:last-child {
-    color: var(--amber);
-    font-weight: 900;
-  }
+
   button {
     background: var(--amber);
     border: 1px solid var(--amber);
@@ -157,21 +254,75 @@ const { version, songs, shareUrl } = Astro.props;
     outline: 3px solid var(--blue);
     outline-offset: 3px;
   }
+  .privacy-note,
+  .status {
+    margin: 0;
+    color: var(--mist);
+    font-size: 0.92rem;
+  }
   .status {
     min-height: 1.5em;
   }
   .error {
-    color: #ffbac0;
     margin: 0;
+    color: #ffbac0;
   }
+
   .share-fallback {
-    align-items: center;
+    display: grid;
+    gap: 0.7rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .share-fallback__title {
+    margin: 0;
+    color: var(--ivory);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+  .share-fallback__actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 0.7rem 1rem;
+    align-items: center;
   }
-  .share-fallback a {
+  .share-fallback__actions a {
     color: var(--ivory);
     font-weight: 800;
+  }
+  .share-fallback button {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--amber) 60%, transparent);
+    color: var(--ivory);
+    min-height: 44px;
+  }
+  .share-fallback code {
+    overflow-wrap: anywhere;
+    color: var(--mist);
+    font-size: 0.85rem;
+  }
+
+  .share-builder__back {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    color: var(--ivory);
+    font-weight: 800;
+    text-decoration: none;
+  }
+  .share-builder__back:hover,
+  .share-builder__back:focus-visible {
+    color: var(--amber);
+  }
+
+  @media (max-width: 48rem) {
+    .share-builder__grid {
+      grid-template-columns: 1fr;
+    }
+    .card-preview {
+      max-width: 22rem;
+    }
   }
 </style>
