@@ -67,6 +67,29 @@ test('staggers data-enter-group children via --enter-i and transition-delay', as
   expect(secondDelay).toBe('0.06s');
 });
 
+test('reveals the six studio albums one after another on the discover page', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  const list = page.locator('.discover__albums ol');
+  await expect(list).toHaveAttribute('data-enter-group', '');
+  const items = list.locator(':scope > li');
+  await expect(items).toHaveCount(6);
+
+  await list.scrollIntoViewIfNeeded();
+  await expect(list).toHaveAttribute('data-enter', 'in');
+
+  const indexes = await items.evaluateAll((els) =>
+    els.map((el) => getComputedStyle(el).getPropertyValue('--enter-i').trim()),
+  );
+  expect(indexes).toEqual(['0', '1', '2', '3', '4', '5']);
+
+  const delays = await items.evaluateAll((els) =>
+    els.map((el) => getComputedStyle(el).transitionDelay),
+  );
+  expect(delays).toEqual(['0s', '0.09s', '0.18s', '0.27s', '0.36s', '0.45s']);
+});
+
 test('keeps body links visible at rest and draws the full underline on hover', async ({
   page,
 }) => {

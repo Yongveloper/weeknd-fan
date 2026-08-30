@@ -58,7 +58,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     <section class="discover__albums" aria-labelledby="studio-albums-title">
       <p class="eyebrow">DISCOGRAPHY, LIGHTLY</p>
       <h2 id="studio-albums-title">정규 앨범 6장</h2>
-      <ol aria-label="정규 앨범 6장">
+      <ol aria-label="정규 앨범 6장" data-enter-group>
         {
           studioAlbums.map((album) => (
             <li>
@@ -155,6 +155,8 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
   }
 
   .discover__albums ol {
+    --enter-stagger: 90ms; /* 6장이 한 장씩 읽히도록 기본 60ms보다 넉넉히 */
+
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.7rem 1.5rem;
