@@ -3,6 +3,7 @@ import AlbumCover from '../content/AlbumCover.astro';
 import OfficialEmbed from '../content/OfficialEmbed.astro';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
+import Disclosure from '../ui/Disclosure.astro';
 import type {
   AlbumRecord,
   SetlistRecord,
@@ -87,16 +88,14 @@ const editorial = getSetlistEditorialMetadata(entries);
       {
         entries.map((entry) => (
           <li>
-            <details>
-              <summary data-affordance="+">
-                <span>
-                  {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
-                </span>
-                {/* Visual density hint only — album is announced in the expanded metadata below. */}
-                <span class="expected-setlist__album-tag" aria-hidden="true">
-                  {entry.data.album}
-                </span>
-              </summary>
+            <Disclosure class="expected-setlist__item">
+              <span slot="summary" class="expected-setlist__song">
+                {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+              </span>
+              {/* Visual density hint only — album is announced in the expanded metadata below. */}
+              <span slot="meta" class="expected-setlist__album-tag" aria-hidden="true">
+                {entry.data.album}
+              </span>
               <div class="expected-setlist__detail">
                 <p class="expected-setlist__metadata">
                   {(() => {
@@ -129,7 +128,7 @@ const editorial = getSetlistEditorialMetadata(entries);
                   )}
                 />
               </div>
-            </details>
+            </Disclosure>
           </li>
         ))
       }
@@ -188,50 +187,26 @@ const editorial = getSetlistEditorialMetadata(entries);
     list-style: none;
   }
 
-  details,
+  .expected-setlist__item,
   .actual-setlist article {
     border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }
 
-  .expected-setlist__list li:last-child details,
+  .expected-setlist__item {
+    border-bottom: 0;
+  }
+
+  .expected-setlist__list li:last-child .expected-setlist__item,
   .actual-setlist article:last-child {
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
   }
 
-  summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    min-height: 44px;
-    padding: 0.9rem 0.2rem;
-    color: var(--ivory);
-    cursor: pointer;
+  .expected-setlist__song {
     font-size: clamp(1.05rem, 2.4vw, 1.45rem);
-    font-weight: 800;
-    list-style: none;
-  }
-
-  summary::-webkit-details-marker {
-    display: none;
-  }
-
-  summary::after {
-    content: attr(data-affordance) / '';
-    color: var(--amber);
-    font-family: var(--font-display);
-    font-size: 1.4em;
-    line-height: 1;
-    transition: transform var(--motion-fast) var(--ease-cinematic);
-  }
-
-  details[open] > summary::after {
-    transform: rotate(45deg);
   }
 
   .expected-setlist__album-tag {
     flex-shrink: 0;
-    margin-inline-start: auto;
     overflow: hidden;
     max-width: 40%;
     color: var(--mist);
@@ -248,21 +223,6 @@ const editorial = getSetlistEditorialMetadata(entries);
     display: grid;
     gap: 0.65rem;
     padding: 0.2rem 0.2rem 1.5rem;
-  }
-
-  details[open] > .expected-setlist__detail {
-    animation: detail-reveal 180ms var(--ease-cinematic) both;
-  }
-
-  @keyframes detail-reveal {
-    from {
-      opacity: 0;
-      transform: translateY(6px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-    }
   }
 
   .expected-setlist__detail h3,

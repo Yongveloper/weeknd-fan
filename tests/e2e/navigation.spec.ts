@@ -464,5 +464,5 @@ test('states what the site is, who it is for, and where the official notice live
     page.getByText('곡을 누르면 관람 포인트·떼창·공식 듣기가 열립니다.'),
   ).toBeVisible();
   const firstSummary = page.locator('.expected-setlist__list summary').first();
-  await expect(firstSummary).toHaveAttribute('data-affordance', '+');
+  await expect(firstSummary.locator('.disclosure__chevron')).toHaveCount(1);
 });
