@@ -47,19 +47,74 @@ test('reaches both private share tools through contextual product CTAs', async (
 
 test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
   await page.goto('/');
-  await expect(
-    page.getByRole('navigation', { name: '주요 메뉴' }),
-  ).toBeVisible();
+  const mainNav = page.getByRole('navigation', { name: '주요 메뉴' });
+  await expect(mainNav).toBeVisible();
   await expect(
     page.getByText('비공식·비영리 팬 가이드', { exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole('link', { name: '예상 셋리스트' }),
+    mainNav.getByRole('link', { name: '예상 셋리스트' }),
   ).toHaveAttribute('href', '/setlist/');
-  await expect(page.getByRole('link', { name: '고양 가이드' })).toHaveAttribute(
-    'href',
-    '/goyang/',
-  );
+  await expect(
+    mainNav.getByRole('link', { name: '고양 가이드' }),
+  ).toHaveAttribute('href', '/goyang/');
+
+  // The footer repeats the site map so the fifth page is reachable on phones,
+  // where the header nav scrolls it out of view.
+  const footerNav = page.getByRole('navigation', { name: '사이트 지도' });
+  await expect(
+    footerNav.getByRole('link', { name: '출처·업데이트' }),
+  ).toHaveAttribute('href', '/sources/');
+  await expect(
+    page.getByText(/공식 정보 마지막 확인 \d{4}\.\d{2}\.\d{2}/),
+  ).toBeVisible();
+});
+
+test('keeps the header in the same fonts across page navigations', async ({
+  page,
+}) => {
+  const headerMetrics = () =>
+    page.evaluate(async () => {
+      await document.fonts.ready;
+      const links = [
+        ...document.querySelectorAll('nav[aria-label="주요 메뉴"] a'),
+      ];
+      const wordmark = document.querySelector('.site-header__wordmark')!;
+      return {
+        widths: links.map((link) =>
+          Math.round(link.getBoundingClientRect().width),
+        ),
+        wordmark: Math.round(wordmark.getBoundingClientRect().width),
+        navLoaded: document.fonts.check(
+          "700 16px 'Noto Sans KR Header'",
+          '예상 셋리스트',
+        ),
+        wordmarkLoaded: document.fonts.check(
+          "400 16px 'Bebas Neue Header'",
+          'DAWNFOLD',
+        ),
+      };
+    });
+
+  await page.goto('/');
+  await expect(
+    page.locator('link[rel="preload"][as="font"]').first(),
+  ).toHaveAttribute('crossorigin', '');
+  const first = await headerMetrics();
+  expect(first.navLoaded).toBe(true);
+  expect(first.wordmarkLoaded).toBe(true);
+
+  for (const href of ['/discover/', '/setlist/', '/goyang/']) {
+    await page
+      .getByRole('navigation', { name: '주요 메뉴' })
+      .getByRole('link')
+      .filter({ has: page.locator(`[href="${href}"]`) })
+      .or(page.locator(`nav[aria-label="주요 메뉴"] a[href="${href}"]`))
+      .first()
+      .click();
+    await page.waitForURL(`**${href}`);
+    expect(await headerMetrics()).toEqual(first);
+  }
 });
 
 test('groups sources and planned update checkpoints without overstating NamuWiki', async ({
@@ -450,7 +505,7 @@ test('states what the site is, who it is for, and where the official notice live
 
   await expect(page.getByText('THE WEEKND · 비공식 팬 팜플렛')).toBeVisible();
   await expect(page.getByText('만 19세 이상')).toBeVisible();
-  await expect(page.getByRole('link', { name: '공식 공지 ↗' })).toHaveAttribute(
+  await expect(page.getByRole('link', { name: '공식 공지' })).toHaveAttribute(
     'href',
     'https://tickets.interpark.com/contents/notice/detail/14180',
   );
