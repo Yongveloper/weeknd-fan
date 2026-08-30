@@ -97,36 +97,54 @@ const editorial = getSetlistEditorialMetadata(entries);
                 {entry.data.album}
               </span>
               <div class="expected-setlist__detail">
-                <p class="expected-setlist__metadata">
+                <div class="song-meta">
                   {(() => {
                     const album = findAlbumByTitle(albums, entry.data.album);
                     return album ? (
-                      <AlbumCover album={album} size={32} />
+                      <AlbumCover album={album} size={48} />
                     ) : null;
                   })()}
-                  <span>{entry.data.album}</span>
-                  <span>신뢰도 {entry.data.confidence}</span>
+                  <span class="song-meta__album">{entry.data.album}</span>
+                  <span class="song-meta__pill">
+                    신뢰도 {entry.data.confidence}
+                  </span>
                   <StatusBadge status={entry.data.status} />
-                </p>
-                <h3>공연 전에 알면 좋은 한 문장</h3>
-                <p>{entry.data.summary}</p>
-                <h3>무대에서 볼 것</h3>
-                <p>{entry.data.liveNote}</p>
-                <h3>떼창 포인트</h3>
-                <p>{entry.data.singAlongNote}</p>
+                </div>
+
+                <div class="song-block">
+                  <p class="eyebrow">BEFORE</p>
+                  <h3>공연 전에 알면 좋은 한 문장</h3>
+                  <p>{entry.data.summary}</p>
+                </div>
+                <div class="song-block">
+                  <p class="eyebrow">ON STAGE</p>
+                  <h3>무대에서 볼 것</h3>
+                  <p>{entry.data.liveNote}</p>
+                </div>
+                <div class="song-block">
+                  <p class="eyebrow">SING ALONG</p>
+                  <h3>떼창 포인트</h3>
+                  <p>{entry.data.singAlongNote}</p>
+                </div>
+
                 {entry.data.officialListenUrl && (
-                  <OfficialEmbed
-                    url={entry.data.officialListenUrl}
-                    songTitle={entry.data.songTitle}
-                  />
+                  <div class="song-embed">
+                    <OfficialEmbed
+                      url={entry.data.officialListenUrl}
+                      songTitle={entry.data.songTitle}
+                    />
+                  </div>
                 )}
-                <h3>출처</h3>
-                <SourceList
-                  sources={resolveSourceReferences(
-                    entry.data.observedIn,
-                    sources,
-                  )}
-                />
+
+                <div class="song-sources">
+                  <h3>출처</h3>
+                  <SourceList
+                    sources={resolveSourceReferences(
+                      entry.data.observedIn,
+                      sources,
+                    )}
+                  />
+                </div>
               </div>
             </Disclosure>
           </li>
@@ -221,30 +239,77 @@ const editorial = getSetlistEditorialMetadata(entries);
 
   .expected-setlist__detail {
     display: grid;
-    gap: 0.65rem;
-    padding: 0.2rem 0.2rem 1.5rem;
+    gap: 1.25rem;
+    padding: 0 0.2rem;
   }
-
-  .expected-setlist__detail h3,
   .actual-setlist h3 {
     margin: 0.85rem 0 0;
     color: var(--amber);
     font-size: 0.85rem;
   }
-
-  .expected-setlist__detail p {
+  .song-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 0.9rem;
+    align-items: center;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    color: var(--ivory);
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+  .song-meta__album {
+    font-weight: 900;
+  }
+  .song-meta__pill {
+    padding: 0.25rem 0.6rem;
+    border: 1px solid color-mix(in srgb, var(--mist) 40%, transparent);
+    border-radius: 999px;
+    color: var(--mist);
+    font-size: 0.76rem;
+  }
+  .song-block {
+    display: grid;
+    gap: 0.35rem;
+    padding-inline-start: 0.9rem;
+    border-inline-start: 2px solid var(--amber);
+  }
+  .song-block .eyebrow {
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+  }
+  .song-block h3 {
+    margin: 0;
+    color: var(--ivory);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+  .song-block p:not(.eyebrow) {
     margin: 0;
     color: var(--mist);
   }
-
-  .expected-setlist__metadata {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.6rem 1rem;
-    align-items: center;
-    color: var(--ivory) !important;
-    font-size: 0.84rem;
+  .song-embed {
+    padding-inline-start: 0.9rem;
+  }
+  .song-sources {
+    display: grid;
+    gap: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .song-sources h3 {
+    margin: 0;
+    color: var(--ink-muted);
+    font-size: 0.72rem;
     font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .song-sources :global(.source-list) {
+    font-size: 0.78rem;
+    color: color-mix(in srgb, var(--mist) 60%, transparent);
   }
 
   .actual-setlist article {

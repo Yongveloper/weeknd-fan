@@ -120,3 +120,28 @@ test('scopes adopter styles (max-width/min-width/color) to the parent, not Discl
   const preview = page.getByRole('group', { name: '전체 예상 셋리스트' });
   await expect(preview).toHaveCSS('max-width', '832px');
 });
+
+test('lays out the song detail as meta header, three labelled blocks, then sources', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+  const first = page.locator('.expected-setlist details').first();
+  await first.locator('summary').click();
+  await expect(first).toHaveAttribute('data-state', 'open');
+
+  const detail = first.locator('.expected-setlist__detail');
+  await expect(detail.locator('.song-meta')).toHaveCount(1);
+  await expect(detail.locator('.song-meta .status')).toHaveText('예상 · 보장 아님');
+  await expect(detail.locator('.song-block .eyebrow')).toHaveText([
+    'BEFORE',
+    'ON STAGE',
+    'SING ALONG',
+  ]);
+  await expect(detail.locator('.song-block h3')).toHaveText([
+    '공연 전에 알면 좋은 한 문장',
+    '무대에서 볼 것',
+    '떼창 포인트',
+  ]);
+  await expect(detail.locator('.song-sources h3')).toHaveText('출처');
+  await expect(detail.locator('.song-sources .source-list li').first()).toBeVisible();
+});
