@@ -262,9 +262,7 @@ test('settles rapid open-close-open with focus and no running panel animation', 
 
   await expect(glossary).toHaveAttribute('data-state', 'open');
   await expect(glossary).toHaveAttribute('open', '');
-  await expect
-    .poll(() => page.evaluate(() => document.activeElement?.tagName))
-    .toBe('SUMMARY');
+  await expect(summary).toBeFocused();
   await expect(panel).not.toHaveAttribute('style', /height|overflow/);
   await expect
     .poll(() =>
