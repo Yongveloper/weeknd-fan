@@ -20,8 +20,7 @@ const { items } = Astro.props;
     private scrollHandler?: EventListener;
     private resizeHandler?: EventListener;
     private historyHandler?: EventListener;
-    private hashTarget?: string;
-    private ignoreNextScroll = false;
+    private initialHashTarget?: string;
 
     connectedCallback() {
       const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'));
@@ -43,8 +42,9 @@ const { items } = Astro.props;
       };
       const update = () => {
         this.frame = 0;
-        if (this.hashTarget) {
-          setCurrent(this.hashTarget);
+        if (this.initialHashTarget) {
+          setCurrent(this.initialHashTarget);
+          this.initialHashTarget = undefined;
           return;
         }
         const stickyBottom = this.getBoundingClientRect().bottom;
@@ -65,20 +65,9 @@ const { items } = Astro.props;
       };
 
       const hashUpdate = () => {
-        const hashId = window.location.hash.slice(1);
-        if (sections.some((section) => section.target.id === hashId)) {
-          this.hashTarget = hashId;
-          this.ignoreNextScroll = true;
-        } else this.hashTarget = undefined;
         schedule();
       };
       this.scrollHandler = () => {
-        if (this.ignoreNextScroll) {
-          this.ignoreNextScroll = false;
-          schedule();
-          return;
-        }
-        this.hashTarget = undefined;
         schedule();
       };
       this.resizeHandler = schedule;
@@ -91,7 +80,10 @@ const { items } = Astro.props;
       window.addEventListener('resize', this.resizeHandler);
       window.addEventListener('hashchange', this.historyHandler);
       window.addEventListener('popstate', this.historyHandler);
-      hashUpdate();
+      const initialHashId = window.location.hash.slice(1);
+      if (sections.some((section) => section.target.id === initialHashId))
+        this.initialHashTarget = initialHashId;
+      schedule();
     }
 
     disconnectedCallback() {

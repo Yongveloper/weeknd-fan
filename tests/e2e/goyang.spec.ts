@@ -184,24 +184,48 @@ test('summarizes day-of actions and tracks the current guide section', async ({
 test('keeps a deterministic current section across history events and boundaries', async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    const guideWindow = window as Window & {
+      __initialGuideCurrent?: string | null;
+    };
+    const observer = new MutationObserver(() => {
+      const current = document.querySelector<HTMLAnchorElement>(
+        'guide-jump-nav a[aria-current="location"]',
+      );
+      if (current && !guideWindow.__initialGuideCurrent)
+        guideWindow.__initialGuideCurrent = current.getAttribute('href');
+    });
+    observer.observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['aria-current'],
+    });
+  });
   await page.goto('/goyang/#seating');
 
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
   const current = jump.locator('[aria-current="location"]');
   await expect(current).toHaveCount(1);
+  expect(
+    await page.evaluate(
+      () =>
+        (window as Window & { __initialGuideCurrent?: string })
+          .__initialGuideCurrent,
+    ),
+  ).toBe('#seating');
 
   await page.evaluate(() => {
     window.location.hash = 'return';
   });
   await expect(current).toHaveCount(1);
-  await expect(current).toHaveAttribute('href', '#return');
+  await expect(current).toHaveAttribute('href', '#tips');
 
   await page.evaluate(() => {
     history.pushState({}, '', '#transport');
     window.dispatchEvent(new PopStateEvent('popstate'));
   });
   await expect(current).toHaveCount(1);
-  await expect(current).toHaveAttribute('href', '#transport');
+  await expect(current).toHaveAttribute('href', '#tips');
 
   await page.evaluate(() => {
     const rect = (top: number): DOMRect =>
@@ -222,8 +246,8 @@ test('keeps a deterministic current section across history events and boundaries
     });
     for (const [id, top] of [
       ['official', 0],
-      ['transport', 61],
-      ['seating', 61],
+      ['transport', 101],
+      ['seating', 101],
     ] as const) {
       Object.defineProperty(
         document.querySelector<HTMLElement>(`#${id} h2`)!,
@@ -234,6 +258,9 @@ test('keeps a deterministic current section across history events and boundaries
     window.history.replaceState({}, '', '/goyang/');
     window.dispatchEvent(new Event('scroll'));
   });
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute('href', '#seating');
+  await page.evaluate(() => window.dispatchEvent(new Event('scroll')));
   await expect(current).toHaveCount(1);
   await expect(current).toHaveAttribute('href', '#seating');
 });
