@@ -8,6 +8,52 @@ test('keeps home venue facts readable without JavaScript', async ({ page }) => {
   await expect(page.getByText('고양종합운동장 주경기장')).toBeVisible();
 });
 
+test('keeps every primary route visible and keyboard reachable on a narrow screen without JavaScript', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/');
+
+  const nav = page.getByRole('navigation', { name: '주요 메뉴' });
+  const links = nav.getByRole('link');
+  await expect(links).toHaveCount(5);
+  for (const link of await links.all()) {
+    await expect(link).toBeVisible();
+  }
+  expect(
+    await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth <=
+        document.documentElement.clientWidth + 1,
+    ),
+  ).toBe(true);
+
+  const expectedHrefs = [
+    '/',
+    '/discover/',
+    '/setlist/',
+    '/goyang/',
+    '/sources/',
+  ];
+  await page.keyboard.press('Tab');
+  await expect(
+    page.getByRole('link', { name: '본문으로 건너뛰기' }),
+  ).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(
+    page.getByRole('link', { name: 'The Weeknd 고양 팬 가이드 홈' }),
+  ).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(
+    page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴'),
+  ).toBeFocused();
+  for (const [index, href] of expectedHrefs.entries()) {
+    await page.keyboard.press('Tab');
+    await expect(links.nth(index)).toHaveAttribute('href', href);
+    await expect(links.nth(index)).toBeFocused();
+  }
+});
+
 test('keeps the expected-setlist label and native details readable without JavaScript', async ({
   page,
 }) => {

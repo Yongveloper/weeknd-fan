@@ -1,3 +1,13 @@
+---
+const shortcuts = [
+  ['/goyang/#official', '공식 공연 정보'],
+  ['/goyang/#transport', '가는 길'],
+  ['/goyang/#seating', '좌석 안내'],
+  ['/goyang/#packing', '준비물'],
+  ['/goyang/#return', '귀가 확인'],
+] as const;
+---
+
 <section
   class="guide-shortcuts fold"
   data-motion-scene-enter
@@ -10,11 +20,7 @@
     </div>
     <nav aria-label="고양 가이드 바로가기">
       {
-        [
-          ['/goyang/#transport', '가는 길'],
-          ['/goyang/#packing', '준비물'],
-          ['/goyang/#return', '귀가 확인'],
-        ].map(([href, label], index) => (
+        shortcuts.map(([href, label], index) => (
           <a href={href} style={`--i: ${index}`}>
             {label} <span aria-hidden="true">→</span>
           </a>

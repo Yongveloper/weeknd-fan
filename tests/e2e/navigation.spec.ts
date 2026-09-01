@@ -1,6 +1,13 @@
 import { expect, test } from '@playwright/test';
 import { useClock } from './helpers/clock';
 
+async function openPrimaryNav(page: import('@playwright/test').Page) {
+  const menu = page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByText('메뉴');
+  if (await menu.isVisible()) await menu.click();
+}
+
 async function expectAnchorHeadingInViewport(
   page: import('@playwright/test').Page,
   heading: string,
@@ -52,6 +59,7 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
   await expect(
     page.getByText('비공식·비영리 팬 가이드', { exact: true }),
   ).toBeVisible();
+  await openPrimaryNav(page);
   await expect(
     mainNav.getByRole('link', { name: '예상 셋리스트' }),
   ).toHaveAttribute('href', '/setlist/');
@@ -105,6 +113,7 @@ test('keeps the header in the same fonts across page navigations', async ({
   expect(first.wordmarkLoaded).toBe(true);
 
   for (const href of ['/discover/', '/setlist/', '/goyang/']) {
+    await openPrimaryNav(page);
     await page
       .getByRole('navigation', { name: '주요 메뉴' })
       .getByRole('link')
@@ -142,6 +151,7 @@ test('keeps navigation targets touch-sized in every viewport', async ({
   page,
 }) => {
   await page.goto('/');
+  await openPrimaryNav(page);
 
   for (const link of await page
     .getByRole('navigation', { name: '주요 메뉴' })
@@ -305,16 +315,33 @@ test('links each Goyang shortcut to its stable guide anchor', async ({
   const shortcuts = page.getByRole('navigation', {
     name: '고양 가이드 바로가기',
   });
-  await expect(
-    shortcuts.getByRole('link', { name: '가는 길' }),
-  ).toHaveAttribute('href', '/goyang/#transport');
-  await expect(shortcuts.getByRole('link', { name: '준비물' })).toHaveAttribute(
+  await expect(shortcuts.getByRole('link')).toHaveText([
+    '공식 공연 정보 →',
+    '가는 길 →',
+    '좌석 안내 →',
+    '준비물 →',
+    '귀가 확인 →',
+  ]);
+  await expect(shortcuts.getByRole('link').nth(0)).toHaveAttribute(
+    'href',
+    '/goyang/#official',
+  );
+  await expect(shortcuts.getByRole('link').nth(1)).toHaveAttribute(
+    'href',
+    '/goyang/#transport',
+  );
+  await expect(shortcuts.getByRole('link').nth(2)).toHaveAttribute(
+    'href',
+    '/goyang/#seating',
+  );
+  await expect(shortcuts.getByRole('link').nth(3)).toHaveAttribute(
     'href',
     '/goyang/#packing',
   );
-  await expect(
-    shortcuts.getByRole('link', { name: '귀가 확인' }),
-  ).toHaveAttribute('href', '/goyang/#return');
+  await expect(shortcuts.getByRole('link').nth(4)).toHaveAttribute(
+    'href',
+    '/goyang/#return',
+  );
 });
 
 test('opens transport and return information within two actions', async ({
@@ -441,34 +468,24 @@ test('shows Spotify-linked official covers for the six studio albums', async ({
   );
 });
 
-test('hides the mobile menu scrollbar and keeps the last item reachable', async ({
+test('exposes every primary route without horizontal scrolling on mobile', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'mobile-chromium', 'mobile only');
   await page.goto('/');
 
+  await page
+    .getByRole('group', { name: '주요 메뉴' })
+    .getByText('메뉴')
+    .click();
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
-  const metrics = await nav.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      overflow: element.scrollWidth > element.clientWidth,
-      scrollbarWidth: style.scrollbarWidth,
-      snap: style.scrollSnapType,
-    };
-  });
-  expect(metrics.overflow).toBe(true);
-  expect(metrics.scrollbarWidth).toBe('none');
-  expect(metrics.snap).toContain('x');
-
-  await expect
-    .poll(() => nav.evaluate((element) => element.scrollLeft))
-    .toBe(0);
-
-  const last = nav.getByRole('link', { name: '출처·업데이트' });
-  await last.scrollIntoViewIfNeeded();
-  const box = await last.boundingBox();
-  const viewport = page.viewportSize()!;
-  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width);
+  await expect(nav.getByRole('link')).toHaveCount(5);
+  for (const link of await nav.getByRole('link').all()) {
+    await expect(link).toBeVisible();
+  }
+  expect(
+    await nav.evaluate((element) => element.scrollWidth - element.clientWidth),
+  ).toBeLessThanOrEqual(1);
 });
 
 test('places covers beside every album mention on home, discover, and setlist', async ({

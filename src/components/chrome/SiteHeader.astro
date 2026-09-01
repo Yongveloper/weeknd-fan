@@ -17,20 +17,25 @@ const pathname = Astro.url.pathname;
       >
     </a>
     <nav aria-label="주요 메뉴">
-      <ul class="site-header__nav-list">
-        {
-          navigation.map(({ href, label }) => (
-            <li>
-              <a
-                href={href}
-                aria-current={pathname === href ? 'page' : undefined}
-              >
-                {label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
+      <mobile-navigation>
+        <details aria-label="주요 메뉴" open>
+          <summary>메뉴</summary>
+          <ul class="site-header__nav-list">
+            {
+              navigation.map(({ href, label }) => (
+                <li>
+                  <a
+                    href={href}
+                    aria-current={pathname === href ? 'page' : undefined}
+                  >
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </details>
+      </mobile-navigation>
     </nav>
   </div>
 </header>
@@ -73,16 +78,6 @@ const pathname = Astro.url.pathname;
     letter-spacing: 0.22em;
   }
 
-  nav {
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    scrollbar-width: none;
-  }
-
-  nav::-webkit-scrollbar {
-    display: none;
-  }
-
   .site-header__nav-list {
     display: flex;
     align-items: center;
@@ -91,10 +86,6 @@ const pathname = Astro.url.pathname;
     margin: 0;
     padding: 0;
     list-style: none;
-  }
-
-  .site-header__nav-list li {
-    scroll-snap-align: start;
   }
 
   .site-header__nav-list a {
@@ -142,17 +133,55 @@ const pathname = Astro.url.pathname;
       padding-block: 1rem 0;
     }
 
-    nav {
-      margin-inline: calc(var(--gutter) * -1);
-      padding-inline: var(--gutter) 3rem;
-      scroll-padding-inline: var(--gutter) 3rem;
-      mask-image: linear-gradient(
-        90deg,
-        transparent,
-        #000 var(--gutter),
-        #000 calc(100% - 3rem),
-        transparent
-      );
+    details {
+      margin-top: 0.5rem;
+    }
+
+    summary {
+      display: grid;
+      place-items: center;
+      min-block-size: 44px;
+      color: var(--ivory);
+      font-family: 'Noto Sans KR Header', var(--font-body);
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .site-header__nav-list {
+      display: grid;
+      gap: 0;
+      min-width: 0;
+      padding-block: 0.5rem;
+    }
+
+    .site-header__nav-list a {
+      justify-content: start;
+    }
+
+    .site-header__nav-list a::after {
+      inset-inline: 0;
+    }
+  }
+
+  @media (min-width: 44.0625rem) {
+    summary {
+      display: none;
     }
   }
 </style>
+
+<script>
+  class MobileNavigation extends HTMLElement {
+    connectedCallback() {
+      const details = this.querySelector('details');
+      if (!details) return;
+      if (window.matchMedia('(max-width: 44rem)').matches) details.open = false;
+      this.dataset.ready = 'true';
+    }
+  }
+
+  if (!customElements.get('mobile-navigation')) {
+    customElements.define('mobile-navigation', MobileNavigation);
+  }
+</script>
