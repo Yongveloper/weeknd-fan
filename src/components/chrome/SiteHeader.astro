@@ -177,6 +177,10 @@ const pathname = Astro.url.pathname;
       padding-block: 0.5rem;
     }
 
+    .site-header__nav details:not([open]) > .site-header__nav-list {
+      display: none;
+    }
+
     .site-header__nav-list a {
       justify-content: start;
     }

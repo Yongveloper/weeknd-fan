@@ -78,22 +78,32 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
 });
 
 test('opens and closes the mobile menu from the keyboard', async ({ page }) => {
-  await page.setViewportSize({ width: 320, height: 568 });
+  await page.setViewportSize({ width: 652, height: 526 });
   await page.goto('/');
 
   const menu = page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴');
   const details = page.getByRole('group', { name: '주요 메뉴' });
+  const list = page.locator('.site-header__nav-list');
+  const firstLink = page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByRole('link')
+    .first();
+  await expect(details).not.toHaveAttribute('open', '');
+  await expect
+    .poll(() => list.evaluate((element) => element.clientHeight))
+    .toBe(0);
   await tabUntilFocused(page, menu);
   await page.keyboard.press('Enter');
   await expect(details).toHaveAttribute('open', '');
-  await expect(
-    page
-      .getByRole('navigation', { name: '주요 메뉴' })
-      .getByRole('link')
-      .first(),
-  ).toBeVisible();
+  await expect(firstLink).toBeVisible();
+  await expect
+    .poll(() => list.evaluate((element) => element.clientHeight))
+    .toBeGreaterThan(0);
   await page.keyboard.press('Enter');
   await expect(details).not.toHaveAttribute('open', '');
+  await expect
+    .poll(() => list.evaluate((element) => element.clientHeight))
+    .toBe(0);
 });
 
 test('keeps the header in the same fonts across page navigations', async ({
