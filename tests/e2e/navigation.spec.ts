@@ -247,7 +247,7 @@ test('presents the setlist as a prediction with expandable song context', async 
   await expect(page.getByRole('heading', { name: '출처' })).toBeVisible();
 });
 
-test('filters expected songs progressively and restores pushed history state', async ({
+test('uses replace for typing and push for filters across browser history', async ({
   page,
 }) => {
   await page.goto('/setlist/');
@@ -255,26 +255,133 @@ test('filters expected songs progressively and restores pushed history state', a
   const explorer = page.locator('.expected-setlist');
   const search = explorer.getByRole('searchbox', { name: '곡 검색' });
   const album = explorer.getByLabel('앨범으로 고르기');
+  const visibleRows = explorer.locator(
+    '[data-setlist-list] > li:not([hidden])',
+  );
+  const expectState = async ({
+    url,
+    query,
+    albumValue,
+    count,
+  }: {
+    url: RegExp;
+    query: string;
+    albumValue: string;
+    count: number;
+  }) => {
+    await expect(page).toHaveURL(url);
+    await expect(search).toHaveValue(query);
+    await expect(album).toHaveValue(albumValue);
+    await expect(explorer.locator('[data-setlist-view="all"]')).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await expect(explorer.getByRole('status')).toHaveText(`${count}곡 표시`);
+    await expect(visibleRows).toHaveCount(count);
+  };
 
-  await search.fill('after');
-  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+  await expectState({
+    url: /\/setlist\/$/,
+    query: '',
+    albumValue: '',
+    count: 38,
+  });
   await expect(
-    explorer.locator('[data-setlist-list] > li:not([hidden])'),
-  ).toHaveCount(1);
-  await expect(page).toHaveURL(/q=after/);
+    explorer.getByRole('button', { name: '3분 핵심 10곡' }),
+  ).toHaveCount(0);
+
+  await explorer.getByRole('button', { name: '전체' }).click();
+  await expectState({
+    url: /\/setlist\/$/,
+    query: '',
+    albumValue: '',
+    count: 38,
+  });
+
+  await search.click();
+  await search.pressSequentially('after');
+  await expectState({
+    url: /\/setlist\/\?q=after$/,
+    query: 'after',
+    albumValue: '',
+    count: 1,
+  });
 
   await album.selectOption('After Hours');
-  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
-  await expect(page).toHaveURL(/album=After\+Hours/);
+  await expectState({
+    url: /\/setlist\/\?q=after&album=After\+Hours$/,
+    query: 'after',
+    albumValue: 'After Hours',
+    count: 1,
+  });
 
   await explorer.getByRole('button', { name: '초기화' }).click();
-  await expect(explorer.getByRole('status')).toHaveText('38곡 표시');
-  await expect(page).not.toHaveURL(/[?]/);
+  await expectState({
+    url: /\/setlist\/$/,
+    query: '',
+    albumValue: '',
+    count: 38,
+  });
 
   await page.goBack();
-  await expect(album).toHaveValue('After Hours');
-  await expect(search).toHaveValue('after');
-  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+  await expectState({
+    url: /\/setlist\/\?q=after&album=After\+Hours$/,
+    query: 'after',
+    albumValue: 'After Hours',
+    count: 1,
+  });
+  await page.goBack();
+  await expectState({
+    url: /\/setlist\/\?q=after$/,
+    query: 'after',
+    albumValue: '',
+    count: 1,
+  });
+  await page.goBack();
+  await expectState({
+    url: /\/setlist\/$/,
+    query: '',
+    albumValue: '',
+    count: 38,
+  });
+  await page.goForward();
+  await expectState({
+    url: /\/setlist\/\?q=after$/,
+    query: 'after',
+    albumValue: '',
+    count: 1,
+  });
+  await page.goForward();
+  await expectState({
+    url: /\/setlist\/\?q=after&album=After\+Hours$/,
+    query: 'after',
+    albumValue: 'After Hours',
+    count: 1,
+  });
+  await page.goForward();
+  await expectState({
+    url: /\/setlist\/$/,
+    query: '',
+    albumValue: '',
+    count: 38,
+  });
+});
+
+test('announces a zero-result expected-song search', async ({ page }) => {
+  await page.goto('/setlist/');
+
+  const explorer = page.locator('.expected-setlist');
+  const search = explorer.getByRole('searchbox', { name: '곡 검색' });
+  await search.click();
+  await search.pressSequentially('zzzz');
+
+  await expect(explorer.getByRole('status')).toHaveText('0곡 표시');
+  await expect(
+    explorer.locator('[data-setlist-list] > li:not([hidden])'),
+  ).toHaveCount(0);
+  await expect(
+    explorer.getByText('검색 결과가 없습니다.', { exact: true }),
+  ).toBeVisible();
 });
 
 test('moves focus to the result count when filtering hides an open song', async ({

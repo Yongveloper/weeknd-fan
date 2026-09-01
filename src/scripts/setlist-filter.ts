@@ -15,12 +15,15 @@ const albumSelect = root?.querySelector<HTMLSelectElement>(
   '[data-setlist-album]',
 );
 const count = root?.querySelector<HTMLElement>('[data-setlist-count]');
+const empty = root?.parentElement?.querySelector<HTMLElement>(
+  '[data-setlist-empty]',
+);
 const reset = root?.querySelector<HTMLButtonElement>('[data-setlist-reset]');
 const viewButtons = root
   ? [...root.querySelectorAll<HTMLButtonElement>('[data-setlist-view]')]
   : [];
 
-if (root && list && queryInput && albumSelect && count && reset) {
+if (root && list && queryInput && albumSelect && count && empty && reset) {
   root.hidden = false;
   const entries: RowEntry[] = [
     ...list.querySelectorAll<HTMLLIElement>(':scope > li'),
@@ -95,6 +98,7 @@ if (root && list && queryInput && albumSelect && count && reset) {
     }
     for (const entry of visible) list.append(entry.row);
     count.textContent = `${visible.length}곡 표시`;
+    empty.hidden = visible.length !== 0;
     syncControls();
     if (shouldFocusCount) count.focus();
   };
