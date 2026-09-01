@@ -1,5 +1,29 @@
 import { expect, type Locator, type Page } from '@playwright/test';
 
+export interface HorizontalRect {
+  left: number;
+  right: number;
+}
+
+export function getHorizontalClipIntersection(
+  rect: HorizontalRect,
+  clipRects: HorizontalRect[],
+  viewportWidth: number,
+): HorizontalRect | null {
+  let left = 0;
+  let right = viewportWidth;
+  clipRects.forEach((clip) => {
+    left = Math.max(left, clip.left);
+    right = Math.min(right, clip.right);
+  });
+  const intersection = {
+    left: Math.max(rect.left, left),
+    right: Math.min(rect.right, right),
+  };
+  if (intersection.right <= intersection.left) return null;
+  return intersection;
+}
+
 export async function tabUntilFocused(
   page: Page,
   target: Locator,
@@ -45,6 +69,7 @@ export async function expectVisibleControlsInsideViewport(page: Page) {
       const viewportWidth = document.documentElement.clientWidth;
       return controls.flatMap((control) => {
         const rect = control.getBoundingClientRect();
+        const clipRects: Array<{ left: number; right: number }> = [];
         let ancestor = control.parentElement;
         while (ancestor) {
           const style = getComputedStyle(ancestor);
@@ -54,24 +79,36 @@ export async function expectVisibleControlsInsideViewport(page: Page) {
             'hidden',
             'scroll',
           ].includes(style.overflowX);
-          // Playwright's :visible includes descendants clipped by a horizontal
-          // scroller; those controls are intentionally off-screen until scrolled.
-          if (clipsHorizontally && ancestor.closest('guide-jump-nav')) {
-            return [];
-          }
-          const ancestorRect = ancestor.getBoundingClientRect();
-          if (
-            clipsHorizontally &&
-            (rect.right <= ancestorRect.left || rect.left >= ancestorRect.right)
-          ) {
-            return [];
+          if (clipsHorizontally) {
+            const ancestorRect = ancestor.getBoundingClientRect();
+            clipRects.push({
+              left: ancestorRect.left,
+              right: ancestorRect.right,
+            });
           }
           ancestor = ancestor.parentElement;
+        }
+        let clipLeft = 0;
+        let clipRight = viewportWidth;
+        clipRects.forEach((clip) => {
+          clipLeft = Math.max(clipLeft, clip.left);
+          clipRight = Math.min(clipRight, clip.right);
+        });
+        // Evaluate the portion that can actually be seen through every clip;
+        // only a zero-width intersection is fully off-screen and ignorable.
+        const intersection = {
+          left:
+            clipRects.length > 0 ? Math.max(rect.left, clipLeft) : rect.left,
+          right:
+            clipRects.length > 0 ? Math.min(rect.right, clipRight) : rect.right,
+        };
+        if (intersection.right <= intersection.left) {
+          return [];
         }
         if (rect.width <= 0 || rect.height <= 0) {
           return [`${control.tagName} has an empty box`];
         }
-        if (rect.left < -1 || rect.right > viewportWidth + 1) {
+        if (intersection.left < -1 || intersection.right > viewportWidth + 1) {
           return [
             `${control.tagName} ${control.textContent?.trim() ?? ''} is outside ${viewportWidth}px`,
           ];
