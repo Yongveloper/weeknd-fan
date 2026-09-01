@@ -68,6 +68,12 @@ test('keeps Goyang transport and pending guidance readable without JavaScript', 
 }) => {
   await page.goto('/goyang/');
 
+  const overview = page.getByRole('navigation', { name: '당일 행동 요약' });
+  await expect(overview.getByRole('link')).toHaveCount(4);
+  await expect(overview.getByRole('link', { name: '가는 길' })).toHaveAttribute(
+    'href',
+    '#transport',
+  );
   await expect(page.getByRole('heading', { name: '가는 길' })).toBeVisible();
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
 });

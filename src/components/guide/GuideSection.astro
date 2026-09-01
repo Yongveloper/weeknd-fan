@@ -31,7 +31,9 @@ const pendingItems = [
 >
   <div class="guide-section__heading">
     <p class="eyebrow">GOYANG DAY-OF GUIDE</p>
-    <h2 id={`${entry.data.section}-title`}>{entry.data.title}</h2>
+    <h2 id={`${entry.data.section}-title`} data-guide-heading>
+      {entry.data.title}
+    </h2>
     <p>{entry.data.summary}</p>
   </div>
 

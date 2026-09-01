@@ -1,0 +1,94 @@
+---
+interface Props {
+  items: Array<{ id: string; label: string }>;
+}
+
+const { items } = Astro.props;
+---
+
+<guide-jump-nav class="guide-jump">
+  <nav aria-label="가이드 섹션">
+    {items.map((item) => <a href={`#${item.id}`}>{item.label}</a>)}
+  </nav>
+</guide-jump-nav>
+
+<script>
+  class GuideJumpNav extends HTMLElement {
+    private frame = 0;
+    private observer?: IntersectionObserver;
+    private resizeObserver?: ResizeObserver;
+
+    connectedCallback() {
+      const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'));
+      const sections = links.flatMap((link) => {
+        const target = document.getElementById(link.hash.slice(1));
+        const heading = target?.querySelector<HTMLElement>(
+          '[data-guide-heading], h2',
+        );
+        return target && heading ? [{ link, target, heading }] : [];
+      });
+      if (sections.length === 0) return;
+
+      const setCurrent = (id: string) => {
+        links.forEach((link) => {
+          if (link.hash === `#${id}`)
+            link.setAttribute('aria-current', 'location');
+          else link.removeAttribute('aria-current');
+        });
+      };
+      const update = () => {
+        this.frame = 0;
+        const stickyBottom = this.getBoundingClientRect().bottom;
+        const crossing = sections.filter(
+          (section) =>
+            section.heading.getBoundingClientRect().top <= stickyBottom + 1,
+        );
+        const atBottom =
+          window.innerHeight + window.scrollY >=
+          document.documentElement.scrollHeight - 1;
+        setCurrent(
+          (atBottom ? sections.at(-1) : (crossing.at(-1) ?? sections[0]))!
+            .target.id,
+        );
+      };
+      const schedule = () => {
+        if (this.frame === 0) this.frame = requestAnimationFrame(update);
+      };
+
+      const hashUpdate = () => {
+        const hashId = window.location.hash.slice(1);
+        if (sections.some((section) => section.target.id === hashId))
+          setCurrent(hashId);
+        schedule();
+      };
+      this.observer = new IntersectionObserver(schedule, { threshold: [0, 1] });
+      sections.forEach(({ heading }) => this.observer?.observe(heading));
+      this.resizeObserver = new ResizeObserver(schedule);
+      this.resizeObserver.observe(this);
+      window.addEventListener('scroll', schedule, { passive: true });
+      window.addEventListener('resize', schedule);
+      window.addEventListener('hashchange', hashUpdate);
+      window.addEventListener('popstate', hashUpdate);
+      hashUpdate();
+    }
+
+    disconnectedCallback() {
+      if (this.frame) cancelAnimationFrame(this.frame);
+      this.observer?.disconnect();
+      this.resizeObserver?.disconnect();
+    }
+  }
+
+  if (!customElements.get('guide-jump-nav'))
+    customElements.define('guide-jump-nav', GuideJumpNav);
+</script>
+
+<style>
+  :global(guide-jump-nav.guide-jump) {
+    display: flex;
+  }
+  :global(.guide-jump a[aria-current='location']) {
+    border-color: var(--amber);
+    color: var(--ivory);
+  }
+</style>

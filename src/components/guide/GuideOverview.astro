@@ -1,0 +1,72 @@
+---
+import { STATUS_LABELS, type TrustStatus } from '../../lib/content/contracts';
+
+interface GuideItem {
+  id: string;
+  label: string;
+  status: TrustStatus;
+}
+
+interface Props {
+  items: GuideItem[];
+}
+
+const { items } = Astro.props;
+const groups = [
+  { label: '도착 전', ids: ['transport', 'packing'] },
+  { label: '입장', ids: ['official', 'pending'] },
+  { label: '관람', ids: ['seating', 'tips'] },
+  { label: '귀가', ids: ['return'] },
+].map((group) => ({
+  ...group,
+  items: group.ids.flatMap((id) => items.filter((item) => item.id === id)),
+}));
+---
+
+<nav class="guide-overview" aria-label="당일 행동 요약">
+  {
+    groups.map((group) => (
+      <a href={`#${group.ids[0]}`}>
+        <strong>{group.label}</strong>
+        <span>{group.items.map((item) => item.label).join(' · ')}</span>
+        <small>
+          {group.items.map((item) => STATUS_LABELS[item.status]).join(' · ')}
+        </small>
+      </a>
+    ))
+  }
+</nav>
+
+<style>
+  .guide-overview {
+    display: grid;
+    gap: 0.65rem;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  a {
+    display: grid;
+    gap: 0.25rem;
+    min-height: 44px;
+    padding: 0.85rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 24%, transparent);
+    color: var(--ivory);
+    text-decoration: none;
+  }
+  a:hover,
+  a:focus-visible {
+    border-color: var(--amber);
+  }
+  strong {
+    color: var(--amber);
+  }
+  small {
+    color: var(--ink-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+  @media (max-width: 44rem) {
+    .guide-overview {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>

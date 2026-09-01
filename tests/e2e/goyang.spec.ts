@@ -139,6 +139,48 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
 });
 
+test('summarizes day-of actions and tracks the current guide section', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+
+  const overview = page.getByRole('navigation', { name: '당일 행동 요약' });
+  await expect(overview.getByRole('link')).toHaveText([
+    /도착 전.*가는 길.*준비물/,
+    /입장.*공식 공연 정보.*공식 발표 대기/,
+    /관람.*좌석 안내.*현장 팁/,
+    /귀가.*귀가 확인/,
+  ]);
+  await expect(
+    overview.getByRole('link', { name: /공식 발표 대기/ }),
+  ).toHaveText(/미공개 · 확인 필요/);
+
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  for (const id of ['transport', 'seating', 'return']) {
+    await page
+      .locator(`#${id} h2`)
+      .evaluate((element) =>
+        element.scrollIntoView({ block: 'start', behavior: 'instant' }),
+      );
+    await expect(jump.locator('[aria-current="location"]')).toHaveCount(1);
+    await expect(jump.locator('[aria-current="location"]')).toHaveAttribute(
+      'href',
+      `#${id}`,
+    );
+  }
+
+  await jump.getByRole('link', { name: '좌석 안내' }).click();
+  await expect(page).toHaveURL(/#seating$/);
+  const heading = page.getByRole('heading', { name: '좌석 안내' });
+  await expect(heading).toBeInViewport();
+  const box = await heading.boundingBox();
+  const viewport = page.viewportSize();
+  expect(box).not.toBeNull();
+  expect(viewport).not.toBeNull();
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
+});
+
 test('keeps every tips tab inside the viewport on mobile', async ({
   page,
 }, testInfo) => {

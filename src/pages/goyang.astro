@@ -3,6 +3,8 @@ import { getCollection } from 'astro:content';
 import AccessMap from '../components/guide/AccessMap.astro';
 import AccessTable from '../components/guide/AccessTable.astro';
 import DirectionsLinks from '../components/guide/DirectionsLinks.astro';
+import GuideJumpNav from '../components/guide/GuideJumpNav.astro';
+import GuideOverview from '../components/guide/GuideOverview.astro';
 import GuideSection from '../components/guide/GuideSection.astro';
 import LiveMap from '../components/guide/LiveMap.astro';
 import SeatMap from '../components/guide/SeatMap.astro';
@@ -24,6 +26,13 @@ const jump = [
   })),
   { id: 'tips', label: '현장 팁', order: tips[0]?.data.order ?? 30 },
 ].sort((a, b) => a.order - b.order);
+const overviewItems = jump.map(({ id, label }) => {
+  const entry =
+    id === 'tips' ? tips[0] : sections.find((item) => item.data.section === id);
+  return entry
+    ? { id, label, status: entry.data.status }
+    : { id, label, status: 'practical' as const };
+});
 ---
 
 <BaseLayout
@@ -42,10 +51,9 @@ const jump = [
         후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.
       </p>
     </header>
+    <GuideOverview items={overviewItems} />
     <div class="guide-body">
-      <nav class="guide-jump" aria-label="가이드 섹션">
-        {jump.map((item) => <a href={`#${item.id}`}>{item.label}</a>)}
-      </nav>
+      <GuideJumpNav items={jump} />
       {
         sections.map((entry) => (
           <>
@@ -89,7 +97,7 @@ const jump = [
     display: grid;
     gap: clamp(4rem, 11vw, 9rem);
   }
-  .guide-jump {
+  :global(.guide-jump) {
     position: sticky;
     top: 0;
     z-index: 2;
@@ -103,11 +111,11 @@ const jump = [
     background: color-mix(in srgb, var(--night) 82%, transparent);
     backdrop-filter: blur(14px);
   }
-  .guide-jump::-webkit-scrollbar {
+  :global(.guide-jump::-webkit-scrollbar) {
     display: none;
   }
   @media (max-width: 44rem) {
-    .guide-jump {
+    :global(.guide-jump) {
       scroll-padding-inline: var(--gutter) 3rem;
       mask-image: linear-gradient(
         90deg,
@@ -118,7 +126,7 @@ const jump = [
       );
     }
   }
-  .guide-jump a {
+  :global(.guide-jump a) {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
@@ -132,8 +140,8 @@ const jump = [
     text-decoration: none;
     white-space: nowrap;
   }
-  .guide-jump a:hover,
-  .guide-jump a:focus-visible {
+  :global(.guide-jump a:hover),
+  :global(.guide-jump a:focus-visible) {
     border-color: var(--amber);
     color: var(--ivory);
   }
