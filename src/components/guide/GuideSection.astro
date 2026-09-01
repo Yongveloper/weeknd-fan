@@ -69,7 +69,7 @@ const pendingItems = [
   .guide-section {
     display: grid;
     gap: 1.25rem;
-    scroll-margin-top: 5.5rem;
+    scroll-margin-top: calc(var(--guide-jump-clearance, 5.5rem) + 1px);
   }
   .guide-section__heading {
     display: grid;

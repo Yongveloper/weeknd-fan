@@ -48,14 +48,23 @@ test('toggles instantly and natively under reduced motion', async ({
 }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/discover/');
-  await expect(intro(page).locator('summary .disclosure__label')).toHaveText(
-    '1분 입문 펼쳐보기',
+  const introDetails = intro(page);
+  await expect(introDetails.locator('summary .disclosure__label')).toHaveText(
+    '접기',
   );
 
   const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
   await glossary.locator('summary').click();
   await expect(glossary).toHaveAttribute('open', '');
   await expect(glossary).not.toHaveAttribute('data-state', /.+/);
+  await expect(glossary.locator('summary .disclosure__label')).toHaveText(
+    '접기',
+  );
+  await glossary.locator('summary').click();
+  await expect(glossary).not.toHaveAttribute('open', '');
+  await expect(glossary.locator('summary .disclosure__label')).toHaveText(
+    '더 깊이 보기',
+  );
 });
 
 test('opens from the keyboard', async ({ page }) => {

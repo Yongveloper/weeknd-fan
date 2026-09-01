@@ -122,11 +122,12 @@ function animatePanel(
   };
 }
 
-if (!reduceMotion.matches) {
-  document
-    .querySelectorAll<HTMLDetailsElement>('details[data-disclosure][open]')
-    .forEach((details) => setLabel(details, true));
-}
+document
+  .querySelectorAll<HTMLDetailsElement>('details[data-disclosure]')
+  .forEach((details) => {
+    setLabel(details, details.open);
+    details.addEventListener('toggle', () => setLabel(details, details.open));
+  });
 
 reduceMotion.addEventListener('change', () => {
   if (reduceMotion.matches) {

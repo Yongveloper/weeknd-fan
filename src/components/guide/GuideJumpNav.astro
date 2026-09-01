@@ -22,6 +22,15 @@ const { items } = Astro.props;
     private historyHandler?: EventListener;
     private initialHashTarget?: string;
 
+    private syncClearance = () => {
+      const parent = this.parentElement;
+      if (!parent) return;
+      parent.style.setProperty(
+        '--guide-jump-clearance',
+        `${this.getBoundingClientRect().height}px`,
+      );
+    };
+
     connectedCallback() {
       const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'));
       const sections = links.flatMap((link) => {
@@ -74,8 +83,12 @@ const { items } = Astro.props;
       this.historyHandler = hashUpdate;
       this.observer = new IntersectionObserver(schedule, { threshold: [0, 1] });
       sections.forEach(({ heading }) => this.observer?.observe(heading));
-      this.resizeObserver = new ResizeObserver(schedule);
+      this.resizeObserver = new ResizeObserver(() => {
+        this.syncClearance();
+        schedule();
+      });
       this.resizeObserver.observe(this);
+      this.syncClearance();
       window.addEventListener('scroll', this.scrollHandler, { passive: true });
       window.addEventListener('resize', this.resizeHandler);
       window.addEventListener('hashchange', this.historyHandler);
@@ -98,6 +111,7 @@ const { items } = Astro.props;
         window.removeEventListener('hashchange', this.historyHandler);
         window.removeEventListener('popstate', this.historyHandler);
       }
+      this.parentElement?.style.removeProperty('--guide-jump-clearance');
     }
   }
 

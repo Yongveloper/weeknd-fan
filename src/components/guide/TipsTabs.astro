@@ -131,7 +131,7 @@ const latest = entries.reduce(
   .tips {
     display: grid;
     gap: 1.5rem;
-    scroll-margin-top: 5.5rem;
+    scroll-margin-top: calc(var(--guide-jump-clearance, 5.5rem) + 1px);
   }
   .tips__heading {
     display: grid;

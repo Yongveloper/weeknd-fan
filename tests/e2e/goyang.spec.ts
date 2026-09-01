@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { tabUntilFocused } from './helpers/accessibility';
+import { applyTextZoom, tabUntilFocused } from './helpers/accessibility';
 
 test('shows Interpark access data as a table with a source caption', async ({
   page,
@@ -226,6 +226,52 @@ test('summarizes day-of actions and tracks the current guide section', async ({
   expect(viewport).not.toBeNull();
   expect(box!.y).toBeGreaterThanOrEqual(0);
   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
+});
+
+test('clears the actual sticky jump nav from every guide heading', async ({
+  page,
+}) => {
+  const cases = [
+    { width: 320, zoom: false },
+    { width: 390, zoom: false },
+    { width: 1280, zoom: false },
+    { width: 320, zoom: true },
+    { width: 390, zoom: true },
+    { width: 1280, zoom: true },
+  ];
+  const ids = [
+    'official',
+    'transport',
+    'seating',
+    'tips',
+    'return',
+    'packing',
+    'pending',
+  ];
+
+  for (const { width, zoom } of cases) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/goyang/');
+    if (zoom) await applyTextZoom(page);
+
+    const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+    for (const id of ids) {
+      await jump.locator(`a[href="#${id}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`#${id}$`));
+      const clearance = await page.locator(`#${id} h2`).evaluate((heading) => {
+        const sticky = document.querySelector<HTMLElement>('guide-jump-nav');
+        if (!sticky) throw new Error('missing sticky guide navigation');
+        return {
+          headingTop: heading.getBoundingClientRect().top,
+          stickyBottom: sticky.getBoundingClientRect().bottom,
+        };
+      });
+      expect(
+        clearance.headingTop,
+        `${width}px${zoom ? ' at 200% text' : ''} #${id} heading should clear sticky nav`,
+      ).toBeGreaterThanOrEqual(clearance.stickyBottom + 1);
+    }
+  }
 });
 
 test('keeps a deterministic current section across history events and boundaries', async ({
