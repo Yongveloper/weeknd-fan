@@ -223,14 +223,14 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
               } catch (shareError) {
                 if (
                   shareError instanceof DOMException &&
-                  shareError.name !== 'AbortError'
+                  shareError.name === 'AbortError'
                 ) {
+                  status.textContent =
+                    '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.';
+                } else {
                   error.textContent =
                     '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.';
                   error.hidden = false;
-                } else {
-                  status.textContent =
-                    '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.';
                 }
               }
             });

@@ -104,6 +104,16 @@ test('redraws the ticket preview and blocks a duplicate download while generatin
     )
     .not.toBe(before);
 
+  const beforeDateChange = await preview.evaluate((canvas) =>
+    (canvas as HTMLCanvasElement).toDataURL(),
+  );
+  await page.locator('input[name="show-date"][value="2026-10-08"]').check();
+  await expect
+    .poll(() =>
+      preview.evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+    )
+    .not.toBe(beforeDateChange);
+
   await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
   await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
   const button = page.getByRole('button', { name: 'D-day 티켓 저장' });
@@ -182,6 +192,41 @@ test('keeps download and copy options after native share is cancelled', async ({
   await expect(
     page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
   ).toBeVisible();
+});
+
+test('announces native share failures other than user cancellation', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: () => true,
+    });
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: () => Promise.reject(new Error('share transport failed')),
+    });
+  });
+  await page.goto('/share/setlist/');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
+  await download;
+  await page.getByRole('button', { name: '공유', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText(
+    '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.',
+  );
+
+  await page.goto('/share/ticket/');
+  await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
+  await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
+  await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
+  const ticketDownload = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'D-day 티켓 저장' }).click();
+  await ticketDownload;
+  await page.getByRole('button', { name: '공유', exact: true }).click();
+  await expect(page.getByRole('alert')).toHaveText(
+    '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.',
+  );
 });
 
 test('does not add native sharing where file sharing is unsupported', async ({
