@@ -250,11 +250,53 @@ test('presents the setlist as a prediction with expandable song context', async 
 test('uses replace for typing and push for filters across browser history', async ({
   page,
 }) => {
+  await page.goto('/');
   await page.goto('/setlist/');
 
   const explorer = page.locator('.expected-setlist');
   const search = explorer.getByRole('searchbox', { name: '곡 검색' });
   const album = explorer.getByLabel('앨범으로 고르기');
+  const homeUrl = new URL('/', page.url()).toString();
+  const allSongIds = [
+    '01-baptized-in-fear',
+    '02-open-hearts',
+    '03-wake-me-up',
+    '04-after-hours',
+    '05-starboy',
+    '06-heartless',
+    '07-faith',
+    '08-cry-for-me',
+    '09-sao-paulo',
+    '10-until-were-skin-and-bones',
+    '11-take-my-breath',
+    '12-sacrifice',
+    '13-how-do-i-make-you-love-me',
+    '14-cant-feel-my-face',
+    '15-lost-in-the-fire',
+    '16-often',
+    '17-given-up-on-me',
+    '18-i-was-never-there',
+    '19-the-hills',
+    '20-timeless',
+    '21-rather-lie',
+    '22-creepin',
+    '23-niagara-falls',
+    '24-one-of-the-girls',
+    '25-stargirl-interlude',
+    '26-out-of-time',
+    '27-i-feel-it-coming',
+    '28-die-for-you',
+    '29-is-there-someone-else',
+    '30-wicked-games',
+    '31-call-out-my-name',
+    '32-the-abyss',
+    '33-save-your-tears',
+    '34-less-than-zero',
+    '35-blinding-lights',
+    '36-without-a-warning',
+    '37-house-of-balloons',
+    '38-moth-to-a-flame',
+  ];
   const visibleRows = explorer.locator(
     '[data-setlist-list] > li:not([hidden])',
   );
@@ -262,12 +304,12 @@ test('uses replace for typing and push for filters across browser history', asyn
     url,
     query,
     albumValue,
-    count,
+    rowIds,
   }: {
     url: RegExp;
     query: string;
     albumValue: string;
-    count: number;
+    rowIds: string[];
   }) => {
     await expect(page).toHaveURL(url);
     await expect(search).toHaveValue(query);
@@ -276,27 +318,28 @@ test('uses replace for typing and push for filters across browser history', asyn
       'aria-pressed',
       'true',
     );
-    await expect(explorer.getByRole('status')).toHaveText(`${count}곡 표시`);
-    await expect(visibleRows).toHaveCount(count);
+    await expect(explorer.getByRole('status')).toHaveText(
+      `${rowIds.length}곡 표시`,
+    );
+    await expect(visibleRows).toHaveCount(rowIds.length);
+    await expect
+      .poll(() =>
+        visibleRows.evaluateAll((rows) =>
+          rows.map((row) => row.getAttribute('data-song-id')),
+        ),
+      )
+      .toEqual(rowIds);
   };
 
   await expectState({
     url: /\/setlist\/$/,
     query: '',
     albumValue: '',
-    count: 38,
+    rowIds: allSongIds,
   });
   await expect(
     explorer.getByRole('button', { name: '3분 핵심 10곡' }),
   ).toHaveCount(0);
-
-  await explorer.getByRole('button', { name: '전체' }).click();
-  await expectState({
-    url: /\/setlist\/$/,
-    query: '',
-    albumValue: '',
-    count: 38,
-  });
 
   await search.click();
   await search.pressSequentially('after');
@@ -304,7 +347,7 @@ test('uses replace for typing and push for filters across browser history', asyn
     url: /\/setlist\/\?q=after$/,
     query: 'after',
     albumValue: '',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
 
   await album.selectOption('After Hours');
@@ -312,7 +355,7 @@ test('uses replace for typing and push for filters across browser history', asyn
     url: /\/setlist\/\?q=after&album=After\+Hours$/,
     query: 'after',
     albumValue: 'After Hours',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
 
   await explorer.getByRole('button', { name: '초기화' }).click();
@@ -320,7 +363,7 @@ test('uses replace for typing and push for filters across browser history', asyn
     url: /\/setlist\/$/,
     query: '',
     albumValue: '',
-    count: 38,
+    rowIds: allSongIds,
   });
 
   await page.goBack();
@@ -328,42 +371,37 @@ test('uses replace for typing and push for filters across browser history', asyn
     url: /\/setlist\/\?q=after&album=After\+Hours$/,
     query: 'after',
     albumValue: 'After Hours',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
   await page.goBack();
   await expectState({
     url: /\/setlist\/\?q=after$/,
     query: 'after',
     albumValue: '',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
   await page.goBack();
-  await expectState({
-    url: /\/setlist\/$/,
-    query: '',
-    albumValue: '',
-    count: 38,
-  });
+  await expect(page).toHaveURL(homeUrl);
   await page.goForward();
   await expectState({
     url: /\/setlist\/\?q=after$/,
     query: 'after',
     albumValue: '',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
   await page.goForward();
   await expectState({
     url: /\/setlist\/\?q=after&album=After\+Hours$/,
     query: 'after',
     albumValue: 'After Hours',
-    count: 1,
+    rowIds: ['04-after-hours'],
   });
   await page.goForward();
   await expectState({
     url: /\/setlist\/$/,
     query: '',
     albumValue: '',
-    count: 38,
+    rowIds: allSongIds,
   });
 });
 
