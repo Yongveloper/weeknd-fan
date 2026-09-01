@@ -76,7 +76,6 @@ const { items } = Astro.props;
       };
       const finishHashTarget = () => {
         const id = this.initialHashTarget;
-        this.initialHashTarget = undefined;
         this.hashSettleTimer = undefined;
         if (id) alignHashTarget(id);
       };
