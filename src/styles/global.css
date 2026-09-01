@@ -10,7 +10,8 @@ html {
 
 body {
   position: relative;
-  min-width: 20rem;
+  /* Keep the narrow-screen floor independent of user text zoom. */
+  min-width: 320px;
   min-height: 100vh;
   margin: 0;
   overflow-x: hidden;
@@ -193,6 +194,20 @@ h3 {
 
 .latin {
   font-size: 1.08em;
+}
+
+@media (max-width: 42rem) {
+  /* Permit display names to wrap at 200% text zoom on narrow screens. */
+  .latin {
+    white-space: normal;
+  }
+
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: anywhere;
+    word-break: normal;
+  }
 }
 
 .display-latin {

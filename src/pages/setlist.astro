@@ -53,8 +53,33 @@ const title = archivePublished
 <style>
   .setlist-page {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: clamp(3.5rem, 9vw, 7rem);
     padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  .setlist-page > *,
+  .setlist-page :global(.setlist-explorer),
+  .setlist-page :global(.expected-setlist),
+  .setlist-page :global(.actual-setlist) {
+    min-width: 0;
+  }
+
+  .setlist-page :global(.setlist-filter) {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .setlist-page :global(.setlist-filter) > * {
+    min-width: 0;
+  }
+
+  .setlist-page :global(.setlist-filter) label,
+  .setlist-page :global(.setlist-filter) input,
+  .setlist-page :global(.setlist-filter) select {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   header {

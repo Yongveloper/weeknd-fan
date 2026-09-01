@@ -416,11 +416,26 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     color: var(--amber);
   }
   @media (max-width: 48rem) {
+    .share-builder,
     .share-builder__grid {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
+      min-width: 0;
+      width: 100%;
     }
+
     .card-preview {
-      max-width: 22rem;
+      max-width: 100%;
+      min-width: 0;
+    }
+
+    .share-builder__grid > *,
+    form,
+    fieldset,
+    .song-fields,
+    select {
+      min-width: 0;
+      width: 100%;
+      max-width: 100%;
     }
   }
 </style>

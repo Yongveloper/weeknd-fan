@@ -106,6 +106,23 @@ test('groups the five review-based tips into keyboard-operable tabs', async ({
   await expect(tips.getByRole('tabpanel')).toContainText('본부석');
 });
 
+test('supports every TipsTabs keyboard navigation key', async ({ page }) => {
+  await page.goto('/goyang/');
+  const tabs = page.locator('#tips [role="tab"]');
+
+  await tabs.nth(0).focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(tabs.nth(4)).toBeFocused();
+  await page.keyboard.press('ArrowRight');
+  await expect(tabs.nth(0)).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(tabs.nth(4)).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(tabs.nth(0)).toBeFocused();
+  await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
+  await expect(tabs.nth(4)).toHaveAttribute('aria-selected', 'false');
+});
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
   test('shows every tips panel in order', async ({ page }) => {
@@ -137,6 +154,32 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
     '#seating',
   );
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
+});
+
+test('activates all seven guide jump links from the keyboard', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  const links = jump.getByRole('link');
+  const ids = [
+    'official',
+    'transport',
+    'seating',
+    'tips',
+    'return',
+    'packing',
+    'pending',
+  ];
+
+  await expect(links).toHaveCount(ids.length);
+  for (const [index, id] of ids.entries()) {
+    await links.nth(index).focus();
+    await expect(links.nth(index)).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(new RegExp(`#${id}$`));
+    await expect(page.locator(`#${id}`)).toBeVisible();
+  }
 });
 
 test('summarizes day-of actions and tracks the current guide section', async ({

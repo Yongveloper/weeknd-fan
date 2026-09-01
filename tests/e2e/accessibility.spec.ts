@@ -1,5 +1,12 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
+import {
+  applyTextZoom,
+  expectFocusedControlsClearStickyNavigation,
+  expectMainAndFooterKeyboardReachable,
+  expectNoHorizontalDocumentOverflow,
+  expectVisibleControlsInsideViewport,
+} from './helpers/accessibility';
 
 const publicRoutes = [
   '/',
@@ -12,12 +19,49 @@ const publicRoutes = [
 ] as const;
 
 for (const route of publicRoutes) {
+  test(`${route} stays keyboard reachable and horizontally contained across the route matrix`, async ({
+    page,
+  }, testInfo) => {
+    const viewports =
+      testInfo.project.name === 'desktop-chromium'
+        ? [{ width: 1280, height: 720, label: 'desktop' }]
+        : [
+            { width: 320, height: 568, label: '320x568' },
+            { width: 390, height: 844, label: '390x844' },
+          ];
+
+    for (const viewport of viewports) {
+      await test.step(viewport.label, async () => {
+        await page.setViewportSize(viewport);
+        await page.goto(route);
+        await expectNoHorizontalDocumentOverflow(page);
+        await expectMainAndFooterKeyboardReachable(page);
+        await expectVisibleControlsInsideViewport(page);
+        await expectFocusedControlsClearStickyNavigation(page);
+
+        if (viewport.label !== 'desktop') {
+          await applyTextZoom(page);
+          await expectNoHorizontalDocumentOverflow(page);
+          await expectVisibleControlsInsideViewport(page);
+        }
+      });
+    }
+  });
+}
+
+for (const route of publicRoutes) {
   test(`${route} has no serious or critical axe violations`, async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.goto(route);
 
     const result = await new AxeBuilder({ page }).analyze();
+    for (const violation of result.violations) {
+      testInfo.annotations.push({
+        type: `axe-${violation.impact ?? 'unknown'}`,
+        description: `${violation.id}: ${violation.help} (${violation.nodes.length} node${violation.nodes.length === 1 ? '' : 's'})`,
+      });
+    }
     const blockingViolations = result.violations.filter((violation) =>
       ['serious', 'critical'].includes(violation.impact ?? ''),
     );

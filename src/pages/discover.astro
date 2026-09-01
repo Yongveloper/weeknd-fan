@@ -123,6 +123,15 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     padding-block: clamp(3rem, 9vw, 8rem) var(--section-space);
   }
 
+  /* Allow long editorial strings to wrap when users enlarge text. */
+  .discover > *,
+  .discover__hero > *,
+  .discover__albums > *,
+  .discover__timeline > *,
+  .discover__closing > * {
+    min-width: 0;
+  }
+
   .discover__hero,
   .discover__albums,
   .discover__timeline,
@@ -130,8 +139,31 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     border-top: 1px solid color-mix(in srgb, var(--ivory) 20%, transparent);
   }
 
+  .discover :global(.trilogies) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .discover :global(.trilogies) > *,
+  .discover :global(.trilogies__intro) > *,
+  .discover :global(.trilogies__sequence) > *,
+  .discover :global(.trilogies__interpretation) > * {
+    min-width: 0;
+  }
+
+  .discover :global(.timeline__entry),
+  .discover :global(.timeline__summary),
+  .discover :global(.timeline__detail) {
+    min-width: 0;
+  }
+
+  .discover :global(.timeline__summary),
+  .discover :global(.timeline__detail) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .discover__hero {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
     padding-block: 2rem var(--section-space);
     border-top: 0;

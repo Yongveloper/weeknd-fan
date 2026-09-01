@@ -271,6 +271,21 @@ const hasEssentialSet =
     gap: 0.8rem;
     align-items: end;
     margin: 1.5rem 0;
+    min-width: 0;
+  }
+
+  .setlist-filter label,
+  .setlist-filter input,
+  .setlist-filter select,
+  .setlist-filter__views,
+  .setlist-filter > button {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .setlist-filter input,
+  .setlist-filter select {
+    width: 100%;
   }
 
   .setlist-filter label {

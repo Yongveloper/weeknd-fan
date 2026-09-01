@@ -1,5 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
+import {
+  expectNoHorizontalDocumentOverflow,
+  expectVisibleControlsInsideViewport,
+} from './helpers/accessibility';
 
 async function expectJpegCard(
   download: import('@playwright/test').Download,
@@ -350,4 +354,53 @@ test('explains the manual fallback when clipboard access is unavailable', async 
   await expect(page.locator('[data-status]')).toContainText(
     '직접 복사해 주세요',
   );
+});
+
+test('keeps share primary actions and fallback controls reachable on mobile', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  for (const route of ['/share/ticket/', '/share/setlist/']) {
+    await page.goto(route);
+    await expectNoHorizontalDocumentOverflow(page);
+    await expectVisibleControlsInsideViewport(page);
+    await expect(page.getByRole('button', { name: /저장/ })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: '기본 공유 이미지 보기' }),
+    ).toBeVisible();
+  }
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('keeps ticket labels and privacy fallback copy visible', async ({
+    page,
+  }) => {
+    await page.goto('/share/ticket/');
+    for (const label of ['관람일', '첫 번째 곡', '두 번째 곡', '세 번째 곡']) {
+      await expect(page.getByText(label, { exact: true })).toBeVisible();
+    }
+    await expect(page.getByText(/선택값을 저장하지 않습니다/)).toBeVisible();
+    await expect(page.getByText('이미지 저장이 안 되면')).toBeVisible();
+  });
+
+  test('keeps setlist facts and manual fallback copy visible', async ({
+    page,
+  }) => {
+    await page.goto('/share/setlist/');
+    await expect(
+      page.getByText('예상 · 보장 아님', { exact: true }),
+    ).toBeVisible();
+    await expect(
+      page.getByText(/이미지는 이 브라우저 안에서만 생성/),
+    ).toBeVisible();
+    await expect(page.getByText('이미지 저장이 안 되면')).toBeVisible();
+    await expect(
+      page.getByRole('link', { name: '기본 공유 이미지 보기' }),
+    ).toBeVisible();
+  });
 });

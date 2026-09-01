@@ -76,6 +76,25 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('opens and closes the mobile menu from the keyboard', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await page.goto('/');
+
+  const menu = page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴');
+  const details = page.getByRole('group', { name: '주요 메뉴' });
+  await menu.focus();
+  await page.keyboard.press('Enter');
+  await expect(details).toHaveAttribute('open', '');
+  await expect(
+    page
+      .getByRole('navigation', { name: '주요 메뉴' })
+      .getByRole('link')
+      .first(),
+  ).toBeVisible();
+  await page.keyboard.press('Enter');
+  await expect(details).not.toHaveAttribute('open', '');
+});
+
 test('keeps the header in the same fonts across page navigations', async ({
   page,
 }) => {
@@ -431,6 +450,45 @@ test('uses replace for typing and push for filters across browser history', asyn
     query: '',
     albumValue: '',
     rowIds: allSongIds,
+  });
+});
+
+test('reaches every setlist filter control and clear action by keyboard', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+  const explorer = page.locator('.expected-setlist');
+  const search = explorer.getByRole('searchbox', { name: '곡 검색' });
+  const album = explorer.getByLabel('앨범으로 고르기');
+  const all = explorer.getByRole('button', { name: '전체' });
+  const essential = explorer.getByRole('button', { name: '3분 핵심 10곡' });
+  const reset = explorer.getByRole('button', { name: '초기화' });
+
+  const controls = [search, album, all, reset];
+  if ((await essential.count()) > 0) controls.splice(3, 0, essential);
+  for (const control of controls) {
+    await control.focus();
+    await expect(control).toBeFocused();
+    await expect(control).toBeVisible();
+  }
+  await search.fill('after');
+  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+  await reset.click();
+  await expect(search).toHaveValue('');
+  await expect(explorer.getByRole('status')).toHaveText('38곡 표시');
+});
+
+test.describe('without JavaScript', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('keeps source groups and source links readable', async ({ page }) => {
+    await page.goto('/sources/');
+    for (const heading of ['공식', '공공 교통', '공연 기록', '보조 참고']) {
+      await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    }
+    await expect(
+      page.getByRole('link', { name: 'Live Nation Korea 고양 공연' }),
+    ).toBeVisible();
   });
 });
 

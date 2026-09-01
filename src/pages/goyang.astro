@@ -83,8 +83,58 @@ const overviewItems = jump.map(({ id, label }) => {
 <style>
   .guide-page {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
     padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  .guide-page > *,
+  .guide-page :global(.guide-body),
+  .guide-page :global(.guide-body) > *,
+  .guide-page :global(.guide-section),
+  .guide-page :global(.guide-section__heading),
+  .guide-page :global(.guide-section) > *,
+  .guide-page :global(.access-table),
+  .guide-page :global(.access-table) > *,
+  .guide-page :global(.guide-overview),
+  .guide-page :global(.guide-overview) > * {
+    min-width: 0;
+  }
+
+  .guide-page :global(.guide-overview) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guide-page :global(.guide-body) {
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
+  }
+
+  .guide-page :global(.guide-section) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .guide-page :global(.access-table__row) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .guide-page :global(.access-map),
+  .guide-page :global(.directions),
+  .guide-page :global(.live-map),
+  .guide-page :global(.live-map__note) {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .guide-page :global(.access-map img) {
+    max-width: 100%;
+  }
+
+  .guide-page :global(.directions a) {
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: anywhere;
   }
   header {
     display: grid;
@@ -102,6 +152,8 @@ const overviewItems = jump.map(({ id, label }) => {
     top: 0;
     z-index: 2;
     display: flex;
+    width: calc(100% + (var(--gutter) * 2));
+    min-width: 0;
     gap: 0.5rem;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0.6rem var(--gutter);
@@ -139,6 +191,9 @@ const overviewItems = jump.map(({ id, label }) => {
     font-weight: 800;
     text-decoration: none;
     white-space: nowrap;
+  }
+  :global(.guide-jump nav) {
+    min-width: 0;
   }
   :global(.guide-jump a:hover),
   :global(.guide-jump a:focus-visible) {
