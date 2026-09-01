@@ -56,9 +56,10 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
   }
 
   .home-entry__albums {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.5rem, 3vw, 1.25rem);
+    width: min(100%, 25rem);
     margin: 0.5rem 0 0;
     padding: 0;
     list-style: none;
@@ -68,9 +69,16 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
     display: grid;
     gap: 0.35rem;
     justify-items: start;
+    min-width: 0;
     color: var(--mist);
     font-size: calc(var(--type-scale) * 0.8rem);
     font-weight: 800;
+  }
+
+  .home-entry__albums :global(.album-cover) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
   }
 
   p:not(.eyebrow) {

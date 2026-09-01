@@ -34,6 +34,52 @@ test('hero intro link targets the rendered artist introduction', async ({
   ).toBeVisible();
 });
 
+test('keeps the three intro album covers in one square row on narrow screens', async ({
+  page,
+}) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/');
+
+    const layout = await page
+      .locator('.home-entry__albums')
+      .evaluate((list) => {
+        const items = Array.from(list.querySelectorAll(':scope > li'));
+        const covers = items.map((item) =>
+          item.querySelector<HTMLElement>('.album-cover'),
+        );
+        if (items.length !== 3 || covers.some((cover) => !cover)) {
+          throw new Error('missing intro trilogy covers');
+        }
+
+        const itemRects = items.map((item) => item.getBoundingClientRect());
+        const coverRects = covers.map((cover) =>
+          cover!.getBoundingClientRect(),
+        );
+
+        return {
+          coverRects: coverRects.map(({ width, height }) => ({
+            width,
+            height,
+          })),
+          documentOverflow:
+            document.documentElement.scrollWidth -
+            document.documentElement.clientWidth,
+          itemTops: itemRects.map(({ top }) => top),
+        };
+      });
+
+    expect(
+      Math.max(...layout.itemTops) - Math.min(...layout.itemTops),
+    ).toBeLessThanOrEqual(1);
+    expect(layout.documentOverflow).toBeLessThanOrEqual(1);
+    for (const cover of layout.coverRects) {
+      expect(cover.width).toBeGreaterThan(0);
+      expect(Math.abs(cover.width - cover.height)).toBeLessThanOrEqual(1);
+    }
+  }
+});
+
 test('aligns the Goyang guide heading with home section geometry', async ({
   page,
 }) => {
