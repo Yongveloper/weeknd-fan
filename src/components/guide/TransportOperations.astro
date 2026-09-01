@@ -1,0 +1,159 @@
+---
+const metroAreas = [
+  '잠실역',
+  '서울역',
+  '합정역',
+  '사당역',
+  '강남역',
+  '노원역',
+  '왕십리역',
+  '신도림역',
+  '미금역',
+  '영통역',
+  '부평역',
+];
+const regionalAreas = ['대전', '대구', '전주', '광주', '부산', '천안', '청주'];
+---
+
+<section
+  class="transport-operations"
+  aria-labelledby="transport-operations-title"
+>
+  <div class="transport-operations__heading">
+    <p>공식 안내</p>
+    <h3 id="transport-operations-title">공식 교통 운영 안내</h3>
+  </div>
+
+  <div class="transport-operations__parking">
+    <strong>공연장 내부 주차 불가</strong>
+    <p>
+      공연 당일에는 공연장 내부에 주차할 수 없어 대중교통 이용을 권장합니다.
+    </p>
+  </div>
+
+  <div class="transport-operations__option">
+    <h4>유료 순환버스 임시 운영 예정</h4>
+    <p>
+      <strong>GTX-A 킨텍스역 1번 출구 ↔ 고양종합운동장</strong> 구간에서 운행합니다.
+    </p>
+    <p class="transport-operations__pending">
+      운행 시간 · 요금 · 배차 간격 · 운동장 승차 위치는 미공개
+    </p>
+  </div>
+
+  <div class="transport-operations__option">
+    <h4>카카오 T 유료 셔틀</h4>
+    <p>
+      수도권 11곳과 지방 7곳에서 출발하는 예약형 셔틀입니다.
+      <a href="https://kko.to/NSrfta0uxT" target="_blank" rel="noreferrer"
+        >카카오 T 셔틀 예약 <span aria-hidden="true">↗</span></a
+      >
+    </p>
+    <div class="transport-operations__areas">
+      <div>
+        <strong>수도권 11곳</strong>
+        <ul aria-label="카카오 T 셔틀 수도권 출발지">
+          {metroAreas.map((area) => <li>{area}</li>)}
+        </ul>
+      </div>
+      <div>
+        <strong>지방 7곳</strong>
+        <ul aria-label="카카오 T 셔틀 지방 출발지">
+          {regionalAreas.map((area) => <li>{area}</li>)}
+        </ul>
+      </div>
+    </div>
+    <p class="transport-operations__detail">
+      자세한 사항은 카카오 T 앱과 예약 전 유의사항에서 확인합니다.
+    </p>
+  </div>
+</section>
+
+<style>
+  .transport-operations {
+    display: grid;
+    gap: 1rem;
+    max-width: 56rem;
+  }
+  .transport-operations__heading {
+    display: grid;
+    gap: 0.25rem;
+  }
+  .transport-operations__heading p,
+  .transport-operations__pending {
+    color: var(--amber);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+  h3,
+  h4,
+  p {
+    margin: 0;
+  }
+  h3,
+  h4 {
+    font-family: var(--font-body);
+    letter-spacing: 0;
+  }
+  h3 {
+    font-size: clamp(1.15rem, 2vw, 1.35rem);
+  }
+  h4 {
+    color: var(--ivory);
+    font-size: 1rem;
+  }
+  .transport-operations__parking,
+  .transport-operations__option {
+    display: grid;
+    gap: 0.6rem;
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 22%, transparent);
+  }
+  .transport-operations__parking {
+    border-color: color-mix(in srgb, var(--amber) 65%, transparent);
+    background: color-mix(in srgb, var(--amber) 8%, transparent);
+  }
+  .transport-operations__parking > strong {
+    color: var(--amber);
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+  }
+  .transport-operations__option p,
+  .transport-operations__parking p,
+  .transport-operations__detail {
+    color: var(--mist);
+  }
+  a {
+    color: var(--ivory);
+    font-weight: 800;
+    overflow-wrap: anywhere;
+  }
+  .transport-operations__areas {
+    display: grid;
+    gap: 0.9rem;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .transport-operations__areas > div {
+    min-width: 0;
+  }
+  .transport-operations__areas ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.45rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .transport-operations__areas li {
+    padding: 0.2rem 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--mist) 36%, transparent);
+    border-radius: 999px;
+    font-size: 0.8rem;
+  }
+  @media (max-width: 36rem) {
+    .transport-operations__areas {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

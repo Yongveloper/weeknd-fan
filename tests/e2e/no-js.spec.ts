@@ -77,6 +77,20 @@ test('keeps Goyang transport and pending guidance readable without JavaScript', 
   );
   await expect(page.getByRole('heading', { name: '가는 길' })).toBeVisible();
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
+  const pendingItems = page.locator('#pending .pending-list li');
+  await expect(pendingItems).toHaveCount(6);
+  await expect(pendingItems.locator('strong')).toHaveText([
+    '입장 게이트',
+    '반입 금지 물품',
+    '교통 통제',
+    '순환버스 세부 운영',
+    '접근성 지원',
+    '스탠딩·Early Entry 운영',
+  ]);
+  for (const item of await pendingItems.all()) await expect(item).toBeVisible();
+  await expect(page.locator('#pending .pending-list')).not.toContainText(
+    '셔틀·교통 통제',
+  );
 });
 
 test('keeps Discover summaries and sources readable without JavaScript', async ({

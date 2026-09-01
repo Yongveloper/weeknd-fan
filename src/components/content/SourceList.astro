@@ -13,10 +13,21 @@ const { sources } = Astro.props;
   {
     sources.map((source) => (
       <li>
-        <a href={source.data.url} target="_blank" rel="noreferrer">
-          {source.data.name}
-        </a>
-        <span>마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}</span>
+        {'medium' in source.data && source.data.medium === 'sms' ? (
+          <>
+            <span class="source-list__message">{source.data.name}</span>
+            <span>수신일 {formatSeoulDate(source.data.receivedAt)}</span>
+          </>
+        ) : (
+          <>
+            <a href={source.data.url} target="_blank" rel="noreferrer">
+              {source.data.name}
+            </a>
+            <span>
+              마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+            </span>
+          </>
+        )}
       </li>
     ))
   }
@@ -41,6 +52,11 @@ const { sources } = Astro.props;
   }
 
   .source-list a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+
+  .source-list__message {
     color: var(--ivory);
     font-weight: 700;
   }

@@ -43,6 +43,32 @@ describe('content trust contract', () => {
     ]);
   });
 
+  it('uses an official SMS received date when auditing volatile guidance', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-09-05T12:00:00+09:00'),
+      entries: [
+        {
+          id: 'transport',
+          status: 'practical',
+          lastVerifiedAt: new Date('2026-09-01T00:00:00+09:00'),
+          sourceCount: 1,
+          volatile: true,
+          sources: [
+            {
+              id: 'nol-weeknd-transport-sms',
+              receivedAt: new Date('2026-09-01T00:00:00+09:00'),
+            },
+          ],
+        },
+      ],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected', records: [] },
+      showRecords: [],
+    });
+
+    expect(issues).toEqual([]);
+  });
+
   it('flags published entries without sources and incomplete archive publication', () => {
     const issues = auditPublishedContent({
       now: new Date('2026-10-05T00:00:00+09:00'),
@@ -625,10 +651,18 @@ describe('content trust contract', () => {
           sourceFiles.map(async (file) => {
             const source = JSON.parse(
               await readFile(join(sourceDirectory, file), 'utf8'),
-            ) as { kind: string; lastCheckedAt: string };
+            ) as {
+              kind: string;
+              lastCheckedAt?: string;
+              receivedAt?: string;
+            };
             return [
               file.replace(/\.json$/, ''),
-              { kind: source.kind, lastCheckedAt: source.lastCheckedAt },
+              {
+                kind: source.kind,
+                lastCheckedAt: source.lastCheckedAt,
+                receivedAt: source.receivedAt,
+              },
             ] as const;
           }),
         ),
@@ -727,7 +761,17 @@ describe('content trust contract', () => {
                   ? [
                       {
                         id: source,
-                        lastCheckedAt: parseSeoulDate(metadata.lastCheckedAt),
+                        ...(metadata.lastCheckedAt
+                          ? {
+                              lastCheckedAt: parseSeoulDate(
+                                metadata.lastCheckedAt,
+                              ),
+                            }
+                          : {
+                              receivedAt: parseSeoulDate(
+                                metadata.receivedAt ?? '',
+                              ),
+                            }),
                       },
                     ]
                   : [];
@@ -773,7 +817,7 @@ describe('content trust contract', () => {
     };
 
     expect(
-      await auditCurrentData(new Date('2026-08-29T12:00:00+09:00')),
+      await auditCurrentData(new Date('2026-09-01T12:00:00+09:00')),
     ).toEqual([]);
     expect(await auditCurrentData()).toEqual([]);
   });

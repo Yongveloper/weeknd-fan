@@ -18,20 +18,37 @@ const editorialDate = z
       ? value
       : new Date(value.length === 10 ? `${value}T00:00:00+09:00` : value),
   );
+const sourceKind = z.enum([
+  'official',
+  'public-agency',
+  'crowd-sourced',
+  'editorial-reference',
+]);
 
 const sources = defineCollection({
   loader: glob({ base: './src/data/sources', pattern: '**/*.json' }),
-  schema: z.object({
-    name: z.string(),
-    url: z.url(),
-    kind: z.enum([
-      'official',
-      'public-agency',
-      'crowd-sourced',
-      'editorial-reference',
-    ]),
-    lastCheckedAt: editorialDate,
-  }),
+  schema: z.union([
+    z.object({
+      name: z.string(),
+      url: z.url(),
+      kind: sourceKind,
+      lastCheckedAt: editorialDate,
+      medium: z.never().optional(),
+      sender: z.never().optional(),
+      receivedAt: z.never().optional(),
+      transcript: z.never().optional(),
+    }),
+    z.object({
+      name: z.string(),
+      url: z.never().optional(),
+      lastCheckedAt: z.never().optional(),
+      kind: z.literal('official'),
+      medium: z.literal('sms'),
+      sender: z.string(),
+      receivedAt: editorialDate,
+      transcript: z.string().min(1),
+    }),
+  ]),
 });
 
 const common = z.object({

@@ -9,6 +9,7 @@ import GuideSection from '../components/guide/GuideSection.astro';
 import LiveMap from '../components/guide/LiveMap.astro';
 import SeatMap from '../components/guide/SeatMap.astro';
 import TipsTabs from '../components/guide/TipsTabs.astro';
+import TransportOperations from '../components/guide/TransportOperations.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getGuideContent } from '../lib/content/queries';
 
@@ -59,7 +60,10 @@ const overviewItems = jump.map(({ id, label }) => {
           <>
             <GuideSection entry={entry} sources={sources}>
               {entry.data.section === 'transport' && (
-                <AccessTable slot="lead" />
+                <div class="guide-transport-lead" slot="lead">
+                  <TransportOperations />
+                  <AccessTable />
+                </div>
               )}
               {entry.data.section === 'transport' && (
                 <div class="guide-transport">
@@ -207,6 +211,11 @@ const overviewItems = jump.map(({ id, label }) => {
   }
   .guide-transport {
     display: grid;
+    gap: clamp(1.5rem, 4vw, 2.5rem);
+  }
+  .guide-transport-lead {
+    display: grid;
+    min-width: 0;
     gap: clamp(1.5rem, 4vw, 2.5rem);
   }
   header > p:last-child {

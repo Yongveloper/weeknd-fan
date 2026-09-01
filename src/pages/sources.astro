@@ -18,10 +18,22 @@ const supportingSources = sources.filter(
   (source) => source.data.kind === 'editorial-reference',
 );
 type SourceEntry = (typeof sources)[number];
+const isSmsSource = (
+  source: SourceEntry,
+): source is SourceEntry & {
+  data: { medium: 'sms'; receivedAt: Date; sender: string; transcript: string };
+} => 'medium' in source.data && source.data.medium === 'sms';
+const sourceDate = (source: SourceEntry): Date => {
+  if (isSmsSource(source)) return source.data.receivedAt;
+  if (!source.data.lastCheckedAt) {
+    throw new Error(`Missing source check date: ${source.id}`);
+  }
+  return source.data.lastCheckedAt;
+};
 /** One shared date per group keeps 40+ identical "마지막 확인" lines out of the list. */
 const sharedCheckedDate = (records: SourceEntry[]) => {
   const dates = new Set(
-    records.map((source) => formatSeoulDate(source.data.lastCheckedAt)),
+    records.map((source) => formatSeoulDate(sourceDate(source))),
   );
   return dates.size === 1 ? [...dates][0] : undefined;
 };
@@ -33,7 +45,8 @@ const groups: Array<{
 }> = [
   {
     title: '공식',
-    description: '아티스트·주최·예매처·레이블이 직접 공개한 원문입니다.',
+    description:
+      '아티스트·주최·예매처·레이블이 공개한 원문과 예매처 공식 문자 안내입니다.',
     kinds: ['official'],
   },
   {
@@ -97,12 +110,23 @@ const checkpoints = [
               <ul>
                 {records.map((source) => (
                   <li>
-                    <a href={source.data.url} target="_blank" rel="noreferrer">
-                      {source.data.name}
-                    </a>
+                    {isSmsSource(source) ? (
+                      <span class="source-group__message">
+                        {source.data.name}
+                      </span>
+                    ) : (
+                      <a
+                        href={source.data.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {source.data.name}
+                      </a>
+                    )}
                     {!sharedDate && (
                       <span>
-                        마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+                        {isSmsSource(source) ? '수신일' : '마지막 확인'}{' '}
+                        {formatSeoulDate(sourceDate(source))}
                       </span>
                     )}
                     {sourceUsage.get(source.id) && (
@@ -143,12 +167,17 @@ const checkpoints = [
           {
             supportingSources.map((source) => (
               <li>
-                <a href={source.data.url} target="_blank" rel="noreferrer">
-                  {source.data.name}
-                </a>
+                {isSmsSource(source) ? (
+                  <span class="source-group__message">{source.data.name}</span>
+                ) : (
+                  <a href={source.data.url} target="_blank" rel="noreferrer">
+                    {source.data.name}
+                  </a>
+                )}
                 {!supportingDate && (
                   <span>
-                    마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+                    {isSmsSource(source) ? '수신일' : '마지막 확인'}{' '}
+                    {formatSeoulDate(sourceDate(source))}
                   </span>
                 )}
                 {sourceUsage.get(source.id) && (
@@ -259,7 +288,8 @@ const checkpoints = [
     gap: 0.2rem;
   }
   .source-group a,
-  .source-group__reference {
+  .source-group__reference,
+  .source-group__message {
     color: var(--ivory);
     font-weight: 800;
   }

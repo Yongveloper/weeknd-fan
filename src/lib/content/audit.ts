@@ -18,10 +18,21 @@ type PublishedEntryAuditRecord = {
   lastVerifiedAt: Date;
   sourceCount: number;
   volatile?: boolean;
-  sources?: Array<{ id: string; lastCheckedAt: Date }>;
+  sources?: Array<{
+    id: string;
+    lastCheckedAt?: Date;
+    receivedAt?: Date;
+  }>;
   observedIn?: Array<{ id: string }>;
   sourceReferences?: SourceReferenceAudit[];
 };
+
+function sourceVerificationDate(source: {
+  lastCheckedAt?: Date;
+  receivedAt?: Date;
+}): Date | undefined {
+  return source.lastCheckedAt ?? source.receivedAt;
+}
 
 type PublishedSetlistAuditRecord = {
   id: string;
@@ -242,32 +253,33 @@ export function auditPublishedContent(
       issues.push({ id: entry.id, code: 'volatile-content-stale' });
     }
     if (entry.status === 'practical' && entry.volatile && entry.sources) {
+      const sourceDates = entry.sources.map(sourceVerificationDate);
+      const validSourceDates = sourceDates.filter(
+        (sourceDate): sourceDate is Date => sourceDate !== undefined,
+      );
       if (
-        entry.sources.some((source) =>
-          Number.isNaN(source.lastCheckedAt.getTime()),
+        sourceDates.some(
+          (sourceDate) => !sourceDate || Number.isNaN(sourceDate.getTime()),
         )
       ) {
         issues.push({ id: entry.id, code: 'volatile-source-date-invalid' });
       } else if (
-        entry.sources.some((source) => source.lastCheckedAt > input.now)
+        validSourceDates.some((sourceDate) => sourceDate > input.now)
       ) {
         issues.push({ id: entry.id, code: 'source-check-in-future' });
       } else if (
         hasValidContentDate &&
         entry.lastVerifiedAt <= input.now &&
-        entry.sources.some(
-          (source) =>
-            input.now.getTime() - source.lastCheckedAt.getTime() >
-            staleAfterMilliseconds,
+        validSourceDates.some(
+          (sourceDate) =>
+            input.now.getTime() - sourceDate.getTime() > staleAfterMilliseconds,
         )
       ) {
         issues.push({ id: entry.id, code: 'volatile-sources-stale' });
       } else if (
         hasValidContentDate &&
         entry.lastVerifiedAt <= input.now &&
-        entry.sources.some(
-          (source) => source.lastCheckedAt < entry.lastVerifiedAt,
-        )
+        validSourceDates.some((sourceDate) => sourceDate < entry.lastVerifiedAt)
       ) {
         issues.push({
           id: entry.id,

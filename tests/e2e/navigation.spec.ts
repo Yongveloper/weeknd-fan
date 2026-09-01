@@ -740,14 +740,25 @@ test('renders exact unpublished operations and an accessible schematic map', asy
 }) => {
   await page.goto('/goyang/');
 
-  await expect(page.locator('#pending .status')).toHaveCount(5);
-  await expect(page.locator('#pending .status')).toHaveText([
-    '미공개 · 확인 필요',
-    '미공개 · 확인 필요',
-    '미공개 · 확인 필요',
-    '미공개 · 확인 필요',
-    '미공개 · 확인 필요',
+  const pending = page.locator('#pending');
+  await expect(
+    pending.locator('.guide-section__heading > p:last-child'),
+  ).toContainText('아래 여섯 운영 항목');
+  await expect(pending.locator('.pending-list strong')).toHaveText([
+    '입장 게이트',
+    '반입 금지 물품',
+    '교통 통제',
+    '순환버스 세부 운영',
+    '접근성 지원',
+    '스탠딩·Early Entry 운영',
   ]);
+  await expect(pending.locator('.status')).toHaveCount(6);
+  await expect(pending.locator('.status')).toHaveText(
+    Array(6).fill('미공개 · 확인 필요'),
+  );
+  await expect(pending.locator('.pending-list')).not.toContainText(
+    '셔틀·교통 통제',
+  );
   await expect(page.locator('#transport .access-map img')).toHaveAttribute(
     'alt',
     /인터파크 오는 길 안내/,
