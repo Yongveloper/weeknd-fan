@@ -45,6 +45,29 @@ export async function expectVisibleControlsInsideViewport(page: Page) {
       const viewportWidth = document.documentElement.clientWidth;
       return controls.flatMap((control) => {
         const rect = control.getBoundingClientRect();
+        let ancestor = control.parentElement;
+        while (ancestor) {
+          const style = getComputedStyle(ancestor);
+          const clipsHorizontally = [
+            'auto',
+            'clip',
+            'hidden',
+            'scroll',
+          ].includes(style.overflowX);
+          // Playwright's :visible includes descendants clipped by a horizontal
+          // scroller; those controls are intentionally off-screen until scrolled.
+          if (clipsHorizontally && ancestor.closest('guide-jump-nav')) {
+            return [];
+          }
+          const ancestorRect = ancestor.getBoundingClientRect();
+          if (
+            clipsHorizontally &&
+            (rect.right <= ancestorRect.left || rect.left >= ancestorRect.right)
+          ) {
+            return [];
+          }
+          ancestor = ancestor.parentElement;
+        }
         if (rect.width <= 0 || rect.height <= 0) {
           return [`${control.tagName} has an empty box`];
         }

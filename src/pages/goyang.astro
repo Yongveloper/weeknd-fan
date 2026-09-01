@@ -193,7 +193,12 @@ const overviewItems = jump.map(({ id, label }) => {
     white-space: nowrap;
   }
   :global(.guide-jump nav) {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
     min-width: 0;
+    overflow-x: auto;
+    width: 100%;
   }
   :global(.guide-jump a:hover),
   :global(.guide-jump a:focus-visible) {

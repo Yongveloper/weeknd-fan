@@ -274,6 +274,22 @@ test('clears the actual sticky jump nav from every guide heading', async ({
   }
 });
 
+test('keeps the guide jump nav in one horizontal row at text zoom', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/goyang/');
+  await applyTextZoom(page);
+
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  const rows = await jump
+    .locator('a')
+    .evaluateAll((links) =>
+      links.map((link) => Math.round(link.getBoundingClientRect().top)),
+    );
+  expect(new Set(rows).size).toBe(1);
+});
+
 test('keeps a deterministic current section across history events and boundaries', async ({
   page,
 }) => {
