@@ -29,9 +29,9 @@ const jump = [
 const overviewItems = jump.map(({ id, label }) => {
   const entry =
     id === 'tips' ? tips[0] : sections.find((item) => item.data.section === id);
-  return entry
-    ? { id, label, status: entry.data.status }
-    : { id, label, status: 'practical' as const };
+  if (!entry)
+    throw new Error(`Missing guide metadata for overview section: ${id}`);
+  return { id, label, status: entry.data.status };
 });
 ---
 

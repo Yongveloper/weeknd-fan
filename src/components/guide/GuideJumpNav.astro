@@ -17,6 +17,11 @@ const { items } = Astro.props;
     private frame = 0;
     private observer?: IntersectionObserver;
     private resizeObserver?: ResizeObserver;
+    private scrollHandler?: EventListener;
+    private resizeHandler?: EventListener;
+    private historyHandler?: EventListener;
+    private hashTarget?: string;
+    private ignoreNextScroll = false;
 
     connectedCallback() {
       const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'));
@@ -38,6 +43,10 @@ const { items } = Astro.props;
       };
       const update = () => {
         this.frame = 0;
+        if (this.hashTarget) {
+          setCurrent(this.hashTarget);
+          return;
+        }
         const stickyBottom = this.getBoundingClientRect().bottom;
         const crossing = sections.filter(
           (section) =>
@@ -57,18 +66,31 @@ const { items } = Astro.props;
 
       const hashUpdate = () => {
         const hashId = window.location.hash.slice(1);
-        if (sections.some((section) => section.target.id === hashId))
-          setCurrent(hashId);
+        if (sections.some((section) => section.target.id === hashId)) {
+          this.hashTarget = hashId;
+          this.ignoreNextScroll = true;
+        } else this.hashTarget = undefined;
         schedule();
       };
+      this.scrollHandler = () => {
+        if (this.ignoreNextScroll) {
+          this.ignoreNextScroll = false;
+          schedule();
+          return;
+        }
+        this.hashTarget = undefined;
+        schedule();
+      };
+      this.resizeHandler = schedule;
+      this.historyHandler = hashUpdate;
       this.observer = new IntersectionObserver(schedule, { threshold: [0, 1] });
       sections.forEach(({ heading }) => this.observer?.observe(heading));
       this.resizeObserver = new ResizeObserver(schedule);
       this.resizeObserver.observe(this);
-      window.addEventListener('scroll', schedule, { passive: true });
-      window.addEventListener('resize', schedule);
-      window.addEventListener('hashchange', hashUpdate);
-      window.addEventListener('popstate', hashUpdate);
+      window.addEventListener('scroll', this.scrollHandler, { passive: true });
+      window.addEventListener('resize', this.resizeHandler);
+      window.addEventListener('hashchange', this.historyHandler);
+      window.addEventListener('popstate', this.historyHandler);
       hashUpdate();
     }
 
@@ -76,6 +98,14 @@ const { items } = Astro.props;
       if (this.frame) cancelAnimationFrame(this.frame);
       this.observer?.disconnect();
       this.resizeObserver?.disconnect();
+      if (this.scrollHandler)
+        window.removeEventListener('scroll', this.scrollHandler);
+      if (this.resizeHandler)
+        window.removeEventListener('resize', this.resizeHandler);
+      if (this.historyHandler) {
+        window.removeEventListener('hashchange', this.historyHandler);
+        window.removeEventListener('popstate', this.historyHandler);
+      }
     }
   }
 

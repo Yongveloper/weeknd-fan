@@ -181,6 +181,63 @@ test('summarizes day-of actions and tracks the current guide section', async ({
   expect(box!.y + box!.height).toBeLessThanOrEqual(viewport!.height);
 });
 
+test('keeps a deterministic current section across history events and boundaries', async ({
+  page,
+}) => {
+  await page.goto('/goyang/#seating');
+
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  const current = jump.locator('[aria-current="location"]');
+  await expect(current).toHaveCount(1);
+
+  await page.evaluate(() => {
+    window.location.hash = 'return';
+  });
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute('href', '#return');
+
+  await page.evaluate(() => {
+    history.pushState({}, '', '#transport');
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  });
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute('href', '#transport');
+
+  await page.evaluate(() => {
+    const rect = (top: number): DOMRect =>
+      ({
+        top,
+        bottom: top + 40,
+        left: 0,
+        right: 200,
+        width: 200,
+        height: 40,
+        x: 0,
+        y: top,
+        toJSON: () => ({}),
+      }) as DOMRect;
+    const nav = document.querySelector<HTMLElement>('guide-jump-nav')!;
+    Object.defineProperty(nav, 'getBoundingClientRect', {
+      value: () => rect(60),
+    });
+    for (const [id, top] of [
+      ['official', 0],
+      ['transport', 61],
+      ['seating', 61],
+    ] as const) {
+      Object.defineProperty(
+        document.querySelector<HTMLElement>(`#${id} h2`)!,
+        'getBoundingClientRect',
+        { value: () => rect(top) },
+      );
+    }
+    window.history.replaceState({}, '', '/goyang/');
+    window.dispatchEvent(new Event('scroll'));
+  });
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveAttribute('href', '#seating');
+});
+
 test('keeps every tips tab inside the viewport on mobile', async ({
   page,
 }, testInfo) => {
