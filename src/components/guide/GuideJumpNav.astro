@@ -20,7 +20,10 @@ const { items } = Astro.props;
     private scrollHandler?: EventListener;
     private resizeHandler?: EventListener;
     private historyHandler?: EventListener;
+    private loadHandler?: EventListener;
+    private inputHandler?: EventListener;
     private initialHashTarget?: string;
+    private hashSettleTimer?: number;
 
     private syncClearance = () => {
       const parent = this.parentElement;
@@ -35,31 +38,63 @@ const { items } = Astro.props;
       const links = Array.from(this.querySelectorAll<HTMLAnchorElement>('a'));
       const sections = links.flatMap((link) => {
         const target = document.getElementById(link.hash.slice(1));
-        const heading = target?.querySelector<HTMLElement>(
-          '[data-guide-heading], h2',
-        );
-        return target && heading ? [{ link, target, heading }] : [];
+        return target ? [{ link, target }] : [];
       });
       if (sections.length === 0) return;
 
       const setCurrent = (id: string) => {
+        let current: HTMLAnchorElement | undefined;
         links.forEach((link) => {
-          if (link.hash === `#${id}`)
+          if (link.hash === `#${id}`) {
             link.setAttribute('aria-current', 'location');
-          else link.removeAttribute('aria-current');
+            current = link;
+          } else link.removeAttribute('aria-current');
         });
+        const nav = current?.parentElement;
+        if (!current || !nav) return;
+        const left = current.offsetLeft;
+        const right = left + current.offsetWidth;
+        const viewportLeft = nav.scrollLeft;
+        const viewportRight = viewportLeft + nav.clientWidth;
+        if (left >= viewportLeft && right <= viewportRight) return;
+        nav.scrollTo({
+          left: left < viewportLeft ? left : right - nav.clientWidth,
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)')
+            .matches
+            ? 'auto'
+            : 'smooth',
+        });
+      };
+      const alignHashTarget = (id: string) => {
+        sections
+          .find((section) => section.target.id === id)
+          ?.target.scrollIntoView({
+            behavior: 'instant' as ScrollBehavior,
+            block: 'start',
+          });
+        setCurrent(id);
+      };
+      const finishHashTarget = () => {
+        const id = this.initialHashTarget;
+        this.initialHashTarget = undefined;
+        this.hashSettleTimer = undefined;
+        if (id) alignHashTarget(id);
+      };
+      const queueHashTarget = (id: string) => {
+        this.initialHashTarget = id;
+        if (this.hashSettleTimer) window.clearTimeout(this.hashSettleTimer);
+        this.hashSettleTimer = window.setTimeout(finishHashTarget, 1000);
       };
       const update = () => {
         this.frame = 0;
         if (this.initialHashTarget) {
-          setCurrent(this.initialHashTarget);
-          this.initialHashTarget = undefined;
+          alignHashTarget(this.initialHashTarget);
           return;
         }
         const stickyBottom = this.getBoundingClientRect().bottom;
         const crossing = sections.filter(
           (section) =>
-            section.heading.getBoundingClientRect().top <= stickyBottom + 1,
+            section.target.getBoundingClientRect().top <= stickyBottom + 1,
         );
         const atBottom =
           window.innerHeight + window.scrollY >=
@@ -74,6 +109,9 @@ const { items } = Astro.props;
       };
 
       const hashUpdate = () => {
+        const hashId = window.location.hash.slice(1);
+        if (sections.some((section) => section.target.id === hashId))
+          queueHashTarget(hashId);
         schedule();
       };
       this.scrollHandler = () => {
@@ -81,8 +119,17 @@ const { items } = Astro.props;
       };
       this.resizeHandler = schedule;
       this.historyHandler = hashUpdate;
+      this.loadHandler = schedule;
+      this.inputHandler = (event) => {
+        if (!event.isTrusted || !this.initialHashTarget) return;
+        this.initialHashTarget = undefined;
+        if (this.hashSettleTimer) {
+          window.clearTimeout(this.hashSettleTimer);
+          this.hashSettleTimer = undefined;
+        }
+      };
       this.observer = new IntersectionObserver(schedule, { threshold: [0, 1] });
-      sections.forEach(({ heading }) => this.observer?.observe(heading));
+      sections.forEach(({ target }) => this.observer?.observe(target));
       this.resizeObserver = new ResizeObserver(() => {
         this.syncClearance();
         schedule();
@@ -93,14 +140,18 @@ const { items } = Astro.props;
       window.addEventListener('resize', this.resizeHandler);
       window.addEventListener('hashchange', this.historyHandler);
       window.addEventListener('popstate', this.historyHandler);
+      window.addEventListener('load', this.loadHandler);
+      for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown'])
+        window.addEventListener(event, this.inputHandler, { passive: true });
       const initialHashId = window.location.hash.slice(1);
       if (sections.some((section) => section.target.id === initialHashId))
-        this.initialHashTarget = initialHashId;
+        queueHashTarget(initialHashId);
       schedule();
     }
 
     disconnectedCallback() {
       if (this.frame) cancelAnimationFrame(this.frame);
+      if (this.hashSettleTimer) window.clearTimeout(this.hashSettleTimer);
       this.observer?.disconnect();
       this.resizeObserver?.disconnect();
       if (this.scrollHandler)
@@ -111,6 +162,11 @@ const { items } = Astro.props;
         window.removeEventListener('hashchange', this.historyHandler);
         window.removeEventListener('popstate', this.historyHandler);
       }
+      if (this.loadHandler)
+        window.removeEventListener('load', this.loadHandler);
+      if (this.inputHandler)
+        for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown'])
+          window.removeEventListener(event, this.inputHandler);
       this.parentElement?.style.removeProperty('--guide-jump-clearance');
     }
   }

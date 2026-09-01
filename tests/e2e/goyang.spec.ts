@@ -290,9 +290,10 @@ test('keeps the guide jump nav in one horizontal row at text zoom', async ({
   expect(new Set(rows).size).toBe(1);
 });
 
-test('keeps a deterministic current section across history events and boundaries', async ({
+test('keeps the hash target and current section aligned after navigation', async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 382, height: 527 });
   await page.addInitScript(() => {
     const guideWindow = window as Window & {
       __initialGuideCurrent?: string | null;
@@ -310,31 +311,57 @@ test('keeps a deterministic current section across history events and boundaries
       attributeFilter: ['aria-current'],
     });
   });
-  await page.goto('/goyang/#seating');
+  await page.goto('/goyang/#return', { waitUntil: 'domcontentloaded' });
 
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
   const current = jump.locator('[aria-current="location"]');
+  await page.waitForTimeout(100);
+  await page.locator('#tips').evaluate((section) => {
+    document.documentElement.style.overflowAnchor = 'none';
+    section.style.paddingBottom = '20rem';
+    window.dispatchEvent(new Event('resize'));
+  });
+  await page.waitForTimeout(600);
   await expect(current).toHaveCount(1);
+  expect(await current.getAttribute('href')).toBe('#return');
+  const directClearance = await page
+    .locator('#return h2')
+    .evaluate((heading) => {
+      const sticky = document.querySelector<HTMLElement>('guide-jump-nav');
+      if (!sticky) throw new Error('missing sticky guide navigation');
+      const headingRect = heading.getBoundingClientRect();
+      return {
+        headingTop: headingRect.top,
+        headingBottom: headingRect.bottom,
+        stickyBottom: sticky.getBoundingClientRect().bottom,
+        viewportHeight: window.innerHeight,
+      };
+    });
+  expect(directClearance.headingTop).toBeGreaterThanOrEqual(
+    directClearance.stickyBottom + 1,
+  );
+  expect(directClearance.headingBottom).toBeLessThanOrEqual(
+    directClearance.viewportHeight,
+  );
   expect(
     await page.evaluate(
       () =>
         (window as Window & { __initialGuideCurrent?: string })
           .__initialGuideCurrent,
     ),
-  ).toBe('#seating');
+  ).toBe('#return');
 
-  await page.evaluate(() => {
-    window.location.hash = 'return';
-  });
+  await jump.locator('a[href="#seating"]').click();
+  await page.waitForTimeout(700);
+  await expect(page).toHaveURL(/#seating$/);
   await expect(current).toHaveCount(1);
-  await expect(current).toHaveAttribute('href', '#tips');
-
-  await page.evaluate(() => {
-    history.pushState({}, '', '#transport');
-    window.dispatchEvent(new PopStateEvent('popstate'));
-  });
-  await expect(current).toHaveCount(1);
-  await expect(current).toHaveAttribute('href', '#tips');
+  expect(await current.getAttribute('href')).toBe('#seating');
+  const alignedScrollY = await page.evaluate(() => window.scrollY);
+  await page.mouse.wheel(0, -800);
+  await page.waitForTimeout(400);
+  expect(await page.evaluate(() => window.scrollY)).toBeLessThan(
+    alignedScrollY - 100,
+  );
 
   await page.evaluate(() => {
     const rect = (top: number): DOMRect =>
@@ -363,7 +390,7 @@ test('keeps a deterministic current section across history events and boundaries
       ['pending', 102],
     ] as const) {
       Object.defineProperty(
-        document.querySelector<HTMLElement>(`#${id} h2`)!,
+        document.querySelector<HTMLElement>(`#${id}`)!,
         'getBoundingClientRect',
         { value: () => rect(top) },
       );
@@ -376,6 +403,36 @@ test('keeps a deterministic current section across history events and boundaries
   await page.evaluate(() => window.dispatchEvent(new Event('scroll')));
   await expect(current).toHaveCount(1);
   await expect(current).toHaveAttribute('href', '#seating');
+});
+
+test('keeps the active guide chip horizontally visible without moving the page', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/goyang/#pending');
+  await page.waitForTimeout(250);
+
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  const current = jump.locator('[aria-current="location"]');
+  await expect(current).toHaveAttribute('href', '#pending');
+  const position = await current.evaluate((link) => {
+    const nav = link.closest('nav');
+    if (!nav) throw new Error('missing guide navigation');
+    const linkRect = link.getBoundingClientRect();
+    const navRect = nav.getBoundingClientRect();
+    return {
+      linkLeft: linkRect.left,
+      linkRight: linkRect.right,
+      navLeft: navRect.left,
+      navRight: navRect.right,
+      scrollY: window.scrollY,
+    };
+  });
+  expect(position.linkLeft).toBeGreaterThanOrEqual(position.navLeft - 1);
+  expect(position.linkRight).toBeLessThanOrEqual(position.navRight + 1);
+  await page.waitForTimeout(100);
+  expect(await page.evaluate(() => window.scrollY)).toBe(position.scrollY);
 });
 
 test('keeps every tips tab inside the viewport on mobile', async ({

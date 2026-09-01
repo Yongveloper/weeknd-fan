@@ -40,8 +40,8 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
     set:html={serializeJsonLd(eventJsonLd)}
   />
   <HomeHero concert={concert} officialNoticeUrl={officialNoticeUrl} />
-  <GuideShortcuts />
   <IntroSummary albums={albums} />
   <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
+  <GuideShortcuts />
   <FanNote />
 </BaseLayout>

@@ -18,30 +18,42 @@ const pathname = Astro.url.pathname;
     </a>
     <nav class="site-header__nav" aria-label="주요 메뉴">
       <mobile-navigation>
-        <details aria-label="주요 메뉴" open>
-          <summary>메뉴</summary>
-          <ul class="site-header__nav-list">
-            {
-              navigation.map(({ href, label }) => (
-                <li>
-                  <a
-                    href={href}
-                    aria-current={pathname === href ? 'page' : undefined}
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))
-            }
-          </ul>
+        <details aria-label="주요 메뉴" data-disclosure data-motion="fast" open>
+          <summary aria-label="메뉴">
+            메뉴
+            <span class="site-header__menu-icon" aria-hidden="true">
+              <span></span>
+              <span></span>
+            </span>
+          </summary>
+          <div class="disclosure__panel">
+            <ul class="site-header__nav-list">
+              {
+                navigation.map(({ href, label }) => (
+                  <li>
+                    <a
+                      href={href}
+                      aria-current={pathname === href ? 'page' : undefined}
+                    >
+                      {label}
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
         </details>
       </mobile-navigation>
     </nav>
   </div>
 </header>
 
+<script src="../../scripts/disclosure.ts"></script>
+
 <style>
   .site-header {
+    position: relative;
+    z-index: 5;
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
     background: color-mix(in srgb, var(--night) 70%, transparent);
     backdrop-filter: blur(16px);
@@ -49,6 +61,7 @@ const pathname = Astro.url.pathname;
   }
 
   .site-header__inner {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -84,6 +97,18 @@ const pathname = Astro.url.pathname;
   }
 
   .site-header__nav details {
+    width: 100%;
+  }
+
+  .site-header__nav summary {
+    list-style: none;
+  }
+
+  .site-header__nav summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .site-header__nav .disclosure__panel {
     width: 100%;
   }
 
@@ -151,48 +176,132 @@ const pathname = Astro.url.pathname;
 
   @media (max-width: 44rem) {
     .site-header__inner {
-      display: block;
-      padding-block: 1rem 0;
+      flex-wrap: wrap;
+      gap: 1rem;
+      min-height: 4rem;
+      padding-block: 0.55rem;
     }
 
-    details {
-      margin-top: 0.5rem;
+    .site-header__wordmark {
+      min-inline-size: 0;
+      max-inline-size: 100%;
     }
 
-    summary {
+    .site-header__wordmark > span {
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
+
+    .site-header__nav {
+      flex: 0 0 auto;
+      margin-inline-start: auto;
+    }
+
+    .site-header__nav > mobile-navigation,
+    .site-header__nav details {
+      width: auto;
+    }
+
+    .site-header__nav summary {
       display: grid;
       place-items: center;
+      inline-size: 44px;
       min-block-size: 44px;
+      padding: 0;
       color: var(--ivory);
       font-family: 'Noto Sans KR Header', var(--font-body);
-      font-size: 0.82rem;
+      font-size: 0;
       font-weight: 700;
       cursor: pointer;
+    }
+
+    .site-header__menu-icon {
+      position: relative;
+      display: block;
+      inline-size: 24px;
+      block-size: 16px;
+    }
+
+    .site-header__menu-icon > span {
+      position: absolute;
+      inset-inline: 1px;
+      block-size: 2px;
+      border-radius: 999px;
+      background: currentColor;
+      transition: transform var(--motion-fast) var(--ease-cinematic);
+    }
+
+    .site-header__menu-icon > span:first-child {
+      inset-block-start: 2px;
+    }
+
+    .site-header__menu-icon > span:last-child {
+      inset-block-end: 2px;
+    }
+
+    .site-header__nav
+      details[open]:not([data-closing])
+      .site-header__menu-icon
+      > span:first-child {
+      transform: translateY(5px) rotate(45deg);
+    }
+
+    .site-header__nav
+      details[open]:not([data-closing])
+      .site-header__menu-icon
+      > span:last-child {
+      transform: translateY(-5px) rotate(-45deg);
+    }
+
+    .site-header__nav .disclosure__panel {
+      position: absolute;
+      z-index: 20;
+      inset-block-start: calc(100% + 1px);
+      inset-inline: calc(var(--gutter) * -1);
+      width: auto;
+      padding: 0.35rem 0;
+      border-block: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
+      background: color-mix(in srgb, var(--night) 94%, transparent);
+      backdrop-filter: blur(16px);
     }
 
     .site-header__nav-list {
       display: grid;
       gap: 0;
+      justify-content: stretch;
       min-width: 0;
-      padding-block: 0.5rem;
+      width: 100%;
+      padding: 0;
     }
 
-    .site-header__nav details:not([open]) > .site-header__nav-list {
+    .site-header__nav-list li {
+      width: 100%;
+    }
+
+    .site-header__nav details:not([open]) > .disclosure__panel {
       display: none;
     }
 
     .site-header__nav-list a {
+      width: 100%;
+      padding-inline: var(--gutter);
       justify-content: start;
     }
 
     .site-header__nav-list a::after {
-      inset-inline: 0;
+      inset-inline: var(--gutter);
     }
   }
 
   @media (min-width: 44.0625rem) {
-    summary {
+    .site-header__nav summary {
       display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-header__menu-icon > span {
+      transition-duration: 0.01ms;
     }
   }
 </style>
