@@ -257,6 +257,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     display: grid;
     gap: clamp(2.5rem, 6vw, 5rem);
     max-width: 58rem;
+    min-width: 0;
     padding-block: clamp(4rem, 10vw, 8rem);
   }
   .share-builder__grid {
@@ -265,6 +266,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     gap: clamp(2rem, 5vw, 4rem);
     grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
     max-width: 64rem;
+    min-width: 0;
   }
   header,
   form,
@@ -272,6 +274,14 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   .song-fields {
     display: grid;
     gap: 1rem;
+    min-width: 0;
+  }
+
+  .share-builder__grid > *,
+  .song-fields > *,
+  select {
+    min-width: 0;
+    max-width: 100%;
   }
   .card-preview {
     display: grid;
@@ -342,6 +352,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   select {
     background: var(--night);
     color: var(--ivory);
+    width: 100%;
   }
   button {
     background: var(--amber);

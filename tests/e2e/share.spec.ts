@@ -3,7 +3,20 @@ import { expect, test } from '@playwright/test';
 import {
   expectNoHorizontalDocumentOverflow,
   expectVisibleControlsInsideViewport,
+  tabUntilFocused,
 } from './helpers/accessibility';
+
+async function chooseSongWithKeyboard(
+  page: import('@playwright/test').Page,
+  select: import('@playwright/test').Locator,
+  optionIndex: number,
+) {
+  await tabUntilFocused(page, select);
+  const option = select.locator('option').nth(optionIndex);
+  await page.keyboard.type((await option.textContent())?.trim() ?? '');
+  await page.keyboard.press('Enter');
+  await expect(select).toHaveValue((await option.getAttribute('value')) ?? '');
+}
 
 async function expectJpegCard(
   download: import('@playwright/test').Download,
@@ -374,6 +387,56 @@ test('keeps share primary actions and fallback controls reachable on mobile', as
   }
 });
 
+test('completes share exports and fallback actions from the keyboard', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', { value: undefined });
+  });
+
+  await page.goto('/share/ticket/');
+  const ticketButton = page.getByRole('button', { name: 'D-day 티켓 저장' });
+  await tabUntilFocused(page, ticketButton);
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('alert')).toHaveText(
+    '서로 다른 세 곡을 선택해 주세요.',
+  );
+  await chooseSongWithKeyboard(page, page.getByLabel('첫 번째 곡'), 1);
+  await chooseSongWithKeyboard(page, page.getByLabel('두 번째 곡'), 2);
+  await chooseSongWithKeyboard(page, page.getByLabel('세 번째 곡'), 3);
+  await tabUntilFocused(page, ticketButton);
+  const ticketDownload = page.waitForEvent('download');
+  await page.keyboard.press('Enter');
+  await ticketDownload;
+  const ticketCopy = page.getByRole('button', {
+    name: '텍스트 공유 문구 복사',
+  });
+  await tabUntilFocused(page, ticketCopy);
+  await page.keyboard.press('Space');
+  await expect(page.locator('[data-status]')).toContainText(
+    '직접 복사해 주세요',
+  );
+
+  await page.goto('/share/setlist/');
+  const setlistButton = page.getByRole('button', {
+    name: '셋리스트 카드 저장',
+  });
+  await tabUntilFocused(page, setlistButton);
+  const setlistDownload = page.waitForEvent('download');
+  await page.keyboard.press('Space');
+  await setlistDownload;
+  await tabUntilFocused(
+    page,
+    page.getByRole('button', {
+      name: '텍스트 공유 문구 복사',
+    }),
+  );
+  await page.keyboard.press('Enter');
+  await expect(page.locator('[data-status]')).toContainText(
+    '직접 복사해 주세요',
+  );
+});
+
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
@@ -395,6 +458,8 @@ test.describe('without JavaScript', () => {
     await expect(
       page.getByText('예상 · 보장 아님', { exact: true }),
     ).toBeVisible();
+    await expect(page.getByText('담기는 곡', { exact: true })).toBeVisible();
+    await expect(page.getByText('기준', { exact: true })).toBeVisible();
     await expect(
       page.getByText(/이미지는 이 브라우저 안에서만 생성/),
     ).toBeVisible();

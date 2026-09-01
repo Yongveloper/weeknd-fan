@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { useClock } from './helpers/clock';
+import { tabUntilFocused } from './helpers/accessibility';
 
 async function openPrimaryNav(page: import('@playwright/test').Page) {
   const menu = page
@@ -82,7 +83,7 @@ test('opens and closes the mobile menu from the keyboard', async ({ page }) => {
 
   const menu = page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴');
   const details = page.getByRole('group', { name: '주요 메뉴' });
-  await menu.focus();
+  await tabUntilFocused(page, menu);
   await page.keyboard.press('Enter');
   await expect(details).toHaveAttribute('open', '');
   await expect(
@@ -389,7 +390,7 @@ test('uses replace for typing and push for filters across browser history', asyn
     explorer.getByRole('button', { name: '3분 핵심 10곡' }),
   ).toHaveCount(0);
 
-  await search.click();
+  await tabUntilFocused(page, search);
   await search.pressSequentially('after');
   await expectState({
     url: /\/setlist\/\?q=after$/,
@@ -464,16 +465,23 @@ test('reaches every setlist filter control and clear action by keyboard', async 
   const essential = explorer.getByRole('button', { name: '3분 핵심 10곡' });
   const reset = explorer.getByRole('button', { name: '초기화' });
 
+  const hasEssential = (await essential.count()) > 0;
   const controls = [search, album, all, reset];
-  if ((await essential.count()) > 0) controls.splice(3, 0, essential);
+  if (hasEssential) controls.splice(3, 0, essential);
   for (const control of controls) {
-    await control.focus();
+    await tabUntilFocused(page, control);
     await expect(control).toBeFocused();
     await expect(control).toBeVisible();
   }
-  await search.fill('after');
+  await tabUntilFocused(page, search);
+  await page.keyboard.type('after');
   await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
-  await reset.click();
+  await tabUntilFocused(page, reset);
+  await page.keyboard.press('Shift+Tab');
+  await expect(hasEssential ? essential : all).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(reset).toBeFocused();
+  await page.keyboard.press('Enter');
   await expect(search).toHaveValue('');
   await expect(explorer.getByRole('status')).toHaveText('38곡 표시');
 });
@@ -497,7 +505,7 @@ test('announces a zero-result expected-song search', async ({ page }) => {
 
   const explorer = page.locator('.expected-setlist');
   const search = explorer.getByRole('searchbox', { name: '곡 검색' });
-  await search.click();
+  await tabUntilFocused(page, search);
   await search.pressSequentially('zzzz');
 
   await expect(explorer.getByRole('status')).toHaveText('0곡 표시');
@@ -516,11 +524,13 @@ test('moves focus to the result count when filtering hides an open song', async 
 
   const explorer = page.locator('.expected-setlist');
   const firstSong = explorer.locator('summary').first();
-  await firstSong.focus();
+  await tabUntilFocused(page, firstSong);
   await page.keyboard.press('Space');
   await expect(explorer.locator('details').first()).toHaveAttribute('open', '');
 
-  await explorer.getByRole('searchbox', { name: '곡 검색' }).fill('after');
+  const search = explorer.getByRole('searchbox', { name: '곡 검색' });
+  await tabUntilFocused(page, search);
+  await page.keyboard.type('after');
   await expect(explorer.getByRole('status')).toBeFocused();
   await expect(explorer.locator('details').first()).not.toHaveAttribute(
     'open',
@@ -548,10 +558,10 @@ test('keeps expected songs ordered and keyboard-operable without media controls'
   );
   await expect(explorer.getByText('공식 영상 불러오기')).toHaveCount(0);
 
-  await firstSong.focus();
+  await tabUntilFocused(page, firstSong);
   await page.keyboard.press('Space');
   await expect(explorer.locator('details').first()).toHaveAttribute('open', '');
-  await secondSong.focus();
+  await tabUntilFocused(page, secondSong);
   await page.keyboard.press('Enter');
   await expect(explorer.locator('details').nth(1)).toHaveAttribute('open', '');
 });

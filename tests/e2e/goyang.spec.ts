@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { tabUntilFocused } from './helpers/accessibility';
 
 test('shows Interpark access data as a table with a source caption', async ({
   page,
@@ -99,7 +100,7 @@ test('groups the five review-based tips into keyboard-operable tabs', async ({
   await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
   await expect(tips.getByRole('tabpanel')).toHaveCount(1);
 
-  await tabs.nth(0).focus();
+  await tabUntilFocused(page, tabs.nth(0));
   await page.keyboard.press('ArrowRight');
   await expect(tabs.nth(1)).toBeFocused();
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
@@ -110,7 +111,7 @@ test('supports every TipsTabs keyboard navigation key', async ({ page }) => {
   await page.goto('/goyang/');
   const tabs = page.locator('#tips [role="tab"]');
 
-  await tabs.nth(0).focus();
+  await tabUntilFocused(page, tabs.nth(0));
   await page.keyboard.press('ArrowLeft');
   await expect(tabs.nth(4)).toBeFocused();
   await page.keyboard.press('ArrowRight');
@@ -174,11 +175,14 @@ test('activates all seven guide jump links from the keyboard', async ({
 
   await expect(links).toHaveCount(ids.length);
   for (const [index, id] of ids.entries()) {
-    await links.nth(index).focus();
+    await page.goto('/goyang/');
+    await tabUntilFocused(page, links.nth(0));
+    for (let tab = 0; tab < index; tab += 1) await page.keyboard.press('Tab');
     await expect(links.nth(index)).toBeFocused();
     await page.keyboard.press('Enter');
     await expect(page).toHaveURL(new RegExp(`#${id}$`));
     await expect(page.locator(`#${id}`)).toBeVisible();
+    await expect(page.locator(`#${id}`)).toBeFocused();
   }
 });
 

@@ -6,6 +6,7 @@ import {
   expectMainAndFooterKeyboardReachable,
   expectNoHorizontalDocumentOverflow,
   expectVisibleControlsInsideViewport,
+  tabUntilFocused,
 } from './helpers/accessibility';
 
 const publicRoutes = [
@@ -17,6 +18,21 @@ const publicRoutes = [
   '/share/ticket/',
   '/share/setlist/',
 ] as const;
+
+const moderateAxeClassifications: Record<
+  string,
+  {
+    classification:
+      'plan-caused' | 'pre-existing-designer-owned' | 'fixed' | 'accepted';
+    rationale: string;
+  }
+> = {
+  'color-contrast': {
+    classification: 'pre-existing-designer-owned',
+    rationale:
+      'The visual palette is owned by the active designer branch; Task 8 does not change tokens, assets, or screenshot baselines.',
+  },
+};
 
 for (const route of publicRoutes) {
   test(`${route} stays keyboard reachable and horizontally contained across the route matrix`, async ({
@@ -39,11 +55,11 @@ for (const route of publicRoutes) {
         await expectVisibleControlsInsideViewport(page);
         await expectFocusedControlsClearStickyNavigation(page);
 
-        if (viewport.label !== 'desktop') {
-          await applyTextZoom(page);
-          await expectNoHorizontalDocumentOverflow(page);
-          await expectVisibleControlsInsideViewport(page);
-        }
+        await applyTextZoom(page);
+        await expectNoHorizontalDocumentOverflow(page);
+        await expectMainAndFooterKeyboardReachable(page);
+        await expectVisibleControlsInsideViewport(page);
+        await expectFocusedControlsClearStickyNavigation(page);
       });
     }
   });
@@ -56,10 +72,29 @@ for (const route of publicRoutes) {
     await page.goto(route);
 
     const result = await new AxeBuilder({ page }).analyze();
+    const moderateViolations = result.violations.filter(
+      (violation) => violation.impact === 'moderate',
+    );
+    expect(
+      moderateViolations
+        .map((violation) => violation.id)
+        .filter((id) => !moderateAxeClassifications[id]),
+      'every moderate axe finding must have an explicit Task 8 classification',
+    ).toEqual([]);
+    if (moderateViolations.length === 0) {
+      testInfo.annotations.push({
+        type: 'axe-moderate',
+        description: 'none observed; route passed the axe scan',
+      });
+    }
     for (const violation of result.violations) {
+      const classification =
+        violation.impact === 'moderate'
+          ? moderateAxeClassifications[violation.id]
+          : undefined;
       testInfo.annotations.push({
         type: `axe-${violation.impact ?? 'unknown'}`,
-        description: `${violation.id}: ${violation.help} (${violation.nodes.length} node${violation.nodes.length === 1 ? '' : 's'})`,
+        description: `${violation.id}: ${violation.help} (${violation.nodes.length} node${violation.nodes.length === 1 ? '' : 's'})${classification ? ` — ${classification.classification}: ${classification.rationale}` : ''}`,
       });
     }
     const blockingViolations = result.violations.filter((violation) =>
@@ -96,7 +131,7 @@ test('opens the first expected-song disclosure from the keyboard', async ({
   await page.goto('/setlist/');
 
   const firstSong = page.locator('.expected-setlist summary').first();
-  await firstSong.focus();
+  await tabUntilFocused(page, firstSong);
   await page.keyboard.press('Space');
 
   await expect(

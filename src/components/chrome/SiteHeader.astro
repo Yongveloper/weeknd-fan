@@ -16,7 +16,7 @@ const pathname = Astro.url.pathname;
         >{wordmark.edition}</span
       >
     </a>
-    <nav aria-label="주요 메뉴">
+    <nav class="site-header__nav" aria-label="주요 메뉴">
       <mobile-navigation>
         <details aria-label="주요 메뉴" open>
           <summary>메뉴</summary>
@@ -69,6 +69,24 @@ const pathname = Astro.url.pathname;
     text-decoration: none;
   }
 
+  .site-header__nav,
+  .site-header__nav > mobile-navigation {
+    min-width: 0;
+  }
+
+  .site-header__nav {
+    flex: 1 1 0;
+  }
+
+  .site-header__nav > mobile-navigation {
+    display: block;
+    width: 100%;
+  }
+
+  .site-header__nav details {
+    width: 100%;
+  }
+
   .site-header__edition {
     margin-top: 0.45rem;
     color: var(--amber);
@@ -82,10 +100,14 @@ const pathname = Astro.url.pathname;
     display: flex;
     align-items: center;
     gap: 0.3rem;
-    min-width: max-content;
+    min-width: 0;
+    max-width: 100%;
+    width: 100%;
     margin: 0;
     padding: 0;
     list-style: none;
+    flex-wrap: wrap;
+    justify-content: flex-end;
   }
 
   .site-header__nav-list a {

@@ -1,4 +1,19 @@
-import { expect, type Page } from '@playwright/test';
+import { expect, type Locator, type Page } from '@playwright/test';
+
+export async function tabUntilFocused(
+  page: Page,
+  target: Locator,
+  maxTabs = 160,
+) {
+  for (let index = 0; index < maxTabs; index += 1) {
+    await page.keyboard.press('Tab');
+    if (await target.evaluate((element) => document.activeElement === element))
+      return;
+  }
+  throw new Error(
+    `could not reach ${(await target.first().getAttribute('aria-label')) ?? 'target'} with Tab`,
+  );
+}
 
 export async function expectNoHorizontalDocumentOverflow(page: Page) {
   await expect
@@ -45,8 +60,23 @@ export async function expectVisibleControlsInsideViewport(page: Page) {
 }
 
 export async function expectMainAndFooterKeyboardReachable(page: Page) {
-  await page.keyboard.press('Tab');
   const skipLink = page.getByRole('link', { name: '본문으로 건너뛰기' });
+  const alreadyFocused = await skipLink.evaluate(
+    (element) => document.activeElement === element,
+  );
+  if (!alreadyFocused) {
+    let skipReached = false;
+    for (let index = 0; index < 220; index += 1) {
+      await page.keyboard.press('Tab');
+      if (
+        await skipLink.evaluate((element) => document.activeElement === element)
+      ) {
+        skipReached = true;
+        break;
+      }
+    }
+    expect(skipReached, 'skip link should be reachable with Tab').toBe(true);
+  }
   await expect(skipLink).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('main')).toBeFocused();
@@ -66,33 +96,38 @@ export async function expectFocusedControlsClearStickyNavigation(page: Page) {
   const sticky = page.locator('guide-jump-nav:visible');
   if ((await sticky.count()) === 0) return;
 
-  const controls = page.locator(
-    'a:visible, button:visible, input:visible, select:visible, summary:visible',
-  );
-  const count = await controls.count();
-  for (let index = 0; index < count; index += 1) {
-    const control = controls.nth(index);
-    if (await control.locator('xpath=ancestor::guide-jump-nav').count())
-      continue;
-    await control.focus();
-    const overlap = await page.evaluate(
-      (element) => {
-        const sticky = document.querySelector<HTMLElement>('guide-jump-nav');
-        if (!sticky || !element) return false;
-        const controlRect = (element as HTMLElement).getBoundingClientRect();
-        const stickyRect = sticky.getBoundingClientRect();
-        return (
+  for (let index = 0; index < 220; index += 1) {
+    await page.keyboard.press('Shift+Tab');
+    const result = await page.evaluate(() => {
+      const active = document.activeElement;
+      if (!active) return { stop: true, control: false, overlap: false };
+      if (active.matches('.skip-link'))
+        return { stop: true, control: false, overlap: false };
+      const control = active.matches(
+        'a, button, input, select, summary, [tabindex]:not([tabindex="-1"])',
+      );
+      if (!control || active.closest('guide-jump-nav'))
+        return { stop: false, control: false, overlap: false };
+      const sticky = document.querySelector<HTMLElement>('guide-jump-nav');
+      if (!sticky) return { stop: false, control: true, overlap: false };
+      const controlRect = (active as HTMLElement).getBoundingClientRect();
+      const stickyRect = sticky.getBoundingClientRect();
+      return {
+        stop: false,
+        control: true,
+        overlap:
           controlRect.left < stickyRect.right &&
           controlRect.right > stickyRect.left &&
           controlRect.top < stickyRect.bottom &&
-          controlRect.bottom > stickyRect.top
-        );
-      },
-      await control.elementHandle(),
-    );
-    expect(
-      overlap,
-      `focused control ${index} is covered by sticky navigation`,
-    ).toBe(false);
+          controlRect.bottom > stickyRect.top,
+      };
+    });
+    if (result.stop) return;
+    if (result.control)
+      expect(
+        result.overlap,
+        `focused control is covered by sticky navigation`,
+      ).toBe(false);
   }
+  throw new Error('could not traverse back to the skip link with Shift+Tab');
 }
