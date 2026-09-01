@@ -4,6 +4,10 @@ import { navigation, wordmark } from './navigation';
 const pathname = Astro.url.pathname;
 ---
 
+<script is:inline>
+  document.documentElement.dataset.headerMenuJs = 'true';
+</script>
+
 <header class="site-header">
   <div class="shell-content site-header__inner">
     <a
@@ -282,6 +286,22 @@ const pathname = Astro.url.pathname;
       display: none;
     }
 
+    :global(html[data-header-menu-js='true'])
+      .site-header__nav
+      > mobile-navigation:not([data-ready])
+      .disclosure__panel {
+      display: none;
+    }
+
+    :global(html[data-header-menu-js='true'])
+      .site-header__nav
+      > mobile-navigation:not([data-ready])
+      details[open]
+      .site-header__menu-icon
+      > span {
+      transform: none;
+    }
+
     .site-header__nav-list a {
       width: 100%;
       padding-inline: var(--gutter);
@@ -315,16 +335,35 @@ const pathname = Astro.url.pathname;
       if (this.details) this.details.open = !this.mobileQuery.matches;
     };
 
+    private closeForNavigation = (event: MouseEvent) => {
+      if (!this.mobileQuery.matches || !this.details) return;
+      const link = (event.target as Element | null)?.closest('a[href]');
+      if (!link || !this.contains(link)) return;
+
+      const panel = this.details.querySelector<HTMLElement>(
+        ':scope > .disclosure__panel',
+      );
+      panel?.getAnimations().forEach((animation) => animation.cancel());
+      panel?.style.removeProperty('height');
+      panel?.style.removeProperty('overflow');
+      if (panel?.getAttribute('style') === '') panel.removeAttribute('style');
+      delete this.details.dataset.closing;
+      delete this.details.dataset.state;
+      this.details.open = false;
+    };
+
     connectedCallback() {
       this.details = this.querySelector('details');
       if (!this.details) return;
       this.mobileQuery.addEventListener('change', this.synchronizeMenu);
+      this.addEventListener('click', this.closeForNavigation);
       this.synchronizeMenu();
       this.dataset.ready = 'true';
     }
 
     disconnectedCallback() {
       this.mobileQuery.removeEventListener('change', this.synchronizeMenu);
+      this.removeEventListener('click', this.closeForNavigation);
     }
   }
 

@@ -154,21 +154,14 @@ const overviewItems = jump.map(({ id, label }) => {
     display: flex;
     width: calc(100% + (var(--gutter) * 2));
     min-width: 0;
-    gap: 0.5rem;
     margin-inline: calc(var(--gutter) * -1);
     padding: 0.6rem var(--gutter);
-    overflow-x: auto;
-    scrollbar-width: none;
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
     background: color-mix(in srgb, var(--night) 82%, transparent);
     backdrop-filter: blur(14px);
   }
-  :global(.guide-jump::-webkit-scrollbar) {
-    display: none;
-  }
   @media (max-width: 44rem) {
     :global(.guide-jump) {
-      scroll-padding-inline: var(--gutter) 3rem;
       mask-image: linear-gradient(
         90deg,
         transparent,
@@ -176,6 +169,9 @@ const overviewItems = jump.map(({ id, label }) => {
         #000 calc(100% - 3rem),
         transparent
       );
+    }
+    :global(.guide-jump nav) {
+      scroll-padding-inline: var(--gutter) 3rem;
     }
   }
   :global(.guide-jump a) {
@@ -196,8 +192,13 @@ const overviewItems = jump.map(({ id, label }) => {
     display: flex;
     flex-wrap: nowrap;
     min-width: 0;
+    gap: 0.5rem;
     overflow-x: auto;
+    scrollbar-width: none;
     width: 100%;
+  }
+  :global(.guide-jump nav::-webkit-scrollbar) {
+    display: none;
   }
   :global(.guide-jump a:hover),
   :global(.guide-jump a:focus-visible) {

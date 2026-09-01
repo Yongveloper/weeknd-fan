@@ -3,10 +3,12 @@ import '@fontsource/bebas-neue';
 import '@fontsource-variable/noto-sans-kr';
 import SiteFooter from '../components/chrome/SiteFooter.astro';
 import SiteHeader from '../components/chrome/SiteHeader.astro';
+import BackToTop from '../components/ui/BackToTop.astro';
 import { headerFontAssets } from '../lib/fonts/headerFontAssets';
 import '../styles/tokens.css';
 import '../styles/global.css';
 import '../styles/motion.css';
+import '../styles/back-to-top.css';
 
 interface Props {
   title: string;
@@ -63,6 +65,8 @@ const ogImageUrl = new URL(ogImage, site);
     <SiteHeader />
     <main id="content" tabindex="-1"><slot /></main>
     <SiteFooter />
+    <BackToTop />
     <script src="../scripts/reveal.ts"></script>
+    <script src="../scripts/back-to-top.ts"></script>
   </body>
 </html>

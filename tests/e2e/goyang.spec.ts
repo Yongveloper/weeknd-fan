@@ -290,6 +290,39 @@ test('keeps the guide jump nav in one horizontal row at text zoom', async ({
   expect(new Set(rows).size).toBe(1);
 });
 
+test('hides the actual jump scroller scrollbar and spaces its chips', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/goyang/');
+
+  const jump = page.getByRole('navigation', { name: '가이드 섹션' });
+  const geometry = await jump.evaluate((nav) => {
+    const links = Array.from(nav.querySelectorAll('a'));
+    const first = links[0]?.getBoundingClientRect();
+    const second = links[1]?.getBoundingClientRect();
+    if (!first || !second) throw new Error('missing guide jump links');
+    const style = getComputedStyle(nav);
+    return {
+      columnGap: style.columnGap,
+      flexWrap: style.flexWrap,
+      gap: second.left - first.right,
+      overflowX: style.overflowX,
+      overflows: nav.scrollWidth > nav.clientWidth,
+      scrollbarWidth: style.scrollbarWidth,
+      webkitScrollbarDisplay: getComputedStyle(nav, '::-webkit-scrollbar')
+        .display,
+    };
+  });
+  expect(geometry.overflows).toBe(true);
+  expect(geometry.overflowX).toBe('auto');
+  expect(geometry.flexWrap).toBe('nowrap');
+  expect(geometry.columnGap).toBe('8px');
+  expect(geometry.gap).toBeCloseTo(8, 3);
+  expect(geometry.scrollbarWidth).toBe('none');
+  expect(geometry.webkitScrollbarDisplay).toBe('none');
+});
+
 test('keeps the hash target and current section aligned after navigation', async ({
   page,
 }) => {

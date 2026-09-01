@@ -1,0 +1,33 @@
+.back-to-top {
+  position: fixed;
+  z-index: 10;
+  right: calc(1rem + env(safe-area-inset-right));
+  bottom: calc(1rem + env(safe-area-inset-bottom));
+  display: grid;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  min-height: 48px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--ivory) 32%, transparent);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--night) 86%, transparent);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 35%);
+  color: var(--ivory);
+  cursor: pointer;
+  place-items: center;
+}
+
+.back-to-top:hover {
+  border-color: var(--amber);
+  color: var(--amber);
+}
+
+.back-to-top svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.back-to-top[hidden] {
+  display: none;
+}

@@ -12,6 +12,47 @@ function headerMenu(page: import('@playwright/test').Page) {
   };
 }
 
+test('keeps the SSR mobile menu closed before its client script is ready', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const originalDefine = CustomElementRegistry.prototype.define;
+    CustomElementRegistry.prototype.define = function (
+      name,
+      constructor,
+      options,
+    ) {
+      if (name === 'mobile-navigation') return;
+      originalDefine.call(this, name, constructor, options);
+    };
+  });
+  await page.setViewportSize({ width: 382, height: 527 });
+
+  for (const path of ['/', '/discover/']) {
+    await page.goto(path);
+    const { details, panel } = headerMenu(page);
+    const header = page.locator('.site-header');
+    const main = page.locator('main');
+
+    await expect(page.locator('mobile-navigation')).not.toHaveAttribute(
+      'data-ready',
+      /.+/,
+    );
+    await expect(details).toHaveAttribute('open', '');
+    await expect(panel).toBeHidden();
+    await expect(details.getByRole('link').first()).toBeHidden();
+
+    const [headerBox, mainBox] = await Promise.all([
+      header.boundingBox(),
+      main.boundingBox(),
+    ]);
+    expect(mainBox?.y).toBeCloseTo(
+      (headerBox?.y ?? 0) + (headerBox?.height ?? 0),
+      0,
+    );
+  }
+});
+
 test('opens a compact mobile overlay without moving the page', async ({
   page,
 }) => {
@@ -87,6 +128,95 @@ test('keeps opened menu links above the home hero pointer layer', async ({
   await details.getByRole('link', { name: 'The Weeknd' }).click();
 
   await expect(page).toHaveURL(/\/discover\/$/);
+});
+
+test('closes the current menu while the destination document is pending', async ({
+  page,
+}) => {
+  await page.setViewportSize(mobileViewport);
+  let releaseDestination = () => {};
+  let destinationRequested = () => {};
+  const destinationHeld = new Promise<void>((resolve) => {
+    releaseDestination = resolve;
+  });
+  const requestStarted = new Promise<void>((resolve) => {
+    destinationRequested = resolve;
+  });
+  await page.route(/\/discover\/$/, async (route) => {
+    destinationRequested();
+    await destinationHeld;
+    await route.continue();
+  });
+  await page.goto('/');
+
+  const { details, summary } = headerMenu(page);
+  await summary.click();
+  await expect(details).toHaveAttribute('data-state', 'open');
+  type PendingMenuState = {
+    open: boolean;
+    panelHidden: boolean;
+    closing: string | null;
+    state: string | null;
+    style: string;
+  };
+  let reportState!: (state: PendingMenuState) => void;
+  const stateReported = new Promise<PendingMenuState>((resolve) => {
+    reportState = resolve;
+  });
+  await page.exposeFunction(
+    'reportPendingMenuState',
+    (state: PendingMenuState) => reportState(state),
+  );
+  await page.evaluate(() => {
+    window.addEventListener(
+      'click',
+      (event) => {
+        const link = (event.target as Element | null)?.closest(
+          '.site-header a[href="/discover/"]',
+        );
+        if (!link) return;
+        const details = document.querySelector<HTMLDetailsElement>(
+          '.site-header details',
+        );
+        const panel = details?.querySelector<HTMLElement>(
+          ':scope > .disclosure__panel',
+        );
+        void (
+          window as typeof window & {
+            reportPendingMenuState: (state: PendingMenuState) => Promise<void>;
+          }
+        ).reportPendingMenuState({
+          open: details?.open ?? false,
+          panelHidden: panel
+            ? getComputedStyle(panel).display === 'none'
+            : true,
+          closing: details?.getAttribute('data-closing') ?? null,
+          state: details?.getAttribute('data-state') ?? null,
+          style: panel?.getAttribute('style') ?? '',
+        });
+      },
+      { once: true },
+    );
+  });
+  const navigation = details.getByRole('link', { name: 'The Weeknd' }).click();
+  await requestStarted;
+  const pendingState = await stateReported;
+
+  try {
+    expect(pendingState).toEqual({
+      open: false,
+      panelHidden: true,
+      closing: null,
+      state: null,
+      style: '',
+    });
+  } finally {
+    releaseDestination();
+    await navigation;
+  }
+
+  await expect(page).toHaveURL(/\/discover\/$/);
+  await expect(headerMenu(page).details).not.toHaveAttribute('open', '');
 });
 
 test('attaches the narrow-screen menu across the full header width', async ({
