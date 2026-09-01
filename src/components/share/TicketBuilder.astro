@@ -21,56 +21,75 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     <p>관람일과 가장 기다리는 세 곡을 골라 나만의 티켓을 만드세요.</p>
   </header>
 
-  <form novalidate>
-    <fieldset>
-      <legend>관람일</legend>
-      {
-        showDates.map((date, index) => (
-          <label class="choice">
-            <input
-              type="radio"
-              name="show-date"
-              value={date}
-              checked={index === 0}
-            />
-            <span>{date.replaceAll('-', '.')}</span>
-          </label>
-        ))
-      }
-    </fieldset>
+  <div class="share-builder__grid">
+    <figure class="card-preview">
+      <canvas
+        data-preview
+        width="1080"
+        height="1350"
+        role="img"
+        aria-label="D-day 티켓 미리보기"
+      >
+        미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
+        이미지와 같은 티켓입니다.
+      </canvas>
+      <figcaption>미리보기 · 저장되는 이미지와 같습니다</figcaption>
+    </figure>
 
-    <div class="song-fields">
-      {
-        ['첫 번째 곡', '두 번째 곡', '세 번째 곡'].map((label, index) => (
-          <label>
-            <span>{label}</span>
-            <select required aria-label={label} data-song-select={index}>
-              <option value="">곡을 선택해 주세요</option>
-              {songs.map((song) => (
-                <option value={song}>{song}</option>
-              ))}
-            </select>
-          </label>
-        ))
-      }
-    </div>
+    <form novalidate>
+      <fieldset>
+        <legend>관람일</legend>
+        {
+          showDates.map((date, index) => (
+            <label class="choice">
+              <input
+                type="radio"
+                name="show-date"
+                value={date}
+                checked={index === 0}
+              />
+              <span>{date.replaceAll('-', '.')}</span>
+            </label>
+          ))
+        }
+      </fieldset>
 
-    <button type="button" data-download-ticket>D-day 티켓 저장</button>
-    <p class="privacy-note">
-      서로 다른 세 곡을 고르면 티켓에 담겨요. 이미지는 이 브라우저 안에서만
-      생성되며 선택값을 저장하지 않습니다.
-    </p>
-    <p class="status" aria-live="polite" data-status></p>
-    <p class="error" role="alert" hidden data-error></p>
-    <div class="share-fallback">
-      <p class="share-fallback__title">이미지 저장이 안 되면</p>
-      <div class="share-fallback__actions">
-        <a href="/og/default.jpg">기본 공유 이미지 보기</a>
-        <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+      <div class="song-fields">
+        {
+          ['첫 번째 곡', '두 번째 곡', '세 번째 곡'].map((label, index) => (
+            <label>
+              <span>{label}</span>
+              <select required aria-label={label} data-song-select={index}>
+                <option value="">곡을 선택해 주세요</option>
+                {songs.map((song) => (
+                  <option value={song}>{song}</option>
+                ))}
+              </select>
+            </label>
+          ))
+        }
       </div>
-      <code data-share-url>{shareUrl}</code>
-    </div>
-  </form>
+
+      <button type="button" data-download-ticket>D-day 티켓 저장</button>
+      <p class="privacy-note">
+        서로 다른 세 곡을 고르면 티켓에 담겨요. 이미지는 이 브라우저 안에서만
+        생성되며 선택값을 저장하지 않습니다.
+      </p>
+      <p class="status" aria-live="polite" data-status></p>
+      <p class="error" role="alert" hidden data-error></p>
+      <div class="share-fallback">
+        <p class="share-fallback__title">이미지 저장이 안 되면</p>
+        <div class="share-fallback__actions">
+          <a href="/og/default.jpg">기본 공유 이미지 보기</a>
+          <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+        </div>
+        <code data-share-url>{shareUrl}</code>
+      </div>
+      <a class="share-builder__back" href="/"
+        >공연 안내로 돌아가기 <span aria-hidden="true">→</span></a
+      >
+    </form>
+  </div>
 </section>
 
 <script>
@@ -92,16 +111,34 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       const button = root.querySelector<HTMLButtonElement>(
         '[data-download-ticket]',
       );
+      const preview = root.querySelector<HTMLCanvasElement>('[data-preview]');
       const status = root.querySelector<HTMLElement>('[data-status]');
       const error = root.querySelector<HTMLElement>('[data-error]');
       const copyShare =
         root.querySelector<HTMLButtonElement>('[data-copy-share]');
       const shareUrl = root.querySelector<HTMLElement>('[data-share-url]');
+      let isGenerating = false;
+      let shareButton: HTMLButtonElement | undefined;
 
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
 
       const selections = () =>
         selects.map((select) => select.value).filter(Boolean);
+      const getLayout = () => {
+        const showDate = root.querySelector<HTMLInputElement>(
+          'input[name="show-date"]:checked',
+        )?.value;
+        const showStart = showDate === '2026-10-08' ? dayTwoStart : dayOneStart;
+
+        return buildTicketLayout({
+          showDate: showDate ?? '2026-10-07',
+          dDayLabel: getSelectedShowLabel({ now: new Date(), showStart }),
+          songs: selections(),
+        });
+      };
+      const renderPreview = () => {
+        if (preview) renderCommands(preview, getLayout()).catch(() => {});
+      };
       const refresh = () => {
         const selected = selections();
         selects.forEach((select) => {
@@ -120,9 +157,14 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           error.hidden = true;
           error.textContent = '';
           refresh();
+          renderPreview();
         }),
       );
+      root
+        .querySelectorAll<HTMLInputElement>('input[name="show-date"]')
+        .forEach((input) => input.addEventListener('change', renderPreview));
       refresh();
+      renderPreview();
 
       const currentShareUrl = window.location.href;
       if (shareUrl) shareUrl.textContent = currentShareUrl;
@@ -143,6 +185,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       });
 
       button.addEventListener('click', async () => {
+        if (isGenerating) return;
         const selected = selections();
         if (selected.length !== 3 || new Set(selected).size !== 3) {
           error.textContent = '서로 다른 세 곡을 선택해 주세요.';
@@ -150,31 +193,49 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           return;
         }
 
-        const showDate = root.querySelector<HTMLInputElement>(
-          'input[name="show-date"]:checked',
-        )?.value;
-        const showStart = showDate === '2026-10-08' ? dayTwoStart : dayOneStart;
-        const dDayLabel = getSelectedShowLabel({
-          now: new Date(),
-          showStart,
-        });
-
         try {
+          isGenerating = true;
           button.disabled = true;
           error.hidden = true;
           error.textContent = '';
           status.textContent = '이미지를 생성하고 있습니다…';
           const canvas = document.createElement('canvas');
-          const blob = await renderCommands(
-            canvas,
-            buildTicketLayout({
-              showDate: showDate ?? '2026-10-07',
-              dDayLabel,
-              songs: selected,
-            }),
-          );
+          const blob = await renderCommands(canvas, getLayout());
           downloadBlob(blob, 'weeknd-goyang-dday-ticket.jpg');
           status.textContent = 'JPEG 티켓을 저장했습니다.';
+          const file = new File([blob], 'weeknd-goyang-dday-ticket.jpg', {
+            type: 'image/jpeg',
+          });
+          if (navigator.share && navigator.canShare?.({ files: [file] })) {
+            shareButton?.remove();
+            shareButton = document.createElement('button');
+            shareButton.type = 'button';
+            shareButton.textContent = '공유';
+            shareButton.addEventListener('click', async () => {
+              try {
+                await navigator.share({
+                  files: [file],
+                  title: 'The Weeknd 고양 D-day 티켓',
+                  text: 'The Weeknd 고양 D-day 티켓',
+                  url: currentShareUrl,
+                });
+                status.textContent = '티켓 이미지를 공유했습니다.';
+              } catch (shareError) {
+                if (
+                  shareError instanceof DOMException &&
+                  shareError.name !== 'AbortError'
+                ) {
+                  error.textContent =
+                    '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.';
+                  error.hidden = false;
+                } else {
+                  status.textContent =
+                    '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.';
+                }
+              }
+            });
+            button.insertAdjacentElement('afterend', shareButton);
+          }
         } catch (caught) {
           error.textContent =
             caught instanceof Error
@@ -183,6 +244,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           error.hidden = false;
           status.textContent = '';
         } finally {
+          isGenerating = false;
           button.disabled = false;
           refresh();
         }
@@ -197,12 +259,37 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     max-width: 58rem;
     padding-block: clamp(4rem, 10vw, 8rem);
   }
+  .share-builder__grid {
+    align-items: start;
+    display: grid;
+    gap: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    max-width: 64rem;
+  }
   header,
   form,
   fieldset,
   .song-fields {
     display: grid;
     gap: 1rem;
+  }
+  .card-preview {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+  }
+  .card-preview canvas {
+    aspect-ratio: 4 / 5;
+    background: #050507;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    color: var(--mist);
+    display: block;
+    height: auto;
+    width: 100%;
+  }
+  .card-preview figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
   }
   h1 {
     margin: 0;
@@ -313,5 +400,27 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     overflow-wrap: anywhere;
     color: var(--mist);
     font-size: 0.85rem;
+  }
+  .share-builder__back {
+    align-items: center;
+    color: var(--ivory);
+    display: inline-flex;
+    font-weight: 800;
+    gap: 0.4rem;
+    justify-self: start;
+    min-height: 44px;
+    text-decoration: none;
+  }
+  .share-builder__back:hover,
+  .share-builder__back:focus-visible {
+    color: var(--amber);
+  }
+  @media (max-width: 48rem) {
+    .share-builder__grid {
+      grid-template-columns: 1fr;
+    }
+    .card-preview {
+      max-width: 22rem;
+    }
   }
 </style>

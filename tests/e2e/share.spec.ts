@@ -68,6 +68,144 @@ test('creates a ticket download without submission or browser storage', async ({
     .toEqual([0, 0]);
 });
 
+test('redraws the ticket preview and blocks a duplicate download while generating', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    let downloads = 0;
+    const createObjectUrl = URL.createObjectURL.bind(URL);
+    URL.createObjectURL = (object) => {
+      downloads += 1;
+      return createObjectUrl(object);
+    };
+    Object.defineProperty(window, '__ticketDownloads', {
+      get: () => downloads,
+    });
+    HTMLCanvasElement.prototype.toBlob = function (callback, type, quality) {
+      setTimeout(
+        () =>
+          HTMLCanvasElement.prototype.toDataURL.call(this, type, quality) &&
+          callback(new Blob(['ticket'], { type: 'image/jpeg' })),
+        50,
+      );
+    };
+  });
+  await page.goto('/share/ticket/');
+  const preview = page.locator('[data-ticket-builder] [data-preview]');
+  await expect(preview).toBeVisible();
+
+  const before = await preview.evaluate((canvas) =>
+    (canvas as HTMLCanvasElement).toDataURL(),
+  );
+  await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
+  await expect
+    .poll(() =>
+      preview.evaluate((canvas) => (canvas as HTMLCanvasElement).toDataURL()),
+    )
+    .not.toBe(before);
+
+  await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
+  await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
+  const button = page.getByRole('button', { name: 'D-day 티켓 저장' });
+  const download = page.waitForEvent('download');
+  await button.evaluate((element) => {
+    (element as HTMLButtonElement).click();
+    (element as HTMLButtonElement).click();
+  });
+  await expect(button).toBeDisabled();
+  await expect(page.locator('[data-status]')).toHaveText(
+    '이미지를 생성하고 있습니다…',
+  );
+  await download;
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as typeof window & { __ticketDownloads: number })
+            .__ticketDownloads,
+      ),
+    )
+    .toBe(1);
+});
+
+test('offers native file sharing only after a supported ticket generation', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: () => true,
+    });
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: () => Promise.resolve(),
+    });
+  });
+  await page.goto('/share/ticket/');
+  await expect(
+    page.getByRole('button', { name: '공유', exact: true }),
+  ).toHaveCount(0);
+  await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
+  await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
+  await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'D-day 티켓 저장' }).click();
+  await download;
+  await page.getByRole('button', { name: '공유', exact: true }).click();
+  await expect(page.locator('[data-status]')).toHaveText(
+    '티켓 이미지를 공유했습니다.',
+  );
+});
+
+test('keeps download and copy options after native share is cancelled', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: () => true,
+    });
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: () => Promise.reject(new DOMException('Cancelled', 'AbortError')),
+    });
+  });
+  await page.goto('/share/setlist/');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
+  await download;
+  await page.getByRole('button', { name: '공유', exact: true }).click();
+  await expect(page.getByRole('alert')).toBeHidden();
+  await expect(page.locator('[data-status]')).toContainText(
+    '공유를 취소했습니다',
+  );
+  await expect(
+    page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
+  ).toBeVisible();
+});
+
+test('does not add native sharing where file sharing is unsupported', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: () => {},
+    });
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: () => false,
+    });
+  });
+  await page.goto('/share/setlist/');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
+  await download;
+  await expect(
+    page.getByRole('button', { name: '공유', exact: true }),
+  ).toHaveCount(0);
+});
+
 test('creates the expected-setlist JPEG without personal input', async ({
   page,
 }, testInfo) => {
