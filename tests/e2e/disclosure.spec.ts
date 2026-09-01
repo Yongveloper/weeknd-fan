@@ -240,3 +240,81 @@ test('stays consistent under rapid repeated clicks', async ({ page }) => {
   const panel = glossary.locator('.disclosure__panel');
   await expect(panel).not.toHaveAttribute('style', /height/);
 });
+
+test('settles rapid open-close-open with focus and no running panel animation', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
+  const summary = glossary.locator('summary');
+  const panel = glossary.locator('.disclosure__panel');
+
+  await summary.focus();
+  await page.evaluate(() => {
+    const target = document.querySelector<HTMLElement>(
+      'details[aria-label="용어 한 장 더 깊이 보기"] summary',
+    );
+    if (!target) throw new Error('glossary summary not found');
+    for (let index = 0; index < 3; index += 1) {
+      target.click();
+    }
+  });
+
+  await expect(glossary).toHaveAttribute('data-state', 'open');
+  await expect(glossary).toHaveAttribute('open', '');
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement?.tagName))
+    .toBe('SUMMARY');
+  await expect(panel).not.toHaveAttribute('style', /height|overflow/);
+  await expect
+    .poll(() =>
+      panel.evaluate(
+        (element) =>
+          element
+            .getAnimations()
+            .filter((animation) => animation.playState === 'running').length,
+      ),
+    )
+    .toBe(0);
+});
+
+test('can switch between expected setlist rows without leaving a stale animation', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+  const rows = page.locator('.expected-setlist details');
+  const first = rows.nth(0);
+  const second = rows.nth(1);
+
+  await first.locator('summary').click();
+  await page.waitForTimeout(40);
+  await second.locator('summary').click();
+
+  await expect(first).toHaveAttribute('data-state', 'open');
+  await expect(second).toHaveAttribute('data-state', 'open');
+  await expect(first.locator('.disclosure__panel')).not.toHaveAttribute(
+    'style',
+    /height|overflow/,
+  );
+  await expect(second.locator('.disclosure__panel')).not.toHaveAttribute(
+    'style',
+    /height|overflow/,
+  );
+  await expect
+    .poll(async () =>
+      page
+        .locator('.expected-setlist .disclosure__panel')
+        .evaluateAll((panels) =>
+          panels.reduce(
+            (count, panel) =>
+              count +
+              panel
+                .getAnimations()
+                .filter((animation) => animation.playState === 'running')
+                .length,
+            0,
+          ),
+        ),
+    )
+    .toBe(0);
+});

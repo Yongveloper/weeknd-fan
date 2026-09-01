@@ -5,6 +5,7 @@ type RunningAnimation = {
   animation: Animation;
   panel: HTMLElement;
 };
+type PanelPadding = Pick<CSSStyleDeclaration, 'paddingTop' | 'paddingBottom'>;
 
 const running = new WeakMap<HTMLDetailsElement, RunningAnimation>();
 
@@ -81,6 +82,7 @@ function animatePanel(
   willOpen: boolean,
   fromOpacity: number,
   motion: 'scene' | 'fast',
+  fromPadding?: PanelPadding,
 ) {
   panel.style.overflow = 'hidden';
   panel.style.height = `${from}px`;
@@ -89,12 +91,13 @@ function animatePanel(
   const { paddingTop, paddingBottom } = getComputedStyle(panel);
   const openPad = { paddingTop, paddingBottom };
   const closedPad = { paddingTop: '0px', paddingBottom: '0px' };
+  const startPad = fromPadding ?? (willOpen ? closedPad : openPad);
   const animation = panel.animate(
     [
       {
         height: `${from}px`,
         opacity: willOpen ? fromOpacity : fromOpacity || 1,
-        ...(willOpen ? closedPad : openPad),
+        ...startPad,
       },
       {
         height: `${to}px`,
@@ -161,13 +164,29 @@ document.addEventListener('click', (event) => {
   // 닫힌 <details>의 내용은 Chromium에서 content-visibility: hidden 으로 감춰져
   // getBoundingClientRect 가 마지막 레이아웃 값을 돌려준다(0이 아님). 닫힌 상태는 0으로 고정.
   const currentHeight = details.open ? panel.getBoundingClientRect().height : 0;
-  const fromOpacity = Number(getComputedStyle(panel).opacity) || 0;
+  const panelStyle = getComputedStyle(panel);
+  const fromOpacity = Number(panelStyle.opacity) || 0;
+  const fromPadding = running.has(details)
+    ? {
+        paddingTop: panelStyle.paddingTop,
+        paddingBottom: panelStyle.paddingBottom,
+      }
+    : undefined;
   cancelAnimation(details);
 
   if (details.open && details.dataset.closing !== 'true') {
     details.dataset.closing = 'true';
     setLabel(details, false);
-    animatePanel(details, panel, currentHeight, 0, false, fromOpacity, mode);
+    animatePanel(
+      details,
+      panel,
+      currentHeight,
+      0,
+      false,
+      fromOpacity,
+      mode,
+      fromPadding,
+    );
     return;
   }
 
@@ -176,5 +195,14 @@ document.addEventListener('click', (event) => {
   setLabel(details, true);
   panel.style.height = 'auto';
   const target = panel.scrollHeight;
-  animatePanel(details, panel, currentHeight, target, true, fromOpacity, mode);
+  animatePanel(
+    details,
+    panel,
+    currentHeight,
+    target,
+    true,
+    fromOpacity,
+    mode,
+    fromPadding,
+  );
 });

@@ -426,6 +426,27 @@ test('plays each scene transition once and leaves nothing running afterwards', a
 test('keeps repeated setlist rows out of reveal observation', async ({
   page,
 }) => {
+  await page.addInitScript(() => {
+    const observedTargets: string[] = [];
+    const NativeIntersectionObserver = window.IntersectionObserver;
+    class TrackedIntersectionObserver extends NativeIntersectionObserver {
+      observe(target: Element) {
+        observedTargets.push(
+          target.hasAttribute('data-song-id')
+            ? `${target.tagName.toLowerCase()}[data-song-id]`
+            : target.tagName.toLowerCase(),
+        );
+        return super.observe(target);
+      }
+    }
+    Object.defineProperty(window, 'IntersectionObserver', {
+      configurable: true,
+      value: TrackedIntersectionObserver,
+    });
+    (
+      window as Window & { __motionObservedTargets?: string[] }
+    ).__motionObservedTargets = observedTargets;
+  });
   await page.goto('/setlist/');
   const rows = page.locator('.expected-setlist__list > li');
   await expect(rows).toHaveCount(38);
@@ -439,6 +460,16 @@ test('keeps repeated setlist rows out of reveal observation', async ({
         ).length,
     ),
   ).toBe(0);
+  expect(
+    await page.evaluate(
+      () =>
+        (
+          window as Window & { __motionObservedTargets?: string[] }
+        ).__motionObservedTargets?.filter((target) =>
+          target.endsWith('[data-song-id]'),
+        ) ?? [],
+    ),
+  ).toEqual([]);
 });
 
 test('reduced motion never marks the document motion-ready', async ({
