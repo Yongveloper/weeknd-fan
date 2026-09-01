@@ -486,7 +486,7 @@ test('exposes every primary route without horizontal scrolling on mobile', async
   ).toBeLessThanOrEqual(1);
 });
 
-test('collapses the header menu after resizing from desktop to mobile', async ({
+test('synchronizes the header menu when resizing across the mobile breakpoint', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop-chromium', 'desktop only');
@@ -498,6 +498,16 @@ test('collapses the header menu after resizing from desktop to mobile', async ({
 
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(menu).not.toHaveAttribute('open', '');
+
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await expect(menu).toHaveAttribute('open', '');
+  const links = page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByRole('link');
+  await expect(links).toHaveCount(5);
+  for (const link of await links.all()) {
+    await expect(link).toBeVisible();
+  }
 });
 
 test('places covers beside every album mention on home, discover, and setlist', async ({

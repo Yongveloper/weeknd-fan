@@ -176,20 +176,20 @@ const pathname = Astro.url.pathname;
     private readonly mobileQuery = window.matchMedia('(max-width: 44rem)');
     private details: HTMLDetailsElement | null = null;
 
-    private collapseOnMobile = () => {
-      if (this.mobileQuery.matches && this.details) this.details.open = false;
+    private synchronizeMenu = () => {
+      if (this.details) this.details.open = !this.mobileQuery.matches;
     };
 
     connectedCallback() {
       this.details = this.querySelector('details');
       if (!this.details) return;
-      this.mobileQuery.addEventListener('change', this.collapseOnMobile);
-      this.collapseOnMobile();
+      this.mobileQuery.addEventListener('change', this.synchronizeMenu);
+      this.synchronizeMenu();
       this.dataset.ready = 'true';
     }
 
     disconnectedCallback() {
-      this.mobileQuery.removeEventListener('change', this.collapseOnMobile);
+      this.mobileQuery.removeEventListener('change', this.synchronizeMenu);
     }
   }
 
