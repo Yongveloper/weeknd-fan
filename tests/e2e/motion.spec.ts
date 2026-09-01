@@ -219,3 +219,68 @@ test('pins the header across view transitions and dips through black', async ({
   expect(css).toMatch(/@keyframes vt-out/);
   expect(css).toMatch(/@keyframes vt-in/);
 });
+
+test('shows only the destination header snapshot during page transitions', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  type HeaderTransitionState = {
+    oldAnimationName: string;
+    oldOpacity: string;
+    newAnimationName: string;
+    newOpacity: string;
+  };
+  let reportState!: (state: HeaderTransitionState) => void;
+  const transitionState = new Promise<HeaderTransitionState>((resolve) => {
+    reportState = resolve;
+  });
+  await page.exposeFunction(
+    'reportHeaderTransitionState',
+    (state: HeaderTransitionState) => reportState(state),
+  );
+  await page.addInitScript(() => {
+    addEventListener(
+      'pagereveal',
+      () => {
+        if (location.pathname !== '/discover/') return;
+        requestAnimationFrame(() => {
+          const root = document.documentElement;
+          const oldHeader = getComputedStyle(
+            root,
+            '::view-transition-old(site-header)',
+          );
+          const newHeader = getComputedStyle(
+            root,
+            '::view-transition-new(site-header)',
+          );
+          void (
+            window as typeof window & {
+              reportHeaderTransitionState: (
+                state: HeaderTransitionState,
+              ) => Promise<void>;
+            }
+          ).reportHeaderTransitionState({
+            oldAnimationName: oldHeader.animationName,
+            oldOpacity: oldHeader.opacity,
+            newAnimationName: newHeader.animationName,
+            newOpacity: newHeader.opacity,
+          });
+        });
+      },
+      { once: true },
+    );
+  });
+  await page.goto('/');
+
+  await page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByRole('link', { name: 'The Weeknd' })
+    .click();
+
+  await expect(transitionState).resolves.toEqual({
+    oldAnimationName: 'none',
+    oldOpacity: '0',
+    newAnimationName: 'none',
+    newOpacity: '1',
+  });
+});

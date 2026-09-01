@@ -34,6 +34,16 @@
   animation: none;
 }
 
+::view-transition-old(site-header) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(site-header) {
+  animation: none;
+  opacity: 1;
+}
+
 @keyframes vt-out {
   to {
     opacity: 0;
