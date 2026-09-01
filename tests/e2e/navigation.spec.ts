@@ -67,8 +67,6 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
     mainNav.getByRole('link', { name: '고양 가이드' }),
   ).toHaveAttribute('href', '/goyang/');
 
-  // The footer repeats the site map so the fifth page is reachable on phones,
-  // where the header nav scrolls it out of view.
   const footerNav = page.getByRole('navigation', { name: '사이트 지도' });
   await expect(
     footerNav.getByRole('link', { name: '출처·업데이트' }),
@@ -486,6 +484,20 @@ test('exposes every primary route without horizontal scrolling on mobile', async
   expect(
     await nav.evaluate((element) => element.scrollWidth - element.clientWidth),
   ).toBeLessThanOrEqual(1);
+});
+
+test('collapses the header menu after resizing from desktop to mobile', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop-chromium', 'desktop only');
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await page.goto('/');
+
+  const menu = page.getByRole('group', { name: '주요 메뉴' });
+  await expect(menu).toHaveAttribute('open', '');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(menu).not.toHaveAttribute('open', '');
 });
 
 test('places covers beside every album mention on home, discover, and setlist', async ({

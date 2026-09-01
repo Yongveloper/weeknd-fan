@@ -173,11 +173,23 @@ const pathname = Astro.url.pathname;
 
 <script>
   class MobileNavigation extends HTMLElement {
+    private readonly mobileQuery = window.matchMedia('(max-width: 44rem)');
+    private details: HTMLDetailsElement | null = null;
+
+    private collapseOnMobile = () => {
+      if (this.mobileQuery.matches && this.details) this.details.open = false;
+    };
+
     connectedCallback() {
-      const details = this.querySelector('details');
-      if (!details) return;
-      if (window.matchMedia('(max-width: 44rem)').matches) details.open = false;
+      this.details = this.querySelector('details');
+      if (!this.details) return;
+      this.mobileQuery.addEventListener('change', this.collapseOnMobile);
+      this.collapseOnMobile();
       this.dataset.ready = 'true';
+    }
+
+    disconnectedCallback() {
+      this.mobileQuery.removeEventListener('change', this.collapseOnMobile);
     }
   }
 
