@@ -41,6 +41,61 @@ test('serves the Korean fan-guide shell', async ({ page }) => {
   );
 });
 
+test('keeps the Korean phrase 한 장씩 intact in the Discover heading on narrow screens', async ({
+  page,
+}) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/discover/');
+
+    const metrics = await page
+      .locator('.discover__hero h1')
+      .evaluate(async (heading) => {
+        await document.fonts.ready;
+        const phrase = '한 장씩';
+        const nodes: Array<{ node: Text; start: number; end: number }> = [];
+        const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+        let text = '';
+        let node = walker.nextNode() as Text | null;
+        while (node) {
+          nodes.push({
+            node,
+            start: text.length,
+            end: text.length + node.length,
+          });
+          text += node.data;
+          node = walker.nextNode() as Text | null;
+        }
+
+        const start = text.indexOf(phrase);
+        const end = start + phrase.length;
+        const startNode = nodes.find(
+          ({ start: nodeStart, end: nodeEnd }) =>
+            start >= nodeStart && start < nodeEnd,
+        );
+        const endNode = nodes.find(
+          ({ start: nodeStart, end: nodeEnd }) =>
+            end > nodeStart && end <= nodeEnd,
+        );
+        if (!startNode || !endNode)
+          throw new Error('Discover heading phrase missing');
+
+        const range = document.createRange();
+        range.setStart(startNode.node, start - startNode.start);
+        range.setEnd(endNode.node, end - endNode.start);
+        return {
+          phraseLines: new Set(
+            Array.from(range.getClientRects(), (rect) => Math.round(rect.top)),
+          ).size,
+          headingFits: heading.scrollWidth <= heading.clientWidth,
+        };
+      });
+
+    expect(metrics.phraseLines).toBe(1);
+    expect(metrics.headingFits).toBe(true);
+  }
+});
+
 test('reaches both private share tools through contextual product CTAs', async ({
   page,
 }) => {

@@ -14,7 +14,7 @@ const shortcuts = [
   aria-labelledby="guide-shortcuts-title"
 >
   <div class="shell-content guide-shortcuts__inner">
-    <div>
+    <div class="guide-shortcuts__heading">
       <p class="eyebrow">GOYANG, BEFORE THE LIGHTS</p>
       <h2 id="guide-shortcuts-title">고양 가이드</h2>
     </div>
@@ -39,7 +39,11 @@ const shortcuts = [
     display: grid;
     gap: clamp(2rem, 6vw, 5rem);
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    align-items: end;
+    align-items: start;
+  }
+
+  .guide-shortcuts__heading {
+    justify-self: end;
   }
 
   h2 {
@@ -127,6 +131,10 @@ const shortcuts = [
   @media (max-width: 42rem) {
     .guide-shortcuts__inner {
       grid-template-columns: 1fr;
+    }
+
+    .guide-shortcuts__heading {
+      justify-self: start;
     }
   }
 </style>

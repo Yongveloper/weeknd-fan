@@ -41,7 +41,10 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
   <article class="discover shell-content">
     <header class="discover__hero">
       <p class="eyebrow">ONE MINUTE BEFORE THE SHOW</p>
-      <h1><span class="latin">The Weeknd</span>를 한 장씩 넘겨 보기</h1>
+      <h1>
+        <span class="latin">The Weeknd</span>를
+        <span class="discover__hero-phrase">한 장씩</span> 넘겨 보기
+      </h1>
       <p>{intro.data.summary}</p>
       <StatusBadge status={intro.data.status} />
       <Disclosure
@@ -173,6 +176,10 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     max-width: 40rem;
     color: var(--mist);
     font-size: clamp(1.08rem, 2vw, 1.3rem);
+  }
+
+  .discover__hero-phrase {
+    white-space: nowrap;
   }
 
   .discover :global(.discover__disclosure) {
