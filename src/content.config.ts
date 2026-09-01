@@ -110,6 +110,7 @@ const setlist = defineCollection({
   loader: glob({ base: './src/data/setlist', pattern: '**/*.json' }),
   schema: common.extend({
     expectedOrder: z.number().int().positive(),
+    essentialOrder: z.number().int().positive().optional(),
     songTitle: z.string(),
     album: z.string(),
     liveNote: z.string(),

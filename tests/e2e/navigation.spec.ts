@@ -247,6 +247,55 @@ test('presents the setlist as a prediction with expandable song context', async 
   await expect(page.getByRole('heading', { name: '출처' })).toBeVisible();
 });
 
+test('filters expected songs progressively and restores pushed history state', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+
+  const explorer = page.locator('.expected-setlist');
+  const search = explorer.getByRole('searchbox', { name: '곡 검색' });
+  const album = explorer.getByLabel('앨범으로 고르기');
+
+  await search.fill('after');
+  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+  await expect(
+    explorer.locator('[data-setlist-list] > li:not([hidden])'),
+  ).toHaveCount(1);
+  await expect(page).toHaveURL(/q=after/);
+
+  await album.selectOption('After Hours');
+  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+  await expect(page).toHaveURL(/album=After\+Hours/);
+
+  await explorer.getByRole('button', { name: '초기화' }).click();
+  await expect(explorer.getByRole('status')).toHaveText('38곡 표시');
+  await expect(page).not.toHaveURL(/[?]/);
+
+  await page.goBack();
+  await expect(album).toHaveValue('After Hours');
+  await expect(search).toHaveValue('after');
+  await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
+});
+
+test('moves focus to the result count when filtering hides an open song', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+
+  const explorer = page.locator('.expected-setlist');
+  const firstSong = explorer.locator('summary').first();
+  await firstSong.focus();
+  await page.keyboard.press('Space');
+  await expect(explorer.locator('details').first()).toHaveAttribute('open', '');
+
+  await explorer.getByRole('searchbox', { name: '곡 검색' }).fill('after');
+  await expect(explorer.getByRole('status')).toBeFocused();
+  await expect(explorer.locator('details').first()).not.toHaveAttribute(
+    'open',
+    '',
+  );
+});
+
 test('keeps expected songs ordered and keyboard-operable without media controls', async ({
   page,
 }) => {

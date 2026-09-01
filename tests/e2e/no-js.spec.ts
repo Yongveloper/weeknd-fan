@@ -60,6 +60,7 @@ test('keeps the expected-setlist label and native details readable without JavaS
   await page.goto('/setlist/');
 
   await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(page.locator('.expected-setlist details')).toHaveCount(38);
   await expect(page.locator('.expected-setlist details').first()).toBeVisible();
 });
 

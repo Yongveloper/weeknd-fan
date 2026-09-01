@@ -21,6 +21,7 @@ type PublishedSetlistAuditRecord = {
   status: TrustStatus;
   observedInCount: number;
   expectedOrder?: number;
+  essentialOrder?: number;
 };
 
 type ArchiveAuditRecord = {
@@ -147,6 +148,24 @@ export function auditSetlistRecords(
   return issues;
 }
 
+export function auditEssentialOrders(
+  orders: Array<number | undefined>,
+): AuditIssue[] {
+  const populated = orders.filter(
+    (order): order is number => order !== undefined,
+  );
+  if (populated.length === 0) return [];
+  const valid =
+    populated.length === 10 &&
+    populated.every(
+      (order) => Number.isInteger(order) && order >= 1 && order <= 10,
+    ) &&
+    new Set(populated).size === 10;
+  return valid
+    ? []
+    : [{ id: 'setlist', code: 'setlist-essential-orders-invalid' }];
+}
+
 export function auditPublishedContent(
   input: PublishedContentAuditInput,
 ): AuditIssue[] {
@@ -238,6 +257,12 @@ export function auditPublishedContent(
   ) {
     issues.push({ id: 'setlist', code: 'setlist-expected-orders-invalid' });
   }
+
+  issues.push(
+    ...auditEssentialOrders(
+      input.setlist.records.map((record) => record.essentialOrder),
+    ),
+  );
 
   const archiveDateCounts = new Map<string, number>();
   for (const record of input.showRecords) {

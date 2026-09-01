@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import {
   auditAlbums,
   auditCoreContent,
+  auditEssentialOrders,
   auditPublishedContent,
   auditSetlistRecords,
   parseSeoulDate,
@@ -12,6 +13,14 @@ import {
 import { STATUS_LABELS } from '../../src/lib/content/contracts';
 
 describe('content trust contract', () => {
+  it('requires an all-or-nothing contiguous editorial essential order', () => {
+    expect(auditEssentialOrders([])).toEqual([]);
+    expect(auditEssentialOrders([1, 2, 2])).toEqual([
+      { id: 'setlist', code: 'setlist-essential-orders-invalid' },
+    ]);
+    expect(auditEssentialOrders([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])).toEqual([]);
+  });
+
   it('flags stale volatile practical guidance without treating it as official', () => {
     const issues = auditPublishedContent({
       now: new Date('2026-10-05T00:00:00+09:00'),
@@ -149,6 +158,53 @@ describe('content trust contract', () => {
     expect(formatSeoulDate(new Date('2026-08-29T00:00:00Z'))).toBe(
       '2026.08.29',
     );
+  });
+
+  it('audits raw setlist essential-order fixtures through the publication gate', () => {
+    const auditRawSetlist = (
+      records: Array<{ id: string; essentialOrder?: number }>,
+    ) =>
+      auditPublishedContent({
+        now: new Date('2026-09-01T00:00:00+09:00'),
+        entries: [],
+        concert: { primarySourceCount: 2, archivePublished: false },
+        setlist: {
+          status: 'expected',
+          records: records.map((record, index) => ({
+            ...record,
+            status: 'expected' as const,
+            observedInCount: 3,
+            expectedOrder: index + 1,
+          })),
+        },
+        showRecords: [],
+      });
+
+    expect(
+      auditRawSetlist(
+        Array.from({ length: 38 }, (_, index) => ({ id: `${index}` })),
+      ),
+    ).toEqual([]);
+    expect(auditRawSetlist([{ id: 'one', essentialOrder: 1 }])).toEqual([
+      { id: 'setlist', code: 'setlist-essential-orders-invalid' },
+    ]);
+    expect(
+      auditRawSetlist([
+        ...Array.from({ length: 9 }, (_, index) => ({
+          id: `${index}`,
+          essentialOrder: index + 1,
+        })),
+        { id: 'duplicate', essentialOrder: 9 },
+      ]),
+    ).toEqual([{ id: 'setlist', code: 'setlist-essential-orders-invalid' }]);
+    expect(
+      auditRawSetlist(
+        Array.from({ length: 10 }, (_, index) => ({
+          id: `${index}`,
+          essentialOrder: index + 1,
+        })),
+      ),
+    ).toEqual([]);
   });
 
   it('accepts both complete Goyang archive dates when publication is enabled', () => {
@@ -556,6 +612,7 @@ describe('content trust contract', () => {
                 sources: string[];
                 observedIn?: string[];
                 expectedOrder?: number;
+                essentialOrder?: number;
                 archivePublished?: boolean;
                 showDate?: string;
                 songs?: Array<{ order: number }>;
@@ -651,6 +708,7 @@ describe('content trust contract', () => {
             status: entry.data.status,
             observedInCount: entry.data.observedIn?.length ?? 0,
             expectedOrder: entry.data.expectedOrder,
+            essentialOrder: entry.data.essentialOrder,
           })),
         },
         showRecords: showRecords.map((record) => ({

@@ -29,6 +29,12 @@ const twoDigits = (value: number) => String(value).padStart(2, '0');
 const dayLabel = (showDate: string) =>
   showDate.endsWith('-07') ? '1일차 공연 후 확인' : '2일차 공연 후 확인';
 const editorial = getSetlistEditorialMetadata(entries);
+const albumsInSetlist = [
+  ...new Set(entries.map((entry) => entry.data.album)),
+].sort((left, right) => left.localeCompare(right));
+const hasEssentialSet =
+  entries.filter((entry) => entry.data.essentialOrder !== undefined).length ===
+  10;
 ---
 
 <div class="setlist-explorer">
@@ -84,10 +90,64 @@ const editorial = getSetlistEditorialMetadata(entries);
     <a class="expected-setlist__poster" href="/share/setlist/"
       >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
     >
-    <ol class="expected-setlist__list">
+    <form class="setlist-filter" data-setlist-filter hidden>
+      <label class="setlist-filter__search">
+        <span>곡 검색</span>
+        <input
+          type="search"
+          name="q"
+          data-setlist-query
+          placeholder="곡 제목으로 찾기"
+          autocomplete="off"
+        />
+      </label>
+      <label class="setlist-filter__album">
+        <span>앨범으로 고르기</span>
+        <select name="album" data-setlist-album>
+          <option value="">전체 앨범</option>
+          {
+            albumsInSetlist.map((album) => (
+              <option value={album}>{album}</option>
+            ))
+          }
+        </select>
+      </label>
+      <div class="setlist-filter__views" aria-label="목록 보기">
+        <button type="button" data-setlist-view="all" aria-pressed="true">
+          전체
+        </button>
+        {
+          hasEssentialSet && (
+            <button
+              type="button"
+              data-setlist-view="essential"
+              aria-pressed="false"
+            >
+              3분 핵심 10곡
+            </button>
+          )
+        }
+      </div>
+      <button type="button" data-setlist-reset>초기화</button>
+      <p
+        class="setlist-filter__count"
+        data-setlist-count
+        aria-live="polite"
+        role="status"
+        tabindex="-1"
+      >
+        {entries.length}곡 표시
+      </p>
+    </form>
+    <ol class="expected-setlist__list" data-setlist-list>
       {
         entries.map((entry) => (
-          <li>
+          <li
+            data-song-id={entry.id}
+            data-song-title={entry.data.songTitle.toLocaleLowerCase()}
+            data-song-album={entry.data.album}
+            data-essential-order={entry.data.essentialOrder ?? ''}
+          >
             <Disclosure class="expected-setlist__item">
               <span slot="summary" class="expected-setlist__song">
                 {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
@@ -158,6 +218,8 @@ const editorial = getSetlistEditorialMetadata(entries);
   </section>
 </div>
 
+<script src="../../scripts/setlist-filter.ts"></script>
+
 <style>
   .setlist-explorer {
     display: grid;
@@ -195,6 +257,68 @@ const editorial = getSetlistEditorialMetadata(entries);
 
   .expected-setlist__hint {
     margin: -1rem 0 1rem;
+    color: var(--amber);
+    font-size: 0.9rem;
+    font-weight: 800;
+  }
+
+  .setlist-filter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.7fr);
+    gap: 0.8rem;
+    align-items: end;
+    margin: 1.5rem 0;
+  }
+
+  .setlist-filter label {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--mist);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+
+  .setlist-filter input,
+  .setlist-filter select,
+  .setlist-filter button {
+    min-height: 44px;
+    border: 1px solid color-mix(in srgb, var(--mist) 45%, transparent);
+    border-radius: 0.25rem;
+    background: color-mix(in srgb, var(--ink) 85%, var(--ivory));
+    color: var(--ivory);
+    font: inherit;
+  }
+
+  .setlist-filter input,
+  .setlist-filter select {
+    padding-inline: 0.75rem;
+  }
+
+  .setlist-filter button {
+    padding-inline: 0.9rem;
+    cursor: pointer;
+    font-weight: 800;
+  }
+
+  .setlist-filter button[aria-pressed='true'] {
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+
+  .setlist-filter :is(input, select, button):focus-visible {
+    outline: 3px solid var(--amber);
+    outline-offset: 2px;
+  }
+
+  .setlist-filter__views {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .setlist-filter__count {
+    grid-column: 1 / -1;
+    margin: 0;
     color: var(--amber);
     font-size: 0.9rem;
     font-weight: 800;
@@ -242,6 +366,10 @@ const editorial = getSetlistEditorialMetadata(entries);
   }
 
   @media (max-width: 42rem) {
+    .setlist-filter {
+      grid-template-columns: 1fr;
+    }
+
     .expected-setlist__list :global(.expected-setlist__item > summary) {
       flex-wrap: wrap;
       row-gap: 0.1rem;
