@@ -248,6 +248,10 @@ test('keeps a deterministic current section across history events and boundaries
       ['official', 0],
       ['transport', 101],
       ['seating', 101],
+      ['tips', 102],
+      ['return', 102],
+      ['packing', 102],
+      ['pending', 102],
     ] as const) {
       Object.defineProperty(
         document.querySelector<HTMLElement>(`#${id} h2`)!,
