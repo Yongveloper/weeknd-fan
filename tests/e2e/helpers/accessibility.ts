@@ -5,6 +5,14 @@ export interface HorizontalRect {
   right: number;
 }
 
+interface ControlGeometry extends HorizontalRect {
+  width: number;
+  height: number;
+  tagName: string;
+  text: string;
+  clipRects: HorizontalRect[];
+}
+
 export function getHorizontalClipIntersection(
   rect: HorizontalRect,
   clipRects: HorizontalRect[],
@@ -20,8 +28,10 @@ export function getHorizontalClipIntersection(
     left: Math.max(rect.left, left),
     right: Math.min(rect.right, right),
   };
-  if (intersection.right <= intersection.left) return null;
-  return intersection;
+  if (intersection.right <= intersection.left) {
+    return clipRects.length > 0 ? null : rect;
+  }
+  return clipRects.length > 0 ? intersection : rect;
 }
 
 export async function tabUntilFocused(
@@ -63,11 +73,10 @@ export async function applyTextZoom(page: Page) {
 }
 
 export async function expectVisibleControlsInsideViewport(page: Page) {
-  const violations = await page
+  const { viewportWidth, controls } = await page
     .locator('a:visible, button:visible')
-    .evaluateAll((controls) => {
-      const viewportWidth = document.documentElement.clientWidth;
-      return controls.flatMap((control) => {
+    .evaluateAll((elements) => {
+      const controls: ControlGeometry[] = elements.map((control) => {
         const rect = control.getBoundingClientRect();
         const clipRects: Array<{ left: number; right: number }> = [];
         let ancestor = control.parentElement;
@@ -88,34 +97,35 @@ export async function expectVisibleControlsInsideViewport(page: Page) {
           }
           ancestor = ancestor.parentElement;
         }
-        let clipLeft = 0;
-        let clipRight = viewportWidth;
-        clipRects.forEach((clip) => {
-          clipLeft = Math.max(clipLeft, clip.left);
-          clipRight = Math.min(clipRight, clip.right);
-        });
-        // Evaluate the portion that can actually be seen through every clip;
-        // only a zero-width intersection is fully off-screen and ignorable.
-        const intersection = {
-          left:
-            clipRects.length > 0 ? Math.max(rect.left, clipLeft) : rect.left,
-          right:
-            clipRects.length > 0 ? Math.min(rect.right, clipRight) : rect.right,
+        return {
+          left: rect.left,
+          right: rect.right,
+          width: rect.width,
+          height: rect.height,
+          tagName: control.tagName,
+          text: control.textContent?.trim() ?? '',
+          clipRects,
         };
-        if (intersection.right <= intersection.left) {
-          return [];
-        }
-        if (rect.width <= 0 || rect.height <= 0) {
-          return [`${control.tagName} has an empty box`];
-        }
-        if (intersection.left < -1 || intersection.right > viewportWidth + 1) {
-          return [
-            `${control.tagName} ${control.textContent?.trim() ?? ''} is outside ${viewportWidth}px`,
-          ];
-        }
-        return [];
       });
+      return { viewportWidth: document.documentElement.clientWidth, controls };
     });
+  const violations = controls.flatMap((control) => {
+    const intersection = getHorizontalClipIntersection(
+      control,
+      control.clipRects,
+      viewportWidth,
+    );
+    if (!intersection) return [];
+    if (control.width <= 0 || control.height <= 0) {
+      return [`${control.tagName} has an empty box`];
+    }
+    if (intersection.left < -1 || intersection.right > viewportWidth + 1) {
+      return [
+        `${control.tagName} ${control.text} is outside ${viewportWidth}px`,
+      ];
+    }
+    return [];
+  });
   expect(violations).toEqual([]);
 }
 
