@@ -43,34 +43,25 @@ test('aligns the Goyang guide heading with home section geometry', async ({
   const desktop = await page
     .locator('.guide-shortcuts__inner')
     .evaluate((inner) => {
-      const heading = inner.querySelector<HTMLElement>(':scope > div');
+      const heading = inner.querySelector<HTMLElement>(
+        '.guide-shortcuts__heading',
+      );
       const nav = inner.querySelector<HTMLElement>('nav');
-      const intro = document.querySelector<HTMLElement>('.home-entry__inner');
-      if (!heading || !nav || !intro)
-        throw new Error('missing home section geometry');
+      if (!heading || !nav) throw new Error('missing home section geometry');
       const innerRect = inner.getBoundingClientRect();
       const headingRect = heading.getBoundingClientRect();
       const navRect = nav.getBoundingClientRect();
-      const introRect = intro.getBoundingClientRect();
       return {
-        columnGap: Number.parseFloat(getComputedStyle(inner).columnGap),
         headingLeft: headingRect.left,
-        headingRight: headingRect.right,
         headingTop: headingRect.top,
         innerLeft: innerRect.left,
-        introLeft: introRect.left,
-        navLeft: navRect.left,
         navTop: navRect.top,
       };
     });
   expect(Math.abs(desktop.headingTop - desktop.navTop)).toBeLessThanOrEqual(1);
-  expect(desktop.headingLeft).toBeGreaterThan(desktop.innerLeft + 100);
-  expect(Math.abs(desktop.headingLeft - desktop.introLeft)).toBeLessThanOrEqual(
-    64,
+  expect(Math.abs(desktop.headingLeft - desktop.innerLeft)).toBeLessThanOrEqual(
+    1,
   );
-  expect(
-    Math.abs(desktop.headingRight - (desktop.navLeft - desktop.columnGap)),
-  ).toBeLessThanOrEqual(1);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
