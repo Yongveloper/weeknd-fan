@@ -423,6 +423,24 @@ test('plays each scene transition once and leaves nothing running afterwards', a
   expect(running).toBe(0);
 });
 
+test('keeps repeated setlist rows out of reveal observation', async ({
+  page,
+}) => {
+  await page.goto('/setlist/');
+  const rows = page.locator('.expected-setlist__list > li');
+  await expect(rows).toHaveCount(38);
+  expect(
+    await rows.evaluateAll(
+      (elements) =>
+        elements.filter(
+          (element) =>
+            element.hasAttribute('data-enter') ||
+            element.hasAttribute('data-enter-group'),
+        ).length,
+    ),
+  ).toBe(0);
+});
+
 test('reduced motion never marks the document motion-ready', async ({
   page,
 }) => {

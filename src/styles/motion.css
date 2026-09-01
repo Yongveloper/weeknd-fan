@@ -2,6 +2,20 @@
   navigation: auto;
 }
 
+/* Disclosure panels choose a pace explicitly: short repeated rows stay quick,
+   while editorial reading panels keep the slower scene rhythm. */
+[data-disclosure][data-motion='scene'] {
+  --disclosure-motion: var(--motion-scene);
+}
+
+[data-disclosure][data-motion='fast'] {
+  --disclosure-motion: var(--motion-fast);
+}
+
+[data-disclosure][data-motion='none'] {
+  --disclosure-motion: 0ms;
+}
+
 /* 페이지 전환: 일식처럼 빛이 가려지고(검은 배경) 돌아온다. 헤더는 별도 그룹으로 고정. */
 ::view-transition-group(root) {
   background: var(--night);

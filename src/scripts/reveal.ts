@@ -22,7 +22,12 @@ if (!reduce) {
     scenes.forEach((scene) => sceneObserver.observe(scene));
   }
 
-  const groups = document.querySelectorAll<HTMLElement>('[data-enter-group]');
+  // Reveal work is attached to containers only. In particular, a repeated
+  // setlist row is marked with data-song-id and must never become its own
+  // observer/animation target.
+  const groups = document.querySelectorAll<HTMLElement>(
+    '[data-enter-group]:not([data-song-id])',
+  );
   for (const group of groups) {
     Array.from(group.children).forEach((child, index) => {
       (child as HTMLElement).style.setProperty('--enter-i', String(index));
@@ -32,7 +37,7 @@ if (!reduce) {
   // 로드 후 삽입된 노드는 관찰되지 않음(정적 사이트, ClientRouter 없음).
   // data-enter와 data-enter-group을 같은 요소에 함께 쓰지 않는다(불투명도 중복).
   const targets = document.querySelectorAll<HTMLElement>(
-    '[data-enter]:not([data-enter="in"]), [data-enter-group]:not([data-enter="in"])',
+    '[data-enter]:not([data-enter="in"]):not([data-song-id]), [data-enter-group]:not([data-enter="in"]):not([data-song-id])',
   );
   if (targets.length > 0) {
     const enterObserver = new IntersectionObserver(

@@ -106,6 +106,43 @@ test('keeps the song summary name clean and animates the setlist explorer', asyn
   await expect(first).toHaveAttribute('data-state', 'open');
 });
 
+test('uses scene motion for editorial panels and fast motion for setlist rows', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  await expect(intro(page)).toHaveAttribute('data-motion', 'scene');
+
+  await page.goto('/setlist/');
+  const first = page.locator('.expected-setlist details').first();
+  await expect(first).toHaveAttribute('data-motion', 'fast');
+  await first.locator('summary').click();
+  const duration = await first
+    .locator('.disclosure__panel')
+    .evaluate((el) => el.getAnimations()[0]?.effect?.getTiming().duration);
+  expect(duration).toBeLessThan(300);
+});
+
+test('interrupts a disclosure safely when reduced motion is enabled mid-animation', async ({
+  page,
+}) => {
+  await page.goto('/discover/');
+  const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
+  await glossary.locator('summary').click();
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+
+  await expect(glossary).toHaveAttribute('open', '');
+  await expect(glossary).not.toHaveAttribute('data-state', /.+/);
+  await expect(glossary.locator('.disclosure__panel')).not.toHaveAttribute(
+    'style',
+    /height|overflow/,
+  );
+  expect(
+    await glossary
+      .locator('.disclosure__panel')
+      .evaluate((panel) => panel.getAnimations().length),
+  ).toBe(0);
+});
+
 test('scopes adopter styles (max-width/min-width/color) to the parent, not Disclosure', async ({
   page,
 }, testInfo) => {

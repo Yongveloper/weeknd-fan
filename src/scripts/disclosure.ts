@@ -1,7 +1,12 @@
 export {};
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
-const running = new WeakMap<HTMLDetailsElement, Animation>();
+type RunningAnimation = {
+  animation: Animation;
+  panel: HTMLElement;
+};
+
+const running = new WeakMap<HTMLDetailsElement, RunningAnimation>();
 
 function readToken(name: string, fallback: string) {
   const value = getComputedStyle(document.documentElement)
@@ -26,17 +31,43 @@ function setLabel(details: HTMLDetailsElement, open: boolean) {
   if (next) label.textContent = next;
 }
 
+function clearPanel(panel: HTMLElement) {
+  panel.style.removeProperty('height');
+  panel.style.removeProperty('overflow');
+  if (panel.getAttribute('style') === '') panel.removeAttribute('style');
+}
+
+function cancelAnimation(details: HTMLDetailsElement) {
+  const current = running.get(details);
+  if (!current) return;
+  running.delete(details);
+  current.animation.cancel();
+}
+
+function settleWithoutMotion(details: HTMLDetailsElement) {
+  const current = running.get(details);
+  const panel =
+    current?.panel ??
+    details.querySelector<HTMLElement>(':scope > .disclosure__panel');
+  const willOpen = details.open && details.dataset.closing !== 'true';
+
+  cancelAnimation(details);
+  details.open = willOpen;
+  if (panel) clearPanel(panel);
+  delete details.dataset.closing;
+  delete details.dataset.state;
+}
+
 function finish(
   details: HTMLDetailsElement,
   panel: HTMLElement,
   willOpen: boolean,
   animation: Animation,
 ) {
-  if (running.get(details) !== animation) return;
+  const current = running.get(details);
+  if (!current || current.animation !== animation) return;
   running.delete(details);
-  panel.style.removeProperty('height');
-  panel.style.removeProperty('overflow');
-  if (panel.getAttribute('style') === '') panel.removeAttribute('style');
+  clearPanel(panel);
   if (!willOpen) details.open = false;
   delete details.dataset.closing;
   details.dataset.state = willOpen ? 'open' : 'closed';
@@ -49,6 +80,7 @@ function animatePanel(
   to: number,
   willOpen: boolean,
   fromOpacity: number,
+  motion: 'scene' | 'fast',
 ) {
   panel.style.overflow = 'hidden';
   panel.style.height = `${from}px`;
@@ -71,14 +103,19 @@ function animatePanel(
       },
     ],
     {
-      duration: readDuration('--motion-scene', 620),
+      duration: readDuration(
+        motion === 'fast' ? '--motion-fast' : '--motion-scene',
+        motion === 'fast' ? 180 : 620,
+      ),
       easing: readToken('--ease-cinematic', 'ease-out'),
     },
   );
-  running.set(details, animation);
+  running.set(details, { animation, panel });
   animation.onfinish = () => finish(details, panel, willOpen, animation);
   animation.oncancel = () => {
-    if (running.get(details) === animation) running.delete(details);
+    if (running.get(details)?.animation === animation) {
+      running.delete(details);
+    }
   };
 }
 
@@ -88,8 +125,22 @@ if (!reduceMotion.matches) {
     .forEach((details) => setLabel(details, true));
 }
 
+reduceMotion.addEventListener('change', () => {
+  if (reduceMotion.matches) {
+    // A media-query change can happen during a panel animation. Snap every
+    // disclosure to its intended state and remove WAAPI's inline footprint.
+    document
+      .querySelectorAll<HTMLDetailsElement>('details[data-disclosure]')
+      .forEach(settleWithoutMotion);
+    return;
+  }
+
+  document
+    .querySelectorAll<HTMLDetailsElement>('details[data-disclosure][open]')
+    .forEach((details) => setLabel(details, true));
+});
+
 document.addEventListener('click', (event) => {
-  if (reduceMotion.matches) return;
   const summary = (event.target as Element | null)?.closest('summary');
   const details = summary?.parentElement;
   if (
@@ -102,17 +153,21 @@ document.addEventListener('click', (event) => {
   );
   if (!panel) return;
 
+  const motion = details.dataset.motion;
+  if (reduceMotion.matches || motion === 'none') return;
+  const mode = motion === 'fast' ? 'fast' : 'scene';
+
   event.preventDefault();
   // 닫힌 <details>의 내용은 Chromium에서 content-visibility: hidden 으로 감춰져
   // getBoundingClientRect 가 마지막 레이아웃 값을 돌려준다(0이 아님). 닫힌 상태는 0으로 고정.
   const currentHeight = details.open ? panel.getBoundingClientRect().height : 0;
   const fromOpacity = Number(getComputedStyle(panel).opacity) || 0;
-  running.get(details)?.cancel();
+  cancelAnimation(details);
 
   if (details.open && details.dataset.closing !== 'true') {
     details.dataset.closing = 'true';
     setLabel(details, false);
-    animatePanel(details, panel, currentHeight, 0, false, fromOpacity);
+    animatePanel(details, panel, currentHeight, 0, false, fromOpacity, mode);
     return;
   }
 
@@ -121,5 +176,5 @@ document.addEventListener('click', (event) => {
   setLabel(details, true);
   panel.style.height = 'auto';
   const target = panel.scrollHeight;
-  animatePanel(details, panel, currentHeight, target, true, fromOpacity);
+  animatePanel(details, panel, currentHeight, target, true, fromOpacity, mode);
 });

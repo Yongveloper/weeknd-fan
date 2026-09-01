@@ -1,5 +1,6 @@
 ---
 interface Props {
+  motion?: DisclosureMotion;
   label?: string;
   openLabel?: string;
   ariaLabel?: string;
@@ -8,7 +9,10 @@ interface Props {
   class?: string;
 }
 
+type DisclosureMotion = 'scene' | 'fast' | 'none';
+
 const {
+  motion = 'scene',
   label,
   openLabel = '접기',
   ariaLabel,
@@ -22,6 +26,7 @@ const hasSummarySlot = Astro.slots.has('summary');
 <details
   class:list={['disclosure', className]}
   data-disclosure
+  data-motion={motion}
   id={id}
   open={open || undefined}
   aria-label={ariaLabel}
@@ -85,7 +90,8 @@ const hasSummarySlot = Astro.slots.has('summary');
     flex: 0 0 auto;
     margin-inline-start: auto;
     color: var(--amber);
-    transition: transform var(--motion-fast) var(--ease-cinematic);
+    transition: transform var(--disclosure-motion, var(--motion-fast))
+      var(--ease-cinematic);
   }
   .disclosure[open]:not([data-closing]) > summary .disclosure__chevron {
     transform: rotate(180deg);
