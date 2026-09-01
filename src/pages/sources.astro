@@ -2,8 +2,18 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { formatSeoulDate } from '../lib/content/audit';
+import { getSourceUsageIndex } from '../lib/content/queries';
 
-const sources = await getCollection('sources');
+const [sources, sourceUsage] = await Promise.all([
+  getCollection('sources'),
+  getSourceUsageIndex(),
+]);
+const routeLabels = {
+  '/': '홈',
+  '/discover/': 'The Weeknd',
+  '/setlist/': '예상 셋리스트',
+  '/goyang/': '고양 가이드',
+} as const;
 const supportingSources = sources.filter(
   (source) => source.data.kind === 'editorial-reference',
 );
@@ -95,6 +105,18 @@ const checkpoints = [
                         마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
                       </span>
                     )}
+                    {sourceUsage.get(source.id) && (
+                      <div class="source-usage">
+                        <span class="source-usage__label">사용 위치</span>
+                        <ul aria-label={`${source.data.name} 사용 위치`}>
+                          {sourceUsage.get(source.id)?.routes.map((route) => (
+                            <li>
+                              <a href={route}>{routeLabels[route]}</a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -128,6 +150,18 @@ const checkpoints = [
                   <span>
                     마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
                   </span>
+                )}
+                {sourceUsage.get(source.id) && (
+                  <div class="source-usage">
+                    <span class="source-usage__label">사용 위치</span>
+                    <ul aria-label={`${source.data.name} 사용 위치`}>
+                      {sourceUsage.get(source.id)?.routes.map((route) => (
+                        <li>
+                          <a href={route}>{routeLabels[route]}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 )}
               </li>
             ))
@@ -235,6 +269,30 @@ const checkpoints = [
     font-size: 0.86rem;
   }
   .source-group__checked {
+    font-weight: 700;
+  }
+
+  .source-usage {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+    align-items: baseline;
+    color: var(--ink-muted);
+    font-size: 0.86rem;
+  }
+
+  .source-usage__label {
+    font-weight: 700;
+  }
+
+  .source-usage ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.8rem;
+  }
+
+  .source-usage a {
+    color: var(--amber);
     font-weight: 700;
   }
 

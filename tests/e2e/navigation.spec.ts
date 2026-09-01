@@ -143,6 +143,35 @@ test('groups sources and planned update checkpoints without overstating NamuWiki
   await expect(
     page.getByText('고양 2일차 아카이브 · 10월 8일 공연 후'),
   ).toBeVisible();
+
+  const concertSourceUsage = page
+    .locator('li')
+    .filter({ hasText: 'Live Nation Korea 고양 공연' })
+    .locator('.source-usage');
+  await expect(concertSourceUsage.getByText('사용 위치')).toBeVisible();
+  await expect(concertSourceUsage.getByRole('link')).toHaveText([
+    '홈',
+    '고양 가이드',
+  ]);
+  await expect(concertSourceUsage.getByRole('link').nth(0)).toHaveAttribute(
+    'href',
+    '/',
+  );
+
+  const observedSetlistUsage = page
+    .locator('li')
+    .filter({ hasText: 'setlist.fm — Manchester, 2026-06-12' })
+    .locator('.source-usage');
+  await expect(observedSetlistUsage.getByRole('link')).toHaveText([
+    '홈',
+    '예상 셋리스트',
+  ]);
+  await expect(
+    page
+      .locator('li')
+      .filter({ hasText: 'Spotify — After Hours 앨범' })
+      .locator('.source-usage'),
+  ).toHaveCount(0);
 });
 
 test('keeps navigation targets touch-sized in every viewport', async ({

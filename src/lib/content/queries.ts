@@ -1,5 +1,6 @@
 import { getCollection, type ReferenceDataEntry } from 'astro:content';
 import type { SourceRecord } from './contracts';
+import { buildSourceUsageIndex } from './sourceUsage';
 
 type EditorialSetlistEntry = {
   data: { lastVerifiedAt: Date; observedIn: Array<{ id: string }> };
@@ -79,6 +80,23 @@ export async function getGuideContent() {
   return (await getCollection('guides')).sort(
     (a, b) => a.data.order - b.data.order,
   );
+}
+
+export async function getSourceUsageIndex() {
+  const [concert, discover, guides, setlist, showRecords] = await Promise.all([
+    getCollection('concert'),
+    getCollection('discover'),
+    getCollection('guides'),
+    getCollection('setlist'),
+    getCollection('showRecords'),
+  ]);
+  return buildSourceUsageIndex({
+    concert,
+    discover,
+    guides,
+    setlist,
+    showRecords,
+  });
 }
 
 export async function getAlbums() {

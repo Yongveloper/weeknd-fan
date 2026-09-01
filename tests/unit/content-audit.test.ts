@@ -119,6 +119,41 @@ describe('content trust contract', () => {
     expect(issues).toEqual([]);
   });
 
+  it('reports unknown source references with the content id, field, and source id', () => {
+    const issues = auditPublishedContent({
+      now: new Date('2026-08-29T12:00:00+09:00'),
+      knownSourceIds: ['known-source'],
+      entries: [
+        {
+          id: 'guides/transport',
+          status: 'practical',
+          lastVerifiedAt: new Date('2026-08-29T00:00:00+09:00'),
+          sourceCount: 2,
+          sourceReferences: [
+            { field: 'sources', sourceIds: ['known-source', 'missing-source'] },
+            { field: 'observedIn', sourceIds: ['missing-observation'] },
+          ],
+        },
+      ],
+      concert: { primarySourceCount: 2, archivePublished: false },
+      setlist: { status: 'expected', records: [] },
+      showRecords: [],
+    });
+
+    expect(issues).toContainEqual({
+      id: 'guides/transport',
+      code: 'source-reference-missing',
+      field: 'sources',
+      sourceId: 'missing-source',
+    });
+    expect(issues).toContainEqual({
+      id: 'guides/transport',
+      code: 'source-reference-missing',
+      field: 'observedIn',
+      sourceId: 'missing-observation',
+    });
+  });
+
   it('keeps a practical guide fresh through exactly seven Seoul calendar days', () => {
     const transport = {
       id: 'transport',
@@ -673,26 +708,38 @@ describe('content trust contract', () => {
       return auditPublishedContent({
         now,
         entries: [...concerts, ...setlist, ...discover, ...guides].map(
-          (entry) => ({
-            id: entry.id,
-            status: entry.data.status as Parameters<
-              typeof auditPublishedContent
-            >[0]['entries'][number]['status'],
-            lastVerifiedAt: parseSeoulDate(entry.data.lastVerifiedAt),
-            sourceCount: entry.data.sources.length,
-            volatile:
-              entry.id.startsWith('guides/') &&
-              entry.data.status === 'practical',
-            sources: entry.data.sources.map((source) => {
-              const metadata = sourceKinds.get(source);
-              if (!metadata)
-                throw new Error(`Missing source audit record: ${source}`);
-              return {
-                id: source,
-                lastCheckedAt: parseSeoulDate(metadata.lastCheckedAt),
-              };
-            }),
-          }),
+          (entry) => {
+            const observedIn = (entry.data as { observedIn?: string[] })
+              .observedIn;
+            return {
+              id: entry.id,
+              status: entry.data.status as Parameters<
+                typeof auditPublishedContent
+              >[0]['entries'][number]['status'],
+              lastVerifiedAt: parseSeoulDate(entry.data.lastVerifiedAt),
+              sourceCount: entry.data.sources.length,
+              volatile:
+                entry.id.startsWith('guides/') &&
+                entry.data.status === 'practical',
+              sources: entry.data.sources.flatMap((source) => {
+                const metadata = sourceKinds.get(source);
+                return metadata
+                  ? [
+                      {
+                        id: source,
+                        lastCheckedAt: parseSeoulDate(metadata.lastCheckedAt),
+                      },
+                    ]
+                  : [];
+              }),
+              sourceReferences: [
+                { field: 'sources', sourceIds: entry.data.sources },
+                ...(observedIn
+                  ? [{ field: 'observedIn', sourceIds: observedIn }]
+                  : []),
+              ],
+            };
+          },
         ),
         concert: {
           primarySourceCount: concert.data.sources.filter(
@@ -717,7 +764,11 @@ describe('content trust contract', () => {
           songCount: record.data.songs?.length ?? 0,
           songOrders: record.data.songs?.map((song) => song.order) ?? [],
           sourceCount: record.data.sources.length,
+          sourceReferences: [
+            { field: 'sources', sourceIds: record.data.sources },
+          ],
         })),
+        knownSourceIds: [...sourceKinds.keys()],
       });
     };
 

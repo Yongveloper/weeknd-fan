@@ -1,4 +1,9 @@
-import type { AuditIssue, ContentAuditInput, TrustStatus } from './contracts';
+import type {
+  AuditIssue,
+  ContentAuditInput,
+  SourceReferenceAudit,
+  TrustStatus,
+} from './contracts';
 
 type SetlistAuditRecord = {
   id: string;
@@ -14,6 +19,8 @@ type PublishedEntryAuditRecord = {
   sourceCount: number;
   volatile?: boolean;
   sources?: Array<{ id: string; lastCheckedAt: Date }>;
+  observedIn?: Array<{ id: string }>;
+  sourceReferences?: SourceReferenceAudit[];
 };
 
 type PublishedSetlistAuditRecord = {
@@ -30,10 +37,12 @@ type ArchiveAuditRecord = {
   songCount: number;
   songOrders: number[];
   sourceCount: number;
+  sourceReferences?: SourceReferenceAudit[];
 };
 
 export type PublishedContentAuditInput = {
   now: Date;
+  knownSourceIds?: readonly string[] | ReadonlySet<string>;
   entries: PublishedEntryAuditRecord[];
   concert: { primarySourceCount: number; archivePublished: boolean };
   setlist: {
@@ -43,6 +52,31 @@ export type PublishedContentAuditInput = {
   };
   showRecords: ArchiveAuditRecord[];
 };
+
+function auditSourceReferences(
+  id: string,
+  references: SourceReferenceAudit[] | undefined,
+  knownSourceIds: Set<string> | undefined,
+): AuditIssue[] {
+  if (!references || !knownSourceIds) return [];
+
+  const issues: AuditIssue[] = [];
+  const seen = new Set<string>();
+  for (const { field, sourceIds } of references) {
+    for (const sourceId of sourceIds) {
+      const key = `${field}\u0000${sourceId}`;
+      if (seen.has(key) || knownSourceIds.has(sourceId)) continue;
+      seen.add(key);
+      issues.push({
+        id,
+        code: 'source-reference-missing',
+        field,
+        sourceId,
+      });
+    }
+  }
+  return issues;
+}
 
 export function parseSeoulDate(date: string): Date {
   const dateOnly = date.match(/^(\d{4})-(\d{2})-(\d{2})$/);
@@ -171,8 +205,24 @@ export function auditPublishedContent(
 ): AuditIssue[] {
   const issues: AuditIssue[] = [];
   const staleAfterMilliseconds = 7 * 24 * 60 * 60 * 1000;
+  const knownSourceIds = input.knownSourceIds
+    ? new Set(input.knownSourceIds)
+    : undefined;
 
   for (const entry of input.entries) {
+    const sourceReferences = entry.sourceReferences ?? [
+      {
+        field: 'sources',
+        sourceIds: entry.sources?.map((source) => source.id) ?? [],
+      },
+      {
+        field: 'observedIn',
+        sourceIds: entry.observedIn?.map((source) => source.id) ?? [],
+      },
+    ];
+    issues.push(
+      ...auditSourceReferences(entry.id, sourceReferences, knownSourceIds),
+    );
     const hasValidContentDate = !Number.isNaN(entry.lastVerifiedAt.getTime());
     if (!hasValidContentDate) {
       issues.push({ id: entry.id, code: 'content-date-invalid' });
@@ -225,6 +275,16 @@ export function auditPublishedContent(
         });
       }
     }
+  }
+
+  for (const record of input.showRecords) {
+    issues.push(
+      ...auditSourceReferences(
+        `archive:${record.showDate}`,
+        record.sourceReferences,
+        knownSourceIds,
+      ),
+    );
   }
 
   if (input.concert.primarySourceCount < 2) {

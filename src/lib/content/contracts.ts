@@ -32,4 +32,14 @@ export type ContentAuditInput = {
   setlistStatus: TrustStatus;
 };
 
-export type AuditIssue = { id: string; code: string };
+export type AuditIssue = {
+  id: string;
+  code: string;
+  field?: string;
+  sourceId?: string;
+};
+
+export type SourceReferenceAudit = {
+  field: string;
+  sourceIds: readonly string[];
+};
