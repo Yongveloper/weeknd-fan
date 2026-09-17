@@ -430,10 +430,10 @@ test('uses replace for typing and push for filters across browser history', asyn
     await expect(page).toHaveURL(url);
     await expect(search).toHaveValue(query);
     await expect(album).toHaveValue(albumValue);
-    await expect(explorer.locator('[data-setlist-view="all"]')).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
+    const allView = explorer.locator('[data-setlist-view="all"]');
+    if (await allView.count()) {
+      await expect(allView).toHaveAttribute('aria-pressed', 'true');
+    }
     await expect(explorer.getByRole('status')).toHaveText(
       `${rowIds.length}곡 표시`,
     );
@@ -533,8 +533,8 @@ test('reaches every setlist filter control and clear action by keyboard', async 
   const reset = explorer.getByRole('button', { name: '초기화' });
 
   const hasEssential = (await essential.count()) > 0;
-  const controls = [search, album, all, reset];
-  if (hasEssential) controls.splice(3, 0, essential);
+  const controls = [search, album, reset];
+  if (hasEssential) controls.splice(2, 0, all, essential);
   for (const control of controls) {
     await tabUntilFocused(page, control);
     await expect(control).toBeFocused();
@@ -545,7 +545,7 @@ test('reaches every setlist filter control and clear action by keyboard', async 
   await expect(explorer.getByRole('status')).toHaveText('1곡 표시');
   await tabUntilFocused(page, reset);
   await page.keyboard.press('Shift+Tab');
-  await expect(hasEssential ? essential : all).toBeFocused();
+  await expect(hasEssential ? essential : album).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(reset).toBeFocused();
   await page.keyboard.press('Enter');
@@ -789,7 +789,8 @@ test('shows checked primary sources when discover disclosures open', async ({
 }) => {
   await page.goto('/discover/');
 
-  const intro = page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
+  const intro = page.getByRole('group', { name: '3분 입문 더 깊이 보기' });
+  await intro.locator('summary').click();
   await expect(intro).toHaveAttribute('open', '');
   await expect(
     intro.getByRole('link', {

@@ -49,6 +49,38 @@ async function expectJpegCard(
   throw new Error('JPEG start-of-frame marker was not found');
 }
 
+test('expands the compact ticket preview without losing song selections', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/share/ticket/');
+  const preview = page.locator('[data-ticket-builder] [data-preview]');
+  const toggle = page.getByRole('button', { name: '미리보기 크게 보기' });
+  await expect(toggle).toBeVisible();
+  const compact = await preview.boundingBox();
+  if (!compact) throw new Error('Ticket preview was not rendered');
+
+  const song = page.getByLabel('첫 번째 곡');
+  await song.selectOption({ index: 1 });
+  const selected = await song.inputValue();
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  const collapse = page.getByRole('button', { name: '미리보기 작게 보기' });
+  await expect(collapse).toHaveAttribute('aria-expanded', 'true');
+  await expect(collapse).toBeFocused();
+  const expanded = await preview.boundingBox();
+  expect(expanded?.width).toBeGreaterThan(compact.width * 1.5);
+  await expect(song).toHaveValue(selected);
+
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toBeFocused();
+  const restored = await preview.boundingBox();
+  expect(restored?.width).toBeCloseTo(compact.width, 0);
+  await expect(song).toHaveValue(selected);
+  await expectNoHorizontalDocumentOverflow(page);
+});
+
 test('creates a ticket download without submission or browser storage', async ({
   page,
 }, testInfo) => {

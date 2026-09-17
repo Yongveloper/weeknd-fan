@@ -1,15 +1,22 @@
 import { expect, test } from '@playwright/test';
 
 const intro = (page: import('@playwright/test').Page) =>
-  page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
+  page.getByRole('group', { name: '3분 입문 더 깊이 보기' });
 
 test('renders a chevron anchor and swaps the label when toggled', async ({
   page,
 }) => {
   await page.goto('/discover/');
   const details = intro(page);
-  await expect(details).toHaveAttribute('open', '');
+  await expect(details).not.toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__chevron')).toHaveCount(1);
+  await expect(details.locator('summary .disclosure__label')).toHaveText(
+    '3분 입문 펼쳐보기',
+  );
+
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('data-state', 'open');
+  await expect(details).toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__label')).toHaveText(
     '접기',
   );
@@ -18,14 +25,7 @@ test('renders a chevron anchor and swaps the label when toggled', async ({
   await expect(details).toHaveAttribute('data-state', 'closed');
   await expect(details).not.toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__label')).toHaveText(
-    '1분 입문 펼쳐보기',
-  );
-
-  await details.locator('summary').click();
-  await expect(details).toHaveAttribute('data-state', 'open');
-  await expect(details).toHaveAttribute('open', '');
-  await expect(details.locator('summary .disclosure__label')).toHaveText(
-    '접기',
+    '3분 입문 펼쳐보기',
   );
 });
 
@@ -50,7 +50,7 @@ test('toggles instantly and natively under reduced motion', async ({
   await page.goto('/discover/');
   const introDetails = intro(page);
   await expect(introDetails.locator('summary .disclosure__label')).toHaveText(
-    '접기',
+    '3분 입문 펼쳐보기',
   );
 
   const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });

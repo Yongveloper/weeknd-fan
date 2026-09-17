@@ -106,10 +106,6 @@ const overviewItems = jump.map(({ id, label }) => {
     min-width: 0;
   }
 
-  .guide-page :global(.guide-overview) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .guide-page :global(.guide-body) {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
@@ -150,7 +146,7 @@ const overviewItems = jump.map(({ id, label }) => {
      without scrolling back to the top. Sections offset their anchors to clear it. */
   .guide-body {
     display: grid;
-    gap: clamp(4rem, 11vw, 9rem);
+    gap: clamp(3rem, 6vw, 5rem);
   }
   :global(.guide-jump) {
     position: sticky;

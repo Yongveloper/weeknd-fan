@@ -36,20 +36,19 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
 <BaseLayout
   cloudSky
   title="The Weeknd 알기 | The Weeknd 고양 팬 가이드"
-  description="공연 전 1분에 훑는 The Weeknd의 커리어, 앨범 구분, 그리고 두 3부작"
+  description="공연 전 3분에 훑는 The Weeknd의 커리어, 앨범 구분, 그리고 두 3부작"
 >
   <article class="discover shell-content">
     <header class="discover__hero">
-      <p class="eyebrow">ONE MINUTE BEFORE THE SHOW</p>
+      <p class="eyebrow">THREE MINUTES BEFORE THE SHOW</p>
       <h1>
         <span class="latin">The Weeknd</span>를
         <span class="discover__hero-phrase">한 장씩</span> 넘겨 보기
       </h1>
       <p>{intro.data.summary}</p>
       <Disclosure
-        ariaLabel="1분 입문 더 깊이 보기"
-        label="1분 입문 펼쳐보기"
-        open
+        ariaLabel="3분 입문 더 깊이 보기"
+        label="3분 입문 펼쳐보기"
         class="discover__disclosure"
       >
         <IntroContent />
@@ -58,7 +57,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     </header>
 
     <section class="discover__albums" aria-labelledby="studio-albums-title">
-      <p class="eyebrow">DISCOGRAPHY, LIGHTLY</p>
       <h2 id="studio-albums-title">정규 앨범 6장</h2>
       <ol aria-label="정규 앨범 6장" data-enter-group>
         {
@@ -82,14 +80,12 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     <TrilogyExplainer albums={albums} />
 
     <section class="discover__timeline" aria-labelledby="timeline-title">
-      <p class="eyebrow">CAREER, AT A GLANCE</p>
       <h2 id="timeline-title">연표는 가볍게, 필요하면 더 깊게</h2>
       <CareerTimeline entries={eras} sources={sources} albums={albums} />
     </section>
 
     <section class="discover__closing" aria-labelledby="glossary-title">
       <div>
-        <p class="eyebrow">GLOSSARY</p>
         <h2 id="glossary-title">{glossary.data.title}</h2>
         <p>{glossary.data.summary}</p>
         <Disclosure
@@ -102,7 +98,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         </Disclosure>
       </div>
       <div>
-        <p class="eyebrow">VISUAL LANGUAGE</p>
         <h2>{visual.data.title}</h2>
         <p>{visual.data.summary}</p>
         <Disclosure
@@ -165,7 +160,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
-    padding-block: 2rem var(--section-space);
+    padding-block: 0 var(--section-space);
     border-top: 0;
   }
 

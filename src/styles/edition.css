@@ -284,18 +284,25 @@ body[data-edition]:not([data-lunar-sky]) main {
   border-top: 0;
 }
 body[data-edition] :is(.setlist-page, .guide-page, .sources-page, .discover) {
-  padding-top: clamp(3.5rem, 7vw, 7rem);
+  --section-space: clamp(3rem, 5.25vw, 5.25rem);
+  padding-top: clamp(2.75rem, 5.25vw, 5.25rem);
 }
 body[data-edition] :is(.setlist-page, .guide-page, .sources-page) > header {
-  padding-bottom: 2.5rem;
+  padding-bottom: 1.875rem;
   border-bottom: 1px solid rgb(218 177 122 / 25%);
   max-width: none;
 }
 body[data-edition]:not([data-lunar-sky]) h1 {
-  font-size: clamp(2.8rem, 6vw, 6rem);
+  font-size: clamp(2.25rem, 4.5vw, 4.5rem);
   font-weight: 750;
   line-height: 1.13;
   letter-spacing: -0.055em;
+}
+body[data-edition]
+  :is(.discover, .guide-page, .setlist-page, .sources-page)
+  h2:not(.guide-section__body h2) {
+  font-size: clamp(1.8rem, 3.2vw, 2.75rem);
+  line-height: 1.2;
 }
 body[data-edition]:not([data-lunar-sky]) header > p {
   max-width: 42rem;
@@ -315,6 +322,7 @@ body[data-edition] :is(input, select, textarea) {
   background-color: #141411;
   color: var(--ivory);
   border-color: #67645a;
+  accent-color: var(--amber);
 }
 body[data-edition] :is(.status-badge, button) {
   border-radius: 2px;
@@ -516,6 +524,6 @@ body[data-edition]
     overflow-wrap: anywhere;
   }
   body[data-edition] .guide-overview {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
   }
 }

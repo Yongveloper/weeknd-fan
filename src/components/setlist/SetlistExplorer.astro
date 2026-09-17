@@ -92,12 +92,12 @@ const hasEssentialSet =
           }
         </select>
       </label>
-      <div class="setlist-filter__views" aria-label="목록 보기">
-        <button type="button" data-setlist-view="all" aria-pressed="true">
-          전체
-        </button>
-        {
-          hasEssentialSet && (
+      {
+        hasEssentialSet && (
+          <div class="setlist-filter__views" aria-label="목록 보기">
+            <button type="button" data-setlist-view="all" aria-pressed="true">
+              전체
+            </button>
             <button
               type="button"
               data-setlist-view="essential"
@@ -105,19 +105,21 @@ const hasEssentialSet =
             >
               3분 핵심 10곡
             </button>
-          )
-        }
+          </div>
+        )
+      }
+      <div class="setlist-filter__footer">
+        <p
+          class="setlist-filter__count"
+          data-setlist-count
+          aria-live="polite"
+          role="status"
+          tabindex="-1"
+        >
+          {entries.length}곡 표시
+        </p>
+        <button type="button" data-setlist-reset>초기화</button>
       </div>
-      <button type="button" data-setlist-reset>초기화</button>
-      <p
-        class="setlist-filter__count"
-        data-setlist-count
-        aria-live="polite"
-        role="status"
-        tabindex="-1"
-      >
-        {entries.length}곡 표시
-      </p>
     </form>
     <ol class="expected-setlist__list" data-setlist-list>
       {
@@ -230,7 +232,7 @@ const hasEssentialSet =
     grid-template-columns: minmax(0, 1fr) minmax(10rem, 0.7fr);
     gap: 0.8rem;
     align-items: end;
-    margin: 1.5rem 0;
+    margin: 0 0 1rem;
     min-width: 0;
   }
 
@@ -262,7 +264,7 @@ const hasEssentialSet =
     min-height: 44px;
     border: 1px solid color-mix(in srgb, var(--mist) 45%, transparent);
     border-radius: 0.25rem;
-    background: color-mix(in srgb, var(--ink) 85%, var(--ivory));
+    background: rgb(12 12 10 / 35%);
     color: var(--ivory);
     font: inherit;
   }
@@ -289,9 +291,32 @@ const hasEssentialSet =
   }
 
   .setlist-filter__views {
+    grid-column: 1 / -1;
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
+  }
+
+  .setlist-filter__footer {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+  }
+
+  .setlist-filter__footer button {
+    border-color: transparent;
+    background: transparent;
+    color: var(--mist);
+    font-size: 0.85rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .setlist-filter__footer button:hover {
+    color: var(--amber);
   }
 
   .setlist-filter__count {
@@ -473,5 +498,11 @@ const hasEssentialSet =
   .actual-setlist li::marker {
     color: var(--amber);
     font-family: var(--font-display);
+  }
+
+  @media (max-width: 48rem) {
+    .setlist-filter {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 </style>
