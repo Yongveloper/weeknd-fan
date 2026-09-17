@@ -100,7 +100,10 @@ test('reaches both private share tools through contextual product CTAs', async (
   page,
 }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: '나만의 D-day 티켓 만들기' }).click();
+  await page
+    .getByLabel('팜플렛 목차')
+    .getByRole('link', { name: '나만의 D-day 티켓 만들기' })
+    .click();
   await expect(page).toHaveURL(/\/share\/ticket\/$/);
 
   await page.goto('/');
@@ -120,7 +123,7 @@ test('exposes navigation and the unofficial disclaimer', async ({ page }) => {
     mainNav.getByRole('link', { name: '예상 셋리스트' }),
   ).toHaveAttribute('href', '/setlist/');
   await expect(
-    mainNav.getByRole('link', { name: '고양 가이드' }),
+    mainNav.getByRole('link', { name: '콘서트 가이드' }),
   ).toHaveAttribute('href', '/goyang/');
 
   const footerNav = page.getByRole('navigation', { name: '사이트 지도' });
@@ -182,7 +185,7 @@ test('keeps the header in the same fonts across page navigations', async ({
         ),
         wordmarkLoaded: document.fonts.check(
           "400 16px 'Bebas Neue Header'",
-          'DAWNFOLD',
+          'INTO:DAWN',
         ),
       };
     });
@@ -236,7 +239,7 @@ test('groups sources and planned update checkpoints without overstating NamuWiki
   await expect(concertSourceUsage.getByText('사용 위치')).toBeVisible();
   await expect(concertSourceUsage.getByRole('link')).toHaveText([
     '홈',
-    '고양 가이드',
+    '콘서트 가이드',
   ]);
   await expect(concertSourceUsage.getByRole('link').nth(0)).toHaveAttribute(
     'href',
@@ -282,13 +285,11 @@ test('keeps navigation targets touch-sized in every viewport', async ({
   }
 });
 
-test('shows concert facts and four lightweight entry blocks', async ({
+test('keeps the four reading sections below the title-only cover', async ({
   page,
 }) => {
   await page.goto('/');
 
-  await expect(page.getByText('2026.10.07—08')).toBeVisible();
-  await expect(page.getByText('고양종합운동장 주경기장')).toBeVisible();
   await expect(
     page.getByRole('heading', { name: '3분 만에 The Weeknd 알기' }),
   ).toBeVisible();
@@ -296,7 +297,7 @@ test('shows concert facts and four lightweight entry blocks', async ({
     page.getByRole('heading', { name: '예상 셋리스트' }),
   ).toBeVisible();
   await expect(
-    page.getByRole('heading', { name: '고양 가이드' }),
+    page.getByRole('heading', { name: '콘서트 가이드' }),
   ).toBeVisible();
   await expect(
     page.getByRole('heading', { name: '팬의 한마디' }),
@@ -310,7 +311,7 @@ test('keeps the complete predicted list collapsed by default', async ({
 
   const disclosure = page.getByRole('group', { name: '전체 예상 셋리스트' });
   await expect(disclosure).not.toHaveAttribute('open', '');
-  await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님')).toHaveCount(0);
 });
 
 test('shows six predicted titles before the complete collapsed list', async ({
@@ -331,7 +332,7 @@ test('shows six predicted titles before the complete collapsed list', async ({
   const disclosure = page.getByRole('group', { name: '전체 예상 셋리스트' });
   await expect(disclosure).not.toHaveAttribute('open', '');
   await expect(disclosure.locator('li')).toHaveCount(32);
-  await expect(preview.getByText('예상 · 보장 아님')).toBeVisible();
+  await expect(preview.getByText('예상 · 보장 아님')).toHaveCount(0);
 });
 
 test('presents the setlist as a prediction with expandable song context', async ({
@@ -342,8 +343,9 @@ test('presents the setlist as a prediction with expandable song context', async 
   await expect(
     page.getByRole('heading', { name: '예상 셋리스트' }),
   ).toBeVisible();
-  await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
-  await expect(page.getByText('최근 2026년 공연 3회 비교')).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님')).toHaveCount(0);
+  await expect(page.getByText('최근 2026년 공연 3회 비교')).toHaveCount(0);
+  await expect(page.getByRole('searchbox', { name: '곡 검색' })).toBeVisible();
 
   const firstSong = page.locator('.expected-setlist summary').first();
   await expect(firstSong).toHaveAccessibleName('01 Baptized in Fear');
@@ -631,7 +633,7 @@ test('keeps expected songs ordered and keyboard-operable without media controls'
   await expect(explorer.locator('details').nth(1)).toHaveAttribute('open', '');
 });
 
-test('keeps the ordered prediction and trust label usable without JavaScript', async ({
+test('keeps the ordered prediction usable without JavaScript', async ({
   browser,
 }, testInfo) => {
   const context = await browser.newContext({
@@ -643,7 +645,7 @@ test('keeps the ordered prediction and trust label usable without JavaScript', a
   await page.goto('/setlist/');
 
   const explorer = page.locator('.expected-setlist');
-  await expect(explorer.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(explorer.getByText('예상 · 보장 아님')).toHaveCount(0);
   await expect(explorer.locator('summary').first()).toHaveText(
     /^\s*01 Baptized in Fear/,
   );
@@ -667,7 +669,7 @@ test('links each Goyang shortcut to its stable guide anchor', async ({
   await page.goto('/');
 
   const shortcuts = page.getByRole('navigation', {
-    name: '고양 가이드 바로가기',
+    name: '콘서트 가이드 바로가기',
   });
   await expect(shortcuts.getByRole('link')).toHaveText([
     '공식 공연 정보 →',
@@ -711,8 +713,8 @@ test('opens transport and return information within two actions', async ({
       .locator('#transport .guide-section__body')
       .getByText('대화역(3호선) 3번 출구'),
   ).toBeVisible();
-  await expect(page.locator('#transport .status')).toHaveText('실용 안내');
-  await expect(page.locator('#official .status')).toHaveText('공식 확정');
+  await expect(page.locator('#transport .status')).toHaveCount(0);
+  await expect(page.locator('#official .status')).toHaveCount(0);
   await expect(page.getByText('막차와 귀가 동선')).toBeVisible();
 });
 
@@ -844,7 +846,7 @@ test('exposes every primary route without horizontal scrolling on mobile', async
     .getByText('메뉴')
     .click();
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
-  await expect(nav.getByRole('link')).toHaveCount(5);
+  await expect(nav.getByRole('link')).toHaveCount(4);
   for (const link of await nav.getByRole('link').all()) {
     await expect(link).toBeVisible();
   }
@@ -871,7 +873,7 @@ test('synchronizes the header menu when resizing across the mobile breakpoint', 
   const links = page
     .getByRole('navigation', { name: '주요 메뉴' })
     .getByRole('link');
-  await expect(links).toHaveCount(5);
+  await expect(links).toHaveCount(4);
   for (const link of await links.all()) {
     await expect(link).toBeVisible();
   }
@@ -909,24 +911,21 @@ test('states what the site is, who it is for, and where the official notice live
   await useClock(page, '2026-08-29T09:00:00+09:00');
   await page.goto('/');
 
-  await expect(page.getByText('THE WEEKND · 비공식 팬 팜플렛')).toBeVisible();
-  await expect(page.getByText('만 19세 이상')).toBeVisible();
-  await expect(page.getByRole('link', { name: '공식 공지' })).toHaveAttribute(
+  await expect(
+    page
+      .getByLabel('팜플렛 목차')
+      .getByRole('link', { name: '공식 티켓 공지 보기' }),
+  ).toHaveAttribute(
     'href',
     'https://tickets.interpark.com/contents/notice/detail/14180',
   );
-  await expect(page.locator('eclipse-countdown [data-caption]')).toHaveText(
-    /공연까지$/,
-  );
   await expect(page.getByText('THE WEEKND · GOYANG 26')).toBeVisible();
   await expect(
-    page.getByText('브라우저에서만 만들어지는 이미지 한 장').first(),
-  ).toBeVisible();
+    page.getByText('브라우저에서만 만들어지는 이미지 한 장'),
+  ).toHaveCount(0);
 
   await page.goto('/setlist/');
-  await expect(
-    page.getByText('곡을 누르면 관람 포인트·떼창·공식 듣기가 열립니다.'),
-  ).toBeVisible();
+  await expect(page.getByRole('searchbox', { name: '곡 검색' })).toBeVisible();
   const firstSummary = page.locator('.expected-setlist__list summary').first();
   await expect(firstSummary.locator('.disclosure__chevron')).toHaveCount(1);
 });

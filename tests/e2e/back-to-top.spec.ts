@@ -51,7 +51,7 @@ test('continues to work after navigating to another route', async ({
   const navigation = page.getByRole('navigation', { name: '주요 메뉴' });
   const menu = navigation.getByText('메뉴');
   if (await menu.isVisible()) await menu.click();
-  await navigation.getByRole('link', { name: '고양 가이드' }).click();
+  await navigation.getByRole('link', { name: '콘서트 가이드' }).click();
   await expect(page).toHaveURL(/\/goyang\/$/);
 
   const topButton = page.getByRole('button', { name: '맨 위로 이동' });

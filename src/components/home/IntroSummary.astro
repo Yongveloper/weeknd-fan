@@ -20,11 +20,10 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
   aria-labelledby="intro-title"
 >
   <div class="shell-content home-entry__inner">
-    <p class="eyebrow">START HERE / 03 MINUTES</p>
     <h2 id="intro-title">
       3분 만에 <span class="latin">The Weeknd</span> 알기
     </h2>
-    <p>
+    <p class="home-entry__description">
       밤의 충동과 후회를 영화처럼 노래하던 인물이, 새벽을 향해 자신을 마주하는
       이야기. 이번 공연 전에는 이 세 장의 앨범만 이어 들어도 충분해요.
     </p>
@@ -33,13 +32,14 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
         trilogy.map((album) => (
           <li>
             <AlbumCover album={album} size={120} />
-            <span>{album.data.year}</span>
+            <span class="home-entry__year">{album.data.year}</span>
+            <span class="home-entry__album-title">{album.data.title}</span>
           </li>
         ))
       }
     </ul>
-    <a href="/discover/"
-      >The Weeknd의 밤으로 들어가기 <span aria-hidden="true">→</span></a
+    <a href="/discover/#timeline-title"
+      >앨범 타임라인 살펴보기 <span aria-hidden="true">→</span></a
     >
   </div>
 </section>
@@ -52,14 +52,19 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
   .home-entry__inner {
     display: grid;
     gap: 1.25rem;
-    max-width: 48rem;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: clamp(3rem, 7vw, 7rem);
+    align-items: start;
   }
 
   .home-entry__albums {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: clamp(0.5rem, 3vw, 1.25rem);
-    width: min(100%, 25rem);
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: center;
+    width: 100%;
     margin: 0.5rem 0 0;
     padding: 0;
     list-style: none;
@@ -67,8 +72,10 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
 
   .home-entry__albums li {
     display: grid;
+    align-content: start;
     gap: 0.35rem;
-    justify-items: start;
+    justify-items: center;
+    text-align: center;
     min-width: 0;
     color: var(--mist);
     font-size: calc(var(--type-scale) * 0.8rem);
@@ -76,14 +83,30 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
   }
 
   .home-entry__albums :global(.album-cover) {
-    width: 100%;
+    width: 80%;
     height: auto;
     aspect-ratio: 1;
   }
 
-  p:not(.eyebrow) {
+  .home-entry__description {
     color: var(--mist);
     font-size: calc(var(--type-scale) * clamp(1rem, 2vw, 1.15rem));
+  }
+
+  h2,
+  .home-entry__description,
+  a {
+    grid-column: 1;
+  }
+  @media (max-width: 48rem) {
+    .home-entry__inner {
+      grid-template-columns: 1fr;
+    }
+    .home-entry__albums {
+      grid-column: 1;
+      grid-row: auto;
+      max-width: 28rem;
+    }
   }
 
   a {

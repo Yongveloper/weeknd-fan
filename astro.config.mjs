@@ -1,4 +1,5 @@
 import sitemap from '@astrojs/sitemap';
+import { readdir, rm } from 'node:fs/promises';
 import { defineConfig } from 'astro/config';
 
 /* global process, URL */
@@ -7,7 +8,10 @@ const publicSiteUrl = resolvePublicSiteUrl(process.env.PUBLIC_SITE_URL);
 export default defineConfig({
   output: 'static',
   site: publicSiteUrl,
-  integrations: publicSiteUrl ? [sitemap()] : [],
+  integrations: [
+    ...(publicSiteUrl ? [sitemap()] : []),
+    excludeSupersededLunarAssets(),
+  ],
   image: {
     layout: 'constrained',
     responsiveStyles: true,
@@ -50,4 +54,31 @@ export function resolvePublicSiteUrl(value) {
   }
 
   throw new Error('PUBLIC_SITE_URL must be an absolute HTTP(S) URL');
+}
+
+/** Keep old working previews/sources locally, but ship only the current moon. */
+function excludeSupersededLunarAssets() {
+  return {
+    name: 'exclude-superseded-lunar-assets',
+    hooks: {
+      'astro:build:done': async ({ dir }) => {
+        const visual = new URL('visual/', dir);
+        for (const name of await readdir(visual)) {
+          if (
+            name === 'eclipse-source-faithful-v1' ||
+            /^eclipse-\d+\.(avif|webp)$/.test(name)
+          ) {
+            await rm(new URL(name, visual), { recursive: true, force: true });
+          }
+        }
+        // Keep editable cloud sources locally; the page uses the WebP only.
+        for (const name of [
+          'golden-cloud-bank-v3.png',
+          'golden-cloud-bank-v3.prompt.txt',
+        ]) {
+          await rm(new URL(`atmosphere/${name}`, visual), { force: true });
+        }
+      },
+    },
+  };
 }

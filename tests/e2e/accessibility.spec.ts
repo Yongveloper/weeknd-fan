@@ -69,6 +69,9 @@ for (const route of publicRoutes) {
   test(`${route} has no serious or critical axe violations`, async ({
     page,
   }, testInfo) => {
+    // Scan fully exposed text, not a transient reveal opacity. Motion behavior
+    // is covered separately in the visual and lunar atmosphere tests.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(route);
 
     const result = await new AxeBuilder({ page }).analyze();

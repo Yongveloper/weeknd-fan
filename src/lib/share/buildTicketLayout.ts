@@ -1,139 +1,89 @@
-export type DrawCommand =
-  | { kind: 'fill'; color: string }
-  | {
-      kind: 'line';
-      from: [number, number];
-      to: [number, number];
-      color: string;
-      width: number;
-    }
-  | {
-      kind: 'text';
-      value: string;
-      x: number;
-      y: number;
-      font: string;
-      color: string;
-      align?: CanvasTextAlign;
-    };
+import {
+  bodyFont,
+  cardCover,
+  cardFooter,
+  cardInk,
+  cardRule,
+  displayFont,
+  type DrawCommand,
+} from './cardDesign';
 
+export type { DrawCommand } from './cardDesign';
 export type TicketLayoutInput = {
   showDate: string;
   dDayLabel: string;
   songs: [string, string, string] | string[];
 };
 
-const DISPLAY = '700 64px "Bebas Neue", Impact, sans-serif';
-const BODY = '600 29px "Noto Sans KR Variable", system-ui, sans-serif';
-
 export function buildTicketLayout(input: TicketLayoutInput): DrawCommand[] {
-  const date = input.showDate.replaceAll('-', '.');
-  const songs = input.songs.slice(0, 3);
-
   return [
-    { kind: 'fill', color: '#050507' },
-    {
-      kind: 'line',
-      from: [-120, 1300],
-      to: [1200, 50],
-      color: '#a61f27',
-      width: 250,
-    },
-    {
-      kind: 'line',
-      from: [-120, 1370],
-      to: [1200, 120],
-      color: '#2f63d8',
-      width: 64,
-    },
+    ...cardCover(),
     {
       kind: 'text',
-      value: 'DAWNFOLD',
-      x: 86,
-      y: 120,
-      font: DISPLAY,
-      color: '#f0e8da',
-    },
-    {
-      kind: 'text',
-      value: 'GOYANG / 2026',
-      x: 88,
-      y: 165,
-      font: BODY,
-      color: '#d7d8dc',
-    },
-    {
-      kind: 'text',
-      value: date,
-      x: 86,
-      y: 352,
-      font: '700 104px "Bebas Neue", Impact, sans-serif',
-      color: '#e6a359',
+      value: 'D-DAY TICKET',
+      x: 74,
+      y: 520,
+      font: displayFont(48),
+      color: cardInk.ivory,
     },
     {
       kind: 'text',
       value: input.dDayLabel,
-      x: 994,
-      y: 352,
-      font: '700 82px "Bebas Neue", Impact, sans-serif',
-      color: '#f0e8da',
-      align: 'right',
+      x: 72,
+      y: 686,
+      font: displayFont(156),
+      color: cardInk.light,
+      maxWidth: 448,
     },
     {
-      kind: 'line',
-      from: [86, 412],
-      to: [994, 412],
-      color: '#f0e8da',
-      width: 2,
+      kind: 'text',
+      value: input.showDate.replaceAll('-', '.'),
+      x: 1006,
+      y: 661,
+      font: displayFont(78),
+      color: cardInk.gold,
+      align: 'right',
+      maxWidth: 420,
     },
+    cardRule(732),
     {
       kind: 'text',
       value: 'MY THREE SONGS',
-      x: 86,
-      y: 510,
-      font: BODY,
-      color: '#e6a359',
+      x: 74,
+      y: 795,
+      font: displayFont(32),
+      color: cardInk.gold,
     },
-    ...songs.flatMap((song, index) => [
-      {
-        kind: 'text' as const,
-        value: `0${index + 1}`,
-        x: 90,
-        y: 630 + index * 120,
-        font: DISPLAY,
-        color: '#e6a359',
-      },
-      {
-        kind: 'text' as const,
-        value: song,
-        x: 210,
-        y: 630 + index * 120,
-        font: '700 50px "Bebas Neue", Impact, sans-serif',
-        color: '#f0e8da',
-      },
-    ]),
-    {
-      kind: 'line',
-      from: [86, 1060],
-      to: [994, 1060],
-      color: '#f0e8da',
-      width: 2,
-    },
-    {
-      kind: 'text',
-      value: 'THE WEEKND: AFTER HOURS TIL DAWN',
-      x: 86,
-      y: 1145,
-      font: BODY,
-      color: '#d7d8dc',
-    },
-    {
-      kind: 'text',
-      value: 'UNOFFICIAL FAN GUIDE',
-      x: 86,
-      y: 1230,
-      font: BODY,
-      color: '#f0e8da',
-    },
+    ...Array.from({ length: 3 }, (_, index): DrawCommand[] => {
+      const song = input.songs[index];
+      return [
+        {
+          kind: 'text',
+          value: String(index + 1).padStart(2, '0'),
+          x: 76,
+          y: 884 + index * 112,
+          font: displayFont(35),
+          color: cardInk.gold,
+        },
+        {
+          kind: 'text',
+          value: song || '곡을 선택해 주세요',
+          x: 150,
+          y: 884 + index * 112,
+          font: song ? displayFont(52) : bodyFont(26),
+          color: song ? cardInk.ivory : cardInk.muted,
+          maxWidth: 856,
+        },
+        {
+          kind: 'line',
+          from: [150, 911 + index * 112],
+          to: [1006, 911 + index * 112],
+          width: 1,
+          color: cardInk.rule,
+        },
+      ];
+    }).flat(),
+    cardRule(1202, true),
+    ...cardFooter(),
   ];
 }

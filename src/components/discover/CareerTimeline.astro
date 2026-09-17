@@ -2,7 +2,6 @@
 import { render, type CollectionEntry } from 'astro:content';
 import AlbumCover from '../content/AlbumCover.astro';
 import SourceList from '../content/SourceList.astro';
-import StatusBadge from '../content/StatusBadge.astro';
 import type { AlbumRecord, SourceRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
 import { resolveSourceReferences } from '../../lib/content/queries';
@@ -47,7 +46,6 @@ const renderedEntries = await Promise.all(
               ))}
             </ul>
           )}
-          <StatusBadge status={entry.data.status} />
         </div>
         <Disclosure
           ariaLabel={`${entry.data.title} 더 깊이 보기`}

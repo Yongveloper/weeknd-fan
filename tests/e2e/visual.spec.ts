@@ -1,109 +1,4 @@
 import { expect, test } from '@playwright/test';
-import { useClock } from './helpers/clock';
-
-test('renders Eclipse Count inside the retained moon scene', async ({
-  page,
-}) => {
-  await page.goto('/');
-
-  await expect(page.locator('eclipse-countdown')).toBeVisible();
-  await expect(page.locator('[data-primary]')).toContainText(
-    /^D-|TONIGHT|WE WERE HERE/,
-  );
-});
-
-test('reduced motion leaves the moon readable without a running animation', async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-
-  await expect(page.locator('eclipse-countdown')).toHaveAttribute(
-    'data-motion-state',
-    'reduced',
-  );
-  await expect(page.locator('[data-primary]')).toBeVisible();
-});
-
-test('synchronizes stale server countdown markup and keeps polling under reduced motion', async ({
-  page,
-}) => {
-  await useClock(page, '2026-10-07T19:40:00+09:00');
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
-  await expect(page.locator('[data-clock]')).toBeVisible();
-  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
-    /고양 공연까지 0일/,
-  );
-});
-
-test('synchronizes stale server countdown markup before normal-motion transitions', async ({
-  page,
-}) => {
-  await useClock(page, '2026-10-07T19:40:00+09:00');
-  await page.goto('/');
-  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
-  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
-    /고양 공연까지 0일/,
-  );
-  await expect(page.locator('[data-clock]')).toHaveText('00 : 05 : 00');
-});
-
-test('updates the reduced-motion target after day one and clears polling on disconnect', async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    let now = new Date('2026-10-07T19:44:00+09:00').getTime();
-    const NativeDate = Date;
-    class ControlledDate extends NativeDate {
-      constructor(...args: [] | [string | number]) {
-        super(args.length === 0 ? now : args[0]);
-      }
-      static now() {
-        return now;
-      }
-    }
-    window.Date = ControlledDate as DateConstructor;
-    Object.assign(window, {
-      __setCountdownTime: (next: string) =>
-        (now = new NativeDate(next).getTime()),
-    });
-    const nativeClearInterval = window.clearInterval;
-    let cleared = 0;
-    window.clearInterval = ((id: number) => {
-      cleared += 1;
-      nativeClearInterval(id);
-    }) as typeof window.clearInterval;
-    Object.assign(window, { __countdownIntervalsCleared: () => cleared });
-  });
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/');
-  await expect(page.locator('[data-primary]')).toHaveText('D-DAY');
-  await page.evaluate(() =>
-    (
-      window as typeof window & { __setCountdownTime: (time: string) => void }
-    ).__setCountdownTime('2026-10-07T20:00:00+09:00'),
-  );
-  await expect(page.locator('[data-primary]')).toHaveText('D-1');
-  await expect(page.locator('[data-accessible-countdown]')).toHaveText(
-    /고양 공연까지 1일/,
-  );
-  await page
-    .locator('eclipse-countdown')
-    .evaluate((element) => element.remove());
-  await expect
-    .poll(() =>
-      page.evaluate(() =>
-        (
-          window as typeof window & {
-            __countdownIntervalsCleared: () => number;
-          }
-        ).__countdownIntervalsCleared(),
-      ),
-    )
-    .toBeGreaterThan(0);
-});
 
 test('reduced motion does not load the deferred Motion chunk', async ({
   page,
@@ -190,63 +85,17 @@ test('records 390 by 844 home transfer, layout-shift, and long-task evidence', a
   expect(evidence.longTasks.every((duration) => duration <= 50)).toBe(true);
 });
 
-test('keeps the near-term clock inside the mobile hero and viewport', async ({
-  page,
-}) => {
-  test.skip(
-    test.info().project.name !== 'mobile-chromium',
-    'This viewport-bound layout regression is mobile-specific.',
-  );
-  await useClock(page, '2026-10-07T19:40:00+09:00');
-  await page.goto('/');
-
-  const clock = page.locator('[data-clock]');
-  const hero = page.locator('[data-home-hero]');
-  await expect(clock).toBeVisible();
-
-  const [clockBox, heroBox] = await Promise.all([
-    clock.boundingBox(),
-    hero.boundingBox(),
-  ]);
-  const viewport = page.viewportSize();
-
-  expect(clockBox).not.toBeNull();
-  expect(heroBox).not.toBeNull();
-  expect(viewport).not.toBeNull();
-  expect(clockBox!.y).toBeGreaterThanOrEqual(heroBox!.y);
-  expect(clockBox!.y + clockBox!.height).toBeLessThanOrEqual(
-    heroBox!.y + heroBox!.height,
-  );
-  expect(clockBox!.y + clockBox!.height).toBeLessThanOrEqual(viewport!.height);
-});
-
-test('serves every home-scene image as AVIF and WebP derivatives', async ({
+test('shares one lightweight WebP texture between the scene and static fallback', async ({
   page,
 }) => {
   await page.goto('/');
-
-  await expect(page.locator('picture source[type="image/avif"]')).toHaveCount(
-    1,
+  const texture = page.locator('.dawn-sky__still img');
+  await expect(texture).toHaveCount(1);
+  await expect(texture).toHaveAttribute(
+    'src',
+    '/visual/atmosphere/golden-cloud-bank-v3.webp',
   );
-  await expect(page.locator('picture source[type="image/webp"]')).toHaveCount(
-    1,
-  );
-});
-
-test('selects the native-capped eclipse candidate on Pixel 7', async ({
-  page,
-}) => {
-  test.skip(
-    test.info().project.name !== 'mobile-chromium',
-    'The source selection contract is specific to the Pixel 7 DPR.',
-  );
-  await page.goto('/');
-
-  await expect(
-    page
-      .locator('[data-moon-art]')
-      .evaluate((image) => (image as HTMLImageElement).currentSrc),
-  ).resolves.toMatch(/eclipse-1400\.avif$/);
+  await expect(page.locator('[data-home-hero] video')).toHaveCount(2);
 });
 
 test('keeps the hero title on two lines and renders Korean headings in Noto Sans KR', async ({
@@ -283,11 +132,23 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
     const spanRights = Array.from(h1.querySelectorAll('span')).map(
       (span) => span.getBoundingClientRect().right,
     );
+    // The luminous pseudo-elements intentionally spill outside the h1 box.
+    // Measure the letters themselves so glow is not mistaken for text overflow.
+    const titleBounds = h1.getBoundingClientRect();
+    const glyphsFit = Array.from(h1.children).every((line) => {
+      const range = document.createRange();
+      range.selectNodeContents(line.firstChild!);
+      const glyphs = range.getBoundingClientRect();
+      return (
+        glyphs.left >= titleBounds.left - 1 &&
+        glyphs.right <= titleBounds.right + 1
+      );
+    });
 
     return {
       heroLines: lineCount(h1),
-      heroScrollWidth: h1.scrollWidth,
-      heroClientWidth: h1.clientWidth,
+      glyphsFit,
+      documentWidth: document.documentElement.scrollWidth,
       spanRights,
       viewportWidth: window.innerWidth,
       introFont: introStyle.fontFamily,
@@ -298,54 +159,41 @@ test('keeps the hero title on two lines and renders Korean headings in Noto Sans
   });
 
   expect(metrics.heroLines).toBe(2);
-  expect(metrics.heroScrollWidth).toBeLessThanOrEqual(metrics.heroClientWidth);
+  expect(metrics.glyphsFit).toBe(true);
+  expect(metrics.documentWidth).toBeLessThanOrEqual(metrics.viewportWidth);
   for (const right of metrics.spanRights) {
     expect(right).toBeLessThanOrEqual(metrics.viewportWidth);
   }
   expect(metrics.introFont).toMatch(/Noto Sans KR/);
-  expect(metrics.introWeight).toBe('900');
+  expect(metrics.introWeight).toBe('750');
   expect(metrics.introLineHeight).toBeGreaterThan(1);
 });
 
-test('reveals more stars as the home page scrolls, over a fixed base sky', async ({
+test('uses a dark lunar backdrop instead of adding stars while scrolling', async ({
   page,
 }) => {
   await page.goto('/');
-  const sky = page.locator('.space-sky');
+  const sky = page.locator('.space-sky--lunar');
   await expect(sky).toHaveAttribute('aria-hidden', 'true');
-
-  const sample = () =>
-    page.evaluate(() => {
-      const element = document.querySelector('.space-sky')!;
-      const style = getComputedStyle(element);
-      return {
-        position: style.position,
-        backgroundImage: style.backgroundImage,
-        mid: Number(getComputedStyle(element, '::before').opacity),
-        dense: Number(getComputedStyle(element, '::after').opacity),
-      };
-    });
-  const top = await sample();
-  expect(top.position).toBe('fixed');
-  expect(top.backgroundImage).toMatch(/starfield-2048\.(?:avif|webp)/);
-
-  const supportsScrollTimeline = await page.evaluate(() =>
-    CSS.supports('animation-timeline: scroll()'),
-  );
-  test.skip(!supportsScrollTimeline, 'static fallback browser');
-  expect(top.mid).toBe(0);
-  expect(top.dense).toBe(0);
-
+  const before = await sky.evaluate((element) => ({
+    image: getComputedStyle(element).backgroundImage,
+    color: getComputedStyle(element).backgroundColor,
+    stars: getComputedStyle(element, '::after').display,
+  }));
+  expect(before).toEqual({
+    image: 'none',
+    color: 'rgb(0, 0, 0)',
+    stars: 'none',
+  });
   await page.evaluate(() =>
-    window.scrollTo({
-      top: document.documentElement.scrollHeight,
-      behavior: 'instant',
-    }),
+    window.scrollTo(0, document.documentElement.scrollHeight),
   );
-  await expect.poll(async () => (await sample()).dense).toBe(1);
-  const bottom = await sample();
-  expect(bottom.mid).toBe(1);
-  expect(bottom.backgroundImage).toBe(top.backgroundImage);
+  await expect
+    .poll(() => page.locator('dawn-sky').getAttribute('data-state'))
+    .toBe('reading');
+  await expect(
+    sky.evaluate((element) => getComputedStyle(element).backgroundImage),
+  ).resolves.toBe('none');
 });
 
 test('does not mount the space sky on sub-pages', async ({ page }) => {
@@ -354,25 +202,30 @@ test('does not mount the space sky on sub-pages', async ({ page }) => {
   const bodyBackgroundImage = await page.evaluate(
     () => getComputedStyle(document.body).backgroundImage,
   );
-  expect(bodyBackgroundImage).not.toBe('none');
+  expect(bodyBackgroundImage).toBe('none');
+  await expect(page.locator('body')).toHaveCSS(
+    'background-color',
+    'rgb(11, 11, 10)',
+  );
 });
 
-test('keeps every home section transparent so the sky shows through', async ({
+test('keeps content sections transparent within one translucent reading panel', async ({
   page,
 }) => {
   await page.goto('/');
   const opaqueSections = await page.evaluate(
     () =>
-      Array.from(document.querySelectorAll('main > section')).filter(
-        (section) => {
-          const { backgroundColor, backgroundImage } =
-            getComputedStyle(section);
-          return (
-            backgroundImage !== 'none' ||
-            !/rgba\(0, 0, 0, 0\)|transparent/.test(backgroundColor)
-          );
-        },
-      ).length,
+      Array.from(
+        document.querySelectorAll(
+          'main > section, .edition-chapters > section',
+        ),
+      ).filter((section) => {
+        const { backgroundColor, backgroundImage } = getComputedStyle(section);
+        return (
+          backgroundImage !== 'none' ||
+          !/rgba\(0, 0, 0, 0\)|transparent/.test(backgroundColor)
+        );
+      }).length,
   );
   expect(opaqueSections).toBe(0);
 });
@@ -389,11 +242,6 @@ test('plays each scene transition once and leaves nothing running afterwards', a
     'data-motion-state',
     'entered',
   );
-  await expect(page.locator('eclipse-countdown')).toHaveAttribute(
-    'data-reveal',
-    'done',
-    { timeout: 5000 },
-  );
 
   await page.locator('.setlist-preview').scrollIntoViewIfNeeded();
   await expect(page.locator('.setlist-preview')).toHaveAttribute(
@@ -407,20 +255,30 @@ test('plays each scene transition once and leaves nothing running afterwards', a
   );
 
   await page.waitForTimeout(900);
-  const running = await page.evaluate(
-    () =>
-      document
-        .getAnimations()
-        .filter(
-          (animation) =>
-            animation.playState === 'running' &&
-            !(
-              animation.effect as KeyframeEffect | null
-            )?.target?.classList.contains('space-sky') &&
-            !(animation instanceof CSSTransition),
-        ).length,
-  );
-  expect(running).toBe(0);
+  const running = () =>
+    page.evaluate(
+      () =>
+        document
+          .getAnimations()
+          .filter(
+            (animation) =>
+              animation.playState === 'running' &&
+              !(
+                animation.effect as KeyframeEffect | null
+              )?.target?.classList.contains('space-sky') &&
+              !(
+                animation.effect as KeyframeEffect | null
+              )?.target?.hasAttribute('data-cloud-motion') &&
+              !(
+                animation.effect as KeyframeEffect | null
+              )?.target?.hasAttribute('data-eclipse-ambient') &&
+              !(animation.effect as KeyframeEffect | null)?.target?.closest(
+                '.eclipse-weather',
+              ) &&
+              !(animation instanceof CSSTransition),
+          ).length,
+    );
+  await expect.poll(running).toBe(0);
 });
 
 test('keeps repeated setlist rows out of reveal observation', async ({
@@ -482,5 +340,17 @@ test('reduced motion never marks the document motion-ready', async ({
     'data-motion-ready',
     /.+/,
   );
-  await expect(page.locator('[data-primary]')).toBeVisible();
+  await expect(page.locator('.dawn-sky__still img')).toBeVisible();
+});
+
+test('keeps only the tour title and eclipse above the pamphlet contents', async ({
+  page,
+}) => {
+  await page.goto('/');
+  const hero = page.locator('[data-home-hero]');
+  await expect(hero).toHaveText(/^[\s]*AFTER HOURS\s+TIL DAWN\s*$/);
+  await expect(hero.locator('a, eclipse-countdown')).toHaveCount(0);
+  await expect(
+    page.getByRole('navigation', { name: '팜플렛 목차' }),
+  ).toBeVisible();
 });

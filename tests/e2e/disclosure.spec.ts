@@ -161,7 +161,7 @@ test('scopes adopter styles (max-width/min-width/color) to the parent, not Discl
   );
   await page.goto('/discover/');
   await expect(intro(page)).toHaveCSS('max-width', '672px');
-  await expect(intro(page)).toHaveCSS('color', 'rgb(215, 216, 220)');
+  await expect(intro(page)).toHaveCSS('color', 'rgb(192, 190, 183)');
 
   const timelineFirst = page.locator('.timeline details').first();
   await expect(timelineFirst).toHaveCSS('max-width', '736px');
@@ -181,9 +181,7 @@ test('lays out the song detail as meta header, three labelled blocks, then sourc
 
   const detail = first.locator('.expected-setlist__detail');
   await expect(detail.locator('.song-meta')).toHaveCount(1);
-  await expect(detail.locator('.song-meta .status')).toHaveText(
-    '예상 · 보장 아님',
-  );
+  await expect(detail.locator('.song-meta .status')).toHaveCount(0);
   await expect(detail.locator('.song-block .eyebrow')).toHaveText([
     'BEFORE',
     'ON STAGE',

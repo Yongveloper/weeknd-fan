@@ -6,7 +6,7 @@ test('flows from the hero through the artist intro and setlist before practical 
   await page.goto('/');
 
   const sectionLabels = await page
-    .locator('main > section')
+    .locator('main > section, .edition-chapters > section')
     .evaluateAll((sections) =>
       sections.map((section) => section.getAttribute('aria-labelledby')),
     );
@@ -18,20 +18,6 @@ test('flows from the hero through the artist intro and setlist before practical 
     'guide-shortcuts-title',
     'fan-note-title',
   ]);
-});
-
-test('hero intro link targets the rendered artist introduction', async ({
-  page,
-}) => {
-  await page.goto('/');
-  await page.getByRole('link', { name: /3분 만에 The Weeknd 알기/ }).click();
-
-  await expect(page).toHaveURL(/#intro$/);
-  const target = page.locator('section:target');
-  await expect(target).toHaveAttribute('id', 'intro');
-  await expect(
-    target.getByRole('heading', { name: '3분 만에 The Weeknd 알기' }),
-  ).toBeVisible();
 });
 
 test('keeps the three intro album covers in one square row on narrow screens', async ({
@@ -104,7 +90,7 @@ test('aligns the Goyang guide heading with home section geometry', async ({
         navTop: navRect.top,
       };
     });
-  expect(Math.abs(desktop.headingTop - desktop.navTop)).toBeLessThanOrEqual(1);
+  expect(desktop.navTop).toBeGreaterThan(desktop.headingTop);
   expect(Math.abs(desktop.headingLeft - desktop.innerLeft)).toBeLessThanOrEqual(
     1,
   );

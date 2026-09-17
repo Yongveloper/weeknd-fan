@@ -41,7 +41,6 @@ const latest = entries.reduce(
       우선합니다.
     </p>
     <p class="tips__meta">
-      <span class="tips__badge">후기 기반 · 이 공연 미확정</span>
       <span>마지막 확인 {formatSeoulDate(latest)}</span>
     </p>
   </div>
@@ -150,17 +149,6 @@ const latest = entries.reduce(
     color: var(--ink-muted);
     font-size: 0.85rem;
     font-weight: 700;
-  }
-  .tips__badge {
-    display: inline-flex;
-    align-items: center;
-    min-height: 2rem;
-    padding: 0.3rem 0.65rem;
-    border: 1px solid color-mix(in srgb, var(--red) 70%, transparent);
-    color: var(--ivory);
-    font-size: 0.76rem;
-    font-weight: 800;
-    letter-spacing: 0.04em;
   }
   .tips__tabs {
     display: grid;

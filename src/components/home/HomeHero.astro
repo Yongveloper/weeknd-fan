@@ -1,179 +1,109 @@
 ---
-import type { ConcertRecord } from '../../lib/content/contracts';
-import EclipseCountdown from '../visual/EclipseCountdown.astro';
-
-interface Props {
-  concert: ConcertRecord;
-  officialNoticeUrl: string;
-}
-
-const { concert, officialNoticeUrl } = Astro.props;
-const [dayOne, dayTwo] = concert.data.shows;
-
-if (!dayOne || !dayTwo) {
-  throw new Error('The Goyang countdown requires two show start times.');
-}
+import DawnSky from '../visual/DawnSky.astro';
 ---
 
 <section
   class="home-hero"
   data-home-hero
   data-motion-scene-enter
+  data-title-phase="waiting"
   aria-labelledby="home-title"
 >
-  <div class="home-hero__visual" aria-hidden="true">
-    <picture>
-      <source
-        srcset="/visual/eclipse-400.avif 400w, /visual/eclipse-700.avif 700w, /visual/eclipse-1000.avif 1000w, /visual/eclipse-1400.avif 1400w, /visual/eclipse-2000.avif 2000w"
-        sizes="103vw"
-        type="image/avif"
-      />
-      <source
-        srcset="/visual/eclipse-700.webp 700w, /visual/eclipse-1400.webp 1400w"
-        sizes="103vw"
-        type="image/webp"
-      />
-      <img
-        class="home-hero__moon-art"
-        data-moon-art
-        src="/visual/eclipse-1400.webp"
-        width="2000"
-        height="2000"
-        alt=""
-      />
-    </picture>
-  </div>
-  <EclipseCountdown
-    dayOneStart={dayOne.startsAt}
-    dayTwoStart={dayTwo.startsAt}
-    archivePublished={concert.data.archivePublished}
-  />
+  <DawnSky />
   <div class="home-hero__content shell-content">
     <div class="home-hero__heading">
-      <p class="eyebrow">THE WEEKND · 비공식 팬 팜플렛</p>
       <h1 id="home-title" class="display-latin">
-        <span>AFTER HOURS</span>
-        <span class="home-hero__dawn">TIL DAWN</span>
+        <span class="home-hero__after">AFTER HOURS</span>
+        <span class="home-hero__dawn"
+          >TIL DAWN<span
+            class="home-hero__dawn-light"
+            data-light-text="TIL DAWN"
+            aria-hidden="true"
+            ><span class="home-hero__dawn-spill" data-light-text="TIL DAWN"
+            ></span><span
+              class="home-hero__dawn-core"
+              data-light-text="TIL DAWN"></span></span
+          ></span
+        >
       </h1>
-      <p class="home-hero__facts">
-        <span>2026.10.07—08</span>
-        <span>{concert.data.venue}</span>
-        <span>{concert.data.ageRestriction}</span>
-        <a href={officialNoticeUrl} rel="noreferrer">공식 공지</a>
-      </p>
-      <a class="home-hero__next" href="#intro"
-        >3분 만에 The Weeknd 알기 <span aria-hidden="true">↓</span></a
-      >
     </div>
   </div>
+  <svg class="home-hero__light-filter" aria-hidden="true" width="0" height="0">
+    <defs>
+      <filter
+        id="dawn-outline-grain"
+        x="-10%"
+        y="-30%"
+        width="120%"
+        height="160%"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.045 0.18"
+          numOctaves="2"
+          seed="8"
+          result="grain"></feTurbulence>
+        <feColorMatrix
+          in="grain"
+          type="matrix"
+          values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0.4 0.3 0.2 0 0.25"
+          result="light-grain"></feColorMatrix>
+        <feComposite in="SourceGraphic" in2="light-grain" operator="in"
+        ></feComposite>
+      </filter>
+    </defs>
+  </svg>
 </section>
+
+<noscript>
+  <style>
+    [data-home-hero][data-title-phase='waiting'] #home-title > span {
+      opacity: 1 !important;
+      filter: none !important;
+      animation: none !important;
+    }
+  </style>
+</noscript>
 
 <style>
   .home-hero {
-    /* 일식 프레임은 h1 크기에 비례: 디스크(프레임의 56.6%) ≈ "AFTER HOURS" 폭 × 0.85.
-       이미지와 카운트다운이 같은 변수로 배치되어 중심이 일치한다. */
-    --hero-h1: clamp(3.8rem, 16.5vw, 15rem);
-    /* 디스크 지름 = 2.807em(6.2em×0.566에서 20% 축소한 값, 유지). 프레임은 디스크의
-       1/0.45 — 코로나 광선(≈2.2R)을 담기 위해 여유를 둔다. 중심: x = 텍스트 시작 + 4.2em,
-       y = 히어로 44% */
-    --hero-frame: calc(6.24 * var(--hero-h1));
-    --hero-disc-cx: calc(
-      max(var(--gutter), (100% - var(--content-max)) / 2) + 4.2 * var(--hero-h1)
-    );
-    --hero-frame-top: calc(44% - var(--hero-frame) / 2);
-    --hero-frame-right: calc(
-      100% - var(--hero-disc-cx) - var(--hero-frame) / 2
-    );
+    --hero-stage: max(38rem, 48.5vw);
+    --hero-origin: 5.25rem;
+    --hero-h1: clamp(3.8rem, 8.4vw, 10rem);
+    --hero-frame: 41.715vw;
+    --hero-frame-top: calc(var(--hero-stage) * 0.368 - var(--hero-frame) / 2);
+    --hero-frame-right: calc(23.6% - var(--hero-frame) / 2);
     position: relative;
     display: grid;
-    min-height: min(76vh, 58rem);
+    min-height: var(--hero-stage);
     overflow: hidden;
-    isolation: isolate;
+    isolation: auto;
     background: transparent;
   }
 
-  .home-hero__visual,
-  .home-hero__visual :global(img) {
-    position: absolute;
-    inset: 0;
-  }
-
-  .home-hero__visual {
-    z-index: -1;
-  }
-
-  .home-hero__moon-art {
-    z-index: 1;
-    width: var(--hero-frame);
-    height: auto;
-    inset: var(--hero-frame-top) var(--hero-frame-right) auto auto !important;
-    transform: translate3d(18vw, 18vh, 0) scale(0.86);
-  }
-
   .home-hero__content {
+    position: relative;
+    z-index: 3;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: center;
     gap: clamp(2.5rem, 8vw, 8rem);
-    padding-block: var(--section-space);
+    padding-block: clamp(6rem, 10vw, 10rem);
   }
 
   .home-hero__heading {
     position: relative;
-    align-self: center;
+    align-self: start;
     overflow: hidden;
   }
 
-  .home-hero__heading::after {
-    position: absolute;
-    inset: -20% -60%;
-    background: linear-gradient(
-      112deg,
-      transparent 40%,
-      color-mix(in srgb, var(--ivory) 22%, transparent) 50%,
-      transparent 60%
-    );
-    content: '';
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  :global(html[data-motion-ready])
-    .home-hero[data-motion-state='entered']
-    .home-hero__heading::after {
-    animation: hero-light-sweep 620ms var(--ease-cinematic) both;
-  }
-
-  @keyframes hero-light-sweep {
-    0% {
-      opacity: 0;
-      transform: translateX(-60%);
-    }
-    25% {
-      opacity: 1;
-    }
-    100% {
-      opacity: 0;
-      transform: translateX(60%);
-    }
-  }
-
-  .home-hero :global(eclipse-countdown) {
-    --eclipse-size: var(--hero-frame);
-    /* 디스크 중심이 h1과 겹치므로 라벨 묶음을 우하향으로 밀어 텍스트를 피한다 */
-    --eclipse-label-x: calc(var(--hero-frame) * 0.09);
-    --eclipse-label-y: calc(var(--hero-frame) * 0.16);
-    position: absolute;
-    top: var(--hero-frame-top);
-    right: var(--hero-frame-right);
-    z-index: 0;
-  }
-
   h1 {
-    margin-top: 0.8rem;
+    width: max-content;
+    margin: 0;
+    text-align: center;
     font-size: calc(var(--type-scale) * var(--hero-h1));
     letter-spacing: 0.01em;
-    line-height: 0.82;
+    line-height: 0.95;
     text-wrap: initial;
   }
 
@@ -182,93 +112,43 @@ if (!dayOne || !dayTwo) {
     white-space: nowrap;
   }
 
-  /* 아웃라인 텍스트. 획 색 = 코로나 림 그라데이션(금 → 주황 → 갈색).
-     background-clip: text 는 stroke 영역까지 칠하고, 채움색(--night)이 안쪽 절반을 덮어
-     바깥 절반만 그라데이션 획으로 남는다 → 획 폭을 2배로 둔다. */
   .home-hero__dawn {
-    -webkit-text-stroke: max(2px, 0.028em) transparent;
-    background: linear-gradient(
-      90deg,
-      #f6d78a,
-      #f0b352 30%,
-      #e08a3a 60%,
-      #b8642c 85%,
-      #7a4a2c
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: var(--night);
+    position: relative;
+    margin-top: 0.12em;
+    color: transparent;
+    -webkit-text-stroke: max(1px, 0.012em) #bca071;
   }
 
-  .home-hero__facts {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem 0.6rem;
-    align-items: center;
-    max-width: 34rem;
-    margin-top: clamp(2rem, 5vw, 4rem);
-    color: var(--mist);
-    font-size: calc(var(--type-scale) * clamp(1rem, 2vw, 1.25rem));
-    font-weight: 700;
-    text-shadow: 0 1px 12px var(--night);
+  .home-hero__light-filter {
+    position: absolute;
+    pointer-events: none;
   }
 
-  .home-hero__facts span + span::before {
-    margin-right: 0.6rem;
-    content: '·' / '';
-  }
-
-  .home-hero__facts a {
-    display: inline-flex;
-    align-items: center;
-    min-height: 44px;
-    color: var(--amber);
-    font-weight: 800;
-  }
-
-  /* inline-flex drops the leading space of the global external-link arrow */
-  .home-hero__facts a::after {
-    margin-left: 0.3em;
-  }
-
-  .home-hero__next {
-    display: inline-flex;
-    gap: 0.4rem;
-    align-items: center;
-    min-height: 44px;
-    margin-top: 0.75rem;
-    color: var(--ivory);
-    font-size: calc(var(--type-scale) * 0.95rem);
-    font-weight: 800;
-    text-shadow: 0 1px 12px var(--night);
-  }
-
-  .home-hero__next:hover,
-  .home-hero__next:focus-visible {
-    color: var(--amber);
+  @media (max-width: 44rem) {
+    .home-hero {
+      --hero-origin: 4rem;
+    }
   }
 
   @media (max-width: 42rem) {
     .home-hero {
-      min-height: 42rem;
+      --hero-h1: clamp(2.25rem, 12.5vw, 5.25rem);
+      --hero-title-top: clamp(3rem, 12vw, 5rem);
+      --hero-frame: 74.612vw;
+      --hero-frame-top: calc(
+        var(--hero-title-top) + var(--hero-h1) * 3.1 - var(--hero-frame) *
+          0.1895625
+      );
+      --hero-frame-right: calc(50% - var(--hero-frame) / 2);
+      --hero-stage: calc(
+        var(--hero-title-top) + var(--hero-h1) * 3.1 + 46.33vw + 5rem
+      );
     }
 
     .home-hero__content {
-      grid-template-columns: 1fr;
-      align-content: space-between;
-    }
-
-    .home-hero {
-      /* 세로: 이전 디스크 중심(100% + 5rem − 3.1em) 유지. 가로: 정중앙 */
-      --hero-frame-top: calc(
-        100% + 5rem - 3.1 * var(--hero-h1) - var(--hero-frame) / 2
-      );
-      --hero-frame-right: calc(50% - var(--hero-frame) / 2);
-    }
-
-    .home-hero :global(eclipse-countdown) {
-      --eclipse-label-x: 0px;
-      --eclipse-label-y: 0px;
+      align-content: start;
+      justify-items: center;
+      padding-block: var(--hero-title-top) 0;
     }
   }
 </style>

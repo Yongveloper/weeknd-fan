@@ -3,3 +3,11 @@
 dist/
 docs/superpowers/
 .playwright-mcp/
+tmp/
+output/
+test-results/
+playwright-report/
+.wrangler/
+# Local generated preview retained for reference; excluded from production.
+public/visual/eclipse-source-faithful-v1/
+.impeccable/

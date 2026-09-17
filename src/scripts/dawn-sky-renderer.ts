@@ -1,0 +1,928 @@
+export interface DawnRenderer {
+  setPlaying(playing: boolean): void;
+  dispose(): void;
+}
+
+const vertex = `
+attribute vec2 position;
+void main() { gl_Position = vec4(position, 0.0, 1.0); }
+`;
+
+// Texture detail provides the cloud forms; slow domain warping makes their
+// edges evolve instead of sliding a flat picture across the screen.
+const fragment = `
+precision highp float;
+uniform vec2 resolution;
+uniform vec3 sceneFrame;
+uniform float scrollOffset;
+uniform float readingOnly;
+uniform float time;
+uniform float dawn;
+uniform float desktopAtmosphere;
+uniform vec3 eclipse;
+uniform vec2 cloudOrigin;
+uniform sampler2D clouds;
+uniform sampler2D titleEmission;
+uniform float titleEnergy;
+uniform vec3 titleColor;
+// RGB ratios sampled separately from the approved v8 loop: orange outer
+// corona, pale gold inner glow, and the near-white emitting rim. Normalize
+// each to red = 1 so the existing spatial light field still controls energy.
+const vec3 coronaOrange = vec3(1.0,0.582,0.299);
+const vec3 coronaGold = vec3(1.0,0.760,0.514);
+const vec3 rimIvory = vec3(1.0,0.968,0.935);
+
+float hash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+float noise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  f = f*f*(3.0-2.0*f);
+  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),
+             mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),f.x),f.y);
+}
+float fbm(vec2 p) {
+  float n = 0.0, a = 0.5;
+  for (int i=0; i<4; i++) {
+    n += a*noise(p); p = mat2(1.6,-1.2,1.2,1.6)*p+2.7; a *= 0.5;
+  }
+  return n;
+}
+float plate(vec2 p) {
+  vec3 c = texture2D(clouds, clamp(p, 0.001, 0.999)).rgb;
+  float edge = smoothstep(0.0,0.12,p.x)*smoothstep(0.0,0.12,1.0-p.x)
+             *smoothstep(0.0,0.15,p.y)*smoothstep(0.0,0.12,1.0-p.y);
+  // A shaded cloud is still a body, not a hole. Recover its middle-density
+  // folds instead of using the photo's illumination as literal opacity.
+  // The plate-wide normalization retains its original integrated density;
+  // edge fades, distributed gaps and eclipse attenuation are applied later.
+  float body = pow(dot(c,vec3(0.3,0.5,0.2)),0.72)*0.6714321;
+  return body*edge;
+}
+// All four currents travel at 0.00728 cover-heights / second (20% slower). Different
+// phases and handedness change direction, never the speed of a cloud group.
+vec2 wind(float phase, float handedness) {
+  float angle = time*0.112*handedness+phase;
+  return (vec2(cos(angle),sin(angle))-vec2(cos(phase),sin(phase)))*0.065;
+}
+// A radius-dependent twist moves cloud lobes around a local center. It is
+// area-preserving in polar coordinates: r stays fixed, only theta changes.
+vec2 cloudCurl(vec2 p, vec2 center, float radius, float turn) {
+  vec2 q = p-center;
+  float weight = 1.0-smoothstep(0.0,radius,length(q));
+  float angle = turn*weight;
+  float c = cos(angle), s = sin(angle);
+  return center+vec2(c*q.x-s*q.y,s*q.x+c*q.y);
+}
+// Nested regions contain a large bank, medium clumps or small wisps. Each
+// has its own cohesion and folding phase, rather than one repeated curl.
+// Every local map stays inside its cell and preserves area/density.
+vec2 deformCloud(vec2 p) {
+  float evolution = time*0.8;
+  vec2 region = floor(p*2.15);
+  float family = hash(region+vec2(2.7,6.3));
+  float divisions = 1.0+step(0.34,family)+step(0.73,family);
+  vec2 cell = floor(fract(p*2.15)*divisions);
+  vec2 center = (region+(cell+0.5)/divisions)/2.15;
+  float character = fract(family*13.71+dot(cell,vec2(0.37,0.61)));
+  float loose = smoothstep(0.45,0.88,character);
+  float phase = character*6.2831853;
+  float rate = mix(0.14,0.27,family);
+  float turn = (sin(evolution*rate+phase)-sin(phase))*mix(0.16,0.85,loose);
+  // Conjugating the curl by an elliptical transform stretches loose
+  // edges into wisps while compact groups retain their core. The inverse
+  // transform cancels its area change; no opacity/volume pulse is added.
+  vec2 stretch = vec2(mix(1.0,1.30,loose),1.0);
+  p = center+cloudCurl((p-center)*stretch,vec2(0.0),0.46/(2.15*divisions),turn)/stretch;
+  // Broad folds evolve without shredding rounded lobes into smoke threads.
+  // Sequential shears still preserve area, with no density/volume pulse.
+  p.x += (sin(p.y*13.0+evolution*0.27)-sin(p.y*13.0))*0.010;
+  p.y += (sin(p.x*17.0-evolution*0.24+1.7)-sin(p.x*17.0+1.7))*0.009;
+  return p;
+}
+// Broad coherent banks contain smaller interleaved pockets. Both currents
+// keep complementary weights, so subdivision does not add cloud density.
+float cloudGroups(vec2 p) {
+  float broad = noise(p*0.52);
+  float pockets = noise(p*1.75+vec2(5.3,2.1));
+  return smoothstep(0.28,0.72,mix(broad,pockets,0.38));
+}
+// Soft pockets occupy about 15% of the cloud field, distributed across
+// staggered cells. Variable widths/heights avoid a single opening or stripe.
+float cloudGaps(vec2 p) {
+  vec2 grid = p*vec2(7.0,5.0);
+  grid.x += floor(grid.y)*0.37;
+  vec2 cell = floor(grid);
+  float seed = hash(cell+vec2(3.4,9.2));
+  vec2 center = vec2(0.5)+vec2(seed-0.5,fract(seed*7.13)-0.5)*0.10;
+  vec2 radius = vec2(mix(0.29,0.43,seed),mix(0.38,0.30,seed));
+  float pocket = 1.0-smoothstep(0.18,1.0,length((fract(grid)-center)/radius));
+  return pocket;
+}
+float spacedPlate(vec2 p, float gapZone) {
+  p = deformCloud(p);
+  // Even the thinnest point retains 40% of its cloud texture. The pockets
+  // share its exact deformation/drift, including the light-blocking sample.
+  return plate(p)*(1.0-0.60*gapZone*cloudGaps(p));
+}
+float groupedPlate(vec2 p, vec2 a, vec2 b, float blend, float gapZone) {
+  return mix(spacedPlate(p+a,gapZone),spacedPlate(p+b,gapZone),blend);
+}
+// The replacement bank uses one compact, rounded lobe family from the photo.
+// Enlarging that smaller source region produces fewer, fuller cloud folds.
+// All deformation still conserves area and has no opacity/volume pulse.
+float cumulusPlate(vec2 p) {
+  p = deformCloud(p);
+  vec2 q = abs((p-vec2(0.23,0.63))/vec2(0.17,0.1942857));
+  float edge = (1.0-smoothstep(0.62,1.0,q.x))
+             *(1.0-smoothstep(0.72,1.0,q.y));
+  return pow(plate(p),0.85)*1.25*edge;
+}
+// Overlapping, seeded rows extend the same texture into the reading area.
+// Edge-faded rows wrap independently; no image is elongated on scroll.
+float continuedPlate(vec2 p) {
+  float row = floor(p.y);
+  vec2 q = vec2(p.x,fract(p.y));
+  q.x += (hash(vec2(row,4.7))-0.5)*0.12;
+  q.x = mix(q.x,1.0-q.x,step(0.5,hash(vec2(row,8.3))));
+  return plate(q)*(1.0-0.60*cloudGaps(q));
+}
+float continuedGroups(vec2 p, vec2 a, vec2 b, float blend) {
+  return mix(continuedPlate(deformCloud(p+a)),continuedPlate(deformCloud(p+b)),blend);
+}
+// Every cloud surface uses this same shadow, gold body and light-facing edge.
+// The foreground bank changes density and form, never its lighting palette.
+vec3 litCloudColor(float detail, float litEdge, float illumination, float reach, vec3 shadowColor) {
+  // Keep the recovered shaded folds as solid surfaces. Low-relief interiors
+  // scatter less light than the rounded caps; the emitting edges, palette
+  // and spatial light field keep their established maximum.
+  float bodyShade = mix(0.70,1.0,smoothstep(0.025,0.24,detail));
+  vec3 color = shadowColor*(0.65+detail);
+  color += coronaOrange*illumination*(0.08+reach*0.95)*(0.15+detail)*bodyShade;
+  color += mix(coronaGold,rimIvory,reach*0.7)*illumination*litEdge*(0.12+reach*0.95)*(0.12+detail);
+  color += coronaGold*desktopAtmosphere*illumination
+           *(0.045+reach*0.26)*sqrt(clamp(detail,0.0,1.0))*bodyShade;
+  return color;
+}
+float mistPlate(vec2 p) {
+  p = deformCloud(p);
+  float body = fbm(p*3.2+vec2(4.1,7.3));
+  float wisps = fbm(p*10.0+vec2(body*1.4,-body*0.8));
+  if (desktopAtmosphere > 0.5) {
+    float filaments = fbm(p*18.0+vec2(wisps*2.0,-body));
+    return smoothstep(0.23,0.72,body*0.52+wisps*0.32+filaments*0.16);
+  }
+  return smoothstep(0.18,0.70,body*0.68+wisps*0.32);
+}
+void main() {
+  vec2 viewportUV = gl_FragCoord.xy / resolution;
+  viewportUV.y = 1.0-viewportUV.y;
+  // Extend above/below the cover without stretching its existing composition.
+  vec2 screenUV = vec2(viewportUV.x,viewportUV.y*sceneFrame.y-sceneFrame.z);
+  float worldY = screenUV.y+scrollOffset;
+  // The cover is one document scene: eclipse, clouds and mist translate
+  // together. Only the separate reading backdrop stays in viewport space.
+  float readingMask = max(readingOnly,smoothstep(1.0,1.15,worldY));
+  // Never interpolate texture coordinates across the join: blend the two
+  // independently sampled densities below so neither scene stretches.
+  vec2 uv = vec2(screenUV.x,worldY);
+  vec2 atmosphereUV = mix(uv,viewportUV,readingMask);
+  float aspect = sceneFrame.x;
+  float mobile = 1.0-step(0.95,aspect);
+  vec2 point = vec2(uv.x*aspect,uv.y);
+  vec2 center = eclipse.xy;
+  float radius = eclipse.z;
+  vec2 relative = point-center;
+  float radialDistance = length(relative)/radius;
+  // Keep the established layout warp static; only the area-preserving
+  // flow above evolves, avoiding expansion/contraction of whole banks.
+  float turbulence = fbm(point*3.0);
+  vec2 warp = vec2(turbulence-0.5,noise(point*5.0)-0.5)*0.035;
+  vec2 cloudUV = uv;
+  cloudUV.x = mix(uv.x,uv.x*0.56+0.27,mobile);
+  // Cover-local coordinates preserve the composition while it scrolls away.
+  vec2 uvPerStage = vec2(mix(1.0,0.56,mobile)/aspect,1.0);
+  vec2 windA = wind(0.25,1.0);
+  vec2 windB = wind(2.20,-1.0);
+  vec2 windC = wind(3.90,1.0);
+  vec2 windD = wind(5.50,-1.0);
+  // Soft irregular pockets split broad banks into several interleaved groups.
+  float nearMix = cloudGroups(point*vec2(4.1,3.3)+vec2(2.1,8.7));
+  float farMix = cloudGroups(point*vec2(3.7,4.2)+vec2(7.4,1.2));
+  vec2 nearScale = vec2(0.8,0.83);
+  vec2 farScale = vec2(0.88,0.95);
+  vec2 nearA = windA*uvPerStage*nearScale;
+  vec2 nearB = windB*uvPerStage*nearScale;
+  vec2 farA = windC*uvPerStage*farScale;
+  vec2 farB = windD*uvPerStage*farScale;
+  vec2 farUV = cloudUV*farScale+vec2(0.03,0.005)+warp;
+  vec2 nearUV = cloudUV*nearScale+vec2(0.13,0.08)-warp*0.7;
+  // An independent viewport field supplies the boards, on home and all
+  // reading routes. It has its own seed/rows, with the cover's wind and grain.
+  float readingY = viewportUV.y*sceneFrame.y;
+  vec2 readingPoint = vec2(point.x,readingY+2.7);
+  float readingNearMix = cloudGroups(readingPoint*vec2(4.1,3.3)+vec2(2.1,8.7));
+  float readingFarMix = cloudGroups(readingPoint*vec2(3.7,4.2)+vec2(7.4,1.2));
+  vec2 readingWarp = vec2(noise(readingPoint*3.0)-0.5,noise(readingPoint*5.0)-0.5)*0.07;
+  vec2 readingNearUV = vec2(cloudUV.x*nearScale.x+0.13,readingY*nearScale.y+2.48)-readingWarp;
+  vec2 readingFarUV = vec2(cloudUV.x*farScale.x+0.03,readingY*farScale.y+2.98)+readingWarp;
+  // Preserve the moving texture, but route dense banks around the disk.
+  // A soft, irregular opening keeps the rim clear; only the lowest bank
+  // can drift across the bottom of the eclipse.
+  float opening = smoothstep(0.93,1.24,radialDistance+(turbulence-0.5)*0.10);
+  float lowerBank = smoothstep(0.30,1.02,relative.y/radius+(turbulence-0.5)*0.18)*0.82;
+  if (desktopAtmosphere > 0.5) {
+    // The lower 20% of the disk starts at center + 0.6 × radius.
+    // Keep that boundary independent of turbulence and wind.
+    lowerBank = smoothstep(0.60,0.94,relative.y/radius)*0.88;
+  }
+  float coverage = mix(max(opening,lowerBank),1.0,readingMask);
+  // Thin only cloud surfaces crossing the lower disk. Feather the boundary
+  // entirely inside the circle, leaving every outside cloud and mist intact.
+  float overlapStart = mix(0.30,0.60,desktopAtmosphere);
+  float diskOverlap = smoothstep(overlapStart,overlapStart+0.12,relative.y/radius)
+                    *(1.0-smoothstep(0.92,1.0,radialDistance))*(1.0-readingMask);
+  // These broad, irregular pockets travel and fold with the two near-cloud
+  // currents. No independent opacity pulse or fixed screen-space spots.
+  float overlapPockets = mix(
+    noise(deformCloud(nearUV+nearA)*vec2(17.1,13.3)+vec2(2.4,5.7)),
+    noise(deformCloud(nearUV+nearB)*vec2(17.1,13.3)+vec2(2.4,5.7)),nearMix);
+  float overlapReduction = mix(0.10,0.30,smoothstep(0.30,0.70,overlapPockets));
+  float overlapOpacity = 1.0-diskOverlap*overlapReduction;
+  float gapZone = smoothstep(0.55,0.78,uv.y);
+  float farCloud = groupedPlate(farUV,farA,farB,farMix,gapZone)*coverage;
+  float nearCloud = groupedPlate(nearUV,nearA,nearB,nearMix,gapZone)*coverage;
+  // Anchor the bank to the original cover composition within the shared
+  // cloud field. Light, occlusion and texture share the cover coordinates.
+  vec2 bankRelative = vec2(cloudUV.x*aspect,cloudUV.y)-cloudOrigin;
+  // Convert shared wind through each texture's scale so both banks travel
+  // the same screen distance, with the same direction and reversal timing.
+  vec2 bankScale = vec2(mix(1.0,0.56,mobile)*0.34,0.72)/radius;
+  vec2 bankA = windA*bankScale;
+  vec2 bankB = windB*bankScale;
+  vec2 bankUV = vec2(bankRelative.x/radius*0.34+0.48,
+                    (bankRelative.y/radius-0.92)*0.72+0.66)-warp*0.3;
+  const float bankAmount = 0.8;
+  float bankWindow = 0.0;
+  float bankCloud = 0.0;
+  float footWindow = 0.0;
+  vec2 footUV = bankUV+vec2(0.10,-0.42);
+  if (desktopAtmosphere > 0.5) {
+    // Broad, uneven hollows break up the bank without changing its fine
+    // texture or lighting. They travel with the same warped cloud field.
+    float hollow = smoothstep(0.28,0.72,
+      noise((bankUV+mix(bankA,bankB,nearMix))*vec2(6.4,1.7)+vec2(1.8,4.6)));
+    float crest = 0.60+hollow*0.24;
+    bankWindow = smoothstep(crest,crest+0.18,bankRelative.y/radius)
+               *(1.0-smoothstep(1.55,2.16,bankRelative.y/radius))
+               *(1.0-smoothstep(0.90,1.85,abs(bankRelative.x/radius+0.03)));
+    bankWindow *= 1.0-hollow*0.40;
+    bankCloud = groupedPlate(bankUV,bankA,bankB,nearMix,gapZone)*bankWindow*bankAmount;
+    // Fill the lower gap between seven and six o'clock with the same
+    // cloud plate and currents. The extra lobes stay below the disk and
+    // belong to the same cover scene as the eclipse.
+    float footAngle = atan(bankRelative.x,bankRelative.y);
+    footWindow = smoothstep(1.04,1.44,bankRelative.y/radius)
+               *(1.0-smoothstep(1.12,1.38,uv.y))
+               *smoothstep(-0.72,-0.51,footAngle)
+               *(1.0-smoothstep(0.02,0.20,footAngle));
+    footWindow *= 0.55+0.45*hollow;
+    bankCloud += groupedPlate(footUV,bankA,bankB,nearMix,gapZone)*footWindow*0.55;
+    nearCloud += bankCloud*1.08;
+  }
+  // Replace the previous bank with a 1.2x wider/taller coherent group.
+  // Texture scale is divided by that size gain; wind keeps its screen speed.
+  vec2 cumulusCenter = vec2(center.x-radius*mix(0.92,0.56,mobile),0.86);
+  vec2 cumulusScale = vec2(0.1888889,0.2833333)/radius;
+  vec2 cumulusUV = (point-cumulusCenter)*cumulusScale+vec2(0.23,0.63);
+  vec2 cumulusWind = windA*cumulusScale;
+  float cumulusCloud = cumulusPlate(cumulusUV+cumulusWind);
+  // New lower-page clouds replace only the region behind the reading panels.
+  // Cover clouds leave with the hero; these independent clouds are not pulled along.
+  if (readingMask > 0.0) {
+    nearCloud = mix(nearCloud,continuedGroups(readingNearUV,nearA,nearB,readingNearMix)*0.90,readingMask);
+    farCloud = mix(farCloud,continuedGroups(readingFarUV,farA,farB,readingFarMix)*0.80,readingMask);
+  }
+  float fogBody = mix(fbm((point+windC)*2.6),fbm((point+windD)*2.6),farMix);
+  if (readingMask > 0.0) {
+    float lowerFog = mix(fbm((readingPoint+windC)*2.6),fbm((readingPoint+windD)*2.6),readingFarMix);
+    fogBody = mix(fogBody,lowerFog,readingMask);
+  }
+  float fog = smoothstep(0.33,0.85,fogBody);
+  fog *= smoothstep(0.12,0.95,atmosphereUV.y);
+
+  // Only atmosphere is rendered here. The unmodified v8 video below this
+  // transparent canvas supplies the eclipse, its corona and its reveal.
+  // The cached outline mask stays with the letters while cloud density moves
+  // through it. Light follows the DOM reveal, then holds the same full intensity.
+  vec2 titleMask = texture2D(titleEmission,viewportUV).rg;
+  // Increase the existing reflected light by 10%, matching the CSS corona.
+  // Letter-face clearance and the arrival clock remain independent.
+  float titleLight = titleMask.r*titleEnergy*0.88;
+  vec3 titleGold = titleColor;
+  // The brightest point of v8 is on the right rim. All scattering and
+  // surface highlights originate there, rather than in the disk's center.
+  // The sun leaves with the cover. The independent reading scene keeps
+  // an offscreen light source with the same golden angular falloff.
+  vec2 lightCenter = mix(center,vec2(center.x,-radius*0.15),readingMask);
+  vec2 lightPoint = vec2(point.x,mix(point.y,screenUV.y,readingMask));
+  vec2 lightRelative = lightPoint-lightCenter;
+  vec2 lightOrigin = lightCenter+vec2(0.985,0.07)*radius;
+  vec2 fromLight = lightPoint-lightOrigin;
+  float lightDistance = length(fromLight);
+  float reach = exp(-lightDistance*1.65);
+  // Lighting lives in eclipse space, not in the moving cloud texture.
+  // Down is six o'clock, +PI/6 is five, -PI/6 is seven. Direct golden
+  // light still fades beyond seven; scattered light keeps the left visible.
+  float clockAngle = atan(lightRelative.x,lightRelative.y);
+  float facing = lightRelative.x/max(length(lightRelative),0.0001);
+  float rimEmission = pow(clamp((facing+0.30)/1.30,0.0,1.0),1.6);
+  float lowerFan = exp(-pow((clockAngle-0.20)/0.68,2.0))
+                 *smoothstep(0.0,0.45,lightRelative.y/radius);
+  float sevenOclockFalloff = smoothstep(-1.0471976,-0.5235988,clockAngle);
+  float directField = max(rimEmission,lowerFan*0.98)*sevenOclockFalloff;
+  // Reference the existing six-o'clock light at this height. A continuous
+  // screen-space ramp gives the far left 10% and six o'clock 100%, without
+  // changing the bright right rim or the established six-o'clock maximum.
+  float sixField = max(pow(0.30/1.30,1.6),
+    exp(-pow(0.20/0.68,2.0))*0.98*smoothstep(0.0,0.45,lightRelative.y/radius));
+  float sixReach = exp(-length(vec2(radius*0.985,lightRelative.y-radius*0.07))*1.65);
+  float leftRamp = mix(0.10,1.0,smoothstep(0.0,lightCenter.x,point.x));
+  float scatteredLight = sixField*(1.0+desktopAtmosphere*sixReach*0.35)*leftRamp;
+  float directLight = directField*(1.0+desktopAtmosphere*reach*0.35);
+  float illumination = dawn*mix(scatteredLight,directLight,step(lightCenter.x,point.x));
+  vec2 towardLight = normalize(vec2(-fromLight.x/aspect,-fromLight.y)+0.0001);
+  towardLight.x *= mix(1.0,0.56,mobile);
+  float nearBlocker = groupedPlate(nearUV+towardLight*0.065,nearA,nearB,nearMix,gapZone)*coverage;
+  float farBlocker = groupedPlate(farUV+towardLight*0.045,farA,farB,farMix,gapZone)*coverage;
+  float bankBlocker = 0.0;
+  if (desktopAtmosphere > 0.5) {
+    bankBlocker = groupedPlate(bankUV+towardLight*0.085,bankA,bankB,nearMix,gapZone)*bankWindow*bankAmount;
+    bankBlocker += groupedPlate(footUV+towardLight*0.085,bankA,bankB,nearMix,gapZone)*footWindow*0.55;
+    nearBlocker += bankBlocker*1.08;
+  }
+  vec2 cumulusTowardLight = normalize(-fromLight+0.0001)*cumulusScale*radius*0.12;
+  float cumulusBlocker = cumulusPlate(cumulusUV+cumulusWind+cumulusTowardLight);
+  nearBlocker += cumulusBlocker*coverage*0.35*(1.0-readingMask);
+  if (readingMask > 0.0) {
+    nearBlocker = mix(nearBlocker,continuedGroups(readingNearUV+towardLight*0.065,nearA,nearB,readingNearMix)*0.90,readingMask);
+    farBlocker = mix(farBlocker,continuedGroups(readingFarUV+towardLight*0.045,farA,farB,readingFarMix)*0.80,readingMask);
+  }
+  float litEdge = max(0.0,nearCloud-nearBlocker)*1.5
+                +max(0.0,farCloud-farBlocker)*0.65;
+  float transmission = exp(-(nearBlocker*1.8+farBlocker)*1.25*overlapOpacity);
+  float haze = reach*illumination*0.065*(0.12+coverage*0.88);
+  vec3 color = coronaOrange*haze;
+  float density = clamp(farCloud*1.5+nearCloud*1.9,0.0,0.92);
+  float detail = farCloud*0.52+nearCloud*0.85;
+  vec3 shadowColor = mix(vec3(0.028,0.035,0.047),vec3(0.055,0.046,0.036),dawn);
+  // Lift the warm midtones, rather than painting the dark cloud interiors
+  // opaque brown. Existing high-frequency detail remains in the texture.
+  shadowColor = mix(shadowColor,vec3(0.115,0.103,0.085),desktopAtmosphere*dawn);
+  vec3 cloudColor = litCloudColor(detail,litEdge,illumination,reach,shadowColor);
+  // Light-facing ridges catch the corona; intervening folds stay in shadow.
+  float bankRidge = max(0.0,bankCloud-bankBlocker)*3.2*(1.0-readingMask);
+  float bankShade = smoothstep(0.02,0.25,bankBlocker-bankCloud)*max(bankWindow,footWindow)*(1.0-readingMask);
+  cloudColor *= 1.0-bankShade*0.28;
+  cloudColor += mix(coronaGold,rimIvory,0.62)*illumination
+              *(bankRidge+bankCloud*transmission*0.22*(1.0-readingMask))*(0.45+reach*1.15);
+  cloudColor += titleGold*titleLight*(0.45+detail*1.8);
+  color = mix(color,cloudColor,density);
+  color += coronaGold*pow(nearCloud,1.6)*reach*illumination*0.65;
+  // A separate front surface retains opaque folds and a readable silhouette
+  // instead of adding brightness to the fine cloud field underneath it.
+  float cumulusAlpha = clamp(cumulusCloud*1.9,0.0,0.92)*coverage*(1.0-readingMask);
+  float cumulusDetail = cumulusCloud*0.85;
+  float cumulusRidge = max(0.0,cumulusCloud-cumulusBlocker)*1.5;
+  vec3 cumulusColor = litCloudColor(cumulusDetail,cumulusRidge,illumination,reach,shadowColor);
+  cumulusColor += coronaGold*pow(cumulusCloud,1.6)*reach*illumination*0.65;
+  cumulusColor += titleGold*titleLight*(0.45+cumulusDetail*1.8);
+  color = mix(color,cumulusColor,cumulusAlpha);
+  density = 1.0-(1.0-density)*(1.0-cumulusAlpha);
+  // Apply the 10–30% attenuation once to the combined cloud surfaces, not
+  // once per layer. Preserve the clear-air glow and the separate mist veil.
+  color = mix(coronaOrange*haze,color,overlapOpacity);
+  density *= overlapOpacity;
+  // Broad, softly broken shafts fan downward through the mist. Denser
+  // intervening clouds attenuate them, leaving dark pockets between beams.
+  float beamAngle = atan(fromLight.x,fromLight.y);
+  float driftAngle = sin(time*0.065)*0.025;
+  float beams = exp(-pow((beamAngle+0.28+driftAngle)/0.15,2.0))*0.8
+              +exp(-pow((beamAngle+0.60-driftAngle)/0.10,2.0))*0.65
+              +exp(-pow((beamAngle+0.92)/0.18,2.0))*0.35;
+  float beamTravel = smoothstep(0.025,0.18,lightDistance)*exp(-lightDistance*0.95);
+  float shafts = beams*beamTravel*transmission*illumination*smoothstep(0.0,0.16,fromLight.y)*coverage;
+  float fogAlpha = fog*0.22*(0.08+coverage*0.92);
+  vec3 fogColor = vec3(0.012,0.015,0.020)+coronaOrange*illumination*(0.015+reach*0.20);
+  fogColor += coronaGold*desktopAtmosphere*illumination*(0.035+reach*0.12);
+  fogColor += titleGold*titleLight*0.8;
+  color = mix(color,fogColor,fogAlpha);
+  color += coronaGold*shafts*(0.13+fog*0.65)*(1.0-density*0.55)
+          *(1.0+desktopAtmosphere*0.65);
+  color *= 1.0-smoothstep(0.42,1.0,length((atmosphereUV-0.5)*vec2(1.0,0.8)))*0.5;
+  // Keep the title side quiet without hiding the cloud movement.
+  color *= mix(0.52,1.0,smoothstep(0.05,0.65,uv.x)+mobile*0.6);
+  color *= 1.0-smoothstep(0.91,1.04,atmosphereUV.y)*0.45;
+  color /= 1.0+max(0.0,max(color.r,max(color.g,color.b))-0.75)*0.8;
+  float alpha = 1.0-(1.0-haze)*(1.0-density)*(1.0-fogAlpha);
+  // A translucent veil covers the entire scene, including the dark disk.
+  // Reuse the foreground cloud coordinates: wisps follow the same drift,
+  // reversal and edge deformation instead of sliding against the clouds.
+  vec2 mistBase = nearUV*vec2(aspect,1.0);
+  vec2 mistA = nearA*vec2(aspect,1.0);
+  vec2 mistB = nearB*vec2(aspect,1.0);
+  float mistTexture = mix(mistPlate(mistBase+mistA),mistPlate(mistBase+mistB),nearMix);
+  if (readingMask > 0.0) {
+    vec2 lowerMistUV = readingNearUV*vec2(aspect,1.0);
+    float lowerMist = mix(mistPlate(lowerMistUV+mistA),mistPlate(lowerMistUV+mistB),readingNearMix);
+    mistTexture = mix(mistTexture,lowerMist,readingMask);
+  }
+  float diskVeil = mix(mix(0.62,1.0,smoothstep(0.65,1.20,radialDistance)),1.0,readingMask);
+  float rimVeil = 1.0-0.35*exp(-pow((radialDistance-1.0)/0.12,2.0))*(1.0-readingMask);
+  float mistAlpha = (0.025+mistTexture*0.40)*diskVeil*rimVeil;
+  mistAlpha *= mix(0.3,1.0,dawn)*(1.0-smoothstep(0.92,1.04,atmosphereUV.y));
+  // Thin only the wisps crossing the actual letter face, with a soft edge.
+  // The surrounding mist, emission field and shared drift stay intact.
+  mistAlpha *= 1.0-titleMask.g*0.40*smoothstep(0.0,0.4,titleEnergy);
+  vec3 mistColor = vec3(0.23,0.225,0.20)
+                 +coronaGold*illumination*(0.12+reach*0.24);
+  mistColor += coronaGold*desktopAtmosphere*illumination*(0.045+reach*0.10);
+  mistColor += titleGold*titleLight*2.0;
+  // Ambient density must not reveal the clouds before the emitting rim.
+  // The measured video light crosses 0.11 just before two seconds; coupling
+  // to that light also follows video stalls/seeks without a second timer.
+  // Independent reading clouds and static fallbacks stay available.
+  float cloudVisibility = mix(smoothstep(0.11,0.40,dawn),1.0,readingMask);
+  color *= cloudVisibility;
+  alpha *= cloudVisibility;
+  mistAlpha *= cloudVisibility;
+  // Separate compositor surfaces put the outline between dense clouds and
+  // this translucent veil. Both passes share one animation clock.
+#ifdef FOREGROUND_MIST
+  gl_FragColor = vec4(mistColor*mistAlpha,mistAlpha);
+#else
+  gl_FragColor = vec4(color,alpha);
+#endif
+}
+`;
+
+async function createAtmospherePass(
+  canvas: HTMLCanvasElement,
+  image: HTMLImageElement,
+  mist: boolean,
+) {
+  const options: WebGLContextAttributes = {
+    alpha: true,
+    antialias: false,
+    depth: false,
+    powerPreference: 'low-power',
+  };
+  const gl2 = canvas.getContext('webgl2', options);
+  const gl = gl2 ?? canvas.getContext('webgl', options);
+  if (!gl) throw new Error('WebGL unavailable');
+  const parallelCompile = gl.getExtension('KHR_parallel_shader_compile') as {
+    COMPLETION_STATUS_KHR: number;
+  } | null;
+  const shaders: WebGLShader[] = [];
+  const program = gl.createProgram();
+  const buffer = gl.createBuffer();
+  const texture = gl.createTexture();
+  const emissionTexture = gl.createTexture();
+  if (!program || !buffer || !texture || !emissionTexture)
+    throw new Error('Scene allocation failed');
+  const cleanupGPU = () => {
+    gl.deleteTexture(texture);
+    gl.deleteTexture(emissionTexture);
+    gl.deleteBuffer(buffer);
+    gl.deleteProgram(program);
+    shaders.forEach((shader) => gl.deleteShader(shader));
+  };
+  for (const [type, source] of [
+    [gl.VERTEX_SHADER, vertex],
+    [gl.FRAGMENT_SHADER, (mist ? '#define FOREGROUND_MIST\n' : '') + fragment],
+  ] as const) {
+    const shader = gl.createShader(type);
+    if (!shader) {
+      cleanupGPU();
+      throw new Error('Shader unavailable');
+    }
+    shaders.push(shader);
+    // WebGL2 provides an asynchronous GPU fence for the first displayed frame.
+    // Keep the shader math identical, with only the GLSL interface updated.
+    const shaderSource = gl2
+      ? '#version 300 es\n' +
+        (type === gl.VERTEX_SHADER
+          ? source.replace('attribute vec2', 'in vec2')
+          : source
+              .replace(
+                'precision highp float;',
+                'precision highp float;\nout vec4 sceneColor;',
+              )
+              .replaceAll('texture2D(', 'texture(')
+              .replaceAll('gl_FragColor', 'sceneColor'))
+      : source;
+    gl.shaderSource(shader, shaderSource);
+    gl.compileShader(shader);
+    gl.attachShader(program, shader);
+  }
+  gl.linkProgram(program);
+  // Query completion asynchronously when supported so compilation does not
+  // block the page's first interactions on a cold GPU cache.
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  if (parallelCompile) {
+    const started = performance.now();
+    while (
+      !gl.getProgramParameter(program, parallelCompile.COMPLETION_STATUS_KHR)
+    ) {
+      if (gl.isContextLost() || performance.now() - started > 10000) {
+        cleanupGPU();
+        throw new Error('Scene compilation unavailable');
+      }
+      await new Promise<void>((resolve) =>
+        requestAnimationFrame(() => resolve()),
+      );
+    }
+  }
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const error = gl.getProgramInfoLog(program);
+    cleanupGPU();
+    throw new Error(error ?? 'Scene shader failed');
+  }
+  gl.useProgram(program);
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1]),
+    gl.STATIC_DRAW,
+  );
+  const position = gl.getAttribLocation(program, 'position');
+  gl.enableVertexAttribArray(position);
+  gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+  const uniforms = {
+    resolution: gl.getUniformLocation(program, 'resolution'),
+    sceneFrame: gl.getUniformLocation(program, 'sceneFrame'),
+    scrollOffset: gl.getUniformLocation(program, 'scrollOffset'),
+    readingOnly: gl.getUniformLocation(program, 'readingOnly'),
+    time: gl.getUniformLocation(program, 'time'),
+    dawn: gl.getUniformLocation(program, 'dawn'),
+    desktopAtmosphere: gl.getUniformLocation(program, 'desktopAtmosphere'),
+    eclipse: gl.getUniformLocation(program, 'eclipse'),
+    cloudOrigin: gl.getUniformLocation(program, 'cloudOrigin'),
+    titleEnergy: gl.getUniformLocation(program, 'titleEnergy'),
+    titleColor: gl.getUniformLocation(program, 'titleColor'),
+  };
+  gl.uniform1i(gl.getUniformLocation(program, 'clouds'), 0);
+  gl.activeTexture(gl.TEXTURE1);
+  gl.bindTexture(gl.TEXTURE_2D, emissionTexture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  // Reading pages have no title emission. A complete black texture keeps
+  // sampling valid there, until the home title supplies its real light mask.
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    1,
+    1,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    new Uint8Array([0, 0, 0, 255]),
+  );
+  gl.uniform1i(gl.getUniformLocation(program, 'titleEmission'), 1);
+  let fence: WebGLSync | null = null;
+  let prepared = !gl2;
+  if (gl2) canvas.style.visibility = 'hidden';
+  return {
+    canvas,
+    gl,
+    uniforms,
+    emissionTexture,
+    prepare() {
+      if (!gl2 || prepared) return true;
+      if (!fence) {
+        fence = gl2.fenceSync(gl2.SYNC_GPU_COMMANDS_COMPLETE, 0);
+        if (!fence) throw new Error('Scene preparation unavailable');
+        gl2.flush();
+        return false;
+      }
+      const status = gl2.clientWaitSync(fence, 0, 0);
+      if (status === gl2.TIMEOUT_EXPIRED) return false;
+      if (status === gl2.WAIT_FAILED)
+        throw new Error('Scene preparation failed');
+      gl2.deleteSync(fence);
+      fence = null;
+      prepared = true;
+      canvas.style.visibility = '';
+      return true;
+    },
+    dispose() {
+      if (fence) gl2?.deleteSync(fence);
+      canvas.style.visibility = '';
+      cleanupGPU();
+    },
+  };
+}
+
+export async function createDawnRenderer(
+  cloudCanvas: HTMLCanvasElement,
+  mistCanvas: HTMLCanvasElement,
+  host: HTMLElement,
+): Promise<DawnRenderer> {
+  const image = new Image();
+  image.src = '/visual/atmosphere/golden-cloud-bank-v3.webp';
+  await image.decode();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  const clouds = await createAtmospherePass(cloudCanvas, image, false);
+  let mist: Awaited<ReturnType<typeof createAtmospherePass>>;
+  try {
+    mist = await createAtmospherePass(mistCanvas, image, true);
+  } catch (error) {
+    clouds.dispose();
+    throw error;
+  }
+  const passes = [clouds, mist];
+  let frame = 0;
+  let playing = false;
+  let disposed = false;
+  let elapsed = 0;
+  let previous = 0;
+  let renderedAt = 0;
+  let progress = 0;
+  let resize = true;
+  let prepared = false;
+  let preparationStarted = false;
+  let width = host.clientWidth;
+  let height = host.clientHeight;
+  const hero = host.closest<HTMLElement>('[data-home-hero]');
+  const readingOnly = host.dataset.surface === 'reading';
+  const moon = hero?.querySelector<HTMLElement>('moon-light');
+  const title = hero?.querySelector<HTMLElement>('.home-hero__dawn');
+  const emission = document.createElement('canvas');
+  const ink = emission.getContext('2d');
+  let geometryDirty = true;
+  let readingProgress = 0;
+  let titlePhase: string | undefined;
+  let titleAnimation: Animation | undefined;
+  const invalidateGeometry = () => {
+    geometryDirty = true;
+  };
+  window.addEventListener('scroll', invalidateGeometry, { passive: true });
+  void document.fonts.ready.then(invalidateGeometry);
+  const titleObserver = new ResizeObserver(invalidateGeometry);
+  if (title) titleObserver.observe(title);
+
+  function updateEmission() {
+    geometryDirty = false;
+    if (!ink || !title || !title.firstChild) return;
+    const scale = Math.min(1, 800 / Math.max(width, 1));
+    emission.width = Math.max(1, Math.round(width * scale));
+    emission.height = Math.max(1, Math.round(height * scale));
+    const bounds = host.getBoundingClientRect();
+    const range = document.createRange();
+    range.selectNodeContents(title.firstChild);
+    const glyphs = range.getBoundingClientRect();
+    const style = getComputedStyle(title);
+    ink.scale(scale, scale);
+    ink.fillStyle = '#000';
+    ink.fillRect(0, 0, width, height);
+    ink.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    ink.letterSpacing = style.letterSpacing;
+    const text = title.firstChild.textContent?.trim() ?? 'TIL DAWN';
+    const metrics = ink.measureText(text);
+    const x = glyphs.x - bounds.x;
+    const y = glyphs.y - bounds.y + metrics.fontBoundingBoxAscent;
+    const fontSize = parseFloat(style.fontSize);
+    // Letter size and the physical glow radius are independent. Keep the
+    // reflected mist and outline clearance aligned with the CSS corona.
+    const effectSize =
+      fontSize * parseFloat(style.getPropertyValue('--dawn-effect-scale'));
+    const glowSize =
+      effectSize *
+      parseFloat(style.getPropertyValue('--dawn-glow-scale')) *
+      parseFloat(style.getPropertyValue('--dawn-glow-reach'));
+    const radius =
+      glowSize * parseFloat(style.getPropertyValue('--dawn-spill-scale'));
+    const wideGain = parseFloat(style.getPropertyValue('--dawn-wide-gain'));
+    // Match the CSS falloff: a clear nearby reflection with a quieter halo.
+    ink.strokeStyle = '#f00';
+    ink.lineWidth = Math.max(2, glowSize * 0.045);
+    ink.filter = `blur(${radius * scale * 0.36}px)`;
+    ink.strokeText(text, x, y);
+    // A second, softer shell lets nearby wisps catch light beyond the glyph.
+    ink.globalAlpha = 0.5 * wideGain;
+    ink.lineWidth *= 1.6;
+    ink.filter = `blur(${radius * scale * 0.8}px)`;
+    ink.strokeText(text, x, y);
+    // Green protects only the bright outline; the open interiors retain mist.
+    // Additive packing
+    // leaves the red light field untouched; no extra texture or frame work.
+    ink.globalAlpha = 1;
+    ink.globalCompositeOperation = 'lighter';
+    ink.strokeStyle = '#0f0';
+    ink.lineWidth = Math.max(3, effectSize * 0.028);
+    ink.filter = `blur(${1.5 * scale}px)`;
+    ink.strokeText(text, x, y);
+    // Use the same orange-gold source for CSS glow and illuminated mist.
+    const hex = style.getPropertyValue('--dawn-light-middle').trim().slice(1);
+    const rgb = parseInt(hex, 16);
+    for (const { gl, uniforms, emissionTexture } of passes) {
+      gl.uniform3f(
+        uniforms.titleColor,
+        (rgb >> 16) / 255,
+        ((rgb >> 8) & 255) / 255,
+        (rgb & 255) / 255,
+      );
+      gl.activeTexture(gl.TEXTURE1);
+      gl.bindTexture(gl.TEXTURE_2D, emissionTexture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        emission,
+      );
+    }
+    geometryDirty = false;
+  }
+
+  // CSS keyframe easing, evaluated from the actual animation clock. This
+  // stays synchronized after pauses/seeks without per-frame style/layout reads.
+  function ease(value: number, x1: number, y1: number, x2: number, y2: number) {
+    let low = 0,
+      high = 1;
+    for (let i = 0; i < 12; i++) {
+      const t = (low + high) / 2;
+      const x =
+        3 * (1 - t) * (1 - t) * t * x1 + 3 * (1 - t) * t * t * x2 + t * t * t;
+      if (x < value) low = t;
+      else high = t;
+    }
+    const t = (low + high) / 2;
+    return (
+      3 * (1 - t) * (1 - t) * t * y1 + 3 * (1 - t) * t * t * y2 + t * t * t
+    );
+  }
+  function emissionEnergy() {
+    const phase = hero?.dataset.titlePhase;
+    if (phase !== titlePhase) {
+      titlePhase = phase;
+      titleAnimation = title?.getAnimations()[0];
+    }
+    if (phase === 'shown' || phase === 'static') return 1;
+    const timing = titleAnimation?.effect?.getComputedTiming();
+    const p = timing?.progress ?? 0;
+    return ease(p, 0.2, 0.65, 0.25, 1);
+  }
+  const observer = new ResizeObserver(([entry]) => {
+    if (!entry) return;
+    width = entry.contentRect.width;
+    height = entry.contentRect.height;
+    resize = true;
+  });
+  observer.observe(host);
+  const coverObserver = new ResizeObserver(invalidateGeometry);
+  if (hero) coverObserver.observe(hero);
+
+  function updateSceneGeometry() {
+    const cover = hero?.getBoundingClientRect();
+    const art = moon?.getBoundingClientRect();
+    const origin = cover ? cover.top + window.scrollY : 0;
+    const stage = Math.max(
+      1,
+      cover?.height ?? Math.min(848, Math.max(640, width * 0.53)),
+    );
+    const x = art ? (art.x + art.width / 2) / stage : (width * 0.73) / stage;
+    const y = art
+      ? (art.y + window.scrollY + art.height / 2 - origin) / stage
+      : 0.42;
+    const radius = art
+      ? (art.width * 0.3104375) / stage
+      : (width * 0.2) / stage;
+    const scroll = Math.max(0, Math.min(1, window.scrollY / (origin + stage)));
+    readingProgress = readingOnly ? 1 : scroll * scroll * (3 - 2 * scroll);
+    for (const { gl, uniforms } of passes) {
+      gl.uniform3f(
+        uniforms.sceneFrame,
+        width / stage,
+        height / stage,
+        origin / stage,
+      );
+      gl.uniform1f(uniforms.scrollOffset, window.scrollY / stage);
+      gl.uniform1f(uniforms.readingOnly, readingOnly ? 1 : 0);
+      gl.uniform2f(uniforms.cloudOrigin, x, y);
+      gl.uniform3f(uniforms.eclipse, x, y, radius);
+    }
+  }
+  function draw(now: number) {
+    if (!playing || disposed) return;
+    frame = requestAnimationFrame(draw);
+    if (previous) elapsed += Math.min(now - previous, 100) / 1000;
+    previous = now;
+    // A soft, atmospheric scene needs 30 fps, not full device DPR rendering.
+    if (now - renderedAt < 32) return;
+    renderedAt = now;
+    // A canvas commit waits for all preceding GPU commands. Prepare the first
+    // frame while hidden, then poll its fence without blocking the main thread.
+    // The existing CSS atmosphere remains visible until both layers are ready.
+    if (preparationStarted && !prepared) {
+      try {
+        prepared = passes.map((pass) => pass.prepare()).every(Boolean);
+      } catch {
+        dispose();
+        return;
+      }
+      if (!prepared) return;
+    }
+    if (resize) {
+      const scale = Math.min(1.25, 1000 / Math.max(width, 1));
+      const desktopAtmosphere = matchMedia('(min-width: 42.001rem)').matches;
+      for (const { canvas, gl, uniforms } of passes) {
+        canvas.width = Math.max(1, Math.round(width * scale));
+        canvas.height = Math.max(1, Math.round(height * scale));
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
+        gl.uniform1f(uniforms.desktopAtmosphere, desktopAtmosphere ? 1 : 0);
+      }
+      resize = false;
+      geometryDirty = true;
+    }
+    if (geometryDirty) {
+      updateSceneGeometry();
+      updateEmission();
+    }
+    progress = Math.max(
+      readingProgress,
+      Math.min(1, Number(moon?.dataset.light ?? 0)),
+    );
+    const energy = emissionEnergy();
+    for (const { gl, uniforms } of passes) {
+      gl.uniform1f(uniforms.time, elapsed);
+      gl.uniform1f(uniforms.dawn, progress);
+      gl.uniform1f(uniforms.titleEnergy, energy);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+    }
+    if (!prepared) {
+      preparationStarted = true;
+      try {
+        prepared = passes.map((pass) => pass.prepare()).every(Boolean);
+      } catch {
+        dispose();
+        return;
+      }
+      if (!prepared) return;
+    }
+    host.dataset.titleLight = energy.toFixed(3);
+    host.dataset.renderer = 'webgl';
+    host.dataset.dawnProgress = progress.toFixed(3);
+    host.dataset.state =
+      readingProgress === 1
+        ? 'reading'
+        : moon?.dataset.phase === 'loop' || moon?.dataset.fallback === 'true'
+          ? 'dawn'
+          : 'revealing';
+  }
+  const contextLost = (event: Event) => {
+    event.preventDefault();
+    dispose();
+  };
+  for (const { canvas } of passes)
+    canvas.addEventListener('webglcontextlost', contextLost);
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    playing = false;
+    cancelAnimationFrame(frame);
+    observer.disconnect();
+    coverObserver.disconnect();
+    titleObserver.disconnect();
+    window.removeEventListener('scroll', invalidateGeometry);
+    for (const pass of passes) {
+      pass.canvas.removeEventListener('webglcontextlost', contextLost);
+      pass.dispose();
+    }
+    delete host.dataset.renderer;
+    host.dataset.state = 'still';
+  }
+  return {
+    setPlaying(value) {
+      if (disposed || value === playing) return;
+      playing = value;
+      previous = 0;
+      if (value) {
+        frame = requestAnimationFrame(draw);
+      } else {
+        cancelAnimationFrame(frame);
+        host.dataset.state = 'paused';
+      }
+    },
+    dispose,
+  };
+}

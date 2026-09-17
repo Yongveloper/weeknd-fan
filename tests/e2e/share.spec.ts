@@ -276,9 +276,9 @@ test('creates the expected-setlist JPEG without personal input', async ({
     if (/\/api\//.test(request.url())) apiRequests.push(request.url());
   });
   await page.goto('/share/setlist/');
-  await expect(
-    page.getByText('예상 · 보장 아님', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님', { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     page.getByText(
       '이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.',
@@ -457,7 +457,7 @@ test.describe('without JavaScript', () => {
     await page.goto('/share/setlist/');
     await expect(
       page.getByText('예상 · 보장 아님', { exact: true }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(page.getByText('담기는 곡', { exact: true })).toBeVisible();
     await expect(page.getByText('기준', { exact: true })).toBeVisible();
     await expect(

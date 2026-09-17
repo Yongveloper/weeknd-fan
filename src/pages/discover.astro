@@ -2,7 +2,6 @@
 import { getCollection, render } from 'astro:content';
 import AlbumCover from '../components/content/AlbumCover.astro';
 import SourceList from '../components/content/SourceList.astro';
-import StatusBadge from '../components/content/StatusBadge.astro';
 import CareerTimeline from '../components/discover/CareerTimeline.astro';
 import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
 import BaseLayout from '../layouts/BaseLayout.astro';
@@ -35,6 +34,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
 ---
 
 <BaseLayout
+  cloudSky
   title="The Weeknd 알기 | The Weeknd 고양 팬 가이드"
   description="공연 전 1분에 훑는 The Weeknd의 커리어, 앨범 구분, 그리고 두 3부작"
 >
@@ -46,7 +46,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         <span class="discover__hero-phrase">한 장씩</span> 넘겨 보기
       </h1>
       <p>{intro.data.summary}</p>
-      <StatusBadge status={intro.data.status} />
       <Disclosure
         ariaLabel="1분 입문 더 깊이 보기"
         label="1분 입문 펼쳐보기"
@@ -93,7 +92,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         <p class="eyebrow">GLOSSARY</p>
         <h2 id="glossary-title">{glossary.data.title}</h2>
         <p>{glossary.data.summary}</p>
-        <StatusBadge status={glossary.data.status} />
         <Disclosure
           ariaLabel="용어 한 장 더 깊이 보기"
           label="더 깊이 보기"
@@ -107,7 +105,6 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         <p class="eyebrow">VISUAL LANGUAGE</p>
         <h2>{visual.data.title}</h2>
         <p>{visual.data.summary}</p>
-        <StatusBadge status={visual.data.status} />
         <Disclosure
           ariaLabel="보는 음악 더 깊이 보기"
           label="더 깊이 보기"

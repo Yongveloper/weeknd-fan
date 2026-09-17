@@ -333,7 +333,7 @@ test('keeps the desktop navigation open and inline', async ({ page }) => {
 
   await expect(details).toHaveAttribute('open', '');
   await expect(summary).toBeHidden();
-  await expect(links).toHaveCount(5);
+  await expect(links).toHaveCount(4);
   for (const link of await links.all()) await expect(link).toBeVisible();
   expect(
     await details
@@ -354,7 +354,7 @@ test.describe('without JavaScript', () => {
     const links = details.getByRole('link');
 
     await expect(details).toHaveAttribute('open', '');
-    await expect(links).toHaveCount(5);
+    await expect(links).toHaveCount(4);
     for (const link of await links.all()) await expect(link).toBeVisible();
 
     await links.first().focus();

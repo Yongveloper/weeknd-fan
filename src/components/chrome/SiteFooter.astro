@@ -1,7 +1,8 @@
 ---
 import { formatSeoulDate } from '../../lib/content/audit';
 import { getConcert } from '../../lib/content/queries';
-import { navigation } from './navigation';
+import { footerNavigation } from './navigation';
+import Wordmark from './Wordmark.astro';
 
 const concert = await getConcert();
 const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
@@ -10,14 +11,14 @@ const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
 <footer class="site-footer">
   <div class="shell-content site-footer__inner" data-enter-group>
     <div>
-      <p class="eyebrow">DAWNFOLD / GOYANG 2026</p>
+      <p class="eyebrow"><Wordmark /> / GOYANG 2026</p>
       <p class="site-footer__disclaimer">비공식·비영리 팬 가이드</p>
       <p class="site-footer__verified">공식 정보 마지막 확인 {lastVerified}</p>
     </div>
     <nav class="site-footer__nav" aria-label="사이트 지도">
       <ul>
         {
-          navigation.map(({ href, label }) => (
+          footerNavigation.map(({ href, label }) => (
             <li>
               <a href={href}>{label}</a>
             </li>

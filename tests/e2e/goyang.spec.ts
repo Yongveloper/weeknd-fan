@@ -88,7 +88,7 @@ test('groups the five review-based tips into keyboard-operable tabs', async ({
 }) => {
   await page.goto('/goyang/');
   const tips = page.locator('#tips');
-  await expect(tips.getByText('후기 기반 · 이 공연 미확정')).toBeVisible();
+  await expect(tips.getByText('후기 기반 · 이 공연 미확정')).toHaveCount(0);
   const tabs = tips.getByRole('tab');
   await expect(tabs).toHaveText([
     '스탠딩',

@@ -5,6 +5,8 @@
 .superpowers/
 .worktrees/
 tmp/
+output/
+.playwright-mcp/
 node_modules
 dist/
 .next/

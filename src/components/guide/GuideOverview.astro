@@ -20,6 +20,17 @@ const groups = [
 ].map((group) => ({
   ...group,
   items: group.ids.flatMap((id) => items.filter((item) => item.id === id)),
+  statusLabels: [
+    ...new Set(
+      items
+        .filter(
+          (item) =>
+            group.ids.includes(item.id) &&
+            !['official', 'practical'].includes(item.status),
+        )
+        .map((item) => STATUS_LABELS[item.status]),
+    ),
+  ],
 }));
 ---
 
@@ -29,9 +40,9 @@ const groups = [
       <a href={`#${group.ids[0]}`}>
         <strong>{group.label}</strong>
         <span>{group.items.map((item) => item.label).join(' · ')}</span>
-        <small>
-          {group.items.map((item) => STATUS_LABELS[item.status]).join(' · ')}
-        </small>
+        {group.statusLabels.length > 0 && (
+          <small>{group.statusLabels.join(' · ')}</small>
+        )}
       </a>
     ))
   }
@@ -45,6 +56,7 @@ const groups = [
   }
   a {
     display: grid;
+    align-content: start;
     gap: 0.25rem;
     min-height: 44px;
     padding: 0.85rem;

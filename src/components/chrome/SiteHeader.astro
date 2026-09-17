@@ -1,5 +1,6 @@
 ---
 import { navigation, wordmark } from './navigation';
+import Wordmark from './Wordmark.astro';
 
 const pathname = Astro.url.pathname;
 ---
@@ -13,9 +14,11 @@ const pathname = Astro.url.pathname;
     <a
       class="site-header__wordmark"
       href="/"
-      aria-label="The Weeknd 고양 팬 가이드 홈"
+      aria-label={`${wordmark.name} · The Weeknd 고양 팬 가이드 홈`}
     >
-      <span aria-hidden="true">{wordmark.name}</span>
+      <span class="site-header__name" aria-hidden="true">
+        <Wordmark spread />
+      </span>
       <span class="site-header__edition" aria-hidden="true"
         >{wordmark.edition}</span
       >
@@ -75,6 +78,7 @@ const pathname = Astro.url.pathname;
 
   .site-header__wordmark {
     display: grid;
+    grid-template-columns: minmax(0, max-content);
     flex: 0 0 auto;
     color: var(--ivory);
     /* Header aliases (BaseLayout preloads them, font-display: block) keep the
@@ -84,6 +88,16 @@ const pathname = Astro.url.pathname;
     letter-spacing: 0.075em;
     line-height: 0.8;
     text-decoration: none;
+  }
+
+  .site-header__name {
+    display: flex;
+    justify-content: space-between;
+    /* The edition line sets the lockup width; distribute the name's spacing
+       across that measure without stretching the glyphs. */
+    inline-size: 0;
+    min-inline-size: 100%;
+    letter-spacing: 0;
   }
 
   .site-header__nav,
@@ -123,6 +137,7 @@ const pathname = Astro.url.pathname;
     font-size: 0.6875rem;
     font-weight: 800;
     letter-spacing: 0.22em;
+    white-space: nowrap;
   }
 
   .site-header__nav-list {
@@ -191,9 +206,8 @@ const pathname = Astro.url.pathname;
       max-inline-size: 100%;
     }
 
-    .site-header__wordmark > span {
-      min-inline-size: 0;
-      overflow-wrap: anywhere;
+    .site-header__edition {
+      white-space: normal;
     }
 
     .site-header__nav {

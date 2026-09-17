@@ -1,0 +1,72 @@
+---
+import { wordmark } from './navigation';
+
+interface Props {
+  spread?: boolean;
+}
+const { spread = false } = Astro.props;
+---
+
+<span class:list={['brand-wordmark', { 'brand-wordmark--spread': spread }]}>
+  {
+    Array.from(wordmark.name).map((letter) =>
+      letter === ':' ? (
+        <span class="brand-wordmark__colon">
+          <span class="brand-wordmark__punctuation">:</span>
+        </span>
+      ) : (
+        <span>{letter}</span>
+      ),
+    )
+  }
+</span>
+
+<style>
+  .brand-wordmark {
+    display: inline-flex;
+    align-items: baseline;
+    white-space: nowrap;
+  }
+
+  .brand-wordmark--spread {
+    display: flex;
+    justify-content: space-between;
+    inline-size: 100%;
+  }
+
+  .brand-wordmark__colon {
+    position: relative;
+    flex: 0 0 0.188em;
+    /* The empty inline box sits on the text baseline. Cap units align the
+       two round dots with the uppercase letters in either existing face. */
+    block-size: 1cap;
+  }
+
+  .brand-wordmark__colon::before,
+  .brand-wordmark__colon::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 50%;
+    inline-size: 0.11em;
+    block-size: 0.11em;
+    border-radius: 50%;
+    background: currentColor;
+    transform: translateX(-50%);
+  }
+
+  .brand-wordmark__colon::before {
+    inset-block-start: 0;
+  }
+
+  .brand-wordmark__colon::after {
+    inset-block-end: 0;
+  }
+
+  .brand-wordmark__punctuation {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+</style>

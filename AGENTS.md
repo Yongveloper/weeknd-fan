@@ -1,4 +1,4 @@
-# AGENTS.md — The Weeknd 고양 팬 가이드
+# AGENTS.md — The Weeknd 고양 팬 가이드: 새 에디션
 
 The Weeknd 2026-10-07/08 고양종합운동장 공연의 **비공식·비영리 정적 팬 가이드**. Astro 6 (`output: 'static'`) → Cloudflare Workers Static Assets(`dist/`만). 콘텐츠는 한국어, 코드·커밋은 영어.
 
@@ -72,3 +72,7 @@ content: refresh Tokyo verification      # 콘텐츠 갱신 전용 형식 (runbo
 ```
 
 커밋 전 `npm run verify` 통과. `docs/handoff-context.md`, `.superpowers/`, `.worktrees/`, `tmp/`, `.playwright-mcp/`는 gitignore/로컬 — 커밋하지 않는다.
+
+## 새 에디션 작업 경계
+
+이 폴더는 기존 ../weeknd-fan과 분리된 새 웹이다. 기존 폴더는 수정하지 않는다. 이 버전의 dev/preview/test 포트는 4323이며 원본은 4321이다. 디자인의 최신 기준은 docs/new-edition-design.md 및 src/styles/edition.css이다. 기존 콘텐츠·라벨·정보·기능 변경은 사용자에게 구체적인 변경안과 이유를 제시하고 승인을 받은 뒤 진행한다.

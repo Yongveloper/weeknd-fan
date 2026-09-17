@@ -16,7 +16,6 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   data-songs={JSON.stringify(songs)}
 >
   <header>
-    <p class="eyebrow">PRIVATE EXPORT</p>
     <h1>D-DAY TICKET</h1>
     <p>관람일과 가장 기다리는 세 곡을 골라 나만의 티켓을 만드세요.</p>
   </header>
@@ -254,9 +253,10 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
 
 <style>
   .share-builder {
+    container-type: inline-size;
     display: grid;
     gap: clamp(2.5rem, 6vw, 5rem);
-    max-width: 58rem;
+    max-width: 74rem;
     min-width: 0;
     padding-block: clamp(4rem, 10vw, 8rem);
   }
@@ -264,8 +264,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     align-items: start;
     display: grid;
     gap: clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-    max-width: 64rem;
+    grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
+    max-width: 74rem;
     min-width: 0;
   }
   header,
@@ -290,8 +290,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   }
   .card-preview canvas {
     aspect-ratio: 4 / 5;
-    background: #050507;
-    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #080807;
+    border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
     color: var(--mist);
     display: block;
     height: auto;
@@ -367,7 +367,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   select:focus-visible,
   button:focus-visible,
   input:focus-visible {
-    outline: 3px solid var(--blue);
+    outline: 3px solid var(--amber);
     outline-offset: 3px;
   }
   .status {
@@ -425,6 +425,11 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   .share-builder__back:hover,
   .share-builder__back:focus-visible {
     color: var(--amber);
+  }
+  @container (max-width: 56rem) {
+    .share-builder__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
   @media (max-width: 48rem) {
     .share-builder,
