@@ -46,8 +46,9 @@ test('keeps a ten-percent left glow rising to the unchanged six oclock light', a
     };
   });
   await page.addStyleTag({
+    // Probe the lighting field itself, without the film-grain compositing pass.
     content:
-      '.site-header,.dawn-sky__eclipse,.home-hero__content,.dawn-sky__foreground,.reading-panel,.site-footer,.back-to-top { visibility:hidden!important; }',
+      '.site-header,.dawn-sky__eclipse,.home-hero__content,.dawn-sky__foreground,.dawn-sky__grain,.reading-panel,.site-footer,.back-to-top { visibility:hidden!important; }',
   });
   const frame = await sky.screenshot({ scale: 'css' });
   const sample = async (x: number, y: number) => {

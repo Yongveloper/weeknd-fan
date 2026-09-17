@@ -168,6 +168,18 @@ vec3 litCloudColor(float detail, float litEdge, float illumination, float reach,
            *(0.045+reach*0.26)*sqrt(clamp(detail,0.0,1.0))*bodyShade;
   return color;
 }
+// Shape the shaded side of the cover using the existing light-facing sample.
+// Ridges receive warm bounce light, while the folds behind them retain depth.
+// This is surface shading only: the texture, density and wind stay unchanged.
+vec3 sculptCloud(vec3 color, float detail, float blocked, float illumination, float reach, float amount) {
+  float ridge = smoothstep(0.012,0.14,detail-blocked);
+  float fold = smoothstep(0.008,0.12,blocked-detail);
+  float softInterior = 1.0-smoothstep(0.035,0.20,detail);
+  vec3 sculpted = color*(1.0-fold*0.26-softInterior*0.08);
+  sculpted += mix(coronaOrange,coronaGold,ridge)*illumination
+            *(0.18+reach*0.65)*ridge*0.85;
+  return mix(color,sculpted,amount);
+}
 float mistPlate(vec2 p) {
   p = deformCloud(p);
   float body = fbm(p*3.2+vec2(4.1,7.3));
@@ -359,6 +371,19 @@ void main() {
   float scatteredLight = sixField*(1.0+desktopAtmosphere*sixReach*0.35)*leftRamp;
   float directLight = directField*(1.0+desktopAtmosphere*reach*0.35);
   float illumination = dawn*mix(scatteredLight,directLight,step(lightCenter.x,point.x));
+  // Lift the lower cover's cloud surfaces, not their opacity or light hue.
+  // Project the seven-o'clock ray to the cover foot: +10% at the left edge,
+  // +15% there, then feather back into the unchanged six-o'clock light.
+  float sevenFootX = max(0.001,center.x-(1.0-center.y)*0.5773503);
+  float lowerLift = smoothstep(center.y+radius*0.60,center.y+radius*1.10,point.y);
+  float leftLift = mix(0.10,0.15,smoothstep(0.0,sevenFootX,point.x))
+                 *(1.0-smoothstep(sevenFootX,center.x,point.x));
+  float cloudBrightness = 1.0+leftLift*lowerLift*(1.0-readingMask);
+  // The soft join straddles the visible left rim; there is no rectangular
+  // grading boundary where these clouds meet the bank below the eclipse.
+  float leftRelief = smoothstep(center.y+radius*0.35,center.y+radius*0.90,point.y)
+                   *(1.0-smoothstep(center.x-radius*1.20,center.x-radius*0.60,point.x))
+                   *(1.0-readingMask);
   vec2 towardLight = normalize(vec2(-fromLight.x/aspect,-fromLight.y)+0.0001);
   towardLight.x *= mix(1.0,0.56,mobile);
   float nearBlocker = groupedPlate(nearUV+towardLight*0.065,nearA,nearB,nearMix,gapZone)*coverage;
@@ -394,9 +419,12 @@ void main() {
   cloudColor *= 1.0-bankShade*0.28;
   cloudColor += mix(coronaGold,rimIvory,0.62)*illumination
               *(bankRidge+bankCloud*transmission*0.22*(1.0-readingMask))*(0.45+reach*1.15);
+  cloudColor = sculptCloud(cloudColor,detail,nearBlocker*0.85+farBlocker*0.52,
+                          illumination,reach,leftRelief);
   cloudColor += titleGold*titleLight*(0.45+detail*1.8);
+  cloudColor *= cloudBrightness;
   color = mix(color,cloudColor,density);
-  color += coronaGold*pow(nearCloud,1.6)*reach*illumination*0.65;
+  color += coronaGold*pow(nearCloud,1.6)*reach*illumination*0.65*cloudBrightness;
   // A separate front surface retains opaque folds and a readable silhouette
   // instead of adding brightness to the fine cloud field underneath it.
   float cumulusAlpha = clamp(cumulusCloud*1.9,0.0,0.92)*coverage*(1.0-readingMask);
@@ -404,7 +432,10 @@ void main() {
   float cumulusRidge = max(0.0,cumulusCloud-cumulusBlocker)*1.5;
   vec3 cumulusColor = litCloudColor(cumulusDetail,cumulusRidge,illumination,reach,shadowColor);
   cumulusColor += coronaGold*pow(cumulusCloud,1.6)*reach*illumination*0.65;
+  cumulusColor = sculptCloud(cumulusColor,cumulusDetail,cumulusBlocker*0.85,
+                            illumination,reach,leftRelief);
   cumulusColor += titleGold*titleLight*(0.45+cumulusDetail*1.8);
+  cumulusColor *= cloudBrightness;
   color = mix(color,cumulusColor,cumulusAlpha);
   density = 1.0-(1.0-density)*(1.0-cumulusAlpha);
   // Apply the 10–30% attenuation once to the combined cloud surfaces, not

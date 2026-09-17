@@ -10,6 +10,8 @@ This branch contains the current design for team review. It is not a production 
 - Home grain opacity is 0.21735 (0.18 × 1.15 × 1.05). AFTER HOURS has a separate 11.5% monochrome ink-grain modulation (10% × 1.15), independent of its existing blur reveal.
 - Matching ticket/poster artwork and browser-local JPEG export.
 - Responsive layout, navigation and enlarged-text fixes made during the design review.
+- Lower-left cover clouds receive a feathered 10–15% surface-brightness lift and directional ridge/fold shading, joining smoothly into the bank below the eclipse. Their density, wind, reveal and source-light palette are retained.
+- The concert guide jump bar shares the surrounding translucent reading surface, then becomes opaque black over the final 96px before docking. Opacity follows scroll position in both directions; mobile edge fades apply only to the links.
 
 The approved visual source is documented in `DESIGN.md` and `docs/share-art-direction.md`. Runtime assets and fonts are included; no credentials, build output, local backups or generated working previews are included.
 
@@ -29,6 +31,14 @@ The approved visual source is documented in `DESIGN.md` and `docs/share-art-dire
 - Six headless desktop/mobile cloud and title tests passed. The cloud regression test checks rendered brightness at quarter, half, and three-quarter reveal, plus the one-second delay and four-second completion independently of video light changes.
 - Desktop/mobile captures confirmed the live page-clock reveal, unchanged title geometry and effects, no horizontal overflow, and no browser page errors. Reduced-motion/static cover clouds retain a matching lower-density mask.
 - This follow-up does not clear the separate release gates below.
+
+## Cloud depth and guide-bar follow-up checks
+
+- Fresh lint, full formatting and Astro type checks passed before upload. Production build and asset budgets passed; JavaScript is 26.6 KiB gzip / 75 KiB and raster remains 914.3 KiB / 1300 KiB.
+- Twelve targeted headless desktop/mobile tests passed together on this revision, covering cloud lighting/reveal and guide links, text zoom, horizontal scrolling and direct-hash alignment.
+- Desktop/mobile captures confirmed the cloud shading and continuous transition beneath the eclipse. Manual scroll probes confirmed transparent, intermediate, opaque and reversed guide-bar states, with no horizontal overflow or page errors.
+- The lighting regression probe now excludes the decorative grain overlay so it measures the light field independently. Existing lighting assertions were not relaxed.
+- The complete `npm run verify` chain was rerun and still stops at the same content audit below. Later stages of that chain and the previously unresolved full-browser checks are not claimed as passing.
 
 ## Release gates still open
 

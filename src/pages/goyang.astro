@@ -162,20 +162,31 @@ const overviewItems = jump.map(({ id, label }) => {
     margin-inline: calc(var(--gutter) * -1);
     padding: 0.6rem var(--gutter);
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
-    background: color-mix(in srgb, var(--night) 82%, transparent);
-    backdrop-filter: blur(14px);
+    /* Share the parent's glass exactly: a second tint, blur or saturation
+       pass makes this strip darker than the surrounding reading surface. */
+    isolation: isolate;
+    background: transparent;
+  }
+  :global(.guide-jump::before) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: #000;
+    /* Scroll distance drives opacity directly, so reversing or stopping the
+       scroll never leaves a time-based fade catching up behind the user. */
+    opacity: var(--guide-stickiness, 0);
   }
   @media (max-width: 44rem) {
-    :global(.guide-jump) {
+    :global(.guide-jump nav) {
       mask-image: linear-gradient(
         90deg,
         transparent,
-        #000 var(--gutter),
-        #000 calc(100% - 3rem),
+        #000 0.5rem,
+        #000 calc(100% - 1.75rem),
         transparent
       );
-    }
-    :global(.guide-jump nav) {
       scroll-padding-inline: var(--gutter) 3rem;
     }
   }
