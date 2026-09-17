@@ -1,5 +1,6 @@
 /* Keep the tour typography legible against the evolving night sky. */
 body[data-edition='dawn'] .home-hero {
+  --sky-grain-opacity: 0.21735;
   --hero-stage: clamp(40rem, 53vw, 53rem);
   --hero-h1: clamp(5rem, 10.8vw, 10rem);
   --hero-title-scale: 0.8;
@@ -96,6 +97,10 @@ body[data-edition='dawn'] .home-hero__after {
   color: #ffffff;
   position: relative;
   z-index: 4;
+}
+/* Keep the static ink texture independent of the parent's blur reveal. */
+body[data-edition='dawn'] .home-hero__after-ink {
+  filter: url('#after-hours-grain');
 }
 /* The outline and corona remain at peak brightness after the reveal. */
 body[data-edition='dawn'] .home-hero__dawn-light {

@@ -5,14 +5,15 @@ This branch contains the current design for team review. It is not a production 
 ## Included changes
 
 - INTO:DAWN branding and the concert-programme layout across the seven static routes.
-- The approved v8 eclipse, cloud bodies and foreground mist. Clouds reveal with the measured first light, preserve their directional illumination and travel, and have independent reading-area counterparts.
+- The approved v8 eclipse, cloud bodies and foreground mist. Clouds start revealing one second after page load and fade in linearly over three seconds. Directional illumination still follows the eclipse; the reading areas have independent clouds. Lower cover cloud density is reduced by 10% with a feathered boundary.
 - Fine monochrome background grain. AFTER HOURS and outline TIL DAWN at 80% of their previous size, with the visible line gap, sharp outline, constant peak glow and mist reflection retained.
+- Home grain opacity is 0.21735 (0.18 × 1.15 × 1.05). AFTER HOURS has a separate 11.5% monochrome ink-grain modulation (10% × 1.15), independent of its existing blur reveal.
 - Matching ticket/poster artwork and browser-local JPEG export.
 - Responsive layout, navigation and enlarged-text fixes made during the design review.
 
 The approved visual source is documented in `DESIGN.md` and `docs/share-art-direction.md`. Runtime assets and fonts are included; no credentials, build output, local backups or generated working previews are included.
 
-## Fresh checks in the publishing checkout
+## Initial design checks at f78b52a
 
 - `npm ci --ignore-scripts --no-audit --no-fund`: passed.
 - Lint, full formatting check and Astro type check: passed. One existing TypeScript deprecation hint remains in the ESLint configuration.
@@ -21,6 +22,13 @@ The approved visual source is documented in `DESIGN.md` and `docs/share-art-dire
 - Asset budget: JavaScript 23.3 KiB gzip / 75 KiB, raster 914.3 KiB / 1300 KiB.
 - Targeted headless desktop/mobile browser suite against this checkout's separate preview: 100 passed, two intentional skips. It covers cloud reveal, title timing/glow, home flow, navigation, ticket/poster exports and share fallbacks. This is not a rerun of the entire browser suite.
 - `git diff --check`: passed. No known credential patterns or files larger than 25 MB were found among the changed/new project files.
+
+## Cloud and grain follow-up checks
+
+- Lint, targeted formatting, Astro type check, production build, and asset budgets passed. JavaScript is now 26.0 KiB gzip / 75 KiB; raster remains 914.3 KiB / 1300 KiB.
+- Six headless desktop/mobile cloud and title tests passed. The cloud regression test checks rendered brightness at quarter, half, and three-quarter reveal, plus the one-second delay and four-second completion independently of video light changes.
+- Desktop/mobile captures confirmed the live page-clock reveal, unchanged title geometry and effects, no horizontal overflow, and no browser page errors. Reduced-motion/static cover clouds retain a matching lower-density mask.
+- This follow-up does not clear the separate release gates below.
 
 ## Release gates still open
 

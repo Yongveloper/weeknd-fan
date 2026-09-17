@@ -1,27 +1,31 @@
 import { expect, test } from '@playwright/test';
 import sharp from 'sharp';
-import curve from '../../src/lib/moon-light-curve.json' with { type: 'json' };
 
-test('reveals cloud bodies and mist with the emitting rim rather than page load', async ({
+test('reveals clouds linearly from one to four seconds independently of eclipse brightness', async ({
   page,
 }) => {
-  // Freeze travel only. The actual video light still drives the atmosphere.
+  // Freeze travel and lighting to measure the reveal itself in rendered pixels.
   await page.addInitScript(() => {
     for (const type of [WebGLRenderingContext, WebGL2RenderingContext]) {
-      const times = new Set<WebGLUniformLocation>();
+      const fields = new Map<WebGLUniformLocation, string>();
       const getLocation = type.prototype.getUniformLocation;
       type.prototype.getUniformLocation = function (program, name) {
         const location = getLocation.call(this, program, name);
-        if (location && name === 'time') times.add(location);
+        if (location) fields.set(location, name);
         return location;
       };
       const setFloat = type.prototype.uniform1f;
       type.prototype.uniform1f = function (location, value) {
-        setFloat.call(
-          this,
-          location,
-          location && times.has(location) ? 8 : value,
-        );
+        const name = location && fields.get(location);
+        const fixed =
+          name === 'time'
+            ? 8
+            : name === 'dawn'
+              ? 1
+              : name === 'titleEnergy'
+                ? 0
+                : value;
+        setFloat.call(this, location, fixed);
       };
     }
   });
@@ -39,18 +43,14 @@ test('reveals cloud bodies and mist with the emitting rim rather than page load'
     .locator('[data-home-hero]')
     .evaluate((hero) => hero.getBoundingClientRect().bottom);
   const levels: number[] = [];
-  for (const time of [0.5, 1.5, 2.5, 3.5, 7]) {
-    await page.locator('[data-intro]').evaluate(async (element, time) => {
-      const video = element as HTMLVideoElement;
-      video.pause();
-      await new Promise<void>((resolve) => {
-        video.addEventListener('seeked', () => resolve(), { once: true });
-        video.currentTime = time;
-      });
+  for (const time of [500, 1000, 1750, 2500, 3250, 4000, 5500]) {
+    // Keep rAF and GPU preparation live; control only the navigation clock.
+    await page.evaluate((time) => {
+      performance.now = () => time;
     }, time);
     await expect(sky).toHaveAttribute(
-      'data-dawn-progress',
-      curve.values[time * curve.fps]!.toFixed(3),
+      'data-cloud-reveal',
+      Math.max(0, Math.min(1, (time - 1000) / 3000)).toFixed(3),
     );
     const frame = await sky.screenshot({ scale: 'css' });
     const { width, height } = await sharp(frame).metadata();
@@ -69,7 +69,14 @@ test('reveals cloud bodies and mist with the emitting rim rather than page load'
   }
   expect(levels[0]).toBeLessThan(0.2);
   expect(levels[1]).toBeLessThan(0.2);
-  expect(levels[2]).toBeGreaterThan(0.5);
-  expect(levels[3]!).toBeGreaterThan(levels[2]! * 1.5);
-  expect(levels[4]!).toBeGreaterThan(levels[3]!);
+  const peak = levels[5]!;
+  expect(peak).toBeGreaterThan(1);
+  for (const [index, ratio] of [
+    [2, 0.25],
+    [3, 0.5],
+    [4, 0.75],
+  ] as const) {
+    expect(Math.abs(levels[index]! / peak - ratio)).toBeLessThan(0.08);
+  }
+  expect(Math.abs(levels[6]! - peak)).toBeLessThan(0.3);
 });

@@ -13,7 +13,9 @@ import DawnSky from '../visual/DawnSky.astro';
   <div class="home-hero__content shell-content">
     <div class="home-hero__heading">
       <h1 id="home-title" class="display-latin">
-        <span class="home-hero__after">AFTER HOURS</span>
+        <span class="home-hero__after"
+          ><span class="home-hero__after-ink">AFTER HOURS</span></span
+        >
         <span class="home-hero__dawn"
           >TIL DAWN<span
             class="home-hero__dawn-light"
@@ -30,6 +32,36 @@ import DawnSky from '../visual/DawnSky.astro';
   </div>
   <svg class="home-hero__light-filter" aria-hidden="true" width="0" height="0">
     <defs>
+      <filter
+        id="after-hours-grain"
+        x="-10%"
+        y="-40%"
+        width="120%"
+        height="180%"
+        color-interpolation-filters="sRGB"
+      >
+        <feTurbulence
+          type="fractalNoise"
+          baseFrequency="0.78"
+          numOctaves="3"
+          seed="37"
+          stitchTiles="stitch"
+          result="ink-noise"></feTurbulence>
+        <!-- Increase the previous 10% grain by 15%; preserve the glyph alpha. -->
+        <feColorMatrix
+          in="ink-noise"
+          type="matrix"
+          values="0.024449 0.082248 0.008303 0 0.885  0.024449 0.082248 0.008303 0 0.885  0.024449 0.082248 0.008303 0 0.885  0 0 0 0 1"
+          result="ink-grain"></feColorMatrix>
+        <feComposite
+          in="SourceGraphic"
+          in2="ink-grain"
+          operator="arithmetic"
+          k1="1"
+          k2="0"
+          k3="0"
+          k4="0"></feComposite>
+      </filter>
       <filter
         id="dawn-outline-grain"
         x="-10%"

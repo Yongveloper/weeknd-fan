@@ -1,7 +1,12 @@
+import { transform } from 'motion';
+
 export interface DawnRenderer {
   setPlaying(playing: boolean): void;
   dispose(): void;
 }
+
+// One second of darkness, followed by a clamped, three-second linear reveal.
+const cloudRevealAt = transform([1000, 4000], [0, 1]);
 
 const vertex = `
 attribute vec2 position;
@@ -18,6 +23,7 @@ uniform float scrollOffset;
 uniform float readingOnly;
 uniform float time;
 uniform float dawn;
+uniform float cloudReveal;
 uniform float desktopAtmosphere;
 uniform vec3 eclipse;
 uniform vec2 cloudOrigin;
@@ -247,6 +253,10 @@ void main() {
     noise(deformCloud(nearUV+nearB)*vec2(17.1,13.3)+vec2(2.4,5.7)),nearMix);
   float overlapReduction = mix(0.10,0.30,smoothstep(0.30,0.70,overlapPockets));
   float overlapOpacity = 1.0-diskOverlap*overlapReduction;
+  // Thin the combined lower cover once, preserving its shapes and mist.
+  // The feathered transition leaves the independent reading sky untouched.
+  float lowerCloudOpacity = 1.0-0.10*smoothstep(0.55,0.75,uv.y)*(1.0-readingMask);
+  float cloudOpacity = overlapOpacity*lowerCloudOpacity;
   float gapZone = smoothstep(0.55,0.78,uv.y);
   float farCloud = groupedPlate(farUV,farA,farB,farMix,gapZone)*coverage;
   float nearCloud = groupedPlate(nearUV,nearA,nearB,nearMix,gapZone)*coverage;
@@ -368,7 +378,7 @@ void main() {
   }
   float litEdge = max(0.0,nearCloud-nearBlocker)*1.5
                 +max(0.0,farCloud-farBlocker)*0.65;
-  float transmission = exp(-(nearBlocker*1.8+farBlocker)*1.25*overlapOpacity);
+  float transmission = exp(-(nearBlocker*1.8+farBlocker)*1.25*cloudOpacity);
   float haze = reach*illumination*0.065*(0.12+coverage*0.88);
   vec3 color = coronaOrange*haze;
   float density = clamp(farCloud*1.5+nearCloud*1.9,0.0,0.92);
@@ -399,8 +409,8 @@ void main() {
   density = 1.0-(1.0-density)*(1.0-cumulusAlpha);
   // Apply the 10–30% attenuation once to the combined cloud surfaces, not
   // once per layer. Preserve the clear-air glow and the separate mist veil.
-  color = mix(coronaOrange*haze,color,overlapOpacity);
-  density *= overlapOpacity;
+  color = mix(coronaOrange*haze,color,cloudOpacity);
+  density *= cloudOpacity;
   // Broad, softly broken shafts fan downward through the mist. Denser
   // intervening clouds attenuate them, leaving dark pockets between beams.
   float beamAngle = atan(fromLight.x,fromLight.y);
@@ -446,11 +456,10 @@ void main() {
                  +coronaGold*illumination*(0.12+reach*0.24);
   mistColor += coronaGold*desktopAtmosphere*illumination*(0.045+reach*0.10);
   mistColor += titleGold*titleLight*2.0;
-  // Ambient density must not reveal the clouds before the emitting rim.
-  // The measured video light crosses 0.11 just before two seconds; coupling
-  // to that light also follows video stalls/seeks without a second timer.
-  // Independent reading clouds and static fallbacks stay available.
-  float cloudVisibility = mix(smoothstep(0.11,0.40,dawn),1.0,readingMask);
+  // Reveal opacity follows the page clock; illumination still follows the
+  // eclipse. Video brightness changes no longer accelerate the entrance.
+  // Independent reading clouds remain immediately available.
+  float cloudVisibility = mix(cloudReveal,1.0,readingMask);
   color *= cloudVisibility;
   alpha *= cloudVisibility;
   mistAlpha *= cloudVisibility;
@@ -569,6 +578,7 @@ async function createAtmospherePass(
     readingOnly: gl.getUniformLocation(program, 'readingOnly'),
     time: gl.getUniformLocation(program, 'time'),
     dawn: gl.getUniformLocation(program, 'dawn'),
+    cloudReveal: gl.getUniformLocation(program, 'cloudReveal'),
     desktopAtmosphere: gl.getUniformLocation(program, 'desktopAtmosphere'),
     eclipse: gl.getUniformLocation(program, 'eclipse'),
     cloudOrigin: gl.getUniformLocation(program, 'cloudOrigin'),
@@ -655,6 +665,8 @@ export async function createDawnRenderer(
   let previous = 0;
   let renderedAt = 0;
   let progress = 0;
+  let revealPausedFor = 0;
+  let revealPauseStarted: number | undefined;
   let resize = true;
   let prepared = false;
   let preparationStarted = false;
@@ -863,9 +875,13 @@ export async function createDawnRenderer(
       Math.min(1, Number(moon?.dataset.light ?? 0)),
     );
     const energy = emissionEnergy();
+    const reveal = readingOnly
+      ? 1
+      : cloudRevealAt(performance.now() - revealPausedFor);
     for (const { gl, uniforms } of passes) {
       gl.uniform1f(uniforms.time, elapsed);
       gl.uniform1f(uniforms.dawn, progress);
+      gl.uniform1f(uniforms.cloudReveal, reveal);
       gl.uniform1f(uniforms.titleEnergy, energy);
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
@@ -882,6 +898,7 @@ export async function createDawnRenderer(
     host.dataset.titleLight = energy.toFixed(3);
     host.dataset.renderer = 'webgl';
     host.dataset.dawnProgress = progress.toFixed(3);
+    host.dataset.cloudReveal = reveal.toFixed(3);
     host.dataset.state =
       readingProgress === 1
         ? 'reading'
@@ -917,8 +934,13 @@ export async function createDawnRenderer(
       playing = value;
       previous = 0;
       if (value) {
+        if (revealPauseStarted !== undefined) {
+          revealPausedFor += performance.now() - revealPauseStarted;
+          revealPauseStarted = undefined;
+        }
         frame = requestAnimationFrame(draw);
       } else {
+        revealPauseStarted = performance.now();
         cancelAnimationFrame(frame);
         host.dataset.state = 'paused';
       }
