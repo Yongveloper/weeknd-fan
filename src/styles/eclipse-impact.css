@@ -60,7 +60,7 @@ body[data-edition='dawn'] #home-title {
 }
 body[data-edition='dawn'] .home-hero__dawn {
   z-index: 2;
-  --title-delay: 4s;
+  --title-delay: 5s;
   --dawn-effect-scale: 1.25;
   --dawn-effect-em: calc(1em * var(--dawn-effect-scale));
   --dawn-glow-scale: 1;

@@ -132,6 +132,21 @@ float spacedPlate(vec2 p, float gapZone) {
 float groupedPlate(vec2 p, vec2 a, vec2 b, float blend, float gapZone) {
   return mix(spacedPlate(p+a,gapZone),spacedPlate(p+b,gapZone),blend);
 }
+// Broad bodies and smaller breaks are attached to the moving cloud domains.
+// They change optical thickness, not the wind, outline or phase of a group.
+float cloudCohesion(vec2 p) {
+  p = deformCloud(p);
+  float bank = noise(p*vec2(4.8,3.5)+vec2(2.7,7.1));
+  float lobes = noise(p*vec2(11.7,8.4)+vec2(8.3,1.9));
+  return smoothstep(0.30,0.62,bank*0.72+lobes*0.28);
+}
+float bodyOpacity(float body, float cohesion) {
+  // Thin skirts, half-dense folds and genuinely opaque cores coexist.
+  // Darker photographed folds stay solid once the surrounding body is dense.
+  float skirt = smoothstep(0.025,0.32,body)*mix(0.34,0.76,cohesion);
+  float core = smoothstep(0.12,0.27,body)*smoothstep(0.42,0.72,cohesion);
+  return max(skirt,core);
+}
 // The replacement bank uses one compact, rounded lobe family from the photo.
 // Enlarging that smaller source region produces fewer, fuller cloud folds.
 // All deformation still conserves area and has no opacity/volume pulse.
@@ -384,6 +399,8 @@ void main() {
   float leftRelief = smoothstep(center.y+radius*0.35,center.y+radius*0.90,point.y)
                    *(1.0-smoothstep(center.x-radius*1.20,center.x-radius*0.60,point.x))
                    *(1.0-readingMask);
+  // The denser bodies stay outside the disk, preserving its overlap thinning.
+  float bodyWindow = leftRelief*smoothstep(1.0,1.10,radialDistance);
   vec2 towardLight = normalize(vec2(-fromLight.x/aspect,-fromLight.y)+0.0001);
   towardLight.x *= mix(1.0,0.56,mobile);
   float nearBlocker = groupedPlate(nearUV+towardLight*0.065,nearA,nearB,nearMix,gapZone)*coverage;
@@ -403,7 +420,42 @@ void main() {
   }
   float litEdge = max(0.0,nearCloud-nearBlocker)*1.5
                 +max(0.0,farCloud-farBlocker)*0.65;
+  float cohesion = 0.0;
+  float bodySample = nearCloud;
+  float bodyShadow = nearBlocker;
+  if (bodyWindow > 0.0) {
+    cohesion = mix(cloudCohesion(nearUV+nearA),cloudCohesion(nearUV+nearB),nearMix);
+    // A broad low bank and a smaller raised lobe use the plate's rounded
+    // folds, rather than enlarging its smoky lower fringe. Unequal sizes,
+    // heights and shared-speed currents keep the front silhouette irregular.
+    float leftSpan = max(0.12,center.x-radius);
+    // Keep the lobes broad even in the narrow strip left of a mobile eclipse.
+    float bodySpan = max(leftSpan,radius*2.2);
+    vec2 broadScale = vec2(0.78/bodySpan,1.10);
+    vec2 smallScale = vec2(1.35/bodySpan,1.45);
+    vec2 broadUV = (point-vec2(leftSpan*0.28,0.96)+windB)*broadScale+vec2(0.23,0.63);
+    vec2 smallUV = (point-vec2(leftSpan*0.72,0.86)+windD)*smallScale+vec2(0.23,0.63);
+    vec2 bodyTowardLight = normalize(-fromLight+0.0001)*radius*0.10;
+    float broadBody = cumulusPlate(broadUV);
+    float smallBody = cumulusPlate(smallUV)*0.66;
+    bodySample = max(nearCloud*0.70,broadBody+smallBody);
+    // Differentiate the photographic folds, not the crop's fading boundary.
+    // Otherwise that artificial boundary becomes a bright vertical rim.
+    float broadShadow = broadBody*pow(
+      plate(deformCloud(broadUV+bodyTowardLight*broadScale))
+      /max(0.001,plate(deformCloud(broadUV))),0.85);
+    float smallShadow = smallBody*pow(
+      plate(deformCloud(smallUV+bodyTowardLight*smallScale))
+      /max(0.001,plate(deformCloud(smallUV))),0.85);
+    bodyShadow = max(nearBlocker*0.70,
+      broadShadow+smallShadow);
+    float solidBody = smoothstep(0.08,0.24,broadBody);
+    cohesion = mix(cohesion,1.0,solidBody);
+  }
+  float bodyAlpha = bodyOpacity(bodySample,cohesion)*bodyWindow;
+  float bodyBlocker = bodyOpacity(bodyShadow,cohesion)*bodyWindow;
   float transmission = exp(-(nearBlocker*1.8+farBlocker)*1.25*cloudOpacity);
+  transmission *= 1.0-bodyBlocker*0.70;
   float haze = reach*illumination*0.065*(0.12+coverage*0.88);
   vec3 color = coronaOrange*haze;
   float density = clamp(farCloud*1.5+nearCloud*1.9,0.0,0.92);
@@ -442,6 +494,21 @@ void main() {
   // once per layer. Preserve the clear-air glow and the separate mist veil.
   color = mix(coronaOrange*haze,color,cloudOpacity);
   density *= cloudOpacity;
+  // Trade some uniformly layered veil for distinct front surfaces. Opaque
+  // cores are composited after the old 90% dilution; their skirts still blend
+  // into the original sky, and the shared fog remains in front of both.
+  float veilRetention = 1.0-bodyWindow*0.18;
+  color = mix(coronaOrange*haze,color,veilRetention);
+  density *= veilRetention;
+  vec3 bodyColor = litCloudColor(bodySample*0.85,
+    max(0.0,bodySample-bodyShadow)*2.0,illumination,reach,shadowColor);
+  bodyColor = sculptCloud(bodyColor,bodySample*0.85,bodyShadow*0.85,
+                          illumination,reach,bodyWindow);
+  bodyColor *= 1.0-smoothstep(0.01,0.15,bodyShadow-bodySample)*cohesion*0.16;
+  bodyColor += titleGold*titleLight*(0.45+bodySample*1.53);
+  bodyColor *= cloudBrightness;
+  color = mix(color,bodyColor,bodyAlpha);
+  density = 1.0-(1.0-density)*(1.0-bodyAlpha);
   // Broad, softly broken shafts fan downward through the mist. Denser
   // intervening clouds attenuate them, leaving dark pockets between beams.
   float beamAngle = atan(fromLight.x,fromLight.y);

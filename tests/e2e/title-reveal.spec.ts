@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('reveals TIL DAWN continuously while preserving both line timings', async ({
+test('reveals AFTER HOURS at 2s and TIL DAWN continuously at 5s', async ({
   page,
 }) => {
   await page.goto('/');
@@ -23,7 +23,7 @@ test('reveals TIL DAWN continuously while preserving both line timings', async (
     };
     return {
       after: sample('.home-hero__after', [1999, 2000, 3200, 6000]),
-      dawn: sample('.home-hero__dawn', [3999, 4000, 5100, 5200, 5300, 7999]),
+      dawn: sample('.home-hero__dawn', [4999, 5000, 6100, 6200, 6300, 8999]),
     };
   });
   expect(samples.after.delay).toBe(2000);
@@ -31,7 +31,7 @@ test('reveals TIL DAWN continuously while preserving both line timings', async (
   expect(samples.after.opacity.slice(0, 2)).toEqual([0, 0]);
   expect(samples.after.opacity[2]).toBeCloseTo(0.35, 3);
   expect(samples.after.opacity[3]).toBe(1);
-  expect(samples.dawn.delay).toBe(4000);
+  expect(samples.dawn.delay).toBe(5000);
   expect(samples.dawn.duration).toBe(4000);
   expect(samples.dawn.opacity.slice(0, 2)).toEqual([0, 0]);
   expect(samples.dawn.opacity[5]).toBeCloseTo(1, 4);
@@ -47,7 +47,7 @@ test('reveals TIL DAWN continuously while preserving both line timings', async (
   // The arrival ends at steady peak brightness, without a second animation.
   await page.locator('.home-hero__dawn').evaluate((line) => {
     const animation = line.getAnimations()[0]!;
-    animation.currentTime = 7900;
+    animation.currentTime = 8900;
     animation.play();
   });
   await expect(hero).toHaveAttribute('data-title-phase', 'shown');
@@ -99,7 +99,7 @@ test('keeps the reflected title light aligned with the continuous reveal', async
   const sky = page.locator('dawn-sky');
   await expect(sky).toHaveAttribute('data-renderer', 'webgl');
   const title = page.locator('.home-hero__dawn');
-  for (const time of [4000, 5000, 5200, 5400, 7200]) {
+  for (const time of [5000, 6000, 6200, 6400, 8200]) {
     const opacity = await title.evaluate((line, time) => {
       const animation = line.getAnimations()[0]!;
       animation.pause();
