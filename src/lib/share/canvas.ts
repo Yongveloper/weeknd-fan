@@ -53,17 +53,19 @@ export async function renderCommands(
   if (generations.get(canvas) !== generation) {
     throw new DOMException('A newer preview is ready.', 'AbortError');
   }
-  canvas.width = CARD_WIDTH;
-  canvas.height = CARD_HEIGHT;
+  const surface = commands.find((command) => command.kind === 'surface');
+  canvas.width = surface?.width ?? CARD_WIDTH;
+  canvas.height = surface?.height ?? CARD_HEIGHT;
   const context = canvas.getContext('2d');
   if (!context)
     throw new Error('이미지를 그릴 수 없습니다. 다시 시도해 주세요.');
 
   for (const command of commands) {
+    if (command.kind === 'surface') continue;
     context.save();
     if (command.kind === 'fill') {
       context.fillStyle = command.color;
-      context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+      context.fillRect(0, 0, canvas.width, canvas.height);
     } else if (command.kind === 'arc') {
       context.beginPath();
       context.arc(
@@ -105,8 +107,13 @@ export async function renderCommands(
       const image = loadedImages.get(command.src)!;
       context.globalAlpha = command.opacity;
       context.globalCompositeOperation = command.blend ?? 'source-over';
+      const [sx, sy, sw, sh] = command.source ?? [0, 0, 1, 1];
       context.drawImage(
         image,
+        sx * image.naturalWidth,
+        sy * image.naturalHeight,
+        sw * image.naturalWidth,
+        sh * image.naturalHeight,
         command.x,
         command.y,
         command.width,
@@ -121,7 +128,7 @@ export async function renderCommands(
         gradient.addColorStop(offset, color),
       );
       context.fillStyle = gradient;
-      context.fillRect(0, 0, CARD_WIDTH, CARD_HEIGHT);
+      context.fillRect(0, 0, canvas.width, canvas.height);
     } else if (command.kind === 'line') {
       context.beginPath();
       context.strokeStyle = command.color;

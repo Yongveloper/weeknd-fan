@@ -40,8 +40,9 @@ async function expectJpegCard(
     }
     const length = bytes.readUInt16BE(index + 2);
     if (marker >= 0xc0 && marker <= 0xc3) {
-      expect(bytes.readUInt16BE(index + 5)).toBe(1350);
-      expect(bytes.readUInt16BE(index + 7)).toBe(1080);
+      const ticket = download.suggestedFilename().includes('ticket');
+      expect(bytes.readUInt16BE(index + 5)).toBe(ticket ? 990 : 1638);
+      expect(bytes.readUInt16BE(index + 7)).toBe(ticket ? 2070 : 1080);
       return;
     }
     index += length + 1;

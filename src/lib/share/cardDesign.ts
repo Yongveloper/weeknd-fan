@@ -1,6 +1,7 @@
 import { wordmark } from '../../components/chrome/navigation';
 
 export type DrawCommand =
+  | { kind: 'surface'; width: number; height: number }
   | { kind: 'fill'; color: string }
   | {
       kind: 'arc';
@@ -27,6 +28,7 @@ export type DrawCommand =
       height: number;
       opacity: number;
       blend?: GlobalCompositeOperation;
+      source?: [number, number, number, number];
     }
   | {
       kind: 'wash';

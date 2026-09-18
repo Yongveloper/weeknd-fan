@@ -17,7 +17,7 @@ const updated = version.replaceAll('-', '.');
   <header>
     <h1>SETLIST POSTER</h1>
     <p class="lead">
-      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1350)으로
+      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1638)으로
       만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에
       넣어 두세요.
     </p>
@@ -28,14 +28,19 @@ const updated = version.replaceAll('-', '.');
       <canvas
         data-preview
         width="1080"
-        height="1350"
+        height="1638"
         role="img"
         aria-label="예상 셋리스트 카드 미리보기"
       >
         미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
         이미지와 같은 카드입니다.
       </canvas>
-      <figcaption>미리보기 · 저장되는 이미지와 같습니다</figcaption>
+      <figcaption>
+        미리보기 · 저장되는 이미지와 같습니다
+        <a href="/downloads/into-dawn-poster-original.png" download
+          >원본 디자인 PNG</a
+        >
+      </figcaption>
     </figure>
 
     <div class="share-builder__controls">
@@ -81,8 +86,6 @@ const updated = version.replaceAll('-', '.');
   document
     .querySelectorAll<HTMLElement>('[data-setlist-builder]')
     .forEach((root) => {
-      const version = root.dataset.version ?? '';
-      const songs = JSON.parse(root.dataset.songs ?? '[]') as string[];
       const button = root.querySelector<HTMLButtonElement>(
         '[data-download-setlist]',
       );
@@ -96,7 +99,7 @@ const updated = version.replaceAll('-', '.');
       let shareButton: HTMLButtonElement | undefined;
       if (!button || !status || !error) return;
 
-      const layout = buildSetlistCardLayout({ version, songs });
+      const layout = buildSetlistCardLayout();
 
       // 미리보기: 저장되는 카드와 같은 명령을 화면 캔버스에 그린다.
       // renderCommands 는 그린 뒤 JPEG blob 까지 만들므로 blob 실패는 무시한다(그림은 이미 남아 있다).
@@ -238,7 +241,7 @@ const updated = version.replaceAll('-', '.');
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 1080 / 1638;
     border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
     background: #080807;
     color: var(--mist);

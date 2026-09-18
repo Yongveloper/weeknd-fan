@@ -1,0 +1,28 @@
+---
+interface Props {
+  cover?: boolean;
+}
+const { cover = false } = Astro.props;
+// Increase the established cover / reading intensities by 15% relatively.
+const opacity = (cover ? 0.21735 : 0.18) * 1.15;
+---
+
+<div
+  class="dawn-sky__grain"
+  style={`--sky-grain-opacity: ${opacity}`}
+  aria-hidden="true"
+>
+</div>
+
+<style>
+  .dawn-sky__grain {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    opacity: var(--sky-grain-opacity);
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='192' height='192' viewBox='0 0 192 192'%3E%3Cfilter id='grain' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.78' numOctaves='3' seed='37' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Cpath fill='%23808080' filter='url(%23grain)' d='M0 0h192v192H0z'/%3E%3C/svg%3E");
+    background-size: 192px 192px;
+  }
+</style>

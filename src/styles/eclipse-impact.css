@@ -1,6 +1,5 @@
 /* Keep the tour typography legible against the evolving night sky. */
 body[data-edition='dawn'] .home-hero {
-  --sky-grain-opacity: 0.21735;
   --hero-stage: clamp(40rem, 53vw, 53rem);
   --hero-h1: clamp(5rem, 10.8vw, 10rem);
   --hero-title-scale: 0.8;

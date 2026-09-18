@@ -1,31 +1,76 @@
 ---
-const EMBED =
-  'https://www.google.com/maps?q=%EA%B3%A0%EC%96%91%EC%A2%85%ED%95%A9%EC%9A%B4%EB%8F%99%EC%9E%A5&z=16&hl=ko&output=embed';
+import 'leaflet/dist/leaflet.css';
 ---
 
-<div class="live-map">
-  <iframe
-    src={EMBED}
-    title="고양종합운동장 지도"
-    loading="lazy"
-    referrerpolicy="no-referrer-when-downgrade"
-    allowfullscreen></iframe>
+<div class="live-map" role="region" aria-label="고양종합운동장 지도">
+  <div class="live-map__canvas" data-venue-map inert aria-hidden="true"></div>
+  <p class="live-map__status" role="status" data-map-status>
+    지도가 표시되지 않으면 위 공식 약도와 길찾기 버튼을 이용하세요.
+  </p>
 </div>
 <p class="live-map__note">
-  구글 지도 임베드 · 지도가 보이지 않으면 위 길찾기 버튼을 이용하세요.
+  고양종합운동장 · 지도를 확대하거나 위 길찾기 버튼으로 경로를 확인하세요.
 </p>
+
+<script src="../../scripts/venue-map.ts"></script>
 
 <style>
   .live-map {
-    display: block;
+    position: relative;
+    isolation: isolate;
     max-width: 56rem;
+    min-height: 19rem;
     aspect-ratio: 16 / 10;
     border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: var(--night);
   }
-  .live-map iframe {
-    width: 100%;
-    height: 100%;
+  .live-map__canvas {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+  }
+  .live-map[data-map-state='ready'] .live-map__canvas {
+    opacity: 1;
+  }
+  .live-map__status {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    padding: 1.5rem;
+    margin: 0;
+    text-align: center;
+    color: var(--ink-muted);
+  }
+  .live-map__status[hidden] {
+    display: none;
+  }
+  .live-map :global(.venue-pin) {
+    display: grid;
+    place-items: center;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    background: #573615;
+    box-shadow: 0 2px 8px #0006;
+  }
+  .live-map :global(.venue-pin::after) {
+    content: '';
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f5cf92;
+  }
+  .live-map :global(.venue-label) {
+    padding: 0.4rem 0.65rem;
     border: 0;
+    color: #20170f;
+    font: 700 13px/1.4 sans-serif;
+  }
+  .live-map :global(.leaflet-control-zoom a) {
+    width: 44px;
+    height: 44px;
+    line-height: 44px;
+    color: #20170f;
   }
   .live-map__note {
     margin: 0.5rem 0 0;

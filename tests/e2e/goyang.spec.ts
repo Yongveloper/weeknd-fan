@@ -42,13 +42,17 @@ test('links to Kakao, Naver, and Google directions', async ({ page }) => {
   }
 });
 
-test('renders the live map iframe on load', async ({ page }) => {
+test('provides an inline venue map without an external frame', async ({
+  page,
+}) => {
   await page.goto('/goyang/');
-  const frame = page.locator('#transport iframe');
-  await expect(frame).toHaveCount(1);
-  await expect(frame).toHaveAttribute('src', /google\.com\/maps/);
-  await expect(frame).toHaveAttribute('title', '고양종합운동장 지도');
-  await expect(frame).toHaveAttribute('loading', 'lazy');
+  const map = page.getByRole('region', {
+    name: '고양종합운동장 지도',
+    exact: true,
+  });
+  await expect(map).toHaveCount(1);
+  await expect(map.locator('[data-venue-map]')).toHaveCount(1);
+  await expect(map.locator('iframe')).toHaveCount(0);
 });
 
 test('shows the Interpark access map image with its source', async ({

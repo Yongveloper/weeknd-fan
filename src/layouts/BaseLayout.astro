@@ -6,6 +6,7 @@ import SiteHeader from '../components/chrome/SiteHeader.astro';
 import { wordmark } from '../components/chrome/navigation';
 import BackToTop from '../components/ui/BackToTop.astro';
 import DawnSky from '../components/visual/DawnSky.astro';
+import FilmGrain from '../components/visual/FilmGrain.astro';
 import { headerFontAssets } from '../lib/fonts/headerFontAssets';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -94,6 +95,7 @@ const pageTitle = `${wordmark.name} | ${title}`;
     </main>
     <SiteFooter />
     <BackToTop />
+    <FilmGrain cover={lunarSky} />
     <script src="../scripts/reveal.ts"></script>
     <script src="../scripts/back-to-top.ts"></script>
   </body>

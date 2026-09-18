@@ -63,7 +63,7 @@ float plate(vec2 p) {
   float body = pow(dot(c,vec3(0.3,0.5,0.2)),0.72)*0.6714321;
   return body*edge;
 }
-// All four currents travel at 0.00728 cover-heights / second (20% slower). Different
+// The four base currents travel at 0.00728 cover-heights / second (20% slower). Different
 // phases and handedness change direction, never the speed of a cloud group.
 vec2 wind(float phase, float handedness) {
   float angle = time*0.112*handedness+phase;
@@ -141,21 +141,48 @@ float cloudCohesion(vec2 p) {
   return smoothstep(0.30,0.62,bank*0.72+lobes*0.28);
 }
 float bodyOpacity(float body, float cohesion) {
-  // Thin skirts, half-dense folds and genuinely opaque cores coexist.
-  // Darker photographed folds stay solid once the surrounding body is dense.
-  float skirt = smoothstep(0.025,0.32,body)*mix(0.34,0.76,cohesion);
-  float core = smoothstep(0.12,0.27,body)*smoothstep(0.42,0.72,cohesion);
-  return max(skirt,core);
+  // Opacity describes the body, not the exposure in the source photograph.
+  // Mid-dark folds join the opaque core; only its outer skirt transmits sky.
+  float skirt = smoothstep(0.025,0.20,body)*mix(0.55,0.95,cohesion);
+  float core = smoothstep(0.08,0.23,body)*smoothstep(0.30,0.60,cohesion);
+  return min(0.985,max(skirt,core));
+}
+// Recover the medium-scale rounded surface beneath the photo's fine wisps.
+// The original contour and some fine grain remain, with no procedural blobs.
+float roundedPlate(vec2 p) {
+  vec2 stepSize = vec2(0.004,0.006);
+  return plate(p)*0.70
+       +(plate(p+vec2(stepSize.x,0.0))+plate(p-vec2(stepSize.x,0.0))
+        +plate(p+vec2(0.0,stepSize.y))+plate(p-vec2(0.0,stepSize.y)))*0.075;
 }
 // The replacement bank uses one compact, rounded lobe family from the photo.
 // Enlarging that smaller source region produces fewer, fuller cloud folds.
 // All deformation still conserves area and has no opacity/volume pulse.
+float cumulusCrop(vec2 p) {
+  vec2 q = (p-vec2(0.23,0.63))/vec2(0.17,0.1942857);
+  // Unequal, overlapping shoulders replace the rectangular source window.
+  // The contour follows the same material coordinates as the photo's folds.
+  float body = length((q-vec2(-0.08,0.22))/vec2(0.96,0.82));
+  float shoulder = length((q-vec2(-0.36,-0.22))/vec2(0.60,0.74));
+  float crown = length((q-vec2(0.34,-0.14))/vec2(0.65,0.55));
+  float contour = min(body,min(shoulder,crown));
+  contour += (noise(q*5.3+vec2(7.1,2.8))-0.5)*0.13;
+  contour += (noise(q*13.0+vec2(1.3,6.2))-0.5)*0.045;
+  return 1.0-smoothstep(0.70,1.02,contour);
+}
 float cumulusPlate(vec2 p) {
   p = deformCloud(p);
-  vec2 q = abs((p-vec2(0.23,0.63))/vec2(0.17,0.1942857));
-  float edge = (1.0-smoothstep(0.62,1.0,q.x))
-             *(1.0-smoothstep(0.72,1.0,q.y));
-  return pow(plate(p),0.85)*1.25*edge;
+  float envelope = cumulusCrop(p);
+  if (envelope == 0.0) return 0.0;
+  return pow(roundedPlate(p),0.85)*1.25*envelope;
+}
+// The crop supplies coverage only. Lighting differentiates the photographic
+// surface so an artificial cut edge can never become a glowing square rim.
+float cumulusShadow(vec2 p, vec2 lightStep, float envelope) {
+  if (envelope == 0.0) return 0.0;
+  // Reuse the already sampled coverage. The source-surface ratio cancels
+  // algebraically, avoiding five redundant texture reads per shadow sample.
+  return pow(roundedPlate(deformCloud(p+lightStep)),0.85)*1.25*envelope;
 }
 // Overlapping, seeded rows extend the same texture into the reading area.
 // Edge-faded rows wrap independently; no image is elongated on scroll.
@@ -171,29 +198,50 @@ float continuedGroups(vec2 p, vec2 a, vec2 b, float blend) {
 }
 // Every cloud surface uses this same shadow, gold body and light-facing edge.
 // The foreground bank changes density and form, never its lighting palette.
-vec3 litCloudColor(float detail, float litEdge, float illumination, float reach, vec3 shadowColor) {
-  // Keep the recovered shaded folds as solid surfaces. Low-relief interiors
-  // scatter less light than the rounded caps; the emitting edges, palette
-  // and spatial light field keep their established maximum.
+vec3 litCloudColor(float detail, float litEdge, float blocked, float pathBlocked,
+                   float illumination, float reach, float directShare,
+                   vec3 shadowColor, float volume) {
+  // Preserve the reading sky's existing diffuse response. The cover below
+  // resolves this energy into exposed caps, half-lit folds and deep shade.
   float bodyShade = mix(0.70,1.0,smoothstep(0.025,0.24,detail));
   vec3 color = shadowColor*(0.65+detail);
   color += coronaOrange*illumination*(0.08+reach*0.95)*(0.15+detail)*bodyShade;
   color += mix(coronaGold,rimIvory,reach*0.7)*illumination*litEdge*(0.12+reach*0.95)*(0.12+detail);
   color += coronaGold*desktopAtmosphere*illumination
            *(0.045+reach*0.26)*sqrt(clamp(detail,0.0,1.0))*bodyShade;
-  return color;
-}
-// Shape the shaded side of the cover using the existing light-facing sample.
-// Ridges receive warm bounce light, while the folds behind them retain depth.
-// This is surface shading only: the texture, density and wind stay unchanged.
-vec3 sculptCloud(vec3 color, float detail, float blocked, float illumination, float reach, float amount) {
-  float ridge = smoothstep(0.012,0.14,detail-blocked);
-  float fold = smoothstep(0.008,0.12,blocked-detail);
-  float softInterior = 1.0-smoothstep(0.035,0.20,detail);
-  vec3 sculpted = color*(1.0-fold*0.26-softInterior*0.08);
-  sculpted += mix(coronaOrange,coronaGold,ridge)*illumination
-            *(0.18+reach*0.65)*ridge*0.85;
-  return mix(color,sculpted,amount);
+  // Signed relief distinguishes an exposed cap from its lee-facing fold.
+  // A second, farther sample catches a lobe shadowing another lobe. All
+  // samples follow the same moving domain, but point toward the fixed sun.
+  float relief = (detail-blocked)/max(0.06,detail+blocked);
+  float cap = smoothstep(-0.20,0.40,relief);
+  float fold = smoothstep(0.02,0.32,-relief);
+  float opticalDepth = max(0.0,blocked-detail*0.60)*4.8
+                     +max(0.0,pathBlocked-detail*0.45)*2.6;
+  float transmission = exp(-opticalDepth);
+  float direct = illumination*directShare*transmission;
+  float surfaceLight = sqrt(max(0.0,illumination))*(0.32+directShare*0.68)*sqrt(transmission);
+  float bounce = illumination*(0.10+0.12*(1.0-directShare));
+  // The dense interior remains a dark surface rather than becoming a hole.
+  // Orange survives in half-light; only unoccluded caps approach ivory.
+  vec3 shaded = shadowColor*(0.48+detail*0.72)*(1.0-fold*0.38);
+  shaded += coronaOrange*bounce*(0.09+detail*0.28)*(1.0-fold*0.45);
+  vec3 bodyTint = mix(coronaOrange,coronaGold,cap*transmission*0.75);
+  // Light occupies the curved face as well as its rim. A longer scattering
+  // falloff makes broad amber half-tones before the fully occluded fold.
+  float face = pow(clamp(detail*3.4,0.0,1.0),1.2);
+  shaded += bodyTint*surfaceLight*(0.40+reach*0.60)
+           *(0.06+face*0.90)*mix(0.62,1.10,cap);
+  float silver = cap*transmission*smoothstep(0.28,0.90,directShare);
+  shaded += mix(coronaGold,rimIvory,silver*0.50)*direct
+           *(litEdge*0.65+cap*detail*0.52)*(0.32+reach*0.95);
+  // Keep broad dark troughs between lit terraces at every cloud depth.
+  // This responds to the source surface, not a fixed screen-space stripe.
+  shaded *= mix(0.72,1.12,smoothstep(0.055,0.32,detail));
+  // A small multiple-scattering floor keeps the warm half-tones readable
+  // between the bright caps and deep folds, especially beyond seven o'clock.
+  shaded = mix(color,shaded,0.82);
+  // Reading surfaces retain their existing quieter illumination.
+  return mix(color,shaded,volume);
 }
 float mistPlate(vec2 p) {
   p = deformCloud(p);
@@ -225,6 +273,21 @@ void main() {
   float radius = eclipse.z;
   vec2 relative = point-center;
   float radialDistance = length(relative)/radius;
+  // Continue the adjoining banks into the two rim gaps. These broad fields
+  // feather existing material; they never draw a separate oval cloud.
+  vec2 rimSide = relative/radius;
+  float leftExtension = smoothstep(-1.60,-1.10,rimSide.x)
+                      *(1.0-smoothstep(-0.88,-0.48,rimSide.x))
+                      *smoothstep(0.18,0.42,rimSide.y)
+                      *(1.0-smoothstep(0.72,1.10,rimSide.y))
+                      *smoothstep(0.78,0.95,radialDistance)*(1.0-readingMask);
+  float rightExtension = smoothstep(0.82,1.05,rimSide.x)
+                       *(1.0-smoothstep(1.35,1.85,rimSide.x))
+                       *smoothstep(-0.32,0.12,rimSide.y)
+                       *(1.0-smoothstep(0.28,1.20,rimSide.y))*(1.0-readingMask);
+  // The extended skirts retain the blue reference's translucent folds.
+  // A gradual density change reads as cloud thickness, not a pasted seam.
+  float extensionDensity = 1.0-leftExtension*0.22;
   // Keep the established layout warp static; only the area-preserving
   // flow above evolves, avoiding expansion/contraction of whole banks.
   float turbulence = fbm(point*3.0);
@@ -240,11 +303,18 @@ void main() {
   // Soft irregular pockets split broad banks into several interleaved groups.
   float nearMix = cloudGroups(point*vec2(4.1,3.3)+vec2(2.1,8.7));
   float farMix = cloudGroups(point*vec2(3.7,4.2)+vec2(7.4,1.2));
+  // On the left, several lobes belong to one bank. Their main current is
+  // shared; local deformation still rolls their edges without separating
+  // them into counter-moving sheets. Reading clouds keep their own flow.
+  float leftGroup = (1.0-smoothstep(center.x-radius*0.95,center.x-radius*0.15,point.x))
+                  *(1.0-readingMask);
+  nearMix *= 1.0-leftGroup*0.94;
+  farMix *= 1.0-leftGroup*0.94;
   vec2 nearScale = vec2(0.8,0.83);
   vec2 farScale = vec2(0.88,0.95);
   vec2 nearA = windA*uvPerStage*nearScale;
   vec2 nearB = windB*uvPerStage*nearScale;
-  vec2 farA = windC*uvPerStage*farScale;
+  vec2 farA = mix(windC,windA,leftGroup)*uvPerStage*farScale;
   vec2 farB = windD*uvPerStage*farScale;
   vec2 farUV = cloudUV*farScale+vec2(0.03,0.005)+warp;
   vec2 nearUV = cloudUV*nearScale+vec2(0.13,0.08)-warp*0.7;
@@ -258,8 +328,8 @@ void main() {
   vec2 readingNearUV = vec2(cloudUV.x*nearScale.x+0.13,readingY*nearScale.y+2.48)-readingWarp;
   vec2 readingFarUV = vec2(cloudUV.x*farScale.x+0.03,readingY*farScale.y+2.98)+readingWarp;
   // Preserve the moving texture, but route dense banks around the disk.
-  // A soft, irregular opening keeps the rim clear; only the lowest bank
-  // can drift across the bottom of the eclipse.
+  // A soft opening keeps the disk clear. The lower-left shoulder can now
+  // feather across its adjacent rim, with the bottom bank's thin texture.
   float opening = smoothstep(0.93,1.24,radialDistance+(turbulence-0.5)*0.10);
   float lowerBank = smoothstep(0.30,1.02,relative.y/radius+(turbulence-0.5)*0.18)*0.82;
   if (desktopAtmosphere > 0.5) {
@@ -267,7 +337,7 @@ void main() {
     // Keep that boundary independent of turbulence and wind.
     lowerBank = smoothstep(0.60,0.94,relative.y/radius)*0.88;
   }
-  float coverage = mix(max(opening,lowerBank),1.0,readingMask);
+  float coverage = mix(max(max(opening,lowerBank),leftExtension*0.60),1.0,readingMask);
   // Thin only cloud surfaces crossing the lower disk. Feather the boundary
   // entirely inside the circle, leaving every outside cloud and mist intact.
   float overlapStart = mix(0.30,0.60,desktopAtmosphere);
@@ -283,8 +353,8 @@ void main() {
   // Thin the combined lower cover once, preserving its shapes and mist.
   // The feathered transition leaves the independent reading sky untouched.
   float lowerCloudOpacity = 1.0-0.10*smoothstep(0.55,0.75,uv.y)*(1.0-readingMask);
-  float cloudOpacity = overlapOpacity*lowerCloudOpacity;
-  float gapZone = smoothstep(0.55,0.78,uv.y);
+  float cloudOpacity = overlapOpacity*lowerCloudOpacity*extensionDensity;
+  float gapZone = smoothstep(0.55,0.78,uv.y)*(1.0-leftGroup*0.80);
   float farCloud = groupedPlate(farUV,farA,farB,farMix,gapZone)*coverage;
   float nearCloud = groupedPlate(nearUV,nearA,nearB,nearMix,gapZone)*coverage;
   // Anchor the bank to the original cover composition within the shared
@@ -325,13 +395,22 @@ void main() {
     bankCloud += groupedPlate(footUV,bankA,bankB,nearMix,gapZone)*footWindow*0.55;
     nearCloud += bankCloud*1.08;
   }
-  // Replace the previous bank with a 1.2x wider/taller coherent group.
-  // Texture scale is divided by that size gain; wind keeps its screen speed.
-  vec2 cumulusCenter = vec2(center.x-radius*mix(0.92,0.56,mobile),0.86);
-  vec2 cumulusScale = vec2(0.1888889,0.2833333)/radius;
-  vec2 cumulusUV = (point-cumulusCenter)*cumulusScale+vec2(0.23,0.63);
-  vec2 cumulusWind = windA*cumulusScale;
+  // One large foreground mass carries medium lobes and smaller surface
+  // folds. Its scale and depth differ from the distant fine cloud bank.
+  vec2 cumulusCenter = vec2(center.x-radius*mix(0.90,0.55,mobile),0.93);
+  vec2 cumulusScale = vec2(0.148,0.22)/radius;
+  vec2 frontScale = cumulusScale*vec2(1.16,1.20);
+  vec2 cumulusUV = (point-cumulusCenter)*frontScale+vec2(0.23,0.63);
+  vec2 cumulusWind = windA*frontScale;
+  float cumulusEnvelope = cumulusCrop(deformCloud(cumulusUV+cumulusWind));
   float cumulusCloud = cumulusPlate(cumulusUV+cumulusWind);
+  // The former single block becomes two banks at different heights/depths.
+  // The upper shoulder emerges behind the wider, lower foreground body.
+  vec2 rearCenter = cumulusCenter+vec2(radius*0.48,-0.125);
+  vec2 rearScale = cumulusScale*vec2(-1.48,1.36);
+  vec2 rearUV = (point-rearCenter+mix(windA,windC,0.12))*rearScale+vec2(0.23,0.63);
+  float rearEnvelope = cumulusCrop(deformCloud(rearUV));
+  float rearCloud = cumulusPlate(rearUV);
   // New lower-page clouds replace only the region behind the reading panels.
   // Cover clouds leave with the hero; these independent clouds are not pulled along.
   if (readingMask > 0.0) {
@@ -399,20 +478,28 @@ void main() {
   float leftRelief = smoothstep(center.y+radius*0.35,center.y+radius*0.90,point.y)
                    *(1.0-smoothstep(center.x-radius*1.20,center.x-radius*0.60,point.x))
                    *(1.0-readingMask);
-  // The denser bodies stay outside the disk, preserving its overlap thinning.
-  float bodyWindow = leftRelief*smoothstep(1.0,1.10,radialDistance);
+  // Uncover the existing shoulder's thin skirt at the lower-left rim.
+  // Its material coordinates and grain scale remain continuous with its root.
+  float bodyWindow = leftRelief*max(smoothstep(1.0,1.10,radialDistance),leftExtension*0.35);
   vec2 towardLight = normalize(vec2(-fromLight.x/aspect,-fromLight.y)+0.0001);
   towardLight.x *= mix(1.0,0.56,mobile);
   float nearBlocker = groupedPlate(nearUV+towardLight*0.065,nearA,nearB,nearMix,gapZone)*coverage;
   float farBlocker = groupedPlate(farUV+towardLight*0.045,farA,farB,farMix,gapZone)*coverage;
+  float nearPathBlocker = nearBlocker;
+  float farPathBlocker = farBlocker;
+  if (readingMask < 1.0) {
+    nearPathBlocker = groupedPlate(nearUV+towardLight*0.14,nearA,nearB,nearMix,gapZone)*coverage;
+    farPathBlocker = groupedPlate(farUV+towardLight*0.10,farA,farB,farMix,gapZone)*coverage;
+  }
   float bankBlocker = 0.0;
   if (desktopAtmosphere > 0.5) {
     bankBlocker = groupedPlate(bankUV+towardLight*0.085,bankA,bankB,nearMix,gapZone)*bankWindow*bankAmount;
     bankBlocker += groupedPlate(footUV+towardLight*0.085,bankA,bankB,nearMix,gapZone)*footWindow*0.55;
     nearBlocker += bankBlocker*1.08;
   }
-  vec2 cumulusTowardLight = normalize(-fromLight+0.0001)*cumulusScale*radius*0.12;
-  float cumulusBlocker = cumulusPlate(cumulusUV+cumulusWind+cumulusTowardLight);
+  vec2 cumulusTowardLight = normalize(-fromLight+0.0001)*frontScale*radius*0.12;
+  float cumulusBlocker = cumulusShadow(cumulusUV+cumulusWind,cumulusTowardLight,cumulusEnvelope);
+  float cumulusPathBlocker = cumulusShadow(cumulusUV+cumulusWind,cumulusTowardLight*2.2,cumulusEnvelope);
   nearBlocker += cumulusBlocker*coverage*0.35*(1.0-readingMask);
   if (readingMask > 0.0) {
     nearBlocker = mix(nearBlocker,continuedGroups(readingNearUV+towardLight*0.065,nearA,nearB,readingNearMix)*0.90,readingMask);
@@ -423,6 +510,8 @@ void main() {
   float cohesion = 0.0;
   float bodySample = nearCloud;
   float bodyShadow = nearBlocker;
+  float bodyPathShadow = nearPathBlocker;
+  float bodyEnvelope = 1.0;
   if (bodyWindow > 0.0) {
     cohesion = mix(cloudCohesion(nearUV+nearA),cloudCohesion(nearUV+nearB),nearMix);
     // A broad low bank and a smaller raised lobe use the plate's rounded
@@ -431,29 +520,33 @@ void main() {
     float leftSpan = max(0.12,center.x-radius);
     // Keep the lobes broad even in the narrow strip left of a mobile eclipse.
     float bodySpan = max(leftSpan,radius*2.2);
-    vec2 broadScale = vec2(0.78/bodySpan,1.10);
-    vec2 smallScale = vec2(1.35/bodySpan,1.45);
-    vec2 broadUV = (point-vec2(leftSpan*0.28,0.96)+windB)*broadScale+vec2(0.23,0.63);
-    vec2 smallUV = (point-vec2(leftSpan*0.72,0.86)+windD)*smallScale+vec2(0.23,0.63);
+    vec2 broadScale = vec2(0.53/bodySpan,0.86);
+    vec2 smallScale = vec2(1.02/bodySpan,1.12);
+    vec2 broadUV = (point-vec2(leftSpan*0.34,0.88)+windA)*broadScale+vec2(0.23,0.63);
+    vec2 smallUV = (point-vec2(leftSpan*0.78,0.77)+windA)*smallScale+vec2(0.23,0.63);
     vec2 bodyTowardLight = normalize(-fromLight+0.0001)*radius*0.10;
     float broadBody = cumulusPlate(broadUV);
     float smallBody = cumulusPlate(smallUV)*0.66;
-    bodySample = max(nearCloud*0.70,broadBody+smallBody);
+    float broadEnvelope = cumulusCrop(deformCloud(broadUV));
+    float smallEnvelope = cumulusCrop(deformCloud(smallUV));
+    bodyEnvelope = 1.0-(1.0-broadEnvelope)*(1.0-smallEnvelope);
+    float smallFront = bodyOpacity(smallBody/max(0.001,smallEnvelope),1.0)*smallEnvelope;
+    bodySample = mix(broadBody,smallBody,smallFront);
     // Differentiate the photographic folds, not the crop's fading boundary.
     // Otherwise that artificial boundary becomes a bright vertical rim.
-    float broadShadow = broadBody*pow(
-      plate(deformCloud(broadUV+bodyTowardLight*broadScale))
-      /max(0.001,plate(deformCloud(broadUV))),0.85);
-    float smallShadow = smallBody*pow(
-      plate(deformCloud(smallUV+bodyTowardLight*smallScale))
-      /max(0.001,plate(deformCloud(smallUV))),0.85);
-    bodyShadow = max(nearBlocker*0.70,
-      broadShadow+smallShadow);
+    float broadShadow = cumulusShadow(broadUV,bodyTowardLight*broadScale,broadEnvelope);
+    float smallShadow = cumulusShadow(smallUV,bodyTowardLight*smallScale,smallEnvelope)*0.66;
+    bodyShadow = mix(broadShadow,smallShadow,smallFront);
+    float broadPath = cumulusShadow(broadUV,bodyTowardLight*broadScale*2.2,broadEnvelope);
+    float smallPath = cumulusShadow(smallUV,bodyTowardLight*smallScale*2.2,smallEnvelope)*0.66;
+    bodyPathShadow = mix(broadPath,smallPath,smallFront);
     float solidBody = smoothstep(0.08,0.24,broadBody);
     cohesion = mix(cohesion,1.0,solidBody);
   }
-  float bodyAlpha = bodyOpacity(bodySample,cohesion)*bodyWindow;
-  float bodyBlocker = bodyOpacity(bodyShadow,cohesion)*bodyWindow;
+  // Keep crop feathering outside the optical-density curve: saturating the
+  // crop itself would expose a smooth rectangular edge around the photograph.
+  float bodyAlpha = bodyOpacity(bodySample/max(0.001,bodyEnvelope),cohesion)*bodyEnvelope*bodyWindow*extensionDensity;
+  float bodyBlocker = bodyOpacity(bodyShadow/max(0.001,bodyEnvelope),cohesion)*bodyEnvelope*bodyWindow;
   float transmission = exp(-(nearBlocker*1.8+farBlocker)*1.25*cloudOpacity);
   transmission *= 1.0-bodyBlocker*0.70;
   float haze = reach*illumination*0.065*(0.12+coverage*0.88);
@@ -464,32 +557,61 @@ void main() {
   // Lift the warm midtones, rather than painting the dark cloud interiors
   // opaque brown. Existing high-frequency detail remains in the texture.
   shadowColor = mix(shadowColor,vec3(0.115,0.103,0.085),desktopAtmosphere*dawn);
-  vec3 cloudColor = litCloudColor(detail,litEdge,illumination,reach,shadowColor);
+  float directShare = smoothstep(0.025,0.72,directField);
+  float coverVolume = 1.0-readingMask;
+  vec3 cloudColor = litCloudColor(detail,litEdge,
+    nearBlocker*0.85+farBlocker*0.52,nearPathBlocker*0.85+farPathBlocker*0.52,
+    illumination,reach,directShare,shadowColor,coverVolume);
+  // Resolve the existing near/far fields as separate surfaces. Adding their
+  // luminance used to flatten the dark folds into a single translucent veil.
+  float nearCohesion = mix(cloudCohesion(nearUV+nearA),cloudCohesion(nearUV+nearB),nearMix);
+  float nearAlpha = bodyOpacity(nearCloud,nearCohesion)*coverage;
+  float farAlpha = bodyOpacity(farCloud,0.75)*coverage;
+  vec3 farColor = litCloudColor(farCloud*0.85,max(0.0,farCloud-farBlocker)*1.5,
+    farBlocker*0.85,farPathBlocker*0.85,illumination,reach,directShare,shadowColor,coverVolume);
+  vec3 nearColor = litCloudColor(nearCloud*0.85,max(0.0,nearCloud-nearBlocker)*1.5,
+    nearBlocker*0.85,nearPathBlocker*0.85,illumination,reach,directShare,shadowColor,coverVolume);
+  // The front bank casts a soft contact shadow onto the bank behind it.
+  farColor *= 1.0-smoothstep(0.05,0.30,nearBlocker)*0.32;
+  cloudColor = mix(cloudColor,mix(farColor,nearColor,nearAlpha),coverVolume);
+  density = mix(density,1.0-(1.0-farAlpha)*(1.0-nearAlpha),coverVolume);
   // Light-facing ridges catch the corona; intervening folds stay in shadow.
   float bankRidge = max(0.0,bankCloud-bankBlocker)*3.2*(1.0-readingMask);
   float bankShade = smoothstep(0.02,0.25,bankBlocker-bankCloud)*max(bankWindow,footWindow)*(1.0-readingMask);
   cloudColor *= 1.0-bankShade*0.28;
-  cloudColor += mix(coronaGold,rimIvory,0.62)*illumination
-              *(bankRidge+bankCloud*transmission*0.22*(1.0-readingMask))*(0.45+reach*1.15);
-  cloudColor = sculptCloud(cloudColor,detail,nearBlocker*0.85+farBlocker*0.52,
-                          illumination,reach,leftRelief);
+  cloudColor += mix(coronaGold,rimIvory,0.62)*illumination*directShare*transmission
+              *bankRidge*(0.45+reach*1.15);
   cloudColor += titleGold*titleLight*(0.45+detail*1.8);
   cloudColor *= cloudBrightness;
   color = mix(color,cloudColor,density);
-  color += coronaGold*pow(nearCloud,1.6)*reach*illumination*0.65*cloudBrightness;
+  color += coronaGold*pow(nearCloud,1.6)*reach*illumination*0.65*cloudBrightness
+           *mix(1.0,transmission*directShare*0.22,coverVolume);
+  float rearAlpha = bodyOpacity(rearCloud/max(0.001,rearEnvelope),1.0)
+                  *rearEnvelope*coverage*coverVolume;
+  vec2 rearLightStep = normalize(-fromLight+0.0001)*rearScale*radius*0.12;
+  float rearBlocker = cumulusShadow(rearUV,rearLightStep,rearEnvelope);
+  float rearPathBlocker = cumulusShadow(rearUV,rearLightStep*2.2,rearEnvelope);
+  vec3 rearColor = litCloudColor(rearCloud*0.85,max(0.0,rearCloud-rearBlocker)*1.5,
+    rearBlocker*0.85,rearPathBlocker*0.85,illumination,reach,directShare,shadowColor,coverVolume);
+  rearColor *= 1.0-smoothstep(0.06,0.32,cumulusBlocker)*0.25;
+  rearColor += titleGold*titleLight*(0.45+rearCloud*1.53);
+  color = mix(color,rearColor*cloudBrightness,rearAlpha);
+  density = 1.0-(1.0-density)*(1.0-rearAlpha);
   // A separate front surface retains opaque folds and a readable silhouette
   // instead of adding brightness to the fine cloud field underneath it.
-  float cumulusAlpha = clamp(cumulusCloud*1.9,0.0,0.92)*coverage*(1.0-readingMask);
+  float cumulusAlpha = bodyOpacity(cumulusCloud/max(0.001,cumulusEnvelope),1.0)
+                     *cumulusEnvelope*coverage*(1.0-readingMask);
   float cumulusDetail = cumulusCloud*0.85;
   float cumulusRidge = max(0.0,cumulusCloud-cumulusBlocker)*1.5;
-  vec3 cumulusColor = litCloudColor(cumulusDetail,cumulusRidge,illumination,reach,shadowColor);
-  cumulusColor += coronaGold*pow(cumulusCloud,1.6)*reach*illumination*0.65;
-  cumulusColor = sculptCloud(cumulusColor,cumulusDetail,cumulusBlocker*0.85,
-                            illumination,reach,leftRelief);
+  vec3 cumulusColor = litCloudColor(cumulusDetail,cumulusRidge,
+    cumulusBlocker*0.85,cumulusPathBlocker*0.85,
+    illumination,reach,directShare,shadowColor,coverVolume);
   cumulusColor += titleGold*titleLight*(0.45+cumulusDetail*1.8);
   cumulusColor *= cloudBrightness;
   color = mix(color,cumulusColor,cumulusAlpha);
   density = 1.0-(1.0-density)*(1.0-cumulusAlpha);
+  // Retain the combined coverage for fog occlusion and opacity diagnostics.
+  cumulusAlpha = 1.0-(1.0-cumulusAlpha)*(1.0-rearAlpha);
   // Apply the 10–30% attenuation once to the combined cloud surfaces, not
   // once per layer. Preserve the clear-air glow and the separate mist veil.
   color = mix(coronaOrange*haze,color,cloudOpacity);
@@ -497,18 +619,80 @@ void main() {
   // Trade some uniformly layered veil for distinct front surfaces. Opaque
   // cores are composited after the old 90% dilution; their skirts still blend
   // into the original sky, and the shared fog remains in front of both.
-  float veilRetention = 1.0-bodyWindow*0.18;
+  float veilRetention = 1.0-bodyWindow*0.66;
   color = mix(coronaOrange*haze,color,veilRetention);
   density *= veilRetention;
   vec3 bodyColor = litCloudColor(bodySample*0.85,
-    max(0.0,bodySample-bodyShadow)*2.0,illumination,reach,shadowColor);
-  bodyColor = sculptCloud(bodyColor,bodySample*0.85,bodyShadow*0.85,
-                          illumination,reach,bodyWindow);
+    max(0.0,bodySample-bodyShadow)*2.0,bodyShadow*0.85,bodyPathShadow*0.85,
+    illumination,reach,directShare,shadowColor,coverVolume);
   bodyColor *= 1.0-smoothstep(0.01,0.15,bodyShadow-bodySample)*cohesion*0.16;
   bodyColor += titleGold*titleLight*(0.45+bodySample*1.53);
   bodyColor *= cloudBrightness;
   color = mix(color,bodyColor,bodyAlpha);
   density = 1.0-(1.0-density)*(1.0-bodyAlpha);
+  // The three annotated gaps are centers, not clipping boundaries. Their
+  // unequal shoulders overlap the surrounding banks, using the same source
+  // folds as the two foreground layers beneath the eclipse.
+  float lowerCloudMass = 0.0;
+  if (readingMask < 1.0 && (uv.y > 0.64 || rightExtension > 0.001)) {
+    for (int i=0; i<10; i++) {
+      // Three upper shoulders, followed by three nearer bodies. Their
+      // overlap gives each bank a visible step without slicing it into rows.
+      float extended = i == 6 || i == 7 ? 1.0 : 0.0;
+      float foot = step(7.5,float(i));
+      float front = i > 5 ? mod(float(i),2.0) : step(2.5,float(i));
+      float group = i > 5 ? 2.0 : mod(float(i),3.0);
+      if (extended > 0.5 && rightExtension <= 0.001) continue;
+      float size = group < 0.5 ? 0.55 : (group < 1.5 ? 0.88 : 0.67);
+      vec2 anchor = group < 0.5 ? vec2(aspect*0.17,0.90)
+                  : (group < 1.5 ? vec2(aspect*0.395,0.82) : vec2(aspect*0.90,0.82));
+      // A connected lower-right foot occupies the same eclipse-relative
+      // side on mobile and desktop. Two unequal shoulders fill the bottom
+      // gap while the existing upper cloud remains in front.
+      if (foot > 0.5) {
+        anchor = vec2(center.x+radius*0.80,0.99);
+        size = 0.64;
+      }
+      anchor += mix(vec2(radius*0.14,-0.075),vec2(-radius*0.09,0.025),front);
+      size *= mix(0.70,0.92,front);
+      vec2 proportions = group < 1.5 && group > 0.5 ? vec2(-0.88,1.08) : vec2(1.0,group < 0.5 ? 1.12 : 0.88);
+      proportions.x *= mix(-1.0,1.0,front);
+      vec2 lobeScale = cumulusScale*proportions/size;
+      vec2 lobeWind = group > 1.5 ? mix(windA,windC,0.25) : windA;
+      // Continue the right bank upward at its original grain scale. A fixed
+      // material offset avoids stretching the photo into vertical streaks.
+      vec2 lobePoint = point+vec2(0.0,radius*0.42)*extended;
+      vec2 lobeUV = (lobePoint-anchor+lobeWind)*lobeScale+vec2(0.23,0.63);
+      float lobeEnvelope = cumulusCrop(deformCloud(lobeUV));
+      if (lobeEnvelope > 0.001) {
+        float lobe = cumulusPlate(lobeUV);
+        vec2 lightStep = normalize(-fromLight+0.0001)*lobeScale*radius*0.12;
+        // Shade the photo's folds, not the crop's soft outer boundary.
+        float blocker = cumulusShadow(lobeUV,lightStep,lobeEnvelope);
+        float pathBlocker = cumulusShadow(lobeUV,lightStep*2.2,lobeEnvelope);
+        float lobeAlpha = bodyOpacity(lobe/max(0.001,lobeEnvelope),1.0)*lobeEnvelope
+                        *coverage*coverVolume*cloudOpacity*smoothstep(0.64,0.80,lobePoint.y)
+                        *(1.0-cumulusAlpha);
+        if (extended > 0.5) {
+          float rootEnvelope = cumulusCrop(deformCloud((point-anchor+lobeWind)*lobeScale+vec2(0.23,0.63)));
+          // Keep the root's solid folds, then feather into a translucent tip.
+          lobeAlpha *= rightExtension*0.48*(1.0-rootEnvelope*0.75);
+        }
+        float lobeDetail = lobe*0.85;
+        vec3 lobeColor = litCloudColor(lobeDetail,max(0.0,lobe-blocker)*1.5,
+          blocker*0.85,pathBlocker*0.85,illumination,reach,directShare,shadowColor,coverVolume);
+        lobeColor *= mix(0.84,1.08,front);
+        lobeColor += titleGold*titleLight*(0.45+lobeDetail*1.8);
+        color = mix(color,lobeColor*cloudBrightness,lobeAlpha);
+        density = 1.0-(1.0-density)*(1.0-lobeAlpha);
+        lowerCloudMass = 1.0-(1.0-lowerCloudMass)*(1.0-lobeAlpha);
+      }
+    }
+  }
+  // Front bodies occlude the haze between the banks. Keep only a thin veil
+  // over these nearer surfaces so their silhouette and shading stay legible.
+  float foregroundMass = max(max(bodyAlpha,cumulusAlpha),max(lowerCloudMass,nearAlpha*coverVolume)*cloudOpacity);
+  transmission *= 1.0-lowerCloudMass*0.60;
   // Broad, softly broken shafts fan downward through the mist. Denser
   // intervening clouds attenuate them, leaving dark pockets between beams.
   float beamAngle = atan(fromLight.x,fromLight.y);
@@ -519,6 +703,7 @@ void main() {
   float beamTravel = smoothstep(0.025,0.18,lightDistance)*exp(-lightDistance*0.95);
   float shafts = beams*beamTravel*transmission*illumination*smoothstep(0.0,0.16,fromLight.y)*coverage;
   float fogAlpha = fog*0.22*(0.08+coverage*0.92);
+  fogAlpha *= 1.0-foregroundMass*0.80;
   vec3 fogColor = vec3(0.012,0.015,0.020)+coronaOrange*illumination*(0.015+reach*0.20);
   fogColor += coronaGold*desktopAtmosphere*illumination*(0.035+reach*0.12);
   fogColor += titleGold*titleLight*0.8;
@@ -531,6 +716,12 @@ void main() {
   color *= 1.0-smoothstep(0.91,1.04,atmosphereUV.y)*0.45;
   color /= 1.0+max(0.0,max(color.r,max(color.g,color.b))-0.75)*0.8;
   float alpha = 1.0-(1.0-haze)*(1.0-density)*(1.0-fogAlpha);
+  // Increase only the two annotated rim extensions by 30%, feathering into
+  // their existing banks. Preserve the unpremultiplied color as opacity rises.
+  float rimOpacityGain = 1.0+0.30*max(leftExtension,rightExtension);
+  float denserAlpha = min(1.0,alpha*rimOpacityGain);
+  color *= denserAlpha/max(alpha,0.00001);
+  alpha = denserAlpha;
   // A translucent veil covers the entire scene, including the dark disk.
   // Reuse the foreground cloud coordinates: wisps follow the same drift,
   // reversal and edge deformation instead of sliding against the clouds.
@@ -546,6 +737,7 @@ void main() {
   float diskVeil = mix(mix(0.62,1.0,smoothstep(0.65,1.20,radialDistance)),1.0,readingMask);
   float rimVeil = 1.0-0.35*exp(-pow((radialDistance-1.0)/0.12,2.0))*(1.0-readingMask);
   float mistAlpha = (0.025+mistTexture*0.40)*diskVeil*rimVeil;
+  mistAlpha *= 1.0-foregroundMass*0.82;
   mistAlpha *= mix(0.3,1.0,dawn)*(1.0-smoothstep(0.92,1.04,atmosphereUV.y));
   // Thin only the wisps crossing the actual letter face, with a soft edge.
   // The surrounding mist, emission field and shared drift stay intact.

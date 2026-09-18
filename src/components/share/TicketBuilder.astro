@@ -1,4 +1,5 @@
 ---
+import '@fontsource/anton/latin.css';
 interface Props {
   showDates: [string, string];
   showStarts: [string, string];
@@ -17,7 +18,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
 >
   <header>
     <h1>D-DAY TICKET</h1>
-    <p>관람일과 가장 기다리는 세 곡을 골라 나만의 티켓을 만드세요.</p>
+    <p>관람일과 가장 기다리는 세 곡을 골라 가로형 티켓을 만드세요.</p>
   </header>
 
   <div class="share-builder__grid">
@@ -25,8 +26,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       <canvas
         id="ticket-preview-canvas"
         data-preview
-        width="1080"
-        height="1350"
+        width="2070"
+        height="990"
         role="img"
         aria-label="D-day 티켓 미리보기"
       >
@@ -34,7 +35,10 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
         이미지와 같은 티켓입니다.
       </canvas>
       <figcaption>
-        <span>미리보기 · 저장되는 이미지와 같습니다</span>
+        <span>가로형 티켓 · 저장되는 이미지와 같습니다</span>
+        <a href="/downloads/into-dawn-ticket-original.png" download
+          >원본 디자인 PNG</a
+        >
         <button
           type="button"
           class="card-preview__toggle"
@@ -300,7 +304,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     align-items: start;
     display: grid;
     gap: clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 1fr);
     max-width: 74rem;
     min-width: 0;
   }
@@ -325,7 +329,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     margin: 0;
   }
   .card-preview canvas {
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 2070 / 990;
     background: #080807;
     border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
     color: var(--mist);
