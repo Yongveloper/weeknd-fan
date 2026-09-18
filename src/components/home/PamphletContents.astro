@@ -1,0 +1,117 @@
+---
+interface Props {
+  officialNoticeUrl: string;
+}
+const { officialNoticeUrl } = Astro.props;
+const chapters = [
+  {
+    title: '새벽을 맞기 전에',
+    links: [
+      ['/discover/#timeline-title', '앨범 타임라인'],
+      ['#setlist', '예상 셋리스트'],
+      ['/setlist/', '곡별 관람 포인트'],
+    ],
+  },
+  {
+    title: '새벽으로 향하는 길',
+    links: [
+      ['#goyang-guide', '콘서트 가이드'],
+      [officialNoticeUrl, '공식 티켓 공지 보기'],
+    ],
+  },
+  {
+    title: '기다림을 담아두기',
+    links: [
+      ['/share/setlist/', '셋리스트 포스터'],
+      ['/share/ticket/', '나만의 D-day 티켓 만들기'],
+    ],
+  },
+];
+---
+
+<nav class="pamphlet-contents shell-content" aria-label="팜플렛 목차">
+  {
+    chapters.map((chapter) => (
+      <div class="pamphlet-contents__chapter">
+        <p>{chapter.title}</p>
+        <ul>
+          {chapter.links.map(([href, label]) => (
+            <li>
+              <a
+                class="pamphlet-contents__link"
+                href={href}
+                rel={href?.startsWith('http') ? 'noreferrer' : undefined}
+              >
+                <span>{label}</span>
+                <svg
+                  aria-hidden="true"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <path d="M5 12h14m-6-6 6 6-6 6" />
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))
+  }
+</nav>
+
+<style>
+  .pamphlet-contents {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(1.5rem, 4vw, 4rem);
+    padding-block: 2.5rem;
+    border-block: 1px solid color-mix(in srgb, var(--amber) 32%, transparent);
+  }
+  p {
+    margin-bottom: 0.75rem;
+    color: var(--amber);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-block: 0.65rem;
+    color: var(--ivory);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color var(--motion-fast);
+  }
+  a:hover,
+  a:focus-visible {
+    color: var(--amber);
+    text-decoration: underline;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+  @media (max-width: 42rem) {
+    .pamphlet-contents {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding-block: 2rem;
+    }
+    .pamphlet-contents__chapter + .pamphlet-contents__chapter {
+      padding-top: 1.25rem;
+      border-top: 1px solid color-mix(in srgb, var(--ivory) 16%, transparent);
+    }
+  }
+</style>

@@ -1,16 +1,23 @@
 import { expect, test } from 'vitest';
 import { buildSetlistCardLayout } from '../../src/lib/share/buildSetlistCardLayout';
 
-test('prints version and prediction warning on the poster', () => {
-  const commands = buildSetlistCardLayout({
-    version: '2026-08-29',
-    songs: ['Baptized in Fear', 'Open Hearts'],
+test('uses the approved poster intact, without re-typesetting its song list', () => {
+  const commands = buildSetlistCardLayout();
+  expect(commands).toContainEqual({
+    kind: 'surface',
+    width: 1080,
+    height: 1638,
   });
-  const text = commands
-    .filter((command) => command.kind === 'text')
-    .map((command) => command.value);
-
-  expect(text).toEqual(
-    expect.arrayContaining(['UPDATED 2026.08.29', '예상 · 보장 아님']),
-  );
+  expect(commands.filter((command) => command.kind === 'text')).toEqual([]);
+  expect(commands.filter((command) => command.kind === 'image')).toEqual([
+    {
+      kind: 'image',
+      src: '/visual/share/poster-approved.webp',
+      x: 0,
+      y: 0,
+      width: 1080,
+      height: 1638,
+      opacity: 1,
+    },
+  ]);
 });

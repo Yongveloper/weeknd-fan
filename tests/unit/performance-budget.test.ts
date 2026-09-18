@@ -53,3 +53,20 @@ test('rejects a page image reference whose candidate asset is missing', async ()
 
   await expect(runBudget(fixture)).rejects.toThrow('Missing referenced asset');
 });
+
+test('budgets linked print originals separately without relaxing page-image limits', async () => {
+  const fixture = await createFixture(
+    '<!doctype html><html><body><a href="/downloads/print.png" download>Original</a></body></html>',
+  );
+  await mkdir(path.join(fixture, 'downloads'));
+  await writeFile(
+    path.join(fixture, 'downloads/print.png'),
+    Buffer.alloc(3 * 1024 * 1024),
+  );
+  await expect(runBudget(fixture)).resolves.toBeDefined();
+  await writeFile(
+    path.join(fixture, 'index.html'),
+    '<html><body><img src="/downloads/print.png" alt=""></body></html>',
+  );
+  await expect(runBudget(fixture)).rejects.toThrow('/ raster budget exceeded');
+});

@@ -1,5 +1,4 @@
 ---
-import StatusBadge from '../content/StatusBadge.astro';
 import Disclosure from '../ui/Disclosure.astro';
 import type { SetlistRecord } from '../../lib/content/contracts';
 
@@ -15,16 +14,15 @@ const remainingEntries = entries.slice(previewCount);
 ---
 
 <section
+  id="setlist"
   class="setlist-preview fold fold--reverse"
   data-motion-scene-enter
   aria-labelledby="setlist-preview-title"
 >
   <div class="shell-content setlist-preview__inner">
     <div class="setlist-preview__heading">
-      <p class="eyebrow">A PATTERN, NOT A PROMISE</p>
       <div class="setlist-preview__title-row">
         <h2 id="setlist-preview-title">예상 셋리스트</h2>
-        <StatusBadge status="expected" />
       </div>
     </div>
     <p class="setlist-preview__comparison">
@@ -66,9 +64,6 @@ const remainingEntries = entries.slice(previewCount);
     <a class="setlist-preview__link" href="/share/setlist/"
       >셋리스트 포스터 만들기 <span aria-hidden="true">→</span></a
     >
-    <p class="setlist-preview__hint">
-      브라우저에서만 만들어지는 이미지 한 장. 서버 저장 없음.
-    </p>
   </div>
 </section>
 
@@ -91,6 +86,27 @@ const remainingEntries = entries.slice(previewCount);
   .setlist-preview__inner {
     display: grid;
     gap: clamp(1.25rem, 3vw, 2rem);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    column-gap: clamp(3rem, 7vw, 7rem);
+  }
+
+  .setlist-preview__inner > :global(*) {
+    grid-column: 2;
+  }
+  .setlist-preview__inner > .setlist-preview__heading {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  @media (max-width: 48rem) {
+    .setlist-preview__inner {
+      grid-template-columns: 1fr;
+    }
+    .setlist-preview__inner > :global(*) {
+      grid-column: 1;
+    }
+    .setlist-preview__inner > .setlist-preview__heading {
+      grid-row: auto;
+    }
   }
 
   .setlist-preview__heading {
@@ -165,7 +181,7 @@ const remainingEntries = entries.slice(previewCount);
   }
 
   .setlist-preview__comparison {
-    margin: -0.9rem 0 0;
+    margin: 0;
     color: var(--mist);
     font-weight: 800;
   }
@@ -199,12 +215,6 @@ const remainingEntries = entries.slice(previewCount);
     .setlist-preview__list,
   .setlist-preview__inner :global(.setlist-preview__more) p {
     margin-block: 0.75rem 1.25rem;
-  }
-
-  .setlist-preview__hint {
-    margin-top: -0.75rem;
-    color: var(--mist);
-    font-size: calc(var(--type-scale) * 0.85rem);
   }
 
   @media (max-width: 36rem) {

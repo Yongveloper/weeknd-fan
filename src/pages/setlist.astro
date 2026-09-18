@@ -23,6 +23,7 @@ const title = archivePublished
 ---
 
 <BaseLayout
+  cloudSky
   title={title}
   description="최근 2026년 공연 기록을 바탕으로 한 The Weeknd 고양 공연 예상 셋리스트"
 >
@@ -54,7 +55,7 @@ const title = archivePublished
   .setlist-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    gap: clamp(3.5rem, 9vw, 7rem);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
     padding-block: clamp(4rem, 10vw, 8rem);
   }
 
@@ -67,7 +68,6 @@ const title = archivePublished
 
   .setlist-page :global(.setlist-filter) {
     width: 100%;
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .setlist-page :global(.setlist-filter) > * {

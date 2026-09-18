@@ -42,13 +42,17 @@ test('links to Kakao, Naver, and Google directions', async ({ page }) => {
   }
 });
 
-test('renders the live map iframe on load', async ({ page }) => {
+test('provides an inline venue map without an external frame', async ({
+  page,
+}) => {
   await page.goto('/goyang/');
-  const frame = page.locator('#transport iframe');
-  await expect(frame).toHaveCount(1);
-  await expect(frame).toHaveAttribute('src', /google\.com\/maps/);
-  await expect(frame).toHaveAttribute('title', '고양종합운동장 지도');
-  await expect(frame).toHaveAttribute('loading', 'lazy');
+  const map = page.getByRole('region', {
+    name: '고양종합운동장 지도',
+    exact: true,
+  });
+  await expect(map).toHaveCount(1);
+  await expect(map.locator('[data-venue-map]')).toHaveCount(1);
+  await expect(map.locator('iframe')).toHaveCount(0);
 });
 
 test('shows the Interpark access map image with its source', async ({
@@ -88,7 +92,7 @@ test('groups the five review-based tips into keyboard-operable tabs', async ({
 }) => {
   await page.goto('/goyang/');
   const tips = page.locator('#tips');
-  await expect(tips.getByText('후기 기반 · 이 공연 미확정')).toBeVisible();
+  await expect(tips.getByText('후기 기반 · 이 공연 미확정')).toHaveCount(0);
   const tabs = tips.getByRole('tab');
   await expect(tabs).toHaveText([
     '스탠딩',

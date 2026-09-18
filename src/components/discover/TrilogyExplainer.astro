@@ -18,7 +18,6 @@ const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
 
 <section class="trilogies" aria-labelledby="trilogy-title">
   <div class="trilogies__intro">
-    <p class="eyebrow">TWO DIFFERENT THINGS</p>
     <h2 id="trilogy-title">두 개의 Trilogy를 헷갈리지 않기</h2>
     <p>
       초기의 세 믹스테이프와 최근의 세 정규 앨범은 이름이 닮았지만 분류가
@@ -89,7 +88,7 @@ const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
   }
 
   h3 {
-    font-size: clamp(1.85rem, 3.6vw, 3rem);
+    font-size: clamp(1.5rem, 2.4vw, 2rem);
   }
 
   .trilogies__intro > p:last-child,
@@ -113,7 +112,7 @@ const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
   }
 
   .trilogies__sequence section + section {
-    border-color: var(--blue);
+    border-color: color-mix(in srgb, var(--amber) 45%, var(--ivory));
   }
 
   .trilogies__covers {
@@ -136,7 +135,7 @@ const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
     gap: 0.5rem;
     max-width: 47rem;
     padding-left: 1rem;
-    border-left: 2px solid var(--red);
+    border-left: 2px solid color-mix(in srgb, var(--amber) 45%, transparent);
   }
 
   .trilogies__interpretation strong {

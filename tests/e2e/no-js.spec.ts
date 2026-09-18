@@ -2,10 +2,16 @@ import { expect, test } from '@playwright/test';
 
 test.use({ javaScriptEnabled: false });
 
-test('keeps home venue facts readable without JavaScript', async ({ page }) => {
+test('keeps venue facts reachable through the guide without JavaScript', async ({
+  page,
+}) => {
   await page.goto('/');
 
-  await expect(page.getByText('고양종합운동장 주경기장')).toBeVisible();
+  await page
+    .getByRole('navigation', { name: '주요 메뉴' })
+    .getByRole('link', { name: '콘서트 가이드' })
+    .click();
+  await expect(page.getByText('고양종합운동장 주경기장').first()).toBeVisible();
 });
 
 test('keeps every primary route visible and keyboard reachable on a narrow screen without JavaScript', async ({
@@ -16,7 +22,7 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
 
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
   const links = nav.getByRole('link');
-  await expect(links).toHaveCount(5);
+  await expect(links).toHaveCount(4);
   for (const link of await links.all()) {
     await expect(link).toBeVisible();
   }
@@ -28,20 +34,16 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
     ),
   ).toBe(true);
 
-  const expectedHrefs = [
-    '/',
-    '/discover/',
-    '/setlist/',
-    '/goyang/',
-    '/sources/',
-  ];
+  const expectedHrefs = ['/', '/discover/', '/setlist/', '/goyang/'];
   await page.keyboard.press('Tab');
   await expect(
     page.getByRole('link', { name: '본문으로 건너뛰기' }),
   ).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(
-    page.getByRole('link', { name: 'The Weeknd 고양 팬 가이드 홈' }),
+    page.getByRole('link', {
+      name: 'INTO:DAWN · The Weeknd 고양 팬 가이드 홈',
+    }),
   ).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(
@@ -54,12 +56,15 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
   }
 });
 
-test('keeps the expected-setlist label and native details readable without JavaScript', async ({
+test('keeps the expected-setlist heading and native details readable without JavaScript', async ({
   page,
 }) => {
   await page.goto('/setlist/');
 
-  await expect(page.getByText('예상 · 보장 아님').first()).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님')).toHaveCount(0);
+  await expect(
+    page.getByRole('heading', { name: '예상 셋리스트' }),
+  ).toBeVisible();
   await expect(page.locator('.expected-setlist details')).toHaveCount(38);
   await expect(page.locator('.expected-setlist details').first()).toBeVisible();
 });
@@ -98,8 +103,9 @@ test('keeps Discover summaries and sources readable without JavaScript', async (
 }) => {
   await page.goto('/discover/');
 
-  const disclosure = page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
-  await expect(disclosure.getByText('1분 입문 펼쳐보기')).toBeVisible();
+  const disclosure = page.getByRole('group', { name: '3분 입문 더 깊이 보기' });
+  await expect(disclosure.getByText('3분 입문 펼쳐보기')).toBeVisible();
+  await disclosure.locator('summary').click();
   await expect(disclosure).toHaveAttribute('open', '');
   await expect(
     disclosure.getByRole('link', { name: /Universal Music Canada/ }).first(),

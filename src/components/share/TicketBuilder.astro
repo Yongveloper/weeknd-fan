@@ -1,4 +1,5 @@
 ---
+import '@fontsource/anton/latin.css';
 interface Props {
   showDates: [string, string];
   showStarts: [string, string];
@@ -16,24 +17,37 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   data-songs={JSON.stringify(songs)}
 >
   <header>
-    <p class="eyebrow">PRIVATE EXPORT</p>
     <h1>D-DAY TICKET</h1>
-    <p>관람일과 가장 기다리는 세 곡을 골라 나만의 티켓을 만드세요.</p>
+    <p>관람일과 가장 기다리는 세 곡을 골라 가로형 티켓을 만드세요.</p>
   </header>
 
   <div class="share-builder__grid">
-    <figure class="card-preview">
+    <figure class="card-preview" data-ticket-preview>
       <canvas
+        id="ticket-preview-canvas"
         data-preview
-        width="1080"
-        height="1350"
+        width="2070"
+        height="990"
         role="img"
         aria-label="D-day 티켓 미리보기"
       >
         미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
         이미지와 같은 티켓입니다.
       </canvas>
-      <figcaption>미리보기 · 저장되는 이미지와 같습니다</figcaption>
+      <figcaption>
+        <span>가로형 티켓 · 저장되는 이미지와 같습니다</span>
+        <a href="/downloads/into-dawn-ticket-original.png" download
+          >원본 디자인 PNG</a
+        >
+        <button
+          type="button"
+          class="card-preview__toggle"
+          data-preview-toggle
+          aria-expanded="false"
+          aria-controls="ticket-preview-canvas"
+          hidden>미리보기 크게 보기</button
+        >
+      </figcaption>
     </figure>
 
     <form novalidate>
@@ -112,6 +126,12 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
         '[data-download-ticket]',
       );
       const preview = root.querySelector<HTMLCanvasElement>('[data-preview]');
+      const previewFigure = root.querySelector<HTMLElement>(
+        '[data-ticket-preview]',
+      );
+      const previewToggle = root.querySelector<HTMLButtonElement>(
+        '[data-preview-toggle]',
+      );
       const status = root.querySelector<HTMLElement>('[data-status]');
       const error = root.querySelector<HTMLElement>('[data-error]');
       const copyShare =
@@ -121,6 +141,25 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       let shareButton: HTMLButtonElement | undefined;
 
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
+
+      if (previewToggle && previewFigure) {
+        previewToggle.hidden = false;
+        previewToggle.addEventListener('click', () => {
+          const expanded =
+            previewToggle.getAttribute('aria-expanded') !== 'true';
+          previewToggle.setAttribute('aria-expanded', String(expanded));
+          previewFigure.classList.toggle('card-preview--expanded', expanded);
+          previewToggle.textContent = expanded
+            ? '미리보기 작게 보기'
+            : '미리보기 크게 보기';
+          // Keep the control reachable when the enlarged preview collapses.
+          previewToggle.focus();
+          previewToggle.scrollIntoView({
+            block: 'nearest',
+            behavior: 'instant',
+          });
+        });
+      }
 
       const selections = () =>
         selects.map((select) => select.value).filter(Boolean);
@@ -254,18 +293,19 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
 
 <style>
   .share-builder {
+    container-type: inline-size;
     display: grid;
-    gap: clamp(2.5rem, 6vw, 5rem);
-    max-width: 58rem;
+    gap: clamp(1.5rem, 4vw, 3rem);
+    max-width: 74rem;
     min-width: 0;
-    padding-block: clamp(4rem, 10vw, 8rem);
+    padding-block: clamp(2.75rem, 5.25vw, 5.25rem);
   }
   .share-builder__grid {
     align-items: start;
     display: grid;
     gap: clamp(2rem, 5vw, 4rem);
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
-    max-width: 64rem;
+    grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 1fr);
+    max-width: 74rem;
     min-width: 0;
   }
   header,
@@ -289,17 +329,34 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     margin: 0;
   }
   .card-preview canvas {
-    aspect-ratio: 4 / 5;
-    background: #050507;
-    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    aspect-ratio: 2070 / 990;
+    background: #080807;
+    border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
     color: var(--mist);
     display: block;
     height: auto;
     width: 100%;
   }
   .card-preview figcaption {
+    display: grid;
+    gap: 0.75rem;
     color: var(--ink-muted);
     font-size: 0.82rem;
+  }
+  .card-preview__toggle {
+    display: none;
+    justify-self: start;
+    min-height: 44px;
+    padding: 0.45rem 0.65rem;
+    background: transparent;
+    border-color: color-mix(in srgb, var(--amber) 55%, transparent);
+    color: var(--amber);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .card-preview__toggle:hover {
+    border-color: var(--amber);
+    color: var(--ivory);
   }
   h1 {
     margin: 0;
@@ -316,6 +373,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
     max-width: 42rem;
   }
   fieldset {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 1rem;
     border: 0;
     margin: 0;
     padding: 0;
@@ -327,7 +386,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   }
   .choice {
     align-items: center;
-    border-top: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
+    border-block: 1px solid color-mix(in srgb, var(--ivory) 30%, transparent);
     color: var(--ivory);
     display: flex;
     gap: 0.75rem;
@@ -340,6 +399,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   input {
     inline-size: 1.2rem;
     block-size: 1.2rem;
+    flex-shrink: 0;
+    accent-color: var(--amber);
   }
   select,
   button {
@@ -367,7 +428,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   select:focus-visible,
   button:focus-visible,
   input:focus-visible {
-    outline: 3px solid var(--blue);
+    outline: 3px solid var(--amber);
     outline-offset: 3px;
   }
   .status {
@@ -425,6 +486,51 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   .share-builder__back:hover,
   .share-builder__back:focus-visible {
     color: var(--amber);
+  }
+  @container (max-width: 56rem) {
+    .share-builder__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.5rem;
+    }
+    .card-preview {
+      grid-template-columns: minmax(0, 9rem) minmax(0, 1fr);
+      align-items: center;
+      gap: 1.25rem;
+    }
+    .card-preview__toggle:not([hidden]) {
+      display: inline-flex;
+      align-items: center;
+    }
+    .card-preview--expanded {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .card-preview--expanded canvas {
+      max-width: 28rem;
+    }
+    .card-preview--expanded figcaption {
+      justify-items: start;
+    }
+  }
+  @container (max-width: 20rem) {
+    fieldset {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .card-preview {
+      grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+      gap: 0.75rem;
+    }
+    .card-preview--expanded {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @container (max-width: 12rem) {
+    /* At large text sizes, reserve a full row for the preview controls. */
+    .card-preview {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .card-preview:not(.card-preview--expanded) canvas {
+      max-width: 9rem;
+    }
   }
   @media (max-width: 48rem) {
     .share-builder,

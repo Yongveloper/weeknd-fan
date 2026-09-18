@@ -1,15 +1,22 @@
 import { expect, test } from '@playwright/test';
 
 const intro = (page: import('@playwright/test').Page) =>
-  page.getByRole('group', { name: '1분 입문 더 깊이 보기' });
+  page.getByRole('group', { name: '3분 입문 더 깊이 보기' });
 
 test('renders a chevron anchor and swaps the label when toggled', async ({
   page,
 }) => {
   await page.goto('/discover/');
   const details = intro(page);
-  await expect(details).toHaveAttribute('open', '');
+  await expect(details).not.toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__chevron')).toHaveCount(1);
+  await expect(details.locator('summary .disclosure__label')).toHaveText(
+    '3분 입문 펼쳐보기',
+  );
+
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('data-state', 'open');
+  await expect(details).toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__label')).toHaveText(
     '접기',
   );
@@ -18,14 +25,7 @@ test('renders a chevron anchor and swaps the label when toggled', async ({
   await expect(details).toHaveAttribute('data-state', 'closed');
   await expect(details).not.toHaveAttribute('open', '');
   await expect(details.locator('summary .disclosure__label')).toHaveText(
-    '1분 입문 펼쳐보기',
-  );
-
-  await details.locator('summary').click();
-  await expect(details).toHaveAttribute('data-state', 'open');
-  await expect(details).toHaveAttribute('open', '');
-  await expect(details.locator('summary .disclosure__label')).toHaveText(
-    '접기',
+    '3분 입문 펼쳐보기',
   );
 });
 
@@ -50,7 +50,7 @@ test('toggles instantly and natively under reduced motion', async ({
   await page.goto('/discover/');
   const introDetails = intro(page);
   await expect(introDetails.locator('summary .disclosure__label')).toHaveText(
-    '접기',
+    '3분 입문 펼쳐보기',
   );
 
   const glossary = page.getByRole('group', { name: '용어 한 장 더 깊이 보기' });
@@ -161,7 +161,7 @@ test('scopes adopter styles (max-width/min-width/color) to the parent, not Discl
   );
   await page.goto('/discover/');
   await expect(intro(page)).toHaveCSS('max-width', '672px');
-  await expect(intro(page)).toHaveCSS('color', 'rgb(215, 216, 220)');
+  await expect(intro(page)).toHaveCSS('color', 'rgb(192, 190, 183)');
 
   const timelineFirst = page.locator('.timeline details').first();
   await expect(timelineFirst).toHaveCSS('max-width', '736px');
@@ -181,9 +181,7 @@ test('lays out the song detail as meta header, three labelled blocks, then sourc
 
   const detail = first.locator('.expected-setlist__detail');
   await expect(detail.locator('.song-meta')).toHaveCount(1);
-  await expect(detail.locator('.song-meta .status')).toHaveText(
-    '예상 · 보장 아님',
-  );
+  await expect(detail.locator('.song-meta .status')).toHaveCount(0);
   await expect(detail.locator('.song-block .eyebrow')).toHaveText([
     'BEFORE',
     'ON STAGE',

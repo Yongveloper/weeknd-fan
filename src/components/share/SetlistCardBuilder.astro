@@ -15,10 +15,9 @@ const updated = version.replaceAll('-', '.');
   data-songs={JSON.stringify(songs)}
 >
   <header>
-    <p class="eyebrow">SHARE · 예상 셋리스트를 이미지로</p>
-    <h1>SETLIST CARD</h1>
+    <h1>SETLIST POSTER</h1>
     <p class="lead">
-      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1350)으로
+      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1638)으로
       만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에
       넣어 두세요.
     </p>
@@ -29,14 +28,19 @@ const updated = version.replaceAll('-', '.');
       <canvas
         data-preview
         width="1080"
-        height="1350"
+        height="1638"
         role="img"
         aria-label="예상 셋리스트 카드 미리보기"
       >
         미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
         이미지와 같은 카드입니다.
       </canvas>
-      <figcaption>미리보기 · 저장되는 이미지와 같습니다</figcaption>
+      <figcaption>
+        미리보기 · 저장되는 이미지와 같습니다
+        <a href="/downloads/into-dawn-poster-original.png" download
+          >원본 디자인 PNG</a
+        >
+      </figcaption>
     </figure>
 
     <div class="share-builder__controls">
@@ -48,10 +52,6 @@ const updated = version.replaceAll('-', '.');
         <div>
           <dt>기준</dt>
           <dd>최근 2026년 공연 기록 · UPDATED {updated}</dd>
-        </div>
-        <div>
-          <dt>정확도</dt>
-          <dd class="card-facts__caveat">예상 · 보장 아님</dd>
         </div>
       </dl>
 
@@ -86,8 +86,6 @@ const updated = version.replaceAll('-', '.');
   document
     .querySelectorAll<HTMLElement>('[data-setlist-builder]')
     .forEach((root) => {
-      const version = root.dataset.version ?? '';
-      const songs = JSON.parse(root.dataset.songs ?? '[]') as string[];
       const button = root.querySelector<HTMLButtonElement>(
         '[data-download-setlist]',
       );
@@ -101,7 +99,7 @@ const updated = version.replaceAll('-', '.');
       let shareButton: HTMLButtonElement | undefined;
       if (!button || !status || !error) return;
 
-      const layout = buildSetlistCardLayout({ version, songs });
+      const layout = buildSetlistCardLayout();
 
       // 미리보기: 저장되는 카드와 같은 명령을 화면 캔버스에 그린다.
       // renderCommands 는 그린 뒤 JPEG blob 까지 만들므로 blob 실패는 무시한다(그림은 이미 남아 있다).
@@ -190,6 +188,7 @@ const updated = version.replaceAll('-', '.');
 
 <style>
   .share-builder {
+    container-type: inline-size;
     display: grid;
     gap: clamp(2rem, 5vw, 3.5rem);
     padding-block: clamp(4rem, 10vw, 8rem);
@@ -197,7 +196,7 @@ const updated = version.replaceAll('-', '.');
   header {
     display: grid;
     gap: 1rem;
-    max-width: 58rem;
+    max-width: 74rem;
   }
   h1 {
     margin: 0;
@@ -216,10 +215,21 @@ const updated = version.replaceAll('-', '.');
 
   .share-builder__grid {
     display: grid;
-    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 32rem) minmax(0, 1fr);
     gap: clamp(2rem, 5vw, 4rem);
     align-items: start;
-    max-width: 64rem;
+    max-width: 74rem;
+    min-width: 0;
+  }
+
+  .share-builder__grid > * {
+    min-width: 0;
+  }
+
+  @container (max-width: 56rem) {
+    .share-builder__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
   }
 
   .card-preview {
@@ -231,9 +241,9 @@ const updated = version.replaceAll('-', '.');
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 4 / 5;
-    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
-    background: #050507;
+    aspect-ratio: 1080 / 1638;
+    border: 1px solid color-mix(in srgb, var(--amber) 35%, transparent);
+    background: #080807;
     color: var(--mist);
   }
   .card-preview figcaption {
@@ -289,7 +299,7 @@ const updated = version.replaceAll('-', '.');
     opacity: 0.5;
   }
   button:focus-visible {
-    outline: 3px solid var(--blue);
+    outline: 3px solid var(--amber);
     outline-offset: 3px;
   }
   .privacy-note,

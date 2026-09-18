@@ -37,7 +37,8 @@ const overviewItems = jump.map(({ id, label }) => {
 ---
 
 <BaseLayout
-  title="고양 가이드 | The Weeknd 고양 팬 가이드"
+  cloudSky
+  title="콘서트 가이드 | The Weeknd 고양 팬 가이드"
   description="The Weeknd 2026 고양 공연 당일 가이드 — 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물"
 >
   <section
@@ -45,8 +46,8 @@ const overviewItems = jump.map(({ id, label }) => {
     aria-labelledby="goyang-guide-title"
   >
     <header>
-      <p class="eyebrow">GOYANG DAY-OF GUIDE</p><h1 id="goyang-guide-title">
-        고양 당일 가이드
+      <p class="eyebrow">CONCERT GUIDE</p><h1 id="goyang-guide-title">
+        콘서트 가이드
       </h1><p>
         확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 두고, 다른 공연
         후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.
@@ -105,10 +106,6 @@ const overviewItems = jump.map(({ id, label }) => {
     min-width: 0;
   }
 
-  .guide-page :global(.guide-overview) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .guide-page :global(.guide-body) {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
@@ -149,7 +146,7 @@ const overviewItems = jump.map(({ id, label }) => {
      without scrolling back to the top. Sections offset their anchors to clear it. */
   .guide-body {
     display: grid;
-    gap: clamp(4rem, 11vw, 9rem);
+    gap: clamp(3rem, 6vw, 5rem);
   }
   :global(.guide-jump) {
     position: sticky;
@@ -161,20 +158,31 @@ const overviewItems = jump.map(({ id, label }) => {
     margin-inline: calc(var(--gutter) * -1);
     padding: 0.6rem var(--gutter);
     border-bottom: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
-    background: color-mix(in srgb, var(--night) 82%, transparent);
-    backdrop-filter: blur(14px);
+    /* Share the parent's glass exactly: a second tint, blur or saturation
+       pass makes this strip darker than the surrounding reading surface. */
+    isolation: isolate;
+    background: transparent;
+  }
+  :global(.guide-jump::before) {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: #000;
+    /* Scroll distance drives opacity directly, so reversing or stopping the
+       scroll never leaves a time-based fade catching up behind the user. */
+    opacity: var(--guide-stickiness, 0);
   }
   @media (max-width: 44rem) {
-    :global(.guide-jump) {
+    :global(.guide-jump nav) {
       mask-image: linear-gradient(
         90deg,
         transparent,
-        #000 var(--gutter),
-        #000 calc(100% - 3rem),
+        #000 0.5rem,
+        #000 calc(100% - 1.75rem),
         transparent
       );
-    }
-    :global(.guide-jump nav) {
       scroll-padding-inline: var(--gutter) 3rem;
     }
   }

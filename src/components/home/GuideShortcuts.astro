@@ -9,16 +9,16 @@ const shortcuts = [
 ---
 
 <section
+  id="goyang-guide"
   class="guide-shortcuts fold"
   data-motion-scene-enter
   aria-labelledby="guide-shortcuts-title"
 >
   <div class="shell-content guide-shortcuts__inner">
     <div class="guide-shortcuts__heading">
-      <p class="eyebrow">GOYANG, BEFORE THE LIGHTS</p>
-      <h2 id="guide-shortcuts-title">고양 가이드</h2>
+      <h2 id="guide-shortcuts-title">콘서트 가이드</h2>
     </div>
-    <nav aria-label="고양 가이드 바로가기">
+    <nav aria-label="콘서트 가이드 바로가기">
       {
         shortcuts.map(([href, label], index) => (
           <a href={href} style={`--i: ${index}`}>
@@ -43,7 +43,7 @@ const shortcuts = [
   }
 
   h2 {
-    margin-top: 0.75rem;
+    margin-top: 0;
   }
 
   nav {

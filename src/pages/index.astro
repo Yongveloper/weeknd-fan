@@ -1,9 +1,11 @@
 ---
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
+import '../styles/eclipse-impact.css';
 import FanNote from '../components/home/FanNote.astro';
 import GuideShortcuts from '../components/home/GuideShortcuts.astro';
 import HomeHero from '../components/home/HomeHero.astro';
+import PamphletContents from '../components/home/PamphletContents.astro';
 import IntroSummary from '../components/home/IntroSummary.astro';
 import SetlistPreview from '../components/home/SetlistPreview.astro';
 import {
@@ -33,15 +35,42 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
   title={title}
   description="The Weeknd 2026 고양 공연을 위한 비공식·비영리 팬 가이드"
   spaceSky
+  lunarSky
 >
   <script
     is:inline
     type="application/ld+json"
     set:html={serializeJsonLd(eventJsonLd)}
   />
-  <HomeHero concert={concert} officialNoticeUrl={officialNoticeUrl} />
-  <IntroSummary albums={albums} />
-  <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
-  <GuideShortcuts />
-  <FanNote />
+  <HomeHero />
+  <div class="reading-panel" data-reading-panel>
+    <div class="edition-directory">
+      <PamphletContents officialNoticeUrl={officialNoticeUrl} />
+    </div>
+    <div class="edition-chapters">
+      <IntroSummary albums={albums} />
+      <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
+      <GuideShortcuts />
+      <FanNote />
+    </div>
+  </div>
 </BaseLayout>
+
+<style>
+  .reading-panel {
+    position: relative;
+    z-index: 4;
+    padding-top: clamp(1rem, 3vw, 2.5rem);
+    padding-bottom: var(--section-space);
+    background: rgb(5 5 4 / 78%);
+    border-top: 1px solid rgb(188 160 113 / 22%);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+  }
+  .reading-panel :global(section) {
+    scroll-margin-top: 2rem;
+  }
+  .reading-panel :global(.pamphlet-contents) {
+    border-top: 0;
+  }
+</style>

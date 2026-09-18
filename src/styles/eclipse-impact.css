@@ -1,0 +1,253 @@
+/* Keep the tour typography legible against the evolving night sky. */
+body[data-edition='dawn'] .home-hero {
+  --hero-stage: clamp(40rem, 53vw, 53rem);
+  --hero-h1: clamp(5rem, 10.8vw, 10rem);
+  --hero-title-scale: 0.8;
+  --hero-frame: 64.43vw;
+  --hero-frame-top: calc(var(--hero-stage) * 0.42 - var(--hero-frame) / 2);
+  --hero-frame-right: calc(27% - var(--hero-frame) / 2);
+}
+body[data-edition='dawn'] .home-hero__content {
+  z-index: auto;
+  align-content: center;
+  padding-block: 0 10rem;
+}
+body[data-edition='dawn'] .home-hero__heading {
+  align-self: center;
+}
+body[data-edition='dawn']
+  .home-hero:is([data-title-phase='waiting'], [data-title-phase='revealing'])
+  #home-title
+  > span {
+  animation: var(--title-animation, dawn-title-arrive) 4s
+    cubic-bezier(0.2, 0.65, 0.25, 1) var(--title-delay, 2s) both;
+}
+body[data-edition='dawn']
+  .home-hero[data-dawn-paused='true']
+  #home-title
+  > span {
+  animation-play-state: paused;
+}
+@keyframes dawn-title-arrive {
+  from {
+    opacity: 0;
+    filter: blur(13px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes dawn-after-arrive {
+  0% {
+    opacity: 0;
+    filter: blur(13px);
+  }
+  30% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+body[data-edition='dawn'] #home-title {
+  font-size: calc(var(--type-scale) * var(--hero-h1) * var(--hero-title-scale));
+  line-height: 0.94;
+  color: #eee8dc;
+  text-shadow: 0 4px 24px rgb(0 0 0 / 45%);
+}
+body[data-edition='dawn'] .home-hero__dawn {
+  z-index: 2;
+  --title-delay: 5s;
+  --dawn-effect-scale: 1.25;
+  --dawn-effect-em: calc(1em * var(--dawn-effect-scale));
+  --dawn-glow-scale: 1;
+  --dawn-glow-reach: 1.15;
+  --dawn-emission-gain: 1.1;
+  --dawn-glow-unit: calc(
+    var(--dawn-effect-em) * var(--dawn-glow-scale) * var(--dawn-glow-reach)
+  );
+  --dawn-spill-scale: 0.36;
+  --dawn-spill-radius: calc(var(--dawn-glow-unit) * var(--dawn-spill-scale));
+  --dawn-wide-gain: 0.72;
+  --dawn-outline-gain: 100%;
+  /* Gold edges heat to a white filament along each letter outline.
+     The orange corona and white core hold their peak after the initial reveal. */
+  --dawn-light-core: #ffffff;
+  --dawn-outline-base: #fff8ec;
+  /* Blend 20% toward the orange sampled from the eclipse corona (#ff944c). */
+  --dawn-light-inner: #ffcc98;
+  --dawn-light-middle: #f5a65d;
+  --dawn-light-outer: #d17839;
+  margin-left: 0;
+  /* Bebas Neue's ink occupies .71em across these two lines. Preserve the
+     original .27em visible gap when the letter size drops to 80%. */
+  margin-top: 0.1075em;
+  text-align: center;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: max(0.7px, calc(var(--dawn-effect-em) * 0.009))
+    color-mix(in srgb, var(--dawn-outline-base) var(--dawn-outline-gain), #000);
+  text-shadow: none;
+}
+body[data-edition='dawn'] .home-hero__after {
+  --title-animation: dawn-after-arrive;
+  color: #ffffff;
+  position: relative;
+  z-index: 4;
+}
+/* Keep the static ink texture independent of the parent's blur reveal. */
+body[data-edition='dawn'] .home-hero__after-ink {
+  filter: url('#after-hours-grain');
+}
+/* The outline and corona remain at peak brightness after the reveal. */
+body[data-edition='dawn'] .home-hero__dawn-light {
+  position: absolute;
+  inset: 0;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  pointer-events: none;
+  opacity: 1;
+}
+body[data-edition='dawn'] .home-hero__dawn-light::before,
+body[data-edition='dawn'] .home-hero__dawn-light::after,
+body[data-edition='dawn'] .home-hero__dawn-core::before,
+body[data-edition='dawn'] .home-hero__dawn-core::after,
+body[data-edition='dawn'] .home-hero__dawn-spill::before {
+  content: attr(data-light-text);
+  position: absolute;
+  inset: -0.16em;
+  padding: 0.16em;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
+}
+/* Keep the sharp edge bright; let only the broad reflected light recede.
+   Font-relative spill keeps the same light proportions on small screens. */
+body[data-edition='dawn'] .home-hero__dawn-spill {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+body[data-edition='dawn'] .home-hero__dawn-spill::before {
+  -webkit-text-stroke: max(2px, calc(var(--dawn-glow-unit) * 0.042))
+    var(--dawn-light-outer);
+  filter: blur(calc(var(--dawn-spill-radius) * 0.4))
+    brightness(var(--dawn-emission-gain));
+  opacity: var(--dawn-wide-gain);
+}
+body[data-edition='dawn'] .home-hero__dawn-light::before {
+  -webkit-text-stroke: max(0.75px, calc(var(--dawn-glow-unit) * 0.012))
+    var(--dawn-light-middle);
+  opacity: 1;
+  filter: url('#dawn-outline-grain')
+    drop-shadow(
+      0 0 max(1px, calc(var(--dawn-glow-unit) * 0.02)) var(--dawn-light-inner)
+    )
+    drop-shadow(0 0 calc(var(--dawn-glow-unit) * 0.1) var(--dawn-light-middle))
+    drop-shadow(
+      0 0 calc(var(--dawn-glow-unit) * 0.18)
+        color-mix(
+          in srgb,
+          var(--dawn-light-outer) calc(var(--dawn-wide-gain) * 100%),
+          transparent
+        )
+    )
+    brightness(var(--dawn-emission-gain));
+}
+body[data-edition='dawn'] .home-hero__dawn-light::after {
+  /* Keep the outer edge gold; pure white belongs inside the letter strokes. */
+  -webkit-text-stroke: max(0.75px, calc(var(--dawn-effect-em) * 0.01))
+    var(--dawn-outline-base);
+  filter: drop-shadow(
+      0 0 max(1px, calc(var(--dawn-glow-unit) * 0.013)) var(--dawn-light-inner)
+    )
+    drop-shadow(
+      0 0 calc(var(--dawn-glow-unit) * 0.038) var(--dawn-light-middle)
+    )
+    brightness(var(--dawn-emission-gain));
+}
+/* An ivory edge with a thinner white filament preserves a crisp outline.
+   Its interiors stay transparent; the separate corona keeps its intensity. */
+body[data-edition='dawn'] .home-hero__dawn-core {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+body[data-edition='dawn'] .home-hero__dawn-core::before {
+  -webkit-text-stroke: max(0.9px, calc(var(--dawn-effect-em) * 0.0125))
+    var(--dawn-outline-base);
+}
+body[data-edition='dawn'] .home-hero__dawn-core::after {
+  -webkit-text-stroke: max(0.6px, calc(var(--dawn-effect-em) * 0.006))
+    var(--dawn-light-core);
+}
+@media (min-width: 42.001rem) {
+  body[data-edition='dawn'] #home-title {
+    font-size: calc(
+      var(--type-scale) * var(--hero-h1) * 0.9 * var(--hero-title-scale)
+    );
+  }
+  body[data-edition='dawn'] .home-hero__dawn {
+    /* Sharpen the warm ivory contour independently of the amber bloom. */
+    --dawn-outline-gain: 100%;
+    --dawn-glow-scale: 1.1111111111;
+  }
+  body[data-edition='dawn'] .home-hero__dawn-core::before {
+    -webkit-text-stroke-width: max(1px, calc(var(--dawn-effect-em) * 0.014));
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-edition='dawn'] .home-hero[data-title-phase] #home-title > span {
+    animation: none;
+    opacity: 1;
+    filter: none;
+  }
+  body[data-edition='dawn']
+    .home-hero[data-title-phase]
+    .home-hero__dawn-light {
+    animation: none;
+    opacity: 1;
+  }
+}
+body[data-edition='dawn'] .reading-panel::before {
+  content: '';
+  position: absolute;
+  inset: -1px 0 auto;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 15%,
+    #987044 65%,
+    #e1ba7f 85%,
+    transparent
+  );
+  pointer-events: none;
+}
+@media (max-width: 42rem) {
+  body[data-edition='dawn'] .home-hero {
+    --hero-h1: min(15.5vw, 5.4rem);
+    --hero-frame: 109.52vw;
+    --hero-frame-right: calc(48% - var(--hero-frame) / 2);
+    --hero-frame-top: calc(
+      var(--hero-title-top) + var(--hero-h1) * 2.6 - var(--hero-frame) *
+        0.1895625
+    );
+    --hero-title-top: clamp(2rem, 8vw, 3rem);
+    --hero-stage: calc(
+      var(--hero-title-top) + var(--hero-h1) * 2.6 + 68vw + 9rem
+    );
+  }
+  body[data-edition='dawn'] .home-hero__content {
+    align-content: start;
+    padding-block: var(--hero-title-top) 0;
+  }
+  body[data-edition='dawn'] .home-hero__heading {
+    align-self: start;
+  }
+  body[data-edition='dawn'] #home-title {
+    text-align: center;
+  }
+}

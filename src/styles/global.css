@@ -290,3 +290,45 @@ summary {
   letter-spacing: 0.16em;
   text-transform: uppercase;
 }
+
+/* The v8 atmosphere replaces the former starfield on the home page. */
+body[data-lunar-sky] {
+  background: #000;
+}
+.space-sky.space-sky--lunar {
+  background: #000;
+}
+.space-sky.space-sky--lunar::before,
+.space-sky.space-sky--lunar::after {
+  display: none;
+  animation: none;
+}
+
+body[data-lunar-sky] .fold::before {
+  display: none;
+}
+
+/* Reading chapters share the same quiet night as the eclipse cover. */
+body[data-lunar-sky] {
+  --section-space: clamp(4.5rem, 9vw, 8rem);
+}
+body[data-lunar-sky] .reading-panel section {
+  scroll-margin-top: 5rem;
+}
+::selection {
+  background: var(--amber);
+  color: var(--night);
+}
+html {
+  scrollbar-color: #775838 var(--night);
+}
+
+/* Carry the reading surface through the footer over the fixed eclipse. */
+body[data-lunar-sky] .site-footer {
+  position: relative;
+  z-index: 4;
+  margin-top: 0;
+  background: rgb(5 5 4 / 78%);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}

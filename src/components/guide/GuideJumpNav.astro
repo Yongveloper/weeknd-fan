@@ -24,6 +24,18 @@ const { items } = Astro.props;
     private inputHandler?: EventListener;
     private initialHashTarget?: string;
     private hashSettleTimer?: number;
+    private surfaceProgress = -1;
+
+    private syncSurface = () => {
+      const bounds = this.getBoundingClientRect();
+      // Fade through the last 96px before docking; the reverse path is exact.
+      const progress = Math.max(0, Math.min(1, 1 - bounds.top / 96));
+      if (progress !== this.surfaceProgress) {
+        this.style.setProperty('--guide-stickiness', String(progress));
+        this.surfaceProgress = progress;
+      }
+      return bounds;
+    };
 
     private syncClearance = () => {
       const parent = this.parentElement;
@@ -88,9 +100,10 @@ const { items } = Astro.props;
         this.frame = 0;
         if (this.initialHashTarget) {
           alignHashTarget(this.initialHashTarget);
+          this.syncSurface();
           return;
         }
-        const stickyBottom = this.getBoundingClientRect().bottom;
+        const stickyBottom = this.syncSurface().bottom;
         const crossing = sections.filter(
           (section) =>
             section.target.getBoundingClientRect().top <= stickyBottom + 1,

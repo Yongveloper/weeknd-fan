@@ -12,7 +12,21 @@ const viewport = { width: 390, deviceScaleFactor: 3 };
 const files = await walk(distRoot);
 const htmlFiles = files.filter((file) => file.endsWith('.html')).sort();
 const builtJavaScript = files.filter((file) => file.endsWith('.js'));
-const builtRasters = files.filter(isRasterAsset);
+// User-provided print originals are explicit downloads, never page imagery.
+// Keep the existing page/aggregate limits; account for downloads separately.
+const downloadRasters = files.filter(
+  (file) =>
+    isRasterAsset(file) &&
+    path.relative(distRoot, file).startsWith(`downloads${path.sep}`),
+);
+const builtRasters = files.filter(
+  (file) => isRasterAsset(file) && !downloadRasters.includes(file),
+);
+const downloadBytes = await byteSize(downloadRasters);
+assertWithinBudget('Download originals raster', downloadBytes, 8 * 1024 * 1024);
+process.stdout.write(
+  `download-originals\traster=${formatBytes(downloadBytes)}/8192.0KiB\n`,
+);
 
 if (htmlFiles.length === 0) {
   throw new Error(

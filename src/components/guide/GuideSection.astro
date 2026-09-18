@@ -32,7 +32,7 @@ const pendingItems = [
   data-enter
 >
   <div class="guide-section__heading">
-    <p class="eyebrow">GOYANG DAY-OF GUIDE</p>
+    <p class="eyebrow">CONCERT GUIDE</p>
     <h2 id={`${entry.data.section}-title`} data-guide-heading>
       {entry.data.title}
     </h2>
@@ -54,7 +54,9 @@ const pendingItems = [
       </ul>
     ) : (
       <p class="guide-section__meta">
-        <StatusBadge status={entry.data.status} />
+        {!['official', 'practical'].includes(entry.data.status) && (
+          <StatusBadge status={entry.data.status} />
+        )}
         <span>마지막 확인 {formatSeoulDate(entry.data.lastVerifiedAt)}</span>
       </p>
     )

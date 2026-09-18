@@ -40,14 +40,47 @@ async function expectJpegCard(
     }
     const length = bytes.readUInt16BE(index + 2);
     if (marker >= 0xc0 && marker <= 0xc3) {
-      expect(bytes.readUInt16BE(index + 5)).toBe(1350);
-      expect(bytes.readUInt16BE(index + 7)).toBe(1080);
+      const ticket = download.suggestedFilename().includes('ticket');
+      expect(bytes.readUInt16BE(index + 5)).toBe(ticket ? 990 : 1638);
+      expect(bytes.readUInt16BE(index + 7)).toBe(ticket ? 2070 : 1080);
       return;
     }
     index += length + 1;
   }
   throw new Error('JPEG start-of-frame marker was not found');
 }
+
+test('expands the compact ticket preview without losing song selections', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/share/ticket/');
+  const preview = page.locator('[data-ticket-builder] [data-preview]');
+  const toggle = page.getByRole('button', { name: '미리보기 크게 보기' });
+  await expect(toggle).toBeVisible();
+  const compact = await preview.boundingBox();
+  if (!compact) throw new Error('Ticket preview was not rendered');
+
+  const song = page.getByLabel('첫 번째 곡');
+  await song.selectOption({ index: 1 });
+  const selected = await song.inputValue();
+  await toggle.focus();
+  await page.keyboard.press('Enter');
+  const collapse = page.getByRole('button', { name: '미리보기 작게 보기' });
+  await expect(collapse).toHaveAttribute('aria-expanded', 'true');
+  await expect(collapse).toBeFocused();
+  const expanded = await preview.boundingBox();
+  expect(expanded?.width).toBeGreaterThan(compact.width * 1.5);
+  await expect(song).toHaveValue(selected);
+
+  await page.keyboard.press('Enter');
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(toggle).toBeFocused();
+  const restored = await preview.boundingBox();
+  expect(restored?.width).toBeCloseTo(compact.width, 0);
+  await expect(song).toHaveValue(selected);
+  await expectNoHorizontalDocumentOverflow(page);
+});
 
 test('creates a ticket download without submission or browser storage', async ({
   page,
@@ -276,9 +309,9 @@ test('creates the expected-setlist JPEG without personal input', async ({
     if (/\/api\//.test(request.url())) apiRequests.push(request.url());
   });
   await page.goto('/share/setlist/');
-  await expect(
-    page.getByText('예상 · 보장 아님', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByText('예상 · 보장 아님', { exact: true })).toHaveCount(
+    0,
+  );
   await expect(
     page.getByText(
       '이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.',
@@ -457,7 +490,7 @@ test.describe('without JavaScript', () => {
     await page.goto('/share/setlist/');
     await expect(
       page.getByText('예상 · 보장 아님', { exact: true }),
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(page.getByText('담기는 곡', { exact: true })).toBeVisible();
     await expect(page.getByText('기준', { exact: true })).toBeVisible();
     await expect(

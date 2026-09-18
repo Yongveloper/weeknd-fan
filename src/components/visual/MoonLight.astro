@@ -1,0 +1,85 @@
+<moon-light data-phase="poster" aria-hidden="true">
+  <picture class="moon-light__poster" data-moon-art>
+    <source srcset="/visual/moon-v8/poster.avif" type="image/avif" />
+    <source srcset="/visual/moon-v8/poster.webp" type="image/webp" />
+    <img
+      src="/visual/moon-v8/poster.webp"
+      width="960"
+      height="960"
+      alt=""
+      fetchpriority="high"
+    />
+  </picture>
+  <video
+    data-intro
+    muted
+    playsinline
+    preload="none"
+    disablepictureinpicture
+    disableRemotePlayback
+  >
+    <source data-src="/visual/moon-v8/intro.mp4" type="video/mp4" />
+  </video>
+  <video
+    data-loop
+    muted
+    playsinline
+    loop
+    preload="none"
+    disablepictureinpicture
+    disableRemotePlayback
+  >
+    <source data-src="/visual/moon-v8/loop.mp4" type="video/mp4" />
+  </video>
+</moon-light>
+<noscript>
+  <style>
+    moon-light .moon-light__poster {
+      opacity: 1 !important;
+    }
+  </style>
+</noscript>
+
+<script>
+  import '../../scripts/moon-light';
+</script>
+
+<style>
+  moon-light {
+    display: block;
+    width: var(--hero-frame);
+    aspect-ratio: 1;
+    pointer-events: none;
+    mix-blend-mode: screen;
+  }
+  picture,
+  video,
+  img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  picture,
+  video {
+    mix-blend-mode: screen;
+  }
+  video {
+    opacity: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    moon-light:not([data-fallback='true'])[data-phase='poster'] picture,
+    moon-light[data-phase='loading'] picture {
+      opacity: 0;
+    }
+  }
+  moon-light[data-phase='intro'] [data-intro],
+  moon-light[data-phase='loop'] [data-loop] {
+    opacity: 1;
+  }
+  moon-light[data-phase='intro'] picture,
+  moon-light[data-phase='loop'] picture {
+    opacity: 0;
+  }
+</style>

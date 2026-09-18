@@ -107,7 +107,7 @@ test('keeps body links visible at rest and draws the full underline on hover', a
     };
   });
   // 쉬는 상태: hover 없이도 링크임이 보여야 한다(밝은 글자 + 옅은 밑줄), 드로우 선은 0.
-  expect(styles.color).toBe('rgb(240, 232, 218)');
+  expect(styles.color).toBe('rgb(241, 238, 231)');
   expect(styles.decoration).toBe('underline');
   expect(styles.transition).toContain('background-size');
   expect(styles.size).toMatch(/^0(px)? /);
@@ -124,7 +124,7 @@ test('excludes structural links like nav shortcuts from the underline draw', asy
 }) => {
   await page.goto('/');
   const navLink = page
-    .locator('nav[aria-label="고양 가이드 바로가기"] a')
+    .locator('nav[aria-label="콘서트 가이드 바로가기"] a')
     .first();
   const styles = await navLink.evaluate((el) => {
     const cs = getComputedStyle(el);

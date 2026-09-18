@@ -3,7 +3,17 @@ import astro from 'eslint-plugin-astro';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['.astro/**', '.superpowers/**', 'dist/**'] },
+  {
+    ignores: [
+      '.astro/**',
+      '.superpowers/**',
+      'dist/**',
+      'tmp/**',
+      'output/**',
+      'test-results/**',
+      'playwright-report/**',
+    ],
+  },
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   ...astro.configs['flat/recommended'],

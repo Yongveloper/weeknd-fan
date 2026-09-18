@@ -1,0 +1,246 @@
+/* Video-clocked dawn light, independent of the cloud composition. */
+body[data-edition='dawn'] .home-hero__corona {
+  position: absolute;
+  top: var(--hero-frame-top);
+  right: var(--hero-frame-right);
+  width: var(--hero-frame);
+  aspect-ratio: 1;
+  opacity: 0.8;
+  mask-image: linear-gradient(110deg, transparent 30%, #000 76%);
+}
+body[data-edition='dawn'] .home-hero__corona-breath {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 59%,
+    rgb(255 216 155 / 30%) 62.5%,
+    rgb(224 154 65 / 40%) 65%,
+    rgb(161 86 32 / 20%) 73%,
+    transparent 88%
+  );
+  animation: dawn-corona-breathe 4.8s ease-in-out infinite alternate;
+}
+/* Light streams fan out from the rim; the mask keeps the moon's core black. */
+body[data-edition='dawn'] .home-hero__corona::before,
+body[data-edition='dawn'] .home-hero__corona::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+body[data-edition='dawn'] .home-hero__corona::before {
+  background: repeating-conic-gradient(
+    from 12deg,
+    transparent 0deg 13deg,
+    rgb(255 210 127 / 3%) 17deg,
+    rgb(255 196 97 / 23%) 21deg,
+    transparent 28deg 40deg
+  );
+  mask-image: radial-gradient(
+    circle closest-side,
+    transparent 61%,
+    #000 64%,
+    rgb(0 0 0 / 60%) 71%,
+    transparent 96%
+  );
+  animation: dawn-corona-stream 8s ease-in-out infinite alternate;
+}
+body[data-edition='dawn'] .home-hero__corona::after {
+  background: radial-gradient(
+    circle closest-side,
+    transparent 61%,
+    rgb(255 211 143 / 26%) 63%,
+    rgb(232 148 58 / 10%) 69%,
+    transparent 77%
+  );
+  animation: dawn-corona-release 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+body[data-edition='dawn'] .home-hero__sunbreak {
+  position: absolute;
+  z-index: 2;
+  top: calc(var(--hero-frame-top) + var(--hero-frame) * 0.675);
+  right: calc(var(--hero-frame-right) + var(--hero-frame) * 0.24);
+  width: calc(var(--hero-frame) * 0.6);
+  aspect-ratio: 2.8;
+  translate: 50% -50%;
+  rotate: -32deg;
+  opacity: 0.72;
+}
+body[data-edition='dawn'] .home-hero__sunbreak-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgb(255 242 210 / 85%),
+      rgb(246 171 83 / 32%) 14%,
+      transparent 57%
+    ),
+    radial-gradient(
+      ellipse 50% 3% at center,
+      rgb(255 232 174 / 80%),
+      rgb(239 163 81 / 25%) 45%,
+      transparent 100%
+    );
+  animation: dawn-sunbreak-shimmer 3.6s ease-in-out -1s infinite alternate;
+}
+body[data-edition='dawn'] .home-hero__horizon {
+  position: fixed;
+  z-index: 1;
+  pointer-events: none;
+  top: calc(var(--hero-origin) + var(--hero-stage) * 0.38);
+  left: 0;
+  width: 100%;
+  height: calc(var(--hero-stage) * 0.8);
+  mix-blend-mode: screen;
+  opacity: 0.68;
+}
+body[data-edition='dawn'] .home-hero__horizon-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 65% 36% at 80% 68%,
+      rgb(172 95 39 / 48%),
+      transparent 100%
+    ),
+    radial-gradient(
+      ellipse 45% 16% at 86% 64%,
+      rgb(255 197 109 / 32%),
+      transparent 100%
+    );
+  animation: dawn-horizon-drift 7s ease-in-out infinite alternate;
+}
+@keyframes dawn-corona-breathe {
+  from {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  to {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+@keyframes dawn-sunbreak-shimmer {
+  from {
+    transform: translate3d(-4%, 0, 0) scaleX(0.65);
+    opacity: 0.4;
+  }
+  to {
+    transform: translate3d(4%, 0, 0) scaleX(1.3);
+    opacity: 1;
+  }
+}
+@keyframes dawn-horizon-drift {
+  from {
+    transform: translate3d(4%, 8%, 0) scale(0.96);
+    opacity: 0.55;
+  }
+  to {
+    transform: translate3d(-5%, -8%, 0) scale(1.1);
+    opacity: 1;
+  }
+}
+@keyframes dawn-corona-stream {
+  from {
+    transform: rotate(-14deg) scale(1);
+    opacity: 0.4;
+  }
+  to {
+    transform: rotate(20deg) scale(1.08);
+    opacity: 1;
+  }
+}
+@keyframes dawn-corona-release {
+  0% {
+    transform: scale(1);
+    opacity: 0;
+  }
+  18% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.27);
+    opacity: 0;
+  }
+}
+/* Opposing cloud currents make the depth legible within a few seconds. */
+@media (prefers-reduced-motion: no-preference) {
+  body[data-edition='dawn'] .eclipse-weather__bank--far {
+    animation: dawn-cloud-far 14s ease-in-out infinite alternate;
+  }
+  body[data-edition='dawn'] .eclipse-weather__bank--front {
+    animation: dawn-cloud-front 11s ease-in-out -4s infinite alternate;
+  }
+  body[data-edition='dawn'] .eclipse-weather__wisp {
+    opacity: 0.42;
+    animation: dawn-mist-sweep 8s ease-in-out -2s infinite alternate;
+  }
+  body[data-edition='dawn'] .eclipse-weather__rays {
+    animation: dawn-ray-sweep 6s ease-in-out infinite alternate;
+  }
+}
+@keyframes dawn-cloud-far {
+  from {
+    transform: translate3d(-7%, 4%, 0) scale(1.12);
+  }
+  to {
+    transform: translate3d(6%, -5%, 0) scale(1.2);
+  }
+}
+@keyframes dawn-cloud-front {
+  from {
+    transform: translate3d(7%, 5%, 0) scale(1.14);
+  }
+  to {
+    transform: translate3d(-7%, -4%, 0) scale(1.22);
+  }
+}
+@keyframes dawn-mist-sweep {
+  from {
+    transform: translate3d(-10%, 6%, 0) scale(1.1);
+  }
+  to {
+    transform: translate3d(10%, -8%, 0) scale(1.18);
+  }
+}
+@keyframes dawn-ray-sweep {
+  from {
+    transform: rotate(-10deg) scaleX(0.9);
+    opacity: 0.35;
+  }
+  to {
+    transform: rotate(10deg) scaleX(1.15);
+    opacity: 1;
+  }
+}
+@media (max-width: 42rem) {
+  body[data-edition='dawn'] .home-hero__horizon {
+    top: calc(var(--hero-origin) + var(--hero-stage) * 0.56);
+    height: calc(var(--hero-stage) * 0.5);
+  }
+}
+body[data-edition='dawn']
+  .home-hero[data-dawn-paused='true']
+  [data-eclipse-ambient],
+body[data-edition='dawn']
+  .home-hero[data-dawn-paused='true']
+  .home-hero__corona::before,
+body[data-edition='dawn']
+  .home-hero[data-dawn-paused='true']
+  .home-hero__corona::after,
+body[data-edition='dawn']
+  .home-hero[data-dawn-paused='true']
+  .eclipse-weather
+  > div {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  body[data-edition='dawn'] .home-hero [data-eclipse-ambient],
+  body[data-edition='dawn'] .home-hero__corona::before,
+  body[data-edition='dawn'] .home-hero__corona::after {
+    animation: none;
+  }
+}
