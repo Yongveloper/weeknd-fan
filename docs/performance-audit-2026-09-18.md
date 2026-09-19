@@ -95,7 +95,7 @@
 
 ### 폰트
 
-- `dist/_astro/*.woff2` 127개, 3.56MB. 실제 페이지당 로드 14~~20개(230~~300KB).
+- `dist/_astro/*.woff2` 127개, 3.56MB. 실제 페이지당 로드 14–20개(230–300KB).
 - 헤더 전용 패밀리 `Noto Sans KR Header`(6 slice) + `Bebas Neue Header`(1)를 `<link rel="preload">`, `font-display: block`. 생성 로직 `src/lib/fonts/headerFontAssets.ts`.
 - 본문 `Noto Sans KR Variable`은 `astro.config.mjs:33-44` Vite 플러그인이 `font-display: optional`로 패치. 홈 롱태스크 예산을 위한 의도적 설계 (AGENTS.md).
 
@@ -151,3 +151,33 @@ npx astro preview --port 4323 --host 127.0.0.1
 chrome-devtools MCP에서 `emulate`(`390x844x3,mobile,touch`, `cpuThrottlingRate: 4`, `networkConditions: "Slow 4G"`) → `navigate_page` → `performance_start_trace(reload: true)`. 비디오 다운로드 여부는 `list_network_requests(resourceTypes: ["media"])` 또는 `performance.getEntriesByType('resource')`에서 `.mp4` 필터로 확인.
 
 개선 후 비교 지표: 홈 모바일 LCP, 홈 mp4 전송 바이트, `npm run budget` JS 여유, Lighthouse 실패 감사 수, 홈 모바일 롱태스크 최대치.
+
+## 7. 개선 후 재측정 — 2026-09-19 (커밋 `2a7d5e1`)
+
+계획 `docs/superpowers/plans/2026-09-19-performance-improvements.md`의 4개 트랙(히어로 비디오 정책, LCP 텍스처 preload·`fetchpriority`, 헤더 폰트 서브셋, 렌더러 부트 지연)을 머지한 뒤 §1과 같은 조건(`astro preview` HTTP/1.1, 모바일 390×3 · CPU 4x · Slow 4G, 데스크톱 1440 무제한)으로 재측정했다. 측정 중 호스트 load ~13으로 §2보다 높았으므로 수치는 보수적이다.
+
+| 지표                            | 이전                      | 이후                                                                         |
+| ------------------------------- | ------------------------- | ---------------------------------------------------------------------------- |
+| `/` 모바일 LCP                  | 2,433ms                   | **2,103ms**                                                                  |
+| `/` 모바일 LCP 리소스 로드 시간 | 1,788ms                   | **573ms**                                                                    |
+| `/` 모바일 LCP 렌더 지연        | 31ms                      | 925ms (이미지가 CSS보다 먼저 도착 → 렌더 블로킹 CSS 대기로 이동)             |
+| `/goyang/` 모바일 LCP           | 2,407ms                   | **1,837ms**                                                                  |
+| `/setlist/` 모바일 LCP          | 2,345ms                   | **1,553ms**                                                                  |
+| `/` 데스크톱 LCP                | 151ms                     | 144ms                                                                        |
+| CLS (전 페이지)                 | 0.00                      | 0.00                                                                         |
+| `/` 모바일 mp4 전송             | 5,866,428 B (`intro.mp4`) | **195,123 B** (`intro-720.mp4`, variant `compact`)                           |
+| `/` 데스크톱 mp4 전송           | 5,866,428 B               | 5,866,428 B (variant `full`, 의도된 동작)                                    |
+| `saveData` / 2g·3g              | 비디오 다운로드           | 포스터, mp4 0건 (e2e `hero-video-policy.spec.ts`)                            |
+| 헤더 폰트 preload               | 7 파일 / 109,464 B        | 7 파일 / **13,908 B**                                                        |
+| 홈 HTML                         | 35,783 B                  | 32,810 B                                                                     |
+| `/` 모바일 롱태스크             | 1건 54ms @477ms           | 3건 55/61/56ms @1763/4742/4825ms — 렌더러 부트가 `load`(4,065ms) 이후로 이동 |
+| 렌더러 청크 fetchStart          | 파싱 중                   | 4,122ms (≥ loadEventStart, e2e `renderer-boot.spec.ts`)                      |
+| `npm run budget` JS             | 74.0 / 75.0 KiB           | 74.4 / 75.0 KiB                                                              |
+| `npm run budget` media          | 미집계                    | 9,720.6 / 13,312 KiB · compact 330.4 / 3,072 KiB                             |
+
+해석:
+
+- LCP 개선의 원인은 리소스 로드 시간(1,788→573ms). 텍스처 preload가 폰트 preload보다 먼저 큐잉되고, 헤더 폰트 preload가 109KB→14KB로 줄어 연결 경쟁이 사라졌다. 남은 병목은 렌더 블로킹 CSS(FCP 절감 추정 ~1,100ms, §4 제외 항목 참조).
+- 렌더러 부트 지연은 LCP 창에서 롱태스크를 빼냈지만 태스크 자체(WebGL 초기화, 4x CPU에서 55~61ms)는 남아 있다. 홈 롱태스크 예산 50ms는 e2e(무제한 CPU)에서 통과하며, 4x 스로틀 조건에서는 여전히 초과한다.
+- 로컬 e2e: 386건 중 358 통과, 17 실패, 11 스킵. 실패 17건은 6개 제목 × 프로젝트로, 모두 변경 전 main에서도 실패하는 이 mac의 headless Chromium WebGL/비디오 한계(`dawn-sky.spec` 3, `cloud-reveal.spec` 1, `back-to-top.spec:47`, `cloud-continuation.spec`). CI(Linux)가 기준.
+- 선재 실패 정리: `format:check`는 이번에 수정(`5c36b79`). `audit:content`는 출처 `lastCheckedAt` staleness로 실패 중 — 콘텐츠 확인 후 갱신이 필요한 사용자 결정 사항.
