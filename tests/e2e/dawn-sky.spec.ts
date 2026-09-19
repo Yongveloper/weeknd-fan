@@ -313,10 +313,11 @@ test('restores the original v8 media and keeps cloud light synchronized', async 
 }) => {
   await page.goto('/');
   const moon = page.locator('moon-light');
+  const compact = (page.viewportSize()?.width ?? 0) <= 672;
   await expect(moon).toHaveAttribute('data-phase', 'intro');
   await expect(moon.locator('[data-intro] source')).toHaveAttribute(
     'src',
-    '/visual/moon-v8/intro.mp4',
+    compact ? '/visual/moon-v8/intro-720.mp4' : '/visual/moon-v8/intro.mp4',
   );
   await expect(
     moon.locator('picture source[type="image/avif"]'),
@@ -345,7 +346,7 @@ test('restores the original v8 media and keeps cloud light synchronized', async 
   await expect(moon).toHaveAttribute('data-phase', 'loop');
   await expect(moon.locator('[data-loop] source')).toHaveAttribute(
     'src',
-    '/visual/moon-v8/loop.mp4',
+    compact ? '/visual/moon-v8/loop-720.mp4' : '/visual/moon-v8/loop.mp4',
   );
   const geometry = await moon.evaluate((el) => ({
     diameter: (el.getBoundingClientRect().width * 0.620875) / innerWidth,

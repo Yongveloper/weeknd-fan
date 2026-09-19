@@ -1,3 +1,8 @@
+import {
+  heroVideoVariant,
+  readMediaPolicy,
+  type HeroVideoVariant,
+} from '../lib/media-policy';
 import { moonLightAt, type MoonPhase } from '../lib/moon-light';
 
 class MoonLight extends HTMLElement {
@@ -12,9 +17,12 @@ class MoonLight extends HTMLElement {
   private atmosphere?: HTMLElement;
   private observer?: IntersectionObserver;
   private visible = true;
+  private variant: HeroVideoVariant = 'full';
 
   connectedCallback() {
     this.abort = new AbortController();
+    this.variant = heroVideoVariant(readMediaPolicy());
+    this.dataset.variant = this.variant;
     this.hero = this.closest<HTMLElement>('[data-home-hero]') ?? undefined;
     this.atmosphere =
       document.querySelector<HTMLElement>('lunar-atmosphere') ?? undefined;
@@ -123,7 +131,9 @@ class MoonLight extends HTMLElement {
   private load(video: HTMLVideoElement) {
     const source = video.querySelector('source');
     if (!source || source.hasAttribute('src')) return;
-    source.src = source.dataset.src ?? '';
+    const compact =
+      this.variant === 'compact' ? source.dataset.srcCompact : undefined;
+    source.src = compact ?? source.dataset.src ?? '';
     video.muted = true;
     video.preload = 'auto';
     video.load();
@@ -158,6 +168,10 @@ class MoonLight extends HTMLElement {
       !this.isConnected
     )
       return;
+    if (this.variant === 'none') {
+      this.poster();
+      return;
+    }
     this.setPaused(false);
     this.dataset.fallback = 'false';
     if (this.dataset.phase === 'poster') {
