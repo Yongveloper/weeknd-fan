@@ -6,8 +6,16 @@ function afterLoadIdle(signal: AbortSignal): Promise<void> {
     const idle = () => {
       if (signal.aborted) return;
       if ('requestIdleCallback' in window)
-        requestIdleCallback(() => resolve(), { timeout: 1500 });
-      else setTimeout(resolve, 0);
+        requestIdleCallback(
+          () => {
+            if (!signal.aborted) resolve();
+          },
+          { timeout: 1500 },
+        );
+      else
+        setTimeout(() => {
+          if (!signal.aborted) resolve();
+        }, 0);
     };
     if (document.readyState === 'complete') idle();
     else window.addEventListener('load', idle, { once: true, signal });
