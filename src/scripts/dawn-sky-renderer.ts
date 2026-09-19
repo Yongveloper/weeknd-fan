@@ -6,7 +6,8 @@ export interface DawnRenderer {
 }
 
 // One second of darkness, followed by a clamped, three-second linear reveal.
-const cloudRevealAt = transform([1000, 4000], [0, 1]);
+const REVEAL_DARK_MS = 1000;
+const cloudRevealAt = transform([REVEAL_DARK_MS, 4000], [0, 1]);
 
 const vertex = `
 attribute vec2 position;
@@ -957,6 +958,7 @@ export async function createDawnRenderer(
   let progress = 0;
   let revealPausedFor = 0;
   let revealPauseStarted: number | undefined;
+  let revealOrigin: number | undefined;
   let resize = true;
   let prepared = false;
   let preparationStarted = false;
@@ -1165,9 +1167,18 @@ export async function createDawnRenderer(
       Math.min(1, Number(moon?.dataset.light ?? 0)),
     );
     const energy = emissionEnergy();
+    // The reveal has to start when the canvas is first shown, not at navigation
+    // start. The renderer boots after load and an idle slot, which on a phone
+    // lands well past the four seconds the curve spans, so anchoring it to the
+    // document clock skipped the fade entirely and the clouds arrived at full
+    // strength. The dark phase has already played as the hidden still cover.
+    if (prepared && revealOrigin === undefined)
+      revealOrigin = performance.now() - REVEAL_DARK_MS;
     const reveal = readingOnly
       ? 1
-      : cloudRevealAt(performance.now() - revealPausedFor);
+      : revealOrigin === undefined
+        ? 0
+        : cloudRevealAt(performance.now() - revealOrigin - revealPausedFor);
     for (const { gl, uniforms } of passes) {
       gl.uniform1f(uniforms.time, elapsed);
       gl.uniform1f(uniforms.dawn, progress);
