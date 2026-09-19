@@ -16,6 +16,8 @@ npm run audit:content                         # 콘텐츠 신뢰 계약 감사 �
 npm run test:e2e                              # playwright; preview 서버 자동 기동, desktop+mobile chromium, workers:1
 npx playwright test tests/e2e/goyang.spec.ts --project=desktop-chromium   # 단일 스펙
 npm run budget                                # 반드시 build 후. 예산 초과 시 실패
+node scripts/build-compact-moon-video.mjs        # 720px 히어로 비디오 재인코딩 (ffmpeg). 원본 mp4 변경 시 1회
+npm run fonts:header                             # 헤더 폰트 서브셋 재생성. src/components/chrome/navigation.ts 변경 시 필수
 npx wrangler deploy --dry-run                 # 구성 + dist 검증, 게시 안 함
 npx prettier --write .                        # format:check가 verify에 포함됨
 ```
@@ -59,6 +61,8 @@ docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배�
 - e2e는 `baseURL` 사용(`http://127.0.0.1:4321` 하드코딩 금지).
 - Astro image: `layout: 'constrained'`, `responsiveStyles: true` 전역. `<picture>`는 AVIF 우선.
 - 홈 long task 예산 50ms(`tests/e2e/visual.spec.ts` 모바일 evidence). `Intl.DateTimeFormat`에 `timeZone` 주면 첫 생성이 20~60ms — 클라이언트 번들에서 쓰지 않는다(`src/lib/countdown.ts`는 고정 UTC+9). Noto Sans KR은 `astro.config.mjs` Vite 플러그인이 `font-display: optional`로 바꿔 swap 재레이아웃 제거 — 첫 방문은 시스템 한글 폰트로 렌더될 수 있음.
+- 히어로 비디오: `src/lib/media-policy.ts`가 `saveData`·`effectiveType`(slow-2g/2g/3g) → 포스터, `≤42rem` → `-720.mp4`, 그 외 원본을 선택. 예산 스크립트가 mp4 합계 13MiB, `-720` 합계 3MiB를 검사한다. 원본 mp4를 바꾸면 `node scripts/build-compact-moon-video.mjs`를 다시 돌린다.
+- 헤더 폰트는 `src/assets/fonts/header/`의 서브셋을 preload한다. `navigation.ts`의 워드마크·메뉴 문구를 바꾸면 `npm run fonts:header`를 실행하고 결과를 커밋한다 — `tests/unit/header-fonts.test.ts`가 manifest와 `chromeText` 불일치를 실패로 잡는다.
 
 ## 커밋
 
