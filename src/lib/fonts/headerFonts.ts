@@ -77,10 +77,13 @@ export function facesCovering(faces: FontFace[], text: string): FontFace[] {
   return faces.filter((face) => needed.has(face));
 }
 
-/** Distinct non-space characters of `text` that `face` declares in its ranges. */
+/** Distinct characters of `text` that `face` declares in its ranges. Runs of
+ *  whitespace collapse to one space: the header renders spaces too, so the face
+ *  that declares U+0020 has to subset and range it, or spaces alone fall back to
+ *  the `font-display: optional` body face and shift between pages. */
 export function charactersCoveredBy(face: FontFace, text: string): string {
   const covered: string[] = [];
-  for (const char of new Set(text.replace(/\s+/g, ''))) {
+  for (const char of new Set(text.replace(/\s+/g, ' '))) {
     const point = char.codePointAt(0) ?? 0;
     if (face.ranges.some(([from, to]) => from <= point && point <= to))
       covered.push(char);
