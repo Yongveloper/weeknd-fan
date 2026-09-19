@@ -21,6 +21,8 @@ interface Props {
   spaceSky?: boolean;
   lunarSky?: boolean;
   cloudSky?: boolean;
+  /** Page renders hotlinked Spotify album covers. */
+  coverCdn?: boolean;
 }
 
 const {
@@ -30,11 +32,15 @@ const {
   spaceSky = false,
   lunarSky = false,
   cloudSky = false,
+  coverCdn = false,
 } = Astro.props;
 const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
 const pageTitle = `${wordmark.name} | ${title}`;
+// Both sky variants paint the same texture first; it is the LCP element on
+// every page that has a sky (audit 2026-09-18 §3).
+const preloadSkyTexture = cloudSky || lunarSky;
 ---
 
 <!doctype html>
@@ -55,6 +61,21 @@ const pageTitle = `${wordmark.name} | ${title}`;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageUrl} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {
+      preloadSkyTexture && (
+        <link
+          rel="preload"
+          as="image"
+          href="/visual/atmosphere/golden-cloud-bank-v3.webp"
+          fetchpriority="high"
+        />
+      )
+    }
+    {
+      coverCdn && (
+        <link rel="preconnect" href="https://image-cdn-ak.spotifycdn.com" />
+      )
+    }
     {
       headerFontAssets.preloads.map((href) => (
         <link
