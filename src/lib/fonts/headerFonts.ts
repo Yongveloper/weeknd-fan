@@ -64,7 +64,11 @@ export function parseFontFaces(css: string): FontFace[] {
   });
 }
 
-/** Faces (in stylesheet order) that cover every non-space code point of `text`. */
+/** Faces (in stylesheet order) that cover every non-space code point of `text`.
+ *  Selection ignores whitespace on purpose — a slice is never pulled in for the
+ *  space alone — while `charactersCoveredBy` keeps one U+0020. The space is
+ *  therefore subset and ranged only when a face needed for some other character
+ *  also declares U+20 (today the Latin-bearing slice 119, and Bebas' latin). */
 export function facesCovering(faces: FontFace[], text: string): FontFace[] {
   const needed = new Set<FontFace>();
   for (const char of new Set(text.replace(/\s+/g, ''))) {

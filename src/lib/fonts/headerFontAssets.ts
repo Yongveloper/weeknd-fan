@@ -17,6 +17,9 @@ const require = createRequire(import.meta.url);
 
 // Hashed asset URLs of the committed header subsets (npm run fonts:header).
 // Each file keeps its fontsource basename so `face.file` still resolves.
+// `no-inline` is required: six of the seven subsets are under Vite's 4096 B
+// inline threshold, so without it they become data: URIs repeated in every page
+// (once in the preload link, once in the src) and the preload buys nothing.
 const hashedUrls = import.meta.glob<string>(
   '/src/assets/fonts/header/*.woff2',
   { query: '?url&no-inline', import: 'default', eager: true },
