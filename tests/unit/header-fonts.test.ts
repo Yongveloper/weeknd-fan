@@ -4,6 +4,7 @@ import { expect, test } from 'vitest';
 import { chromeText } from '../../src/components/chrome/navigation';
 import {
   aliasFaceCss,
+  charactersCoveredBy,
   facesCovering,
   formatUnicodeRange,
   parseFontFaces,
@@ -69,4 +70,18 @@ test('alias faces block instead of falling back', () => {
   expect(css).toContain('font-display:block');
   expect(css).toContain('src:url(/_astro/slice.woff2)');
   expect(css).toContain('unicode-range:U+AC00-D7A3');
+});
+
+test('charactersCoveredBy returns the distinct characters a face can render', () => {
+  const face = {
+    file: 'slice.woff2',
+    format: 'woff2-variations',
+    weight: '100 900',
+    ranges: [
+      [0x41, 0x5a] as [number, number],
+      [0xac00, 0xd7a3] as [number, number],
+    ],
+  };
+  expect(charactersCoveredBy(face, 'THE WEEKND 홈 the')).toBe('THEWKND홈');
+  expect(charactersCoveredBy(face, '· 26')).toBe('');
 });

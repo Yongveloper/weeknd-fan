@@ -77,6 +77,17 @@ export function facesCovering(faces: FontFace[], text: string): FontFace[] {
   return faces.filter((face) => needed.has(face));
 }
 
+/** Distinct non-space characters of `text` that `face` declares in its ranges. */
+export function charactersCoveredBy(face: FontFace, text: string): string {
+  const covered: string[] = [];
+  for (const char of new Set(text.replace(/\s+/g, ''))) {
+    const point = char.codePointAt(0) ?? 0;
+    if (face.ranges.some(([from, to]) => from <= point && point <= to))
+      covered.push(char);
+  }
+  return covered.join('');
+}
+
 export function formatUnicodeRange(ranges: Array<[number, number]>): string {
   const hex = (value: number) => value.toString(16).toUpperCase();
   return ranges
