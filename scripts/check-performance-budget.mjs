@@ -9,6 +9,9 @@ const javascriptBudget = 75 * 1024;
 const aggregateRasterBudget = 1300 * 1024;
 const pageRasterBudgets = { home: 700 * 1024, other: 400 * 1024 };
 const viewport = { width: 390, deviceScaleFactor: 3 };
+// Hero video: 1440×1440 intro/loop plus the ≤42rem compact encodes. Not
+// raster, not JS — tracked separately so growth is never invisible.
+const mediaBudgets = { aggregate: 13 * 1024 * 1024, compact: 3 * 1024 * 1024 };
 const files = await walk(distRoot);
 const htmlFiles = files.filter((file) => file.endsWith('.html')).sort();
 const builtJavaScript = files.filter((file) => file.endsWith('.js'));
@@ -26,6 +29,18 @@ const downloadBytes = await byteSize(downloadRasters);
 assertWithinBudget('Download originals raster', downloadBytes, 8 * 1024 * 1024);
 process.stdout.write(
   `download-originals\traster=${formatBytes(downloadBytes)}/8192.0KiB\n`,
+);
+
+const builtMedia = files.filter(isMediaAsset);
+const compactMedia = builtMedia.filter((file) => /-720\.mp4$/i.test(file));
+const [mediaBytes, compactMediaBytes] = await Promise.all([
+  byteSize(builtMedia),
+  byteSize(compactMedia),
+]);
+assertWithinBudget('Aggregate media', mediaBytes, mediaBudgets.aggregate);
+assertWithinBudget('Compact media', compactMediaBytes, mediaBudgets.compact);
+process.stdout.write(
+  `media\ttotal=${formatBytes(mediaBytes)}/${formatBytes(mediaBudgets.aggregate)}\tcompact=${formatBytes(compactMediaBytes)}/${formatBytes(mediaBudgets.compact)}\n`,
 );
 
 if (htmlFiles.length === 0) {
@@ -208,6 +223,10 @@ function routeFor(htmlFile) {
 
 function isRasterAsset(file) {
   return /\.(?:avif|webp|png|jpe?g)$/i.test(file);
+}
+
+function isMediaAsset(file) {
+  return /\.(?:mp4|webm)$/i.test(file);
 }
 
 async function gzipBytes(files) {

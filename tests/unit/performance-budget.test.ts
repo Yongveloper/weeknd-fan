@@ -70,3 +70,49 @@ test('budgets linked print originals separately without relaxing page-image limi
   );
   await expect(runBudget(fixture)).rejects.toThrow('/ raster budget exceeded');
 });
+
+test('rejects built media that exceeds the aggregate media budget', async () => {
+  const fixture = await createFixture(
+    '<!doctype html><html><body></body></html>',
+  );
+  await mkdir(path.join(fixture, 'visual'));
+  await writeFile(
+    path.join(fixture, 'visual/intro.mp4'),
+    Buffer.alloc(13 * 1024 * 1024 + 1),
+  );
+
+  await expect(runBudget(fixture)).rejects.toThrow(
+    'Aggregate media budget exceeded',
+  );
+});
+
+test('rejects compact media variants that exceed the compact media budget', async () => {
+  const fixture = await createFixture(
+    '<!doctype html><html><body></body></html>',
+  );
+  await mkdir(path.join(fixture, 'visual'));
+  await writeFile(
+    path.join(fixture, 'visual/intro-720.mp4'),
+    Buffer.alloc(3 * 1024 * 1024 + 1),
+  );
+
+  await expect(runBudget(fixture)).rejects.toThrow(
+    'Compact media budget exceeded',
+  );
+});
+
+test('reports media usage without counting it as raster', async () => {
+  const fixture = await createFixture(
+    '<!doctype html><html><body></body></html>',
+  );
+  await mkdir(path.join(fixture, 'visual'));
+  await writeFile(path.join(fixture, 'visual/loop.mp4'), Buffer.alloc(2048));
+
+  const { stdout } = await runBudget(fixture);
+  expect(stdout).toMatch(
+    /^media\ttotal=2\.0KiB\/13312\.0KiB\tcompact=0\.0KiB\/3072\.0KiB$/m,
+  );
+  expect(stdout).toMatch(
+    /^aggregate\tjs-gzip=0\.0KiB\/75\.0KiB\traster=0\.0KiB\/1300\.0KiB$/m,
+  );
+});
