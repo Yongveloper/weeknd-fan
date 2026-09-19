@@ -1,5 +1,27 @@
 import type { DawnRenderer } from './dawn-sky-renderer';
 
+/** Resolves after the window `load` event, then on the next idle slot. */
+function afterLoadIdle(signal: AbortSignal): Promise<void> {
+  return new Promise((resolve) => {
+    const idle = () => {
+      if (signal.aborted) return;
+      if ('requestIdleCallback' in window)
+        requestIdleCallback(
+          () => {
+            if (!signal.aborted) resolve();
+          },
+          { timeout: 1500 },
+        );
+      else
+        setTimeout(() => {
+          if (!signal.aborted) resolve();
+        }, 0);
+    };
+    if (document.readyState === 'complete') idle();
+    else window.addEventListener('load', idle, { once: true, signal });
+  });
+}
+
 class DawnSky extends HTMLElement {
   private abort?: AbortController;
   private renderer?: DawnRenderer;
@@ -66,6 +88,8 @@ class DawnSky extends HTMLElement {
     this.dataset.state = 'still';
     if (this.reduced.matches) return;
     this.dataset.state = 'loading';
+    if (this.abort) await afterLoadIdle(this.abort.signal);
+    if (generation !== this.generation || !this.isConnected) return;
     try {
       const { createDawnRenderer } = await import('./dawn-sky-renderer');
       if (generation !== this.generation || !this.isConnected) return;
