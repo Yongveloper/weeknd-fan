@@ -1,6 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { expect, test } from 'vitest';
+import manifest from '../../src/assets/fonts/header/manifest.json';
 import { chromeText } from '../../src/components/chrome/navigation';
 import {
   aliasFaceCss,
@@ -12,6 +14,7 @@ import {
 } from '../../src/lib/fonts/headerFonts';
 
 const require = createRequire(import.meta.url);
+const HEADER_FONT_DIR = path.resolve('src/assets/fonts/header');
 const read = (specifier: string) =>
   readFileSync(require.resolve(specifier), 'utf8');
 
@@ -84,4 +87,19 @@ test('charactersCoveredBy returns the distinct characters a face can render', ()
   };
   expect(charactersCoveredBy(face, 'THE WEEKND 홈 the')).toBe('THEWKND홈');
   expect(charactersCoveredBy(face, '· 26')).toBe('');
+});
+
+test('the committed header subsets were built from the current chrome text', () => {
+  expect(manifest.text).toEqual(chromeText);
+});
+
+test('every header subset exists and is a fraction of its fontsource slice', () => {
+  expect(manifest.files.length).toBeGreaterThan(0);
+  for (const entry of manifest.files) {
+    const file = path.join(HEADER_FONT_DIR, entry.file);
+    expect(existsSync(file), `${entry.file} missing`).toBe(true);
+    expect(statSync(file).size).toBe(entry.bytes);
+    expect(entry.bytes).toBeLessThan(6 * 1024);
+    expect(entry.characters.length).toBeGreaterThan(0);
+  }
 });
