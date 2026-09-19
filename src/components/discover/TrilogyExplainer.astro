@@ -115,10 +115,14 @@ const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
     border-color: color-mix(in srgb, var(--amber) 45%, var(--ivory));
   }
 
+  /* Three equal tracks, capped at the covers' full size. A wrapping flex row
+     dropped the third cover onto a row of its own once the three no longer
+     fit side by side; equal tracks let all three share the width instead. */
   .trilogies__covers {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0.75rem;
+    max-width: calc(120px * 3 + 1.5rem);
     margin: 0 0 0.75rem;
     padding: 0;
     list-style: none;

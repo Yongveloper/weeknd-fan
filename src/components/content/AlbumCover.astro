@@ -34,9 +34,10 @@ const { title, era, spotifyUrl, cover } = album.data;
   .album-cover {
     position: relative;
     display: grid;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     width: var(--size);
-    height: var(--size);
+    max-width: 100%;
+    aspect-ratio: 1;
     min-height: 0;
     overflow: hidden;
     color: var(--ivory);

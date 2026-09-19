@@ -212,7 +212,7 @@ body[data-edition] .home-entry__year {
   letter-spacing: 0.1em;
 }
 body[data-edition] .home-entry__album-title {
-  width: 80%;
+  width: 100%;
   overflow-wrap: anywhere;
   color: #fff;
   font-weight: 450;
@@ -412,6 +412,15 @@ body[data-edition] .back-to-top {
   body[data-edition] .home-entry__albums {
     gap: 0.65rem;
     margin-block: 0.75rem;
+  }
+  /* The longest of the three titles has to fit its column, or that card alone
+     grows a second line and the row reads as ragged. Sizing against the column
+     keeps the fit whatever the gap and the fallback font metrics work out to. */
+  body[data-edition] .home-entry__albums li {
+    container-type: inline-size;
+  }
+  body[data-edition] .home-entry__album-title {
+    font-size: min(0.85rem, 10cqw);
   }
 }
 @media (max-width: 44rem) {

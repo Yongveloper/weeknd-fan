@@ -409,7 +409,11 @@ const hasEssentialSet =
     font-weight: 800;
   }
 
+  /* A long album name has to wrap inside its own box. Left at its natural
+     width it pushed the confidence pill onto a second row on those songs only. */
   .song-meta__album {
+    flex: 1 1 0;
+    min-width: 0;
     font-weight: 900;
   }
 

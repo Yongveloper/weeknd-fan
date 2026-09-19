@@ -31,13 +31,16 @@ const links = [
 </nav>
 
 <style>
+  /* Equal tracks, so the three buttons never stack at three different widths
+     when the row is too narrow to hold two of them. */
   .directions {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: 0.7rem;
   }
   .directions a {
     display: inline-flex;
+    justify-content: center;
     align-items: center;
     gap: 0.4rem;
     min-height: 44px;

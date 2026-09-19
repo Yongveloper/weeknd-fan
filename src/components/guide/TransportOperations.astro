@@ -137,15 +137,18 @@ const regionalAreas = ['대전', '대구', '전주', '광주', '부산', '천안
   .transport-operations__areas > div {
     min-width: 0;
   }
+  /* Equal tracks keep the rows even. A wrapping flex row sized each chip to
+     its label, which left the seventh region alone on a row of its own. */
   .transport-operations__areas ul {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
     gap: 0.35rem;
     margin: 0.45rem 0 0;
     padding: 0;
     list-style: none;
   }
   .transport-operations__areas li {
+    text-align: center;
     padding: 0.2rem 0.5rem;
     border: 1px solid color-mix(in srgb, var(--mist) 36%, transparent);
     border-radius: 999px;
