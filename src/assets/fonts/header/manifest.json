@@ -1,0 +1,50 @@
+{
+  "text": {
+    "display": "INTO:DAWN",
+    "body": "THE WEEKND · GOYANG 26홈The Weeknd예상 셋리스트콘서트 가이드"
+  },
+  "files": [
+    {
+      "file": "bebas-neue-latin-400-normal.woff2",
+      "family": "display",
+      "characters": "INTO:DAW",
+      "bytes": 2908
+    },
+    {
+      "file": "noto-sans-kr-111-wght-normal.woff2",
+      "family": "body",
+      "characters": "셋",
+      "bytes": 1320
+    },
+    {
+      "file": "noto-sans-kr-115-wght-normal.woff2",
+      "family": "body",
+      "characters": "콘",
+      "bytes": 1188
+    },
+    {
+      "file": "noto-sans-kr-116-wght-normal.woff2",
+      "family": "body",
+      "characters": "홈",
+      "bytes": 1240
+    },
+    {
+      "file": "noto-sans-kr-117-wght-normal.woff2",
+      "family": "body",
+      "characters": "H예",
+      "bytes": 1300
+    },
+    {
+      "file": "noto-sans-kr-118-wght-normal.woff2",
+      "family": "body",
+      "characters": "N상트서드",
+      "bytes": 1772
+    },
+    {
+      "file": "noto-sans-kr-119-wght-normal.woff2",
+      "family": "body",
+      "characters": "TE WKD·GOYA26heknd리스가이",
+      "bytes": 4180
+    }
+  ]
+}

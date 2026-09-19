@@ -64,7 +64,11 @@ export function parseFontFaces(css: string): FontFace[] {
   });
 }
 
-/** Faces (in stylesheet order) that cover every non-space code point of `text`. */
+/** Faces (in stylesheet order) that cover every non-space code point of `text`.
+ *  Selection ignores whitespace on purpose — a slice is never pulled in for the
+ *  space alone — while `charactersCoveredBy` keeps one U+0020. The space is
+ *  therefore subset and ranged only when a face needed for some other character
+ *  also declares U+20 (today the Latin-bearing slice 119, and Bebas' latin). */
 export function facesCovering(faces: FontFace[], text: string): FontFace[] {
   const needed = new Set<FontFace>();
   for (const char of new Set(text.replace(/\s+/g, ''))) {
@@ -75,6 +79,20 @@ export function facesCovering(faces: FontFace[], text: string): FontFace[] {
     if (face) needed.add(face);
   }
   return faces.filter((face) => needed.has(face));
+}
+
+/** Distinct characters of `text` that `face` declares in its ranges. Runs of
+ *  whitespace collapse to one space: the header renders spaces too, so the face
+ *  that declares U+0020 has to subset and range it, or spaces alone fall back to
+ *  the `font-display: optional` body face and shift between pages. */
+export function charactersCoveredBy(face: FontFace, text: string): string {
+  const covered: string[] = [];
+  for (const char of new Set(text.replace(/\s+/g, ' '))) {
+    const point = char.codePointAt(0) ?? 0;
+    if (face.ranges.some(([from, to]) => from <= point && point <= to))
+      covered.push(char);
+  }
+  return covered.join('');
 }
 
 export function formatUnicodeRange(ranges: Array<[number, number]>): string {

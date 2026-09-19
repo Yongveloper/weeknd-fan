@@ -3,6 +3,7 @@ import { createRequire } from 'node:module';
 import { chromeText } from '../../components/chrome/navigation';
 import {
   aliasFaceCss,
+  charactersCoveredBy,
   facesCovering,
   formatUnicodeRange,
   parseFontFaces,
@@ -14,18 +15,15 @@ export const HEADER_DISPLAY_FAMILY = 'Bebas Neue Header';
 
 const require = createRequire(import.meta.url);
 
-// Hashed asset URLs. The CSS from the fontsource packages already emits these
-// files, and Vite dedupes identical assets, so nothing extra ships.
-const hashedUrls = {
-  ...import.meta.glob<string>(
-    '/node_modules/@fontsource-variable/noto-sans-kr/files/*.woff2',
-    { query: '?url', import: 'default', eager: true },
-  ),
-  ...import.meta.glob<string>(
-    '/node_modules/@fontsource/bebas-neue/files/*.woff2',
-    { query: '?url', import: 'default', eager: true },
-  ),
-};
+// Hashed asset URLs of the committed header subsets (npm run fonts:header).
+// Each file keeps its fontsource basename so `face.file` still resolves.
+// `no-inline` is required: six of the seven subsets are under Vite's 4096 B
+// inline threshold, so without it they become data: URIs repeated in every page
+// (once in the preload link, once in the src) and the preload buys nothing.
+const hashedUrls = import.meta.glob<string>(
+  '/src/assets/fonts/header/*.woff2',
+  { query: '?url&no-inline', import: 'default', eager: true },
+);
 
 function urlFor(face: FontFace): string {
   const entry = Object.entries(hashedUrls).find(([path]) =>
@@ -47,7 +45,12 @@ function aliasFor(family: string, specifier: string, text: string) {
       weight: face.weight,
       url: urlFor(face),
       format: face.format,
-      ranges: formatUnicodeRange(face.ranges),
+      ranges: formatUnicodeRange(
+        [...charactersCoveredBy(face, text)].map((char) => {
+          const point = char.codePointAt(0) ?? 0;
+          return [point, point] as [number, number];
+        }),
+      ),
     }),
   );
 }

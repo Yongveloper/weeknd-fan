@@ -1,9 +1,12 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import path from 'node:path';
 import { expect, test } from 'vitest';
+import manifest from '../../src/assets/fonts/header/manifest.json';
 import { chromeText } from '../../src/components/chrome/navigation';
 import {
   aliasFaceCss,
+  charactersCoveredBy,
   facesCovering,
   formatUnicodeRange,
   parseFontFaces,
@@ -11,6 +14,7 @@ import {
 } from '../../src/lib/fonts/headerFonts';
 
 const require = createRequire(import.meta.url);
+const HEADER_FONT_DIR = path.resolve('src/assets/fonts/header');
 const read = (specifier: string) =>
   readFileSync(require.resolve(specifier), 'utf8');
 
@@ -69,4 +73,70 @@ test('alias faces block instead of falling back', () => {
   expect(css).toContain('font-display:block');
   expect(css).toContain('src:url(/_astro/slice.woff2)');
   expect(css).toContain('unicode-range:U+AC00-D7A3');
+});
+
+test('charactersCoveredBy returns the distinct characters a face can render', () => {
+  const face = {
+    file: 'slice.woff2',
+    format: 'woff2-variations',
+    weight: '100 900',
+    ranges: [
+      [0x41, 0x5a] as [number, number],
+      [0xac00, 0xd7a3] as [number, number],
+    ],
+  };
+  expect(charactersCoveredBy(face, 'THE WEEKND 홈 the')).toBe('THEWKND홈');
+  expect(charactersCoveredBy(face, '· 26')).toBe('');
+});
+
+test('charactersCoveredBy keeps one space for a face that declares U+0020', () => {
+  const faceWithSpace = {
+    file: 'slice.woff2',
+    format: 'woff2-variations',
+    weight: '100 900',
+    ranges: [
+      [0x20, 0x20] as [number, number],
+      [0x41, 0x5a] as [number, number],
+    ],
+  };
+  // The header renders spaces, so a face declaring U+0020 has to subset and
+  // range it; runs of whitespace collapse to the single space glyph.
+  expect(charactersCoveredBy(faceWithSpace, 'THE  WEEKND')).toBe('THE WKND');
+});
+
+test('the committed header subsets were built from the current chrome text', () => {
+  expect(manifest.text).toEqual(chromeText);
+});
+
+test('every header subset exists and is a fraction of its fontsource slice', () => {
+  expect(manifest.files.length).toBeGreaterThan(0);
+  for (const entry of manifest.files) {
+    const file = path.join(HEADER_FONT_DIR, entry.file);
+    expect(existsSync(file), `${entry.file} missing`).toBe(true);
+    expect(statSync(file).size).toBe(entry.bytes);
+    expect(entry.bytes).toBeLessThan(6 * 1024);
+    expect(entry.characters.length).toBeGreaterThan(0);
+  }
+});
+
+test('each subset holds exactly the glyphs its alias face will range', () => {
+  const specifiers = {
+    display: '@fontsource/bebas-neue/index.css',
+    body: '@fontsource-variable/noto-sans-kr/index.css',
+  } as const;
+
+  for (const entry of manifest.files) {
+    const family = entry.family as keyof typeof specifiers;
+    const text = chromeText[family];
+    const face = parseFontFaces(read(specifiers[family])).find(
+      (candidate) => candidate.file === entry.file,
+    );
+    expect(
+      face,
+      `${entry.file} is not a ${family} fontsource slice`,
+    ).toBeDefined();
+    // headerFontAssets.ts derives unicode-range from the same call, so a drift
+    // here means the preloaded file and its declared range disagree.
+    expect(entry.characters).toBe(charactersCoveredBy(face!, text));
+  }
 });
