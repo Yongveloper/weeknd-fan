@@ -8,6 +8,7 @@ import HomeHero from '../components/home/HomeHero.astro';
 import PamphletContents from '../components/home/PamphletContents.astro';
 import IntroSummary from '../components/home/IntroSummary.astro';
 import SetlistPreview from '../components/home/SetlistPreview.astro';
+import DawnSky from '../components/visual/DawnSky.astro';
 import {
   getAlbums,
   getConcert,
@@ -43,6 +44,11 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
     type="application/ld+json"
     set:html={serializeJsonLd(eventJsonLd)}
   />
+  {
+    /* The cover sky scrolls away with the hero; this fixed sky stays behind
+      the programme sheet, exactly as on the reading routes. */
+  }
+  <DawnSky readingOnly />
   <HomeHero />
   <div class="reading-panel" data-reading-panel>
     <div class="edition-directory">

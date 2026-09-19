@@ -20,7 +20,6 @@ const fragment = `
 precision highp float;
 uniform vec2 resolution;
 uniform vec3 sceneFrame;
-uniform float scrollOffset;
 uniform float readingOnly;
 uniform float time;
 uniform float dawn;
@@ -259,10 +258,12 @@ void main() {
   viewportUV.y = 1.0-viewportUV.y;
   // Extend above/below the cover without stretching its existing composition.
   vec2 screenUV = vec2(viewportUV.x,viewportUV.y*sceneFrame.y-sceneFrame.z);
-  float worldY = screenUV.y+scrollOffset;
-  // The cover is one document scene: eclipse, clouds and mist translate
-  // together. Only the separate reading backdrop stays in viewport space.
-  float readingMask = max(readingOnly,smoothstep(1.0,1.15,worldY));
+  // The cover is one composition built around the moon, drawn in a canvas
+  // that belongs to the hero and scrolls away with it natively. Nothing here
+  // follows the page from script. The reading sky is a separate, fixed
+  // surface, so a pass is either wholly cover or wholly reading.
+  float worldY = screenUV.y;
+  float readingMask = readingOnly;
   // Never interpolate texture coordinates across the join: blend the two
   // independently sampled densities below so neither scene stretches.
   vec2 uv = vec2(screenUV.x,worldY);
@@ -865,7 +866,6 @@ async function createAtmospherePass(
   const uniforms = {
     resolution: gl.getUniformLocation(program, 'resolution'),
     sceneFrame: gl.getUniformLocation(program, 'sceneFrame'),
-    scrollOffset: gl.getUniformLocation(program, 'scrollOffset'),
     readingOnly: gl.getUniformLocation(program, 'readingOnly'),
     time: gl.getUniformLocation(program, 'time'),
     dawn: gl.getUniformLocation(program, 'dawn'),
@@ -971,13 +971,14 @@ export async function createDawnRenderer(
   const emission = document.createElement('canvas');
   const ink = emission.getContext('2d');
   let geometryDirty = true;
+  let appliedScrollY = Number.NaN;
+  let coverEnd = 1;
   let readingProgress = 0;
   let titlePhase: string | undefined;
   let titleAnimation: Animation | undefined;
   const invalidateGeometry = () => {
     geometryDirty = true;
   };
-  window.addEventListener('scroll', invalidateGeometry, { passive: true });
   void document.fonts.ready.then(invalidateGeometry);
   const titleObserver = new ResizeObserver(invalidateGeometry);
   if (title) titleObserver.observe(title);
@@ -1095,23 +1096,30 @@ export async function createDawnRenderer(
   const coverObserver = new ResizeObserver(invalidateGeometry);
   if (hero) coverObserver.observe(hero);
 
+  function updateReadingProgress() {
+    appliedScrollY = window.scrollY;
+    const scroll = Math.max(0, Math.min(1, appliedScrollY / coverEnd));
+    readingProgress = readingOnly ? 1 : scroll * scroll * (3 - 2 * scroll);
+  }
   function updateSceneGeometry() {
+    // Every measurement is relative to the canvas, which scrolls with the
+    // hero: the scene geometry is independent of the scroll position.
     const cover = hero?.getBoundingClientRect();
+    const frame = host.getBoundingClientRect();
     const art = moon?.getBoundingClientRect();
-    const origin = cover ? cover.top + window.scrollY : 0;
+    const origin = cover ? cover.top - frame.top : 0;
     const stage = Math.max(
       1,
       cover?.height ?? Math.min(848, Math.max(640, width * 0.53)),
     );
+    coverEnd = cover ? Math.max(1, cover.bottom + window.scrollY) : 1;
     const x = art ? (art.x + art.width / 2) / stage : (width * 0.73) / stage;
-    const y = art
-      ? (art.y + window.scrollY + art.height / 2 - origin) / stage
-      : 0.42;
+    const y =
+      art && cover ? (art.y + art.height / 2 - cover.top) / stage : 0.42;
     const radius = art
       ? (art.width * 0.3104375) / stage
       : (width * 0.2) / stage;
-    const scroll = Math.max(0, Math.min(1, window.scrollY / (origin + stage)));
-    readingProgress = readingOnly ? 1 : scroll * scroll * (3 - 2 * scroll);
+    updateReadingProgress();
     for (const { gl, uniforms } of passes) {
       gl.uniform3f(
         uniforms.sceneFrame,
@@ -1119,7 +1127,6 @@ export async function createDawnRenderer(
         height / stage,
         origin / stage,
       );
-      gl.uniform1f(uniforms.scrollOffset, window.scrollY / stage);
       gl.uniform1f(uniforms.readingOnly, readingOnly ? 1 : 0);
       gl.uniform2f(uniforms.cloudOrigin, x, y);
       gl.uniform3f(uniforms.eclipse, x, y, radius);
@@ -1131,8 +1138,13 @@ export async function createDawnRenderer(
     if (previous) elapsed += Math.min(now - previous, 100) / 1000;
     previous = now;
     // A soft, atmospheric scene needs 30 fps, not full device DPR rendering.
+    // Neither surface follows the page: the cover scrolls natively with the
+    // hero and the reading sky is fixed, so a skipped frame never shows.
     if (now - renderedAt < 32) return;
     renderedAt = now;
+    // Only the dawn progress reads the scroll position, and it reads it here
+    // rather than from scroll events, which mobile Safari coalesces heavily.
+    if (window.scrollY !== appliedScrollY) updateReadingProgress();
     // A canvas commit waits for all preceding GPU commands. Prepare the first
     // frame while hidden, then poll its fence without blocking the main thread.
     // The existing CSS atmosphere remains visible until both layers are ready.
@@ -1221,7 +1233,6 @@ export async function createDawnRenderer(
     observer.disconnect();
     coverObserver.disconnect();
     titleObserver.disconnect();
-    window.removeEventListener('scroll', invalidateGeometry);
     for (const pass of passes) {
       pass.canvas.removeEventListener('webglcontextlost', contextLost);
       pass.dispose();

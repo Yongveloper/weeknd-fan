@@ -29,19 +29,6 @@ const { readingOnly = false } = Astro.props;
       decoding="async"
     />
   </div>
-  {
-    !readingOnly && (
-      <div class="dawn-sky__reading-still">
-        <img
-          src="/visual/atmosphere/golden-cloud-bank-v3.webp"
-          alt=""
-          width="1536"
-          height="1024"
-          decoding="async"
-        />
-      </div>
-    )
-  }
   <canvas class="dawn-sky__clouds" aria-hidden="true"></canvas>
 </dawn-sky>
 <canvas class="dawn-sky__foreground" aria-hidden="true"></canvas>
@@ -51,14 +38,31 @@ const { readingOnly = false } = Astro.props;
 </script>
 
 <style>
+  /* The reading sky is pinned to the viewport. The large viewport height, not
+     the dynamic one: a collapsing mobile URL bar otherwise resizes the sky
+     mid-scroll (measured at 684 / 762 / 792 on iOS in one flick), and every
+     change reallocates the canvas and resets the scene. Sized to the tallest
+     viewport, the bottom strip is simply cropped while the bar is showing. */
   dawn-sky {
     position: fixed;
     inset: 0;
     display: block;
-    height: 100dvh;
+    height: 100lvh;
     z-index: 1;
     overflow: hidden;
     pointer-events: none;
+  }
+  /* The cover sky belongs to the hero and scrolls away with it, so it never
+     has to chase the page from JavaScript. It reaches up behind the
+     transparent header by the hero's own top offset, which keeps every
+     composition offset below expressed in the same coordinates as before:
+     the viewport at scroll 0. */
+  dawn-sky[data-surface='cover'],
+  dawn-sky[data-surface='cover'] + .dawn-sky__foreground,
+  .dawn-sky__eclipse {
+    position: absolute;
+    inset: calc(-1 * var(--hero-origin)) 0 0;
+    height: auto;
   }
   .dawn-sky__still {
     filter: hue-rotate(-8deg);
@@ -66,21 +70,6 @@ const { readingOnly = false } = Astro.props;
     inset: 0;
     width: 100%;
     height: 100%;
-  }
-  dawn-sky[data-surface='cover'] .dawn-sky__still {
-    transform: translateY(var(--cover-shift, 0px));
-    clip-path: inset(
-      0 0 max(0px, calc(100dvh - var(--hero-origin) - var(--hero-stage))) 0
-    );
-  }
-  .dawn-sky__reading-still {
-    filter: hue-rotate(-8deg);
-    position: absolute;
-    inset: 0;
-    clip-path: inset(
-      var(--reading-start, calc(var(--hero-origin) + var(--hero-stage))) 0 0
-    );
-    mask-image: linear-gradient(90deg, rgb(0 0 0 / 38%), #000);
   }
   dawn-sky[data-surface='cover'] .dawn-sky__still::before {
     content: '';
@@ -106,7 +95,7 @@ const { readingOnly = false } = Astro.props;
     position: fixed;
     inset: 0;
     width: 100%;
-    height: 100dvh;
+    height: 100lvh;
     z-index: 3;
     pointer-events: none;
     opacity: 0;
@@ -148,21 +137,25 @@ const { readingOnly = false } = Astro.props;
       linear-gradient(#000 55%, rgb(0 0 0 / 90%) 75%);
     mask-composite: intersect;
   }
+  /* The lowest cover layer. Its opaque night backs the whole hero extent, so
+     the fixed reading sky behind the page never shows through the cover's
+     translucent clouds or the opening around the moon. */
   .dawn-sky__eclipse {
-    position: absolute;
-    inset: 0;
     z-index: 1;
     overflow: hidden;
     pointer-events: none;
+    background: #000;
   }
   .dawn-sky__eclipse :global(moon-light) {
     position: absolute;
-    top: var(--hero-frame-top);
+    top: calc(var(--hero-origin) + var(--hero-frame-top));
     right: var(--hero-frame-right);
   }
   .dawn-sky__occlusion {
     position: absolute;
-    top: calc(var(--hero-frame-top) + var(--hero-frame) * 0.1895625);
+    top: calc(
+      var(--hero-origin) + var(--hero-frame-top) + var(--hero-frame) * 0.1895625
+    );
     right: calc(var(--hero-frame-right) + var(--hero-frame) * 0.1895625);
     width: calc(var(--hero-frame) * 0.620875);
     aspect-ratio: 1;

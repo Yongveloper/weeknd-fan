@@ -28,7 +28,7 @@ class DawnSky extends HTMLElement {
   private reduced = matchMedia('(prefers-reduced-motion: reduce)');
   private observer?: IntersectionObserver;
   private generation = 0;
-  private fallbackFrame = 0;
+  private coverVisible = true;
 
   connectedCallback() {
     this.abort = new AbortController();
@@ -39,36 +39,20 @@ class DawnSky extends HTMLElement {
     document.addEventListener('visibilitychange', () => this.syncPlayback(), {
       signal,
     });
-    this.observer = new IntersectionObserver(([entry]) => {
-      this.dataset.coverVisible = String(entry?.isIntersecting ?? false);
-    });
+    // The cover sky scrolls away with the hero. Once the hero has left the
+    // viewport there is nothing of it to draw, and the fixed reading sky is
+    // already running behind the programme sheet.
     const hero = this.closest('[data-home-hero]');
-    if (hero) this.observer.observe(hero);
-    // The static/reduced-motion cover uses the same document anchoring as
-    // the GPU scene; its independent reading fallback remains fixed below.
-    const positionFallback = () => {
-      this.fallbackFrame = 0;
-      if (!hero) return;
-      const readingStart = Math.max(0, hero.getBoundingClientRect().bottom);
-      this.style.setProperty('--cover-shift', `${-window.scrollY}px`);
-      this.style.setProperty('--reading-start', `${readingStart}px`);
-    };
-    const requestFallbackPosition = () => {
-      if (!this.fallbackFrame)
-        this.fallbackFrame = requestAnimationFrame(positionFallback);
-    };
-    window.addEventListener('scroll', requestFallbackPosition, {
-      signal,
-      passive: true,
-    });
-    window.addEventListener('resize', requestFallbackPosition, {
-      signal,
-      passive: true,
-    });
-    this.reduced.addEventListener('change', requestFallbackPosition, {
-      signal,
-    });
-    positionFallback();
+    if (hero) {
+      this.observer = new IntersectionObserver(
+        ([entry]) => {
+          this.coverVisible = entry?.isIntersecting ?? true;
+          this.syncPlayback();
+        },
+        { rootMargin: '25% 0px' },
+      );
+      this.observer.observe(hero);
+    }
     void this.configure();
   }
 
@@ -76,7 +60,6 @@ class DawnSky extends HTMLElement {
     this.generation++;
     this.abort?.abort();
     this.observer?.disconnect();
-    cancelAnimationFrame(this.fallbackFrame);
     this.renderer?.dispose();
   }
 
@@ -111,7 +94,9 @@ class DawnSky extends HTMLElement {
   }
 
   private syncPlayback() {
-    this.renderer?.setPlaying(!document.hidden && !this.reduced.matches);
+    this.renderer?.setPlaying(
+      !document.hidden && !this.reduced.matches && this.coverVisible,
+    );
   }
 }
 

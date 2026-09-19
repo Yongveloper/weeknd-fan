@@ -106,10 +106,12 @@ import DawnSky from '../visual/DawnSky.astro';
     --hero-frame-top: calc(var(--hero-stage) * 0.368 - var(--hero-frame) / 2);
     --hero-frame-right: calc(23.6% - var(--hero-frame) / 2);
     position: relative;
+    z-index: 4;
     display: grid;
     min-height: var(--hero-stage);
-    overflow: hidden;
-    isolation: auto;
+    /* The sky layers reach above the hero to sit behind the header, so the
+       block must not clip vertically. They clip their own horizontal excess. */
+    overflow: clip visible;
     background: transparent;
   }
 
