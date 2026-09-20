@@ -112,4 +112,75 @@ export const en: UiStrings = {
         'Check the Kakao T app and the pre-booking notice for details.',
     },
   },
+  home: {
+    page: {
+      title: '{artist} Goyang Fan Guide',
+      description:
+        "An unofficial, non-commercial fan guide for {artist}'s 2026 Goyang concert",
+    },
+    fanNote: {
+      heading: 'A note from one fan',
+      body: "It's fine if you don't know every song. What stays with you won't be the ones you knew by heart — it'll be watching the night turn to dawn right in front of you.",
+      cta: 'Make your own D-day ticket',
+    },
+    shortcuts: {
+      heading: 'Concert Guide',
+      navAriaLabel: 'Concert guide shortcuts',
+      official: 'Official show information',
+      directions: 'Getting there',
+      seating: 'Seating guide',
+      packing: 'What to bring',
+      returning: 'Getting home',
+    },
+    intro: {
+      heading: 'Get to know {artist} in 3 minutes',
+      description:
+        'A story of someone who once sang the impulses and regrets of night like a film, now turning to face himself on the way to dawn. Before the show, these three albums back to back are all you need.',
+      albumsAriaLabel: 'Three albums to hear before the show',
+      cta: 'Browse the album timeline',
+    },
+    setlistPreview: {
+      heading: 'Expected Setlist',
+      comparison: {
+        one: 'Compared against 1 show from the 2026 tour',
+        other: 'Compared against {count} shows from the 2026 tour',
+      },
+      empty:
+        "We're still confirming the latest show's lineup. The verified song order will appear here soon.",
+      fullListAriaLabel: 'Full expected setlist',
+      fullListLabel: 'Expand the full list',
+      fullListEmpty:
+        'The full expected setlist will be published once the latest show is confirmed.',
+      pointsLink: 'See what to watch for, song by song',
+      posterLink: 'Make a setlist poster',
+    },
+    pamphlet: {
+      navAriaLabel: 'Pamphlet contents',
+      chapters: {
+        beforeDawn: {
+          title: 'Before dawn arrives',
+          albumTimeline: 'Album timeline',
+          setlist: 'Expected setlist',
+          points: 'Song-by-song points',
+        },
+        towardDawn: {
+          title: 'The road toward dawn',
+          guide: 'Concert guide',
+          officialNotice: 'View official ticket notice',
+        },
+        keepsake: {
+          title: 'Something to keep while you wait',
+          poster: 'Setlist poster',
+          ticket: 'Make your own D-day ticket',
+        },
+      },
+    },
+    countdown: {
+      days: { one: '{n} day to go', other: '{n} days to go' },
+    },
+  },
+  ui: {
+    backToTop: 'Back to top',
+    collapse: 'Collapse',
+  },
 };

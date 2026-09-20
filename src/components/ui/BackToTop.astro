@@ -1,8 +1,20 @@
+---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).ui;
+---
+
 <back-to-top>
   <button
     class="back-to-top"
     type="button"
-    aria-label="맨 위로 이동"
+    aria-label={strings.backToTop}
     data-back-to-top
     hidden
   >

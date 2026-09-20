@@ -1,16 +1,25 @@
+---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).home.fanNote;
+---
+
 <section
   class="fan-note fold fold--reverse"
   data-enter
   aria-labelledby="fan-note-title"
 >
   <div class="shell-content fan-note__inner">
-    <h2 id="fan-note-title">팬의 한마디</h2>
-    <p>
-      모르는 곡이 있어도 괜찮아요. 가장 크게 남는 순간은 완벽히 아는 노래보다,
-      눈앞에서 밤이 새벽으로 바뀌는 장면일 테니까요.
-    </p>
+    <h2 id="fan-note-title">{strings.heading}</h2>
+    <p>{strings.body}</p>
     <a class="fan-note__cta" href="/share/ticket/"
-      >나만의 D-day 티켓 만들기 <span aria-hidden="true">→</span></a
+      >{strings.cta} <span aria-hidden="true">→</span></a
     >
     <p class="fan-note__caption">FROM ONE FAN TO ANOTHER</p>
   </div>

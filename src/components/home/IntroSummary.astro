@@ -2,15 +2,24 @@
 import AlbumCover from '../content/AlbumCover.astro';
 import type { AlbumRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 interface Props {
   albums: AlbumRecord[];
+  locale: Locale;
 }
 
-const { albums } = Astro.props;
+const { albums, locale } = Astro.props;
 const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
   .map((title) => findAlbumByTitle(albums, title))
   .filter((album): album is AlbumRecord => Boolean(album));
+const strings = ui(locale).home.intro;
+// The heading wraps the artist name in its own font; split around the slot
+// instead of assembling the sentence from translated fragments.
+const [headingBefore = '', headingAfter = ''] =
+  strings.heading.split('{artist}');
 ---
 
 <section
@@ -21,13 +30,12 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
 >
   <div class="shell-content home-entry__inner">
     <h2 id="intro-title">
-      3분 만에 <span class="latin">The Weeknd</span> 알기
+      {headingBefore}<span class="latin">{ARTIST}</span>{headingAfter}
     </h2>
     <p class="home-entry__description">
-      밤의 충동과 후회를 영화처럼 노래하던 인물이, 새벽을 향해 자신을 마주하는
-      이야기. 이번 공연 전에는 이 세 장의 앨범만 이어 들어도 충분해요.
+      {strings.description}
     </p>
-    <ul class="home-entry__albums" aria-label="이번 공연 전에 들을 세 장">
+    <ul class="home-entry__albums" aria-label={strings.albumsAriaLabel}>
       {
         trilogy.map((album) => (
           <li>
@@ -39,7 +47,7 @@ const trilogy = ['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']
       }
     </ul>
     <a href="/discover/#timeline-title"
-      >앨범 타임라인 살펴보기 <span aria-hidden="true">→</span></a
+      >{strings.cta} <span aria-hidden="true">→</span></a
     >
   </div>
 </section>

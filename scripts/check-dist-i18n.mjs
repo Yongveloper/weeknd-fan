@@ -166,6 +166,23 @@ function checkPage({ relative, locale, route, html, fail }) {
     if (locale === 'en' && !html.includes('Goyang Stadium · 고양종합운동장'))
       fail(relative, 'the english venue is not shown bilingually');
   }
+
+  // Task 7 — the english home carries no korean ui label
+  if (locale === 'en' && route === '') {
+    const mainStart = html.indexOf('<main');
+    const mainEnd = html.indexOf('</main>');
+    if (mainStart === -1 || mainEnd === -1) {
+      fail(relative, 'no <main> — cannot check the content area');
+      return;
+    }
+    const main = html.slice(mainStart, mainEnd);
+    const body = html.slice(html.indexOf('<body'));
+    if (/[가-힣]/.test(stripAllowedKorean(body.replace(main, ''))))
+      fail(
+        relative,
+        'korean text left outside the content area of the english home',
+      );
+  }
 }
 
 if (failures.length) {

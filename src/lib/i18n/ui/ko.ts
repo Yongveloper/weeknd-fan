@@ -119,4 +119,74 @@ export const ko = {
         '자세한 사항은 카카오 T 앱과 예약 전 유의사항에서 확인합니다.',
     },
   },
+  home: {
+    page: {
+      title: '{artist} 고양 팬 가이드',
+      description: '{artist} 2026 고양 공연을 위한 비공식·비영리 팬 가이드',
+    },
+    fanNote: {
+      heading: '팬의 한마디',
+      body: '모르는 곡이 있어도 괜찮아요. 가장 크게 남는 순간은 완벽히 아는 노래보다, 눈앞에서 밤이 새벽으로 바뀌는 장면일 테니까요.',
+      cta: '나만의 D-day 티켓 만들기',
+    },
+    shortcuts: {
+      heading: '콘서트 가이드',
+      navAriaLabel: '콘서트 가이드 바로가기',
+      official: '공식 공연 정보',
+      directions: '가는 길',
+      seating: '좌석 안내',
+      packing: '준비물',
+      returning: '귀가 확인',
+    },
+    intro: {
+      heading: '3분 만에 {artist} 알기',
+      description:
+        '밤의 충동과 후회를 영화처럼 노래하던 인물이, 새벽을 향해 자신을 마주하는 이야기. 이번 공연 전에는 이 세 장의 앨범만 이어 들어도 충분해요.',
+      albumsAriaLabel: '이번 공연 전에 들을 세 장',
+      cta: '앨범 타임라인 살펴보기',
+    },
+    setlistPreview: {
+      heading: '예상 셋리스트',
+      comparison: {
+        one: '최근 2026년 공연 {count}회 비교',
+        other: '최근 2026년 공연 {count}회 비교',
+      },
+      empty:
+        '최신 공연 구성을 확인 중이에요. 확인된 곡 순서는 곧 여기에 이어집니다.',
+      fullListAriaLabel: '전체 예상 셋리스트',
+      fullListLabel: '전체 목록 펼쳐보기',
+      fullListEmpty:
+        '전체 예상 셋리스트는 최신 공연 기록을 확인한 뒤 공개합니다.',
+      pointsLink: '곡별 관람 포인트 보기',
+      posterLink: '셋리스트 포스터 만들기',
+    },
+    pamphlet: {
+      navAriaLabel: '팜플렛 목차',
+      chapters: {
+        beforeDawn: {
+          title: '새벽을 맞기 전에',
+          albumTimeline: '앨범 타임라인',
+          setlist: '예상 셋리스트',
+          points: '곡별 관람 포인트',
+        },
+        towardDawn: {
+          title: '새벽으로 향하는 길',
+          guide: '콘서트 가이드',
+          officialNotice: '공식 티켓 공지 보기',
+        },
+        keepsake: {
+          title: '기다림을 담아두기',
+          poster: '셋리스트 포스터',
+          ticket: '나만의 D-day 티켓 만들기',
+        },
+      },
+    },
+    countdown: {
+      days: { one: 'D-{n}', other: 'D-{n}' },
+    },
+  },
+  ui: {
+    backToTop: '맨 위로 이동',
+    collapse: '접기',
+  },
 } as const;

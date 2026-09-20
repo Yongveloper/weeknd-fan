@@ -1,10 +1,19 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).home.shortcuts;
 const shortcuts = [
-  ['/goyang/#official', '공식 공연 정보'],
-  ['/goyang/#transport', '가는 길'],
-  ['/goyang/#seating', '좌석 안내'],
-  ['/goyang/#packing', '준비물'],
-  ['/goyang/#return', '귀가 확인'],
+  ['/goyang/#official', strings.official],
+  ['/goyang/#transport', strings.directions],
+  ['/goyang/#seating', strings.seating],
+  ['/goyang/#packing', strings.packing],
+  ['/goyang/#return', strings.returning],
 ] as const;
 ---
 
@@ -16,9 +25,9 @@ const shortcuts = [
 >
   <div class="shell-content guide-shortcuts__inner">
     <div class="guide-shortcuts__heading">
-      <h2 id="guide-shortcuts-title">콘서트 가이드</h2>
+      <h2 id="guide-shortcuts-title">{strings.heading}</h2>
     </div>
-    <nav aria-label="콘서트 가이드 바로가기">
+    <nav aria-label={strings.navAriaLabel}>
       {
         shortcuts.map(([href, label], index) => (
           <a href={href} style={`--i: ${index}`}>

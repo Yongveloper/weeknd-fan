@@ -1,35 +1,40 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
 interface Props {
   officialNoticeUrl: string;
+  locale: Locale;
 }
-const { officialNoticeUrl } = Astro.props;
+const { officialNoticeUrl, locale } = Astro.props;
+const strings = ui(locale).home.pamphlet;
 const chapters = [
   {
-    title: '새벽을 맞기 전에',
+    title: strings.chapters.beforeDawn.title,
     links: [
-      ['/discover/#timeline-title', '앨범 타임라인'],
-      ['#setlist', '예상 셋리스트'],
-      ['/setlist/', '곡별 관람 포인트'],
+      ['/discover/#timeline-title', strings.chapters.beforeDawn.albumTimeline],
+      ['#setlist', strings.chapters.beforeDawn.setlist],
+      ['/setlist/', strings.chapters.beforeDawn.points],
     ],
   },
   {
-    title: '새벽으로 향하는 길',
+    title: strings.chapters.towardDawn.title,
     links: [
-      ['#goyang-guide', '콘서트 가이드'],
-      [officialNoticeUrl, '공식 티켓 공지 보기'],
+      ['#goyang-guide', strings.chapters.towardDawn.guide],
+      [officialNoticeUrl, strings.chapters.towardDawn.officialNotice],
     ],
   },
   {
-    title: '기다림을 담아두기',
+    title: strings.chapters.keepsake.title,
     links: [
-      ['/share/setlist/', '셋리스트 포스터'],
-      ['/share/ticket/', '나만의 D-day 티켓 만들기'],
+      ['/share/setlist/', strings.chapters.keepsake.poster],
+      ['/share/ticket/', strings.chapters.keepsake.ticket],
     ],
   },
 ];
 ---
 
-<nav class="pamphlet-contents shell-content" aria-label="팜플렛 목차">
+<nav class="pamphlet-contents shell-content" aria-label={strings.navAriaLabel}>
   {
     chapters.map((chapter) => (
       <div class="pamphlet-contents__chapter">

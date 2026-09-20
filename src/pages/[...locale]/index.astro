@@ -17,11 +17,15 @@ import {
 } from '../../lib/content/queries';
 import { buildEventJsonLd, serializeJsonLd } from '../../lib/seo/eventJsonLd';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-const title = 'The Weeknd 고양 팬 가이드';
+const strings = ui(locale).home.page;
+const title = strings.title.replace('{artist}', ARTIST);
+const description = strings.description.replace('{artist}', ARTIST);
 const concert = await getConcert();
 const albums = await getAlbums();
 const setlist = await getExpectedSetlist();
@@ -40,7 +44,7 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
 <BaseLayout
   locale={locale}
   title={title}
-  description="The Weeknd 2026 고양 공연을 위한 비공식·비영리 팬 가이드"
+  description={description}
   spaceSky
   lunarSky
   coverCdn
@@ -58,13 +62,18 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
   <HomeHero />
   <div class="reading-panel" data-reading-panel>
     <div class="edition-directory">
-      <PamphletContents officialNoticeUrl={officialNoticeUrl} />
+      <PamphletContents officialNoticeUrl={officialNoticeUrl} locale={locale} />
     </div>
     <div class="edition-chapters">
-      <IntroSummary albums={albums} />
-      <SetlistPreview entries={setlist} previewCount={6} {observationCount} />
-      <GuideShortcuts />
-      <FanNote />
+      <IntroSummary albums={albums} locale={locale} />
+      <SetlistPreview
+        entries={setlist}
+        previewCount={6}
+        {observationCount}
+        locale={locale}
+      />
+      <GuideShortcuts locale={locale} />
+      <FanNote locale={locale} />
     </div>
   </div>
 </BaseLayout>

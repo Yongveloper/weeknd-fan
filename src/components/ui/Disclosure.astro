@@ -1,4 +1,7 @@
 ---
+import { DEFAULT_LOCALE, type Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
 interface Props {
   motion?: DisclosureMotion;
   label?: string;
@@ -7,6 +10,7 @@ interface Props {
   id?: string;
   open?: boolean;
   class?: string;
+  locale?: Locale;
 }
 
 type DisclosureMotion = 'scene' | 'fast' | 'none';
@@ -14,13 +18,17 @@ type DisclosureMotion = 'scene' | 'fast' | 'none';
 const {
   motion = 'scene',
   label,
-  openLabel = '접기',
+  openLabel,
   ariaLabel,
   id,
   open = false,
   class: className,
+  locale = DEFAULT_LOCALE,
 } = Astro.props;
 const hasSummarySlot = Astro.slots.has('summary');
+// Callers that don't yet pass a locale keep the korean default via
+// DEFAULT_LOCALE, so their rendered output is unchanged.
+const resolvedOpenLabel = openLabel ?? ui(locale).ui.collapse;
 ---
 
 <details
@@ -39,7 +47,7 @@ const hasSummarySlot = Astro.slots.has('summary');
         <span
           class="disclosure__label"
           data-label-closed={label}
-          data-label-open={openLabel}
+          data-label-open={resolvedOpenLabel}
         >
           {label}
         </span>
