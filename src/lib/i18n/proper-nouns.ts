@@ -26,9 +26,10 @@ export const STATION_KINTEX: ProperNoun = {
   ko: '킨텍스역',
 };
 
-export const ILSANSEOGU_OFFICE: ProperNoun = {
-  latin: 'Ilsanseo-gu Office',
-  ko: '일산서구청',
+/** One stop whose Korean name joins two places; not two stops. */
+export const BUS_STOP_VENUE: ProperNoun = {
+  latin: 'Goyang Stadium / Ilsanseo-gu Office',
+  ko: '고양종합운동장·일산서구청',
 };
 
 export const VENUE_ADDRESS: ProperNoun = {

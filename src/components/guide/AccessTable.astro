@@ -2,10 +2,9 @@
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 import {
-  ILSANSEOGU_OFFICE,
+  BUS_STOP_VENUE,
   STATION_DAEHWA,
   STATION_KINTEX,
-  VENUE,
   VENUE_ADDRESS,
   bilingual,
 } from '../../lib/i18n/proper-nouns';
@@ -18,9 +17,6 @@ const { locale } = Astro.props;
 const strings = ui(locale).guide.accessTable;
 const daehwa = bilingual(STATION_DAEHWA, locale);
 const kintex = bilingual(STATION_KINTEX, locale);
-// The two bus stops join place names with a bare "·" in korean but a spaced
-// " · " in english, matching how `bilingual()` itself formats its own output.
-const stopSeparator = locale === 'ko' ? '·' : ' · ';
 
 const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
 const rows = [
@@ -58,7 +54,7 @@ const buses = [
     ],
   },
   {
-    stop: `${bilingual(VENUE, locale)}${stopSeparator}${bilingual(ILSANSEOGU_OFFICE, locale)}`,
+    stop: bilingual(BUS_STOP_VENUE, locale),
     routes: ['55', '88A', '88B', '999', '1100'],
   },
 ];

@@ -19,7 +19,7 @@ const metroAreas = SHUTTLE_METRO_STOPS.map((stop) => bilingual(stop, locale));
 const regionalAreas = SHUTTLE_REGIONAL_STOPS.map((stop) =>
   bilingual(stop, locale),
 );
-const shuttleRoute = strings.shuttleRouteTemplate
+const shuttleRoute = strings.shuttleRoute
   .replace('{kintex}', bilingual(STATION_KINTEX, locale))
   .replace('{venue}', bilingual(VENUE, locale));
 ---
@@ -44,7 +44,6 @@ const shuttleRoute = strings.shuttleRouteTemplate
     <h4>{strings.shuttleHeading}</h4>
     <p>
       <strong>{shuttleRoute}</strong>
-      {strings.shuttleRouteSuffix}
     </p>
     <p class="transport-operations__pending">
       {strings.shuttlePending}

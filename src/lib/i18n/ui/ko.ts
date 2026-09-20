@@ -105,8 +105,7 @@ export const ko = {
       noParkingBody:
         '공연 당일에는 공연장 내부에 주차할 수 없어 대중교통 이용을 권장합니다.',
       shuttleHeading: '유료 순환버스 임시 운영 예정',
-      shuttleRouteTemplate: 'GTX-A {kintex} 1번 출구 ↔ {venue}',
-      shuttleRouteSuffix: '구간에서 운행합니다.',
+      shuttleRoute: 'GTX-A {kintex} 1번 출구 ↔ {venue} 구간에서 운행합니다.',
       shuttlePending:
         '운행 시간 · 요금 · 배차 간격 · 운동장 승차 위치는 미공개',
       kakaoHeading: '카카오 T 유료 셔틀',

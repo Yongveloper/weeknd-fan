@@ -34,8 +34,8 @@ export const en: UiStrings = {
       subwayLabel: 'Subway',
       subwayDaehwaLine: 'Line 3 {daehwa} Exit 3 · about 3 min on foot',
       subwayKintexLine: 'GTX-A {kintex} Exit 1 · about 20 min on foot',
-      busDtLabel: 'Bus · {stop} stop',
-      busRoutesAriaLabel: 'Bus routes serving the {stop} stop',
+      busDtLabel: '{stop} bus stop',
+      busRoutesAriaLabel: 'Bus routes serving {stop}',
       sourcePrefix: 'Directions info source:',
       sourceLinkLabel: 'Interpark ticket listing',
       confirmedOn: '(confirmed 2026-08-29)',
@@ -96,8 +96,8 @@ export const en: UiStrings = {
       noParkingBody:
         'On the day of the show, parking inside the venue is unavailable, so public transit is recommended.',
       shuttleHeading: 'Paid shuttle bus — temporary service planned',
-      shuttleRouteTemplate: 'GTX-A {kintex} Exit 1 ↔ {venue}',
-      shuttleRouteSuffix: 'is the route.',
+      shuttleRoute:
+        'The shuttle runs between GTX-A {kintex} Exit 1 and {venue}.',
       shuttlePending:
         'Operating hours, fare, interval, and the stadium boarding point are unpublished',
       kakaoHeading: 'Kakao T paid shuttle',
