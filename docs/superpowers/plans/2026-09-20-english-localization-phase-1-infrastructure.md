@@ -850,6 +850,41 @@ EOF
   - `chromeText: { display: string; body: string }` — **두 로케일 라벨의 합집합**
   - `BaseLayout` 이 `locale: Locale` prop을 받는다
 
+- [ ] **Step 0: 검사기를 보강한다**
+
+이 파일은 Task 4~10의 검증 뼈대다. 잘못된 입력에서 조용히 엉뚱한 구간을 검사하면
+이후 모든 게이트가 실패를 못 잡고도 통과한다.
+
+`describe()` 의 죽은 절을 지운다 — `'en/'.startsWith('en/')` 가 이미 참이라 앞 절은 도달하지 않는다:
+
+```js
+function describe(relative) {
+  const withoutFile = relative.replace(/index\.html$/, '');
+  if (withoutFile.startsWith('en/'))
+    return { locale: 'en', route: withoutFile.slice(3) };
+  return { locale: 'ko', route: withoutFile };
+}
+```
+
+`head` 슬라이스가 `</head>` 없는 문서를 통과시키지 않게 한다. 지금은 `indexOf` 가 -1을
+돌려주면 `slice(0, -1)` 이 문서 전체에서 마지막 글자만 뺀 것을 잡아, head 전용 단언이
+body까지 훑는다:
+
+```js
+  const headEnd = html.indexOf('</head>');
+  if (headEnd === -1) {
+    fail(relative, 'no </head> — cannot check head-only assertions');
+    continue;
+  }
+  const head = html.slice(0, headEnd);
+```
+
+```bash
+npm run build && npm run check:dist
+```
+Expected: 실패 건수가 보강 전과 같다(이 시점 21건). 보강은 동작을 바꾸지 않고
+잘못된 입력에서 침묵하지 않게만 만든다.
+
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
 `scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
