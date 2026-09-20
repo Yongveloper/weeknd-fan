@@ -6,7 +6,7 @@
 
 **Architecture:** 모든 페이지를 `src/pages/[...locale]/` 아래 단일 파일로 옮기고 `getStaticPaths`가 `undefined`(한국어, 루트 유지)와 `'en'`을 낸다. UI 문자열은 `src/lib/i18n/ui/{ko,en}.ts` 타입 고정 사전으로 모으고, 고유명사는 `proper-nouns.ts` 단일 출처에서만 온다. 콘텐츠 데이터(`src/data/`)는 이 단계에서 전혀 건드리지 않는다.
 
-**Tech Stack:** Astro 6 (`output: 'static'`), TypeScript (`strict` + `noUncheckedIndexedAccess`), Vitest, Playwright, Cloudflare Workers Static Assets.
+**Tech Stack:** Astro 6 (`output: 'static'`), TypeScript (`strict` + `noUncheckedIndexedAccess`), Vitest, Cloudflare Workers Static Assets. 시각 확인만 Playwright MCP.
 
 **Spec:** `docs/superpowers/specs/2026-09-20-english-localization-design.md`
 
@@ -27,9 +27,32 @@
 - 커밋: Conventional Commits, 영어 소문자 subject ≤ 72자. 커밋 메시지 끝에 `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>` 를 붙인다.
 - 각 태스크 마지막 커밋 전 최소한 `npm run check && npm run lint && npx prettier --check <변경 파일>` 을 통과시킨다.
 
-### 기존 e2e 스펙이 한국어 회귀 테스트다
+### 검증 수단: 빌드 산출물 정적 검사. e2e는 쓰지 않는다
 
-`tests/e2e/` 13개 스펙에 한국어 문자열 리터럴이 **316줄** 있다(`navigation.spec.ts` 116, `share.spec.ts` 76, `goyang.spec.ts` 33, `goyang-transport.spec.ts` 32, `disclosure.spec.ts` 23, `no-js.spec.ts` 22 …). 문자열을 사전으로 옮기는 태스크에서 **이 스펙들이 통과한다는 것이 곧 한국어 경로 무회귀 증명**이다. 이 단계에서는 해당 리터럴을 건드리지 않는다.
+`tests/e2e/` 의 13개 스펙은 이 작업 이전부터 관리되지 않아 **현재 전부 실패한다.** 이 계획은 그것을 고치지 않고, 그것에 기대지도 않는다.
+
+- `npm run test:e2e` 와 `npx playwright test` 를 **실행하지 않는다.**
+- `npm run verify` 는 `test:e2e` 를 포함하므로 게이트로 쓰지 않는다. 대신 Task 2에서 만드는 `npm run verify:core` 를 쓴다.
+- 기존 스위트 복구는 별건이다. 이 작업에서 건드리지 않는다.
+
+이 작업이 검증해야 하는 것 — 라우트 존재, `<html lang>`, canonical, hreflang 세 개, 영어 페이지의 한글 잔존, 신뢰 라벨, 언어 전환기 링크 — 은 전부 **렌더된 HTML만 보면 판정된다.** Task 2에서 `scripts/check-dist-i18n.mjs` 를 만들고, 이후 모든 태스크가 여기에 단언을 더해 가며 TDD 사이클을 돈다.
+
+언어 전환기는 순수 `<a href>` 다. 그 `href` 가 맞다는 정적 단언이 곧 **no-JS 동작의 증명**이다. 브라우저가 필요 없다.
+
+### 한국어 무회귀는 무엇으로 증명하나
+
+e2e가 죽었으므로 다른 증거를 쓴다.
+
+1. **산출물 검사기** — 한국어 라우트의 `<html lang="ko">`, canonical, 신뢰 라벨(`예상 · 보장 아님`)이 그대로다.
+2. **한국어 경로의 코드 경로가 갈리지 않는다** — 사전은 `ui('ko')` 로 같은 문자열을 돌려주고, `localeHref('ko', path)` 는 접두사를 붙이지 않는다. 단위 테스트가 이 항등을 고정한다.
+3. **문자열 이관 태스크마다 한국어 렌더 텍스트를 빌드 전후로 비교한다.** Task 6 Step 6의 `diff` 절차가 이것이다.
+4. **Playwright MCP 헤디드 투어** — 각 태스크 끝에 사람이 직접 본다.
+
+### 시각 확인은 Playwright MCP로 한다
+
+정적 검사가 못 잡는 것은 레이아웃뿐이다. 태스크 끝마다 `npm run preview` 를 띄우고 **Playwright MCP**로 두 로케일을 1440×960 과 390×844 에서 본다. 320px·200% 텍스트 확대도 여기서 본다.
+
+**영어가 이번 작업의 최대 시각 위험이다** — 단어가 길고 끊을 자리가 적어 좁은 컬럼에서 넘친다.
 
 ---
 
@@ -48,7 +71,7 @@
 | `src/components/chrome/LocaleSwitcher.astro` | KO/EN 링크 |
 | `tests/unit/i18n-routes.test.ts` | 로케일 기본형·경로 계산 |
 | `tests/unit/i18n-dictionary.test.ts` | 사전 키 패리티·빈 문자열 금지 |
-| `tests/e2e/i18n.spec.ts` | lang·hreflang·canonical·전환기·라우트 존재 |
+| `scripts/check-dist-i18n.mjs` | 빌드 산출물 정적 검사 — 라우트·lang·canonical·hreflang·전환기·한글 잔존·신뢰 라벨 |
 
 ### 이동
 
@@ -57,7 +80,7 @@
 
 ### 수정
 
-`astro.config.mjs` · `src/layouts/BaseLayout.astro` · `src/components/chrome/navigation.ts` `SiteHeader.astro` `SiteFooter.astro` · `src/lib/seo/eventJsonLd.ts` · `src/lib/content/contracts.ts` · 한글이 있는 컴포넌트 29개 · 클라이언트 스크립트 4개 · `src/lib/share/canvas.ts` `buildTicketLayout.ts` · `scripts/check-performance-budget.mjs` · `tests/unit/performance-budget.test.ts` `header-fonts.test.ts` · `tests/e2e/no-js.spec.ts` · `src/assets/fonts/header/*` (재생성)
+`astro.config.mjs` · `src/layouts/BaseLayout.astro` · `src/components/chrome/navigation.ts` `SiteHeader.astro` `SiteFooter.astro` · `src/lib/seo/eventJsonLd.ts` · `src/lib/content/contracts.ts` · 한글이 있는 컴포넌트 29개 · 클라이언트 스크립트 4개 · `src/lib/share/canvas.ts` `buildTicketLayout.ts` · `scripts/check-performance-budget.mjs` · `tests/unit/performance-budget.test.ts` `header-fonts.test.ts` · `src/assets/fonts/header/*` (재생성)
 
 ---
 
@@ -316,62 +339,140 @@ EOF
 
 ---
 
-## Task 2: 나머지 6개 라우트 전환
+## Task 2: 나머지 6개 라우트 전환과 산출물 검사기
+
+**이 태스크가 이후 모든 태스크의 검증 수단을 만든다.** e2e 스위트가 죽어 있으므로 `dist/**/*.html` 을 직접 읽어 단언하는 검사기를 세우고, 이후 태스크는 여기에 단언을 더해 가며 TDD 사이클을 돈다.
 
 **Files:**
 - Move: `src/pages/index.astro` `discover.astro` `setlist.astro` `sources.astro` `share/ticket.astro` `share/setlist.astro` → `src/pages/[...locale]/` 아래 같은 이름
-- Create: `tests/e2e/i18n.spec.ts`
+- Create: `scripts/check-dist-i18n.mjs`
+- Modify: `package.json`
 
 **Interfaces:**
 - Consumes: `localePaths`, `localeFromParam` (Task 1)
-- Produces: 14개 정적 라우트. 페이지 파일마다 `const locale = localeFromParam(Astro.params.locale);` 가 준비돼 있다.
+- Produces:
+  - 14개 정적 라우트. 페이지 파일마다 `const locale = localeFromParam(Astro.params.locale);` 가 준비돼 있다.
+  - `npm run check:dist` — 실패 시 종료 코드 1, 실패한 파일과 이유를 한 줄씩 출력
+  - `npm run verify:core` — e2e를 뺀 전체 체인
 
-- [ ] **Step 1: 실패하는 e2e 테스트를 쓴다**
+- [ ] **Step 1: 검사기를 쓴다 (아직 실패한다)**
 
-`tests/e2e/i18n.spec.ts`:
+`scripts/check-dist-i18n.mjs`:
 
-```ts
-import { expect, test } from '@playwright/test';
+```js
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
+import process from 'node:process';
+
+const DIST = path.resolve(process.env.CHECK_DIST_ROOT ?? 'dist');
 
 const ROUTES = [
-  '/',
-  '/discover/',
-  '/setlist/',
-  '/goyang/',
-  '/sources/',
-  '/share/ticket/',
-  '/share/setlist/',
-] as const;
+  '',
+  'discover/',
+  'setlist/',
+  'goyang/',
+  'sources/',
+  'share/ticket/',
+  'share/setlist/',
+];
 
-test.describe('locale routes', () => {
-  for (const route of ROUTES) {
-    test(`korean ${route} responds`, async ({ page }) => {
-      const response = await page.goto(route);
-      expect(response?.status()).toBe(200);
-    });
+const failures = [];
+const fail = (where, why) => failures.push(`${where}: ${why}`);
 
-    test(`english ${route} responds`, async ({ page }) => {
-      const response = await page.goto(`/en${route}`);
-      expect(response?.status()).toBe(200);
-    });
+/** `dist/en/goyang/index.html` → { locale: 'en', route: 'goyang/' } */
+function describe(relative) {
+  const withoutFile = relative.replace(/index\.html$/, '');
+  if (withoutFile === 'en/' || withoutFile.startsWith('en/'))
+    return { locale: 'en', route: withoutFile.slice(3) };
+  return { locale: 'ko', route: withoutFile };
+}
+
+async function walk(dir) {
+  const out = [];
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...(await walk(full)));
+    else if (entry.name === 'index.html') out.push(full);
   }
+  return out;
+}
 
-  test('does not double the locale prefix', async ({ page }) => {
-    const response = await page.goto('/en/en/goyang/');
-    expect(response?.status()).toBe(404);
-  });
-});
+const pages = await walk(DIST);
+
+// 1. Every route exists in both locales, and only there.
+for (const route of ROUTES) {
+  for (const prefix of ['', 'en/']) {
+    const expected = path.join(DIST, prefix, route, 'index.html');
+    if (!pages.includes(expected)) fail(`${prefix}${route}`, 'route missing');
+  }
+}
+if (pages.some((file) => path.relative(DIST, file).startsWith('en/en/')))
+  fail('en/en', 'locale prefix doubled');
+
+// 2-6. Per-page assertions.
+for (const file of pages) {
+  const relative = path.relative(DIST, file);
+  const { locale, route } = describe(relative);
+  const html = await readFile(file, 'utf8');
+  const head = html.slice(0, html.indexOf('</head>'));
+
+  const lang = /<html[^>]*\blang="([^"]+)"/.exec(html)?.[1];
+  if (lang !== locale) fail(relative, `html lang is ${lang}, expected ${locale}`);
+
+  const canonicals = head.match(/<link[^>]+rel="canonical"/g) ?? [];
+  if (canonicals.length !== 1)
+    fail(relative, `${canonicals.length} canonical links, expected 1`);
+
+  const alternates = [
+    ...head.matchAll(/<link[^>]+rel="alternate"[^>]+hreflang="([^"]+)"/g),
+  ].map((match) => match[1]);
+  const expectedAlternates = ['ko', 'en', 'x-default'];
+  if (
+    alternates.length !== 3 ||
+    expectedAlternates.some((value) => !alternates.includes(value))
+  )
+    fail(relative, `alternates were [${alternates}], expected ko/en/x-default`);
+
+  checkPage({ relative, locale, route, html, fail });
+}
+
+/** Assertions later tasks extend. Kept separate so each task adds one block. */
+function checkPage({ relative, locale, route, html, fail }) {
+  void relative;
+  void locale;
+  void route;
+  void html;
+  void fail;
+}
+
+if (failures.length) {
+  for (const line of failures) process.stderr.write(`${line}\n`);
+  process.stderr.write(`\n${failures.length} dist i18n failures\n`);
+  process.exit(1);
+}
+process.stdout.write(`dist i18n ok\t${pages.length} pages\n`);
 ```
 
-- [ ] **Step 2: 실패를 확인한다**
+- [ ] **Step 2: 스크립트를 등록한다**
+
+`package.json` 에 더한다:
+
+```json
+    "check:dist": "node scripts/check-dist-i18n.mjs",
+    "verify:core": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run check:dist",
+```
+
+> `verify:core` 는 `verify` 에서 `test:e2e` 만 뺀 것이다. 기존 `verify` 는 **지우지 않는다** — e2e 스위트를 나중에 복구할 때 쓸 자리다.
+
+- [ ] **Step 3: 실패를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: FAIL — `/en/`, `/en/discover/`, `/en/setlist/`, `/en/sources/`, `/en/share/ticket/`, `/en/share/setlist/` 가 404. `/en/goyang/` 만 통과.
+Expected: FAIL — `discover/: route missing`, `en/: route missing` 등 12건 + `html lang is ko, expected en`
 
-- [ ] **Step 3: 6개 페이지를 옮긴다**
+- [ ] **Step 4: 6개 페이지를 옮긴다**
 
 ```bash
 mkdir -p 'src/pages/[...locale]/share'
@@ -384,7 +485,7 @@ done
 rmdir src/pages/share
 ```
 
-- [ ] **Step 4: 각 파일의 상대 import 깊이와 `getStaticPaths`를 고친다**
+- [ ] **Step 5: 각 파일의 상대 import 깊이와 `getStaticPaths`를 고친다**
 
 `[...locale]/index.astro` `discover.astro` `setlist.astro` `sources.astro` 는 `../` 를 `../../` 로 바꾼다.
 `[...locale]/share/ticket.astro` `setlist.astro` 는 이미 `../../` 였으므로 `../../../` 로 바꾼다.
@@ -407,29 +508,52 @@ npm run check
 ```
 Expected: `Cannot find module` 오류가 0건이 될 때까지 반복한다.
 
-- [ ] **Step 5: 통과를 확인한다**
+- [ ] **Step 6: 라우트 존재를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: PASS — 15 tests
-
-- [ ] **Step 6: 한국어 경로 무회귀를 확인한다**
+Expected: 라우트 누락과 이중 접두사 실패가 **0건.** `html lang` 과 alternates 실패는 아직 남아 있다(Task 4·5에서 해소된다). 그때까지는 라우트 관련 실패만 0인지 본다:
 
 ```bash
-npx playwright test tests/e2e/navigation.spec.ts tests/e2e/goyang.spec.ts --project=desktop-chromium
+npm run check:dist 2>&1 | grep -c 'route missing\|prefix doubled'
 ```
-Expected: PASS. 실패하면 상대 경로나 `href` 가 어긋난 것이다 — 예산·문자열이 아니라 경로만 고친다.
+Expected: `0`
 
-- [ ] **Step 7: 커밋**
+- [ ] **Step 7: 한국어 렌더 텍스트의 기준선을 남긴다**
+
+이후 문자열 이관 태스크가 한국어를 깨뜨리지 않았음을 `diff` 로 증명하기 위해, 아직 아무 문자열도 옮기지 않은 지금 기준선을 뜬다.
 
 ```bash
-npx prettier --write 'src/pages' tests/e2e/i18n.spec.ts
+mkdir -p tmp/i18n-baseline
+for route in '' discover setlist goyang sources share/ticket share/setlist; do
+  name=$(echo "${route:-home}" | tr '/' '-')
+  sed -e 's/<[^>]*>/ /g' -e 's/  */ /g' "dist/${route:+$route/}index.html" \
+    > "tmp/i18n-baseline/$name.txt"
+done
+ls tmp/i18n-baseline/
+```
+Expected: 7개 파일. `tmp/` 는 gitignore라 커밋되지 않는다.
+
+- [ ] **Step 8: 한국어 라우트가 살아 있는지 확인한다**
+
+```bash
+npm run check:dist 2>&1 | grep -c 'route missing\|prefix doubled'
+test -s dist/goyang/index.html && test -s dist/index.html && echo "korean routes intact"
+```
+Expected: `0` 과 `korean routes intact`
+
+깨졌다면 상대 경로나 `href` 가 어긋난 것이다 — 문자열이 아니라 경로만 고친다.
+
+- [ ] **Step 9: 커밋**
+
+```bash
+npx prettier --write 'src/pages' scripts/check-dist-i18n.mjs package.json
 npm run check && npm run lint
-git add src/pages tests/e2e/i18n.spec.ts
+git add src/pages scripts/check-dist-i18n.mjs package.json
 git commit -m "$(cat <<'EOF'
-feat(i18n): route every page through the [...locale] segment
+feat(i18n): route every page through [...locale] and add the dist checker
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -693,46 +817,53 @@ EOF
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('chrome', () => {
-  test('marks the document language', async ({ page }) => {
-    await page.goto('/goyang/');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'ko');
-    await page.goto('/en/goyang/');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
-  });
+```js
+  // Task 4 — chrome
+  const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+  const chrome = html.replace(main, '');
 
-  test('switches locale without javascript state', async ({ page }) => {
-    await page.goto('/goyang/');
-    await page.getByRole('link', { name: 'English' }).click();
-    await expect(page).toHaveURL(/\/en\/goyang\/$/);
-    await page.getByRole('link', { name: '한국어' }).click();
-    await expect(page).toHaveURL(/(?<!\/en)\/goyang\/$/);
-  });
+  const switcher = [
+    ...chrome.matchAll(/<a[^>]+hreflang="(ko|en)"[^>]*href="([^"]+)"/g),
+  ];
+  if (switcher.length !== 2)
+    fail(relative, `${switcher.length} locale switcher links, expected 2`);
+  for (const [, target, href] of switcher) {
+    const want = target === 'ko' ? `/${route}` : `/en/${route}`;
+    if (href !== want) fail(relative, `${target} switcher points at ${href}, expected ${want}`);
+  }
 
-  test('marks the current locale for assistive tech', async ({ page }) => {
-    await page.goto('/en/goyang/');
-    await expect(
-      page.getByRole('link', { name: 'English' }),
-    ).toHaveAttribute('aria-current', 'true');
-  });
+  const current = /<a[^>]+aria-current="true"[^>]+hreflang="([^"]+)"|<a[^>]+hreflang="([^"]+)"[^>]+aria-current="true"/.exec(chrome);
+  if ((current?.[1] ?? current?.[2]) !== locale)
+    fail(relative, 'the switcher does not mark the current locale');
 
-  test('translates the skip link', async ({ page }) => {
-    await page.goto('/en/goyang/');
-    await expect(page.locator('.skip-link')).toHaveText('Skip to content');
-  });
-});
+  if (locale === 'en' && /[\uAC00-\uD7A3]/.test(stripAllowedKorean(chrome)))
+    fail(relative, 'korean text left in the english chrome');
 ```
+
+파일 하단에 허용 목록을 더한다. 병기 고유명사와 전환기의 `한국어` 라벨만 남는다:
+
+```js
+const ALLOWED_KOREAN = ['고양종합운동장', '대화역', '한국어'];
+
+function stripAllowedKorean(fragment) {
+  return ALLOWED_KOREAN.reduce(
+    (text, allowed) => text.replaceAll(allowed, ''),
+    fragment,
+  );
+}
+```
+
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: FAIL — `lang` 이 `/en/goyang/` 에서도 `ko`, `English` 링크 없음
+Expected: FAIL — `html lang is ko, expected en` 과 `0 locale switcher links, expected 2`
 
 - [ ] **Step 3: `navigation.ts`를 로케일 함수로 바꾼다**
 
@@ -973,9 +1104,9 @@ Expected: PASS. `manifest.json` 의 `text` 가 새 `chromeText` 와 일치한다
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/navigation.spec.ts tests/e2e/header-menu.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: PASS — i18n 19 tests + 기존 navigation·header-menu 스펙 무회귀
+Expected: `dist i18n ok` — 전환기 링크·aria-current·영어 크롬 한글 잔존 실패 0건
 
 - [ ] **Step 10: 커밋**
 
@@ -1043,32 +1174,26 @@ describe('alternateLinks', () => {
 });
 ```
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('seo', () => {
-  for (const path of ['/goyang/', '/en/goyang/']) {
-    test(`${path} carries canonical and three alternates`, async ({ page }) => {
-      await page.goto(path);
-      await expect(page.locator('link[rel="canonical"]')).toHaveCount(1);
-      await expect(
-        page.locator('link[rel="alternate"][hreflang]'),
-      ).toHaveCount(3);
-      await expect(
-        page.locator('link[rel="alternate"][hreflang="x-default"]'),
-      ).toHaveAttribute('href', /\/goyang\/$/);
-    });
-  }
+```js
+  // Task 5 — canonical and x-default targets
+  const canonical = /<link[^>]+rel="canonical"[^>]+href="([^"]+)"/.exec(html)?.[1] ?? '';
+  const canonicalPath = new URL(canonical, 'https://placeholder.test').pathname;
+  const wantCanonical = locale === 'ko' ? `/${route}` : `/en/${route}`;
+  if (canonicalPath !== wantCanonical)
+    fail(relative, `canonical is ${canonicalPath}, expected ${wantCanonical}`);
 
-  test('canonical points at the locale being viewed', async ({ page }) => {
-    await page.goto('/en/goyang/');
-    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
-      'href',
-      /\/en\/goyang\/$/,
-    );
-  });
-});
+  const xDefault = /<link[^>]+hreflang="x-default"[^>]+href="([^"]+)"/.exec(html)?.[1] ?? '';
+  if (new URL(xDefault, 'https://placeholder.test').pathname !== `/${route}`)
+    fail(relative, 'x-default does not point at the korean route');
+
+  const ogLocale = /<meta[^>]+property="og:locale"[^>]+content="([^"]+)"/.exec(html)?.[1];
+  if (ogLocale !== (locale === 'ko' ? 'ko_KR' : 'en_US'))
+    fail(relative, `og:locale is ${ogLocale}`);
 ```
+
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
@@ -1204,9 +1329,9 @@ Expected: `<url>` 14개. `xhtml:link` 가 0보다 크다.
 - [ ] **Step 9: e2e를 확인한다**
 
 ```bash
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: PASS — 22 tests
+Expected: `dist i18n ok` — canonical·x-default·og:locale 실패 0건
 
 - [ ] **Step 10: 커밋**
 
@@ -1246,25 +1371,26 @@ EOF
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('guide page', () => {
-  test('renders korean chrome on the korean route', async ({ page }) => {
-    await page.goto('/goyang/');
-    await expect(page.locator('main')).toContainText('고양종합운동장');
-  });
-
-  test('renders english chrome with the korean venue name kept', async ({
-    page,
-  }) => {
-    await page.goto('/en/goyang/');
-    const main = page.locator('main');
-    await expect(main).toContainText('Goyang Stadium · 고양종합운동장');
-    await expect(main).not.toContainText('오는 길');
-  });
-});
+```js
+  // Task 6 — guide chrome is translated, the venue keeps its korean original
+  if (route === 'goyang/') {
+    if (!html.includes('고양종합운동장'))
+      fail(relative, 'the venue lost its korean original');
+    if (locale === 'en' && !html.includes('Goyang Stadium · 고양종합운동장'))
+      fail(relative, 'the english venue is not shown bilingually');
+  }
 ```
+
+이 태스크의 이관 진행은 다음으로 잰다 — 남은 줄 수가 줄어드는 것이 곧 진행이다:
+
+```bash
+grep -c '[가-힣]' src/components/guide/*.astro 'src/pages/[...locale]/goyang.astro' | awk -F: '{s+=$2} END{print s}'
+```
+Expected: 시작 91 → 끝 0
+
+
 
 `오는 길` 은 `goyang.astro`/`GuideJumpNav` 계열의 UI 라벨이다. 실제 라벨이 다르면 `grep -n '[가-힣]' src/pages/'[...locale]'/goyang.astro` 로 확인해 그 문자열로 바꾼다.
 
@@ -1272,9 +1398,9 @@ test.describe('guide page', () => {
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium -g 'guide page'
+npm run check:dist
 ```
-Expected: FAIL — 영어 라우트에 한국어 UI 라벨이 그대로 남아 있다
+Expected: FAIL — `the english venue is not shown bilingually`
 
 - [ ] **Step 3: 이관 대상 전체 목록을 뽑는다**
 
@@ -1360,9 +1486,9 @@ Expected: `bilingual()` 이 처리하지 않는 한글 UI 문자열이 0건. `ko
 ```bash
 npm run check
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/goyang.spec.ts tests/e2e/goyang-transport.spec.ts tests/e2e/live-map-loading.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: PASS. `goyang.spec.ts`(33줄 한글)·`goyang-transport.spec.ts`(32줄 한글)가 통과하는 것이 한국어 무회귀 증명이다.
+Expected: `dist i18n ok`
 
 - [ ] **Step 8: 커밋**
 
@@ -1425,31 +1551,35 @@ const label = template.replace('{n}', String(n));
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('home page', () => {
-  test('renders english shortcuts on the english route', async ({ page }) => {
-    await page.goto('/en/');
-    const main = page.locator('main');
-    await expect(main).toContainText('Concert guide');
-    await expect(main).not.toContainText('콘서트 가이드');
-  });
-
-  test('keeps the korean home intact', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('main')).toContainText('콘서트 가이드');
-  });
-});
+```js
+  // Task 7 — the english home carries no korean ui label
+  if (locale === 'en' && route === '') {
+    const body = html.slice(html.indexOf('<body'));
+    if (/[\uAC00-\uD7A3]/.test(stripAllowedKorean(body.replace(main, ''))))
+      fail(relative, 'korean text left outside the content area of the english home');
+  }
 ```
+
+이 태스크의 이관 진행은 다음으로 잰다:
+
+```bash
+grep -c '[가-힣]' src/components/home/*.astro src/components/ui/*.astro \
+  src/components/visual/EclipseCountdown.astro 'src/pages/[...locale]/index.astro' \
+  | awk -F: '{s+=$2} END{print s}'
+```
+Expected: 시작 41 → 끝 0
+
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium -g 'home page'
+npm run check:dist
 ```
-Expected: FAIL — 영어 홈에 한국어 라벨이 남아 있다
+Expected: FAIL — `korean text left outside the content area of the english home`
 
 - [ ] **Step 3: 이관 대상 전체 목록을 뽑는다**
 
@@ -1531,16 +1661,16 @@ Expected: 0건
 ```bash
 npm run check
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/home-flow.spec.ts tests/e2e/back-to-top.spec.ts tests/e2e/disclosure.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS
 
 - [ ] **Step 7: 홈 long task 예산을 확인한다**
 
 ```bash
-npx playwright test tests/e2e/visual.spec.ts --project=mobile-chromium
+npm run check:dist
 ```
-Expected: PASS — long task 50ms 단언이 유지된다
+Expected: `javascript` 항목이 75KiB gzip 아래. 카운트다운이 클라이언트 `Intl` 을 새로 만들지 않았는지 `grep -c 'DateTimeFormat' dist/_astro/*.js` 로 확인한다.
 
 - [ ] **Step 8: 커밋**
 
@@ -1629,23 +1759,29 @@ describe('status labels', () => {
 });
 ```
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다. **이것이 불변 규칙의 자동 검사다:**
 
-```ts
-test.describe('trust labels', () => {
-  test('korean setlist keeps the guarantee disclaimer', async ({ page }) => {
-    await page.goto('/setlist/');
-    await expect(page.locator('main')).toContainText('예상 · 보장 아님');
-  });
-
-  test('english setlist carries the same disclaimer', async ({ page }) => {
-    await page.goto('/en/setlist/');
-    await expect(page.locator('main')).toContainText(
-      'Expected · not guaranteed',
-    );
-  });
-});
+```js
+  // Task 8 — the guarantee disclaimer survives translation
+  if (route === 'setlist/') {
+    const want =
+      locale === 'ko' ? '예상 · 보장 아님' : 'Expected · not guaranteed';
+    if (!html.includes(want))
+      fail(relative, `the setlist page does not carry "${want}"`);
+  }
 ```
+
+이 태스크의 이관 진행은 다음으로 잰다:
+
+```bash
+grep -c '[가-힣]' src/components/discover/*.astro src/components/setlist/*.astro \
+  src/components/content/*.astro 'src/pages/[...locale]/discover.astro' \
+  'src/pages/[...locale]/setlist.astro' 'src/pages/[...locale]/sources.astro' \
+  | awk -F: '{s+=$2} END{print s}'
+```
+Expected: 시작 106 → 끝 0
+
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
@@ -1746,10 +1882,10 @@ Expected: 0건
 ```bash
 npm run check
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/navigation.spec.ts --project=desktop-chromium
+npm run check:dist
 npm run audit:content
 ```
-Expected: PASS. `navigation.spec.ts`(116줄 한글)가 통과하는 것이 이 태스크의 한국어 무회귀 증명이다.
+Expected: `dist i18n ok`
 
 - [ ] **Step 9: 커밋**
 
@@ -1787,36 +1923,32 @@ EOF
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('share builders', () => {
-  test('english ticket builder has no korean form labels', async ({ page }) => {
-    await page.goto('/en/share/ticket/');
-    await expect(page.locator('main')).not.toHaveText(/[가-힣]/);
-  });
-
-  test('korean ticket builder is unchanged', async ({ page }) => {
-    await page.goto('/share/ticket/');
-    await expect(page.locator('main')).toHaveText(/[가-힣]/);
-  });
-
-  test('english setlist card builder has no korean form labels', async ({
-    page,
-  }) => {
-    await page.goto('/en/share/setlist/');
-    await expect(page.locator('main')).not.toHaveText(/[가-힣]/);
-  });
-});
+```js
+  // Task 9 — the english share builders carry no korean form copy
+  if (locale === 'en' && route.startsWith('share/')) {
+    if (/[\uAC00-\uD7A3]/.test(stripAllowedKorean(main)))
+      fail(relative, 'korean text left in the english share builder');
+  }
 ```
+
+**사전이 클라이언트 번들로 새지 않았는지**는 별도 명령으로 확인한다. 사전 두 벌이 번들에 들어가면 JS 75KiB gzip 예산에 직접 부딪힌다:
+
+```bash
+grep -rl 'skipToContent\|본문으로 건너뛰기' dist/_astro/*.js | wc -l
+```
+Expected: `0`
+
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium -g 'share builders'
+npm run check:dist
 ```
-Expected: FAIL — 영어 빌더에 한국어 폼 라벨이 남아 있다
+Expected: FAIL — `korean text left in the english share builder`
 
 - [ ] **Step 3: `canvas.ts`가 메시지를 인자로 받게 한다**
 
@@ -1912,9 +2044,9 @@ Expected: 0건
 - [ ] **Step 8: 통과와 무회귀를 확인한다**
 
 ```bash
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/share.spec.ts tests/e2e/disclosure.spec.ts tests/e2e/setlist-filter.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
-Expected: PASS. `share.spec.ts`(76줄 한글)가 통과하는 것이 한국어 무회귀 증명이다. 해당 스펙 파일명이 없으면 `ls tests/e2e/` 로 확인한다.
+Expected: `dist i18n ok`
 
 - [ ] **Step 9: 커밋**
 
@@ -1937,8 +2069,7 @@ EOF
 **Files:**
 - Modify: `scripts/check-performance-budget.mjs`
 - Modify: `tests/unit/performance-budget.test.ts`
-- Modify: `tests/e2e/no-js.spec.ts`
-- Modify: `tests/e2e/accessibility.spec.ts`
+- Modify: `scripts/check-dist-i18n.mjs`
 
 **Interfaces:**
 - Consumes: 앞선 모든 태스크
@@ -2004,46 +2135,56 @@ npm run budget
 ```
 Expected: PASS — 14개 라우트가 출력되고 예산 초과가 없다
 
-- [ ] **Step 6: no-JS 전환기 케이스를 더한다**
+- [ ] **Step 6: no-JS 전환을 정적으로 증명한다**
 
-`tests/e2e/no-js.spec.ts` 에 더한다. 기존 파일의 JS 비활성 컨텍스트 패턴을 그대로 쓴다:
+언어 전환기는 순수 `<a href>` 다. 브라우저 없이 `href` 가 맞다는 것이 곧 JavaScript 없이 동작한다는 증명이다. Task 4에서 이미 검사기가 단언한다. 여기서는 **전환기 안에 스크립트가 끼어들지 않았는지**만 확인한다.
 
-```ts
-test('switches locale without javascript', async ({ browser }) => {
-  const context = await browser.newContext({ javaScriptEnabled: false });
-  const page = await context.newPage();
-  await page.goto('/goyang/');
-  await page.getByRole('link', { name: 'English' }).click();
-  await expect(page).toHaveURL(/\/en\/goyang\/$/);
-  await context.close();
-});
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 더한다:
+
+```js
+  // Task 10 — the switcher must stay a plain link so it works without js
+  const switcherMarkup = /<nav[^>]+class="locale-switcher"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+  if (!switcherMarkup) fail(relative, 'no locale switcher found');
+  if (/<script|onclick=|data-astro-cid-[^"]*"[^>]*type="module"/.test(switcherMarkup))
+    fail(relative, 'the locale switcher depends on javascript');
 ```
 
-- [ ] **Step 7: 접근성·가로 넘침 매트릭스를 두 로케일로 넓힌다**
+```bash
+npm run build && npm run check:dist
+```
+Expected: `dist i18n ok`
 
-`tests/e2e/accessibility.spec.ts` 의 라우트 목록을 두 로케일로 확장한다. 기존 목록이 `const ROUTES = ['/', '/discover/', …]` 형태라면:
+- [ ] **Step 7: 가로 넘침을 Playwright MCP로 확인한다**
 
-```ts
-const ROUTES = [
-  '/',
-  '/discover/',
-  '/setlist/',
-  '/goyang/',
-  '/sources/',
-  '/share/ticket/',
-  '/share/setlist/',
-];
-const LOCALIZED = ROUTES.flatMap((route) => [route, `/en${route}`]);
+정적 검사가 못 잡는 것은 레이아웃뿐이다. 자동화하지 않고 직접 본다.
+
+```bash
+npm run preview
 ```
 
-320px·200% 텍스트 확대 가로 넘침 검사도 `LOCALIZED` 를 돌게 한다. **영어가 이번 작업의 최대 시각 위험이다** — 단어가 길고 끊을 자리가 적어 좁은 컬럼에서 넘친다.
+**Playwright MCP**로 14개 라우트를 돈다. 뷰포트 세 가지:
+
+| 뷰포트 | 목적 |
+|---|---|
+| 1440×960 | 데스크톱 기본 |
+| 390×844 | 모바일 기본 |
+| 320×720 + 텍스트 200% | **영어 최대 위험 구간** |
+
+각 화면에서 확인한다:
+
+1. 가로 스크롤이 생기지 않는다 — `document.documentElement.scrollWidth <= innerWidth`
+2. 영어 라벨이 잘리거나 겹치지 않는다
+3. 언어 전환기가 헤더 안에 들어간다
+4. 콘솔 오류가 없다
+
+영어에서만 넘치면 해당 라벨을 더 짧은 완성 문장으로 바꾼다. **CSS로 `overflow: hidden` 을 덮지 않는다** — 문장을 고친다.
 
 - [ ] **Step 8: 전체 체인을 돌린다**
 
 ```bash
-npm run verify
+npm run verify:core
 ```
-Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → test:e2e
+Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → check:dist
 
 - [ ] **Step 9: 배포 구성을 확인한다**
 
@@ -2086,7 +2227,7 @@ EOF
 - `/en/en/` 같은 이중 접두사 라우트가 없다.
 - 모든 페이지가 canonical 1개와 `hreflang` 3개(`ko`·`en`·`x-default`)를 낸다.
 - 언어 전환기가 JavaScript 없이 동작한다.
-- `npm run verify` 와 `npx wrangler deploy --dry-run` 이 통과한다.
+- `npm run verify:core` 와 `npx wrangler deploy --dry-run` 이 통과한다.
 - `src/data/` 는 수정되지 않았다: `git diff --stat main -- src/data` 가 빈 출력.
 
 다음: `docs/superpowers/plans/2026-09-20-english-localization-phase-2-content.md`

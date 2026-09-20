@@ -6,11 +6,13 @@
 
 **Architecture:** `src/data/` 정본은 그대로 두고 `src/data/i18n/en/` 오버레이에 번역만 쌓는다. 오버레이는 `sourceHash` 를 들고 있고, `audit:content` 가 정본에서 다시 계산한 해시와 비교한다. `src/lib/content/queries.ts` 가 단일 병합 지점이며 `locale === 'ko'` 일 때는 오버레이 조회 자체를 건너뛴다.
 
-**Tech Stack:** Astro 6 content collections (`glob` loader), Zod, `node:crypto`, Vitest, Playwright.
+**Tech Stack:** Astro 6 content collections (`glob` loader), Zod, `node:crypto`, Vitest. 시각 확인만 Playwright MCP.
 
 **Spec:** `docs/superpowers/specs/2026-09-20-english-localization-design.md`
 
 **전제:** Phase 1(`docs/superpowers/plans/2026-09-20-english-localization-phase-1-infrastructure.md`)이 완료돼 있다. 14개 라우트가 뜨고 UI는 두 로케일, 본문은 한국어다.
+
+**검증 수단:** `tests/e2e/` 의 13개 스펙은 이 작업 이전부터 관리되지 않아 현재 전부 실패한다. **`npm run test:e2e` 와 `npx playwright test` 를 실행하지 않는다.** Phase 1 Task 2에서 만든 `scripts/check-dist-i18n.mjs`(`npm run check:dist`)가 빌드 산출물을 정적으로 검사하고, 게이트는 `npm run verify:core` 다. 레이아웃 확인만 **Playwright MCP** 헤디드 투어로 한다.
 
 ## Global Constraints
 
@@ -55,7 +57,7 @@ src/data/i18n/en/concert.json        1
 
 ### 수정
 
-`src/content.config.ts` · `src/lib/content/queries.ts` · `src/lib/content/audit.ts` · `src/lib/content/contracts.ts` · `src/lib/i18n/ui/ko.ts` `en.ts` · `src/pages/[...locale]/*.astro` · `src/components/guide/GuideSection.astro` `TipsTabs.astro` · `tests/unit/content-audit.test.ts` · `tests/e2e/i18n.spec.ts` · `package.json` · `docs/content-update-runbook.md`
+`src/content.config.ts` · `src/lib/content/queries.ts` · `src/lib/content/audit.ts` · `src/lib/content/contracts.ts` · `src/lib/i18n/ui/ko.ts` `en.ts` · `src/pages/[...locale]/*.astro` · `src/components/guide/GuideSection.astro` `TipsTabs.astro` · `tests/unit/content-audit.test.ts` · `scripts/check-dist-i18n.mjs` · `package.json` · `docs/content-update-runbook.md`
 
 ---
 
@@ -650,38 +652,36 @@ EOF
 
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
-`tests/e2e/i18n.spec.ts` 에 더한다:
+`scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
 
-```ts
-test.describe('content fallback', () => {
-  test('renders the translated guide section in english', async ({ page }) => {
-    await page.goto('/en/goyang/');
-    await expect(page.locator('main')).toContainText(
-      'Cross one crosswalk from Exit 3',
-    );
-  });
-
-  test('marks an untranslated section as korean', async ({ page }) => {
-    await page.goto('/en/goyang/');
-    await expect(
-      page.getByText('This section is shown in Korean.').first(),
-    ).toBeVisible();
-  });
-
-  test('never shows the notice on the korean route', async ({ page }) => {
-    await page.goto('/goyang/');
-    await expect(page.getByText('This section is shown in Korean.')).toHaveCount(
-      0,
-    );
-  });
-});
+```js
+  // Phase 2 Task 4 — translated bodies land, untranslated ones say so
+  if (locale === 'en' && route === 'goyang/') {
+    if (!html.includes('Cross one crosswalk from Exit 3'))
+      fail(relative, 'the translated guide body did not render');
+  }
+  if (locale === 'ko' && html.includes('This section is shown in Korean.'))
+    fail(relative, 'the fallback notice leaked onto a korean page');
 ```
+
+폴백 고지가 **영어 페이지에 실제로 뜨는지**는 이 시점에 번역이 하나뿐이라 개수로 잰다:
+
+```js
+  // Every untranslated section carries the notice. Phase 2 Task 10 tightens
+  // this to zero once all 25 overlays exist.
+  if (locale === 'en') {
+    const notices = (html.match(/This section is shown in Korean\./g) ?? []).length;
+    if (route === 'goyang/' && notices === 0)
+      fail(relative, 'no fallback notice on a page with untranslated sections');
+  }
+```
+
 
 - [ ] **Step 2: 실패를 확인한다**
 
 ```bash
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium -g 'content fallback'
+npm run check:dist
 ```
 Expected: FAIL — 영어 가이드가 아직 한국어 본문이다
 
@@ -860,7 +860,7 @@ grep -rn 'getGuideContent\|getDiscoverContent\|getExpectedSetlist\|getConcert\|r
 ```bash
 npm run check
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/goyang.spec.ts tests/e2e/navigation.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS
 
@@ -1124,7 +1124,7 @@ Expected: 출력 없음 — 11개 전부 `ok`
 ```bash
 npm run audit:content
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS
 
@@ -1133,7 +1133,7 @@ Expected: PASS
 ```bash
 npm run preview &
 ```
-`http://127.0.0.1:4323/en/goyang/` 를 1440×960 과 390×844 에서 본다. 가로 넘침·잘린 문장·한국어 잔존이 없는지 확인한다.
+**Playwright MCP**로 `http://127.0.0.1:4323/en/goyang/` 를 1440×960, 390×844, 320×720+텍스트 200% 에서 본다. 가로 넘침·잘린 문장·한국어 잔존이 없는지 확인한다.
 
 - [ ] **Step 6: 커밋**
 
@@ -1201,7 +1201,7 @@ Expected: 출력 없음
 ```bash
 npm run audit:content
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS
 
@@ -1291,7 +1291,7 @@ Expected: 출력 없음 — 38개 전부 `ok`
 ```bash
 npm run audit:content
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts tests/e2e/setlist-filter.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS. `trust labels` 테스트가 영어 `Expected · not guaranteed` 를 확인한다.
 
@@ -1397,7 +1397,7 @@ Expected: **출력 없음** — 모든 로케일·모든 엔트리가 `ok`
 ```bash
 npm run audit:content
 npm run build
-npx playwright test tests/e2e/i18n.spec.ts --project=desktop-chromium
+npm run check:dist
 ```
 Expected: PASS
 
@@ -1424,7 +1424,7 @@ EOF
 
 **Files:**
 - Modify: `docs/content-update-runbook.md`
-- Modify: `tests/e2e/i18n.spec.ts`
+- Modify: `scripts/check-dist-i18n.mjs`
 
 **Interfaces:**
 - Consumes: Task 1~9 전부
@@ -1481,7 +1481,7 @@ mv /tmp/overlay-backup.md src/data/i18n/en/guides/32-tips-entry.md
 1. `npm run i18n:status` — stale로 떨어진 항목을 확인한다.
 2. 해당 오버레이의 번역을 갱신한다.
 3. `npm run i18n:hash -- <collection>/<id>` 출력으로 `sourceHash` 를 다시 적는다.
-4. `npm run verify`.
+4. `npm run verify:core`.
 
 출처의 `lastCheckedAt` 만 고쳤다면 stale이 되지 않는다. 해시는 `title`·`summary`·본문만 덮는다.
 
@@ -1502,9 +1502,9 @@ mv /tmp/overlay-backup.md src/data/i18n/en/guides/32-tips-entry.md
 - [ ] **Step 4: 전체 체인을 돌린다**
 
 ```bash
-npm run verify
+npm run verify:core
 ```
-Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → test:e2e
+Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → check:dist
 
 - [ ] **Step 5: 사이트맵과 배포 구성을 확인한다**
 
@@ -1524,7 +1524,7 @@ Expected: **빈 출력.** 한 줄이라도 나오면 정본을 건드린 것이�
 
 - [ ] **Step 7: 두 로케일 전 라우트를 눈으로 확인한다**
 
-`npm run preview` 후 1440×960 과 390×844 에서 14개 라우트를 전부 본다. 확인 항목:
+`npm run preview` 후 **Playwright MCP**로 1440×960, 390×844, 320×720+텍스트 200% 에서 14개 라우트를 전부 본다. 확인 항목:
 
 - 가로 넘침 0
 - 영어 페이지에 남은 한국어 UI 문자열 0 (고유명사 병기와 고지는 제외)
@@ -1556,5 +1556,5 @@ EOF
 - 오버레이 하나를 지우면 빌드가 통과하고 해당 섹션이 한국어 + 고지로 렌더된다.
 - `/setlist/` 와 `/en/setlist/` 가 각각 `예상 · 보장 아님` 과 `Expected · not guaranteed` 를 노출한다.
 - 두 로케일 전 라우트에서 320px·200% 확대 시 가로 넘침이 없다.
-- `npm run verify` 와 `npx wrangler deploy --dry-run` 이 통과한다.
+- `npm run verify:core` 와 `npx wrangler deploy --dry-run` 이 통과한다.
 - `git diff --stat main -- src/data ':!src/data/i18n'` 가 빈 출력.

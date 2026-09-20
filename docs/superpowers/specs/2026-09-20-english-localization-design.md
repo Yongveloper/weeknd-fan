@@ -262,32 +262,57 @@ stale은 빌드를 세우므로 사용자에게 노출되지 않는다. 배포�
 - 고유명사는 `src/lib/i18n/proper-nouns.ts`만 사용한다. 번역문에 직접 적지 않는다.
 - 커밋 형식은 `content(i18n): translate goyang transport section into en`.
 
-정본 산문을 고쳤을 때의 절차: `npm run i18n:status`로 stale 확인 → 번역 갱신 → `npm run i18n:hash <id>`로 해시 재기입 → `npm run verify`.
+정본 산문을 고쳤을 때의 절차: `npm run i18n:status`로 stale 확인 → 번역 갱신 → `npm run i18n:hash <id>`로 해시 재기입 → `npm run verify:core`.
 
 공연 임박 시 긴급 정정이 필요한데 번역이 준비되지 않았다면, 해당 오버레이 파일을 **삭제한다.** 한국어 폴백과 고지로 즉시 배포할 수 있다.
 
 ## 테스트
 
-`playwright.config.ts`는 `workers: 1`에 프로젝트 두 개(desktop/mobile)다. 전체를 두 배로 돌리면 CI 시간이 두 배가 되므로 선별한다.
+### 기존 e2e 스위트는 이 작업의 검증 수단이 아니다
 
-| 스펙 | 로케일 |
-|---|---|
-| 기존 13개 (`navigation`, `share`, `goyang`, `disclosure`, `motion`, `dawn-sky`, 구름 계열 등) | ko만 |
-| 신규 `tests/e2e/i18n.spec.ts` | ko/en |
-| `critical-path.spec.ts` | ko/en |
-| `no-js.spec.ts` | 전환기 케이스 추가 |
-| 320px + 200% 텍스트 확대 가로 넘침 매트릭스 | ko/en |
-| `visual.spec.ts` 시각 회귀 | ko만 |
+`tests/e2e/` 의 13개 스펙은 이 작업 이전부터 관리되지 않아 현재 실패한다. 이번 작업은 그것을 고치지 않고, 그것에 기대지도 않는다. `npm run verify` 는 `test:e2e` 를 포함하므로 이 작업의 게이트로 쓰지 않는다.
 
-가로 넘침을 두 로케일 모두 도는 이유는 영어가 한국어보다 단어가 길고 끊을 자리가 적기 때문이다. 좁은 컬럼에서 라벨이 넘칠 가능성이 이번 작업의 최대 시각 위험이다.
+기존 스위트 복구는 별건이다.
 
-기존 스펙의 한글 리터럴 316줄은 텍스트 직접 단언 대신 `getByRole`과 사전 import로 바꾼다. 그래야 앞으로 카피를 고쳐도 테스트가 깨지지 않는다.
+### 빌드 산출물 정적 검사가 주 검증 수단이다
 
-단위 테스트를 더한다.
+이 작업이 검증해야 하는 것 — 라우트 존재, `<html lang>`, canonical, hreflang 세 개, 영어 페이지의 한글 잔존, 신뢰 라벨, 언어 전환기 링크 — 은 전부 **렌더된 HTML만 보면 판정된다.** 브라우저가 필요 없다.
 
-- `i18n-dictionary.test.ts` — ko/en 키 집합 일치, 빈 문자열 없음.
-- `hreflang.test.ts` — 14개 라우트 전부 대체 링크 세 개.
+`scripts/check-dist-i18n.mjs` 가 `npm run build` 뒤에 `dist/**/*.html` 을 읽어 단언한다.
+
+1. 14개 라우트가 존재하고 `dist/en/en/` 이 없다.
+2. 모든 HTML이 canonical 1개와 `rel=alternate hreflang` 3개(`ko`·`en`·`x-default`)를 가진다.
+3. `<html lang>` 이 그 파일의 경로와 일치한다.
+4. 언어 전환기 앵커 두 개의 `href` 가 같은 페이지의 다른 로케일을 가리킨다. 전환기는 순수 `<a href>` 이므로 **이 정적 단언이 곧 no-JS 동작의 증명이다.**
+5. `/setlist/` 에 `예상 · 보장 아님`, `/en/setlist/` 에 `Expected · not guaranteed` 가 있다.
+6. `/en/**` 의 크롬(헤더·푸터·스킵링크)에 한글이 없다. 병기 고유명사와 전환기의 `한국어` 라벨만 허용한다.
+7. (2단계에서 추가) `/en/**` 의 `<main>` 에도 한글이 없다. 병기 고유명사만 허용한다.
+
+브라우저 기반 e2e보다 빠르고 결정적이며, 깨진 스위트에 의존하지 않는다.
+
+### 시각 확인은 Playwright MCP 헤디드 투어로 한다
+
+정적 검사가 못 잡는 것은 레이아웃뿐이다. 각 단계 끝에 두 로케일 전 라우트를 1440×960 과 390×844 에서 직접 본다. 320px·200% 텍스트 확대도 여기서 확인한다.
+
+**영어가 이번 작업의 최대 시각 위험이다** — 한국어보다 단어가 길고 끊을 자리가 적어 좁은 컬럼에서 넘친다. 자동 검사로 대체하지 않고 사람이 본다.
+
+### 단위 테스트
+
+- `i18n-routes.test.ts` — 로케일 기본형, 경로 접두사 계산.
+- `i18n-dictionary.test.ts` — ko/en 키 집합 일치, 빈 문자열 없음, 사전에 고유명사 금지.
+- `hreflang.test.ts` — 대체 링크 세 개 생성.
+- `i18n-hash.test.ts` — 정본 파서, 해시 안정성, URL 추출.
+- `i18n-overlays.test.ts` — 번들 스키마.
 - `content-audit.test.ts` — stale·URL 패리티·고아 오버레이·금지 표기.
+- `performance-budget.test.ts` — 로케일 접두사 경로의 예산 매핑.
+
+### 게이트 명령
+
+`npm run verify` 대신 e2e를 뺀 동일 체인을 쓴다. `package.json` 에 더한다.
+
+```
+verify:core = lint → format:check → check → audit:content → test:unit → build → budget → check:dist
+```
 
 ## 단계
 
@@ -303,7 +328,7 @@ stale은 빌드를 세우므로 사용자에게 노출되지 않는다. 배포�
 2. `/`와 `/en/`의 `<html lang>`이 정확하고 hreflang 세 개가 붙는다.
 3. `PUBLIC_SITE_URL=https://fan-guide.test npm run build` 후 `dist/sitemap-0.xml`에 14 URL과 언어 대체 링크가 있다.
 4. 전환기가 JavaScript 없이 동작한다.
-5. `npm run verify`가 통과한다.
+5. `npm run verify:core`가 통과한다.
 
 신규 파일 약 10개, 수정 약 45개.
 
@@ -320,7 +345,7 @@ stale은 빌드를 세우므로 사용자에게 노출되지 않는다. 배포�
 5. 오버레이 하나를 지우면 해당 페이지가 한국어와 폴백 고지로 렌더된다.
 6. `/`와 `/en/` 셋리스트 페이지 모두 "예상 · 보장 아님" 등가 문구를 노출한다.
 7. 두 로케일 전 라우트에서 320px·200% 확대 시 가로 넘침이 없다.
-8. `npm run verify`가 통과한다.
+8. `npm run verify:core`가 통과한다.
 9. `npx wrangler deploy --dry-run`이 통과한다. 실제 배포는 하지 않는다.
 
 신규 파일 25개(번역문) + 코드 약 6개, 수정 약 12개. 노동의 대부분이 번역 작성과 검수다.
