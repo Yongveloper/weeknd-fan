@@ -1459,6 +1459,39 @@ EOF
 
 ## Task 6: guide 컴포넌트 문자열 이관
 
+- [ ] **Step 0: Task 5가 남긴 두 가지를 정리한다**
+
+**sitemap의 언어 코드를 다른 두 표면과 맞춘다.** 지금 sitemap은 `ko-KR` 을,
+`<html lang>` 과 head의 `hreflang` 은 `ko` 를 쓴다. 둘 다 유효한 코드지만 같은
+페이지에 대해 세 표면이 두 가지 말을 한다. 지역 코드를 쓰는 건 sitemap 하나뿐이니
+그쪽을 맞춘다. `astro.config.mjs`:
+
+```js
+            i18n: {
+              defaultLocale: 'ko',
+              locales: { ko: 'ko', en: 'en' },
+            },
+```
+
+> `@astrojs/sitemap` 은 `x-default` 를 낼 수 없다(패키지에 해당 개념 자체가 없다).
+> head의 `<link rel="alternate">` 가 내므로 크롤러는 받는다. 손으로 XML을 짜지 않는다.
+
+**죽은 타입 필드를 지운다.** `src/lib/seo/eventJsonLd.ts` 의 `ConcertForJsonLd.venue`
+는 Task 5가 `location.name` 을 `bilingual(VENUE, locale)` 로 바꾸면서 마지막 소비자를
+잃었다. 필드를 지우고 호출부에서 넘기던 값도 정리한다.
+
+```bash
+grep -rn '\.venue\b' src/ tests/ --include='*.ts' --include='*.astro'
+```
+Expected: CSS 클래스명(`venue-pin`, `venue-label`)만 남는다.
+
+```bash
+npm run verify:core
+```
+Expected: exit 0.
+
+
+
 **Files:**
 - Modify: `src/components/guide/AccessMap.astro` (7줄) `AccessTable.astro` (12) `DirectionsLinks.astro` (7) `GuideJumpNav.astro` (1) `GuideOverview.astro` (5) `GuideSection.astro` (10) `LiveMap.astro` (3) `SeatMap.astro` (7) `TipsTabs.astro` (6) `TransportOperations.astro` (27)
 - Modify: `src/pages/[...locale]/goyang.astro` (6)

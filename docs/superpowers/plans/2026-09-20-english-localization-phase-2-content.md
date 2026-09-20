@@ -575,7 +575,6 @@ const concertSchema = z.record(
   z.object({
     title: z.string(),
     summary: z.string(),
-    venue: z.string(),
     ageRestriction: z.string(),
     shows: z.array(z.object({ dateLabel: z.string() })).length(2),
     ...meta,
@@ -1334,7 +1333,10 @@ EOF
 - **URL·`kind`·`lastCheckedAt` 은 오버레이에 넣지 않는다.**
 
 **`concert` 번역 규칙.**
-- `venue` 는 `bilingual(VENUE, 'en')` 과 같은 문자열이어야 한다: `Goyang Stadium · 고양종합운동장`.
+- `venue` 는 **오버레이에 넣지 않는다.** Phase 1 Task 5 이후 `concert.data.venue` 를
+  렌더하는 코드가 없다 — 공연장 이름은 `src/lib/i18n/proper-nouns.ts` 의 `VENUE` 에서
+  `bilingual(VENUE, locale)` 로 나온다. 정본 JSON의 `venue` 필드는 스키마가 요구하므로
+  남지만 번역 대상이 아니다.
 - `ageRestriction` 「만 19세 이상」 → `19 and over (Korean age reckoning)`. 관람객이 오해하면 입장이 막히므로 기준을 명시한다.
 - `shows[].dateLabel` 「2026.10.07 WED」 → `Wed 7 Oct 2026`. 배열 길이는 정본과 같아야 하며(`.length(2)`), 순서도 같다.
 
@@ -1379,7 +1381,6 @@ npm run i18n:hash -- concert/goyang-2026
   "goyang-2026": {
     "title": "The Weeknd: After Hours Til Dawn Tour — Goyang",
     "summary": "Two nights at Goyang Stadium · 고양종합운동장 on 7–8 October 2026.",
-    "venue": "Goyang Stadium · 고양종합운동장",
     "ageRestriction": "19 and over (Korean age reckoning)",
     "shows": [
       { "dateLabel": "Wed 7 Oct 2026" },
