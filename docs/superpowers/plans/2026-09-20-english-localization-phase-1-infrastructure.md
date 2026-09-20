@@ -1831,6 +1831,18 @@ EOF
 
 ## Task 8: discover·setlist·content·sources 문자열 이관
 
+- [ ] **Step 0a: 소비자가 없는 countdown 키를 지운다**
+
+Task 7이 브리프 지시로 `home.countdown.days.{one,other}` 를 `ko.ts`·`en.ts` 에 넣었는데,
+그 키를 읽을 `EclipseCountdown.astro` 는 임포터가 하나도 없는 죽은 컴포넌트다.
+컴포넌트 자체는 이 작업 이전부터 있던 것이라 건드리지 않지만(무관한 죽은 코드는 언급만 한다),
+키는 소비자가 0인 **새로 만든 코드**다. 지운다.
+
+```bash
+grep -rn 'countdown' src/lib/i18n/ui/ src/components src/pages
+```
+Expected: 삭제 후 `src/components/visual/EclipseCountdown.astro` 내부 참조만 남는다.
+
 - [ ] **Step 0: JSON-LD의 공연장 이름을 콘텐츠 기록으로 되돌린다**
 
 Task 5가 `location.name` 을 `concert.data.venue` 에서 `bilingual(VENUE, locale)` 로
