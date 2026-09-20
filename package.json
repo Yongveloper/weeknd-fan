@@ -22,7 +22,7 @@
     "fonts:header": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/build-header-font-subsets.mjs",
     "verify": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run test:e2e",
     "check:dist": "node scripts/check-dist-i18n.mjs",
-    "verify:core": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run check:dist",
+    "verify:core": "npm run lint && npm run format:check && npm run check && npm run test:unit && npm run build && npm run budget && npm run check:dist",
     "deploy:dry-run": "wrangler deploy --dry-run",
     "assert:production-origin": "node scripts/assert-production-origin.mjs",
     "deploy": "npm run assert:production-origin && npm run build && wrangler deploy"
