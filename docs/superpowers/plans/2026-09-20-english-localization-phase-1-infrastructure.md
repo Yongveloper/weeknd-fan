@@ -470,7 +470,11 @@ process.stdout.write(`dist i18n ok\t${pages.length} pages\n`);
 npm run build
 npm run check:dist
 ```
-Expected: FAIL — `discover/: route missing`, `en/: route missing` 등 12건 + `html lang is ko, expected en`
+Expected: FAIL — **7건.** Task 1에서 `goyang.astro` 만 옮겼으므로 나머지 6개 한국어 라우트는
+아직 원래 경로에 그대로 빌드된다. 따라서 누락은 `en/` 쪽 6개(`en/: route missing`,
+`en/discover/: route missing`, `en/setlist/`, `en/sources/`, `en/share/ticket/`, `en/share/setlist/`)
+이고, 여기에 `dist/en/goyang/index.html` 의 `html lang is ko, expected en` 1건이 더해진다.
+alternates 실패는 모든 페이지에서 나지만 Task 5까지 정상이다
 
 - [ ] **Step 4: 6개 페이지를 옮긴다**
 
