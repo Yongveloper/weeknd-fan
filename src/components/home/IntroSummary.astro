@@ -39,7 +39,7 @@ const [headingBefore = '', headingAfter = ''] =
       {
         trilogy.map((album) => (
           <li>
-            <AlbumCover album={album} size={120} />
+            <AlbumCover locale={locale} album={album} size={120} />
             <span class="home-entry__year">{album.data.year}</span>
             <span class="home-entry__album-title">{album.data.title}</span>
           </li>

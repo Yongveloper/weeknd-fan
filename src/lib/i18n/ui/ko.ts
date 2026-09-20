@@ -21,6 +21,72 @@ export const ko = {
     siteMap: '사이트 지도',
     officialTicketNotice: '공식 티켓 공지 보기',
   },
+  content: {
+    albumCover: {
+      alt: '{title} 앨범 커버 — Spotify에서 열기',
+    },
+    officialEmbed: {
+      listen: '공식 원문에서 듣기',
+      loadVideo: '공식 영상 불러오기',
+      iframeTitle: '{song} 공식 미디어',
+    },
+    sourceList: {
+      ariaLabel: '출처',
+      receivedOn: '수신일 {date}',
+      lastChecked: '마지막 확인 {date}',
+    },
+  },
+  discover: {
+    page: {
+      title: '{artist} 알기 | {artist} 고양 팬 가이드',
+      description:
+        '공연 전 3분에 훑는 {artist}의 커리어, 앨범 구분, 그리고 두 3부작',
+    },
+    hero: {
+      heading: '{artist}를 {phrase} 넘겨 보기',
+      phrase: '한 장씩',
+      introDisclosureAriaLabel: '3분 입문 더 깊이 보기',
+      introDisclosureLabel: '3분 입문 펼쳐보기',
+    },
+    albums: {
+      heading: '정규 앨범 6장',
+      note: '2011년 세 믹스테이프, 2012년 {trilogy} 컴필레이션, 2018년 {mdm} EP는 이 여섯 장과 따로 센다.',
+    },
+    timeline: {
+      heading: '연표는 가볍게, 필요하면 더 깊게',
+      careerAriaLabel: '{artist} 시대별 커리어',
+      coversAriaLabel: '{era} 앨범',
+      disclosureAriaLabel: '{era} 더 깊이 보기',
+    },
+    disclosureLabel: '더 깊이 보기',
+    glossary: {
+      disclosureAriaLabel: '용어 한 장 더 깊이 보기',
+    },
+    visual: {
+      disclosureAriaLabel: '보는 음악 더 깊이 보기',
+    },
+    trilogy: {
+      title: '두 개의 Trilogy를 헷갈리지 않기',
+      intro:
+        '초기의 세 믹스테이프와 최근의 세 정규 앨범은 이름이 닮았지만 분류가 다르다.',
+      early: {
+        heading: '초기 3부작',
+        coversAriaLabel: '초기 3부작 앨범',
+        body: '세 장의 오리지널 믹스테이프. 2012년 {album}는 이들을 묶은 컴필레이션이다.',
+      },
+      recent: {
+        heading: '최근 앨범 3부작',
+        coversAriaLabel: '최근 앨범 3부작 앨범',
+        body: '세 장의 정규 앨범이 이어지는 공식 3부작이다.',
+      },
+      interpretation: {
+        ariaLabel: '한 가지 해석',
+        eyebrow: '한 가지 해석',
+        emphasis: '사망 → 연옥 → 환생',
+        body: '{emphasis}은 팬들이 세 장을 읽는 한 방식이다. 공식 설정이나 단일한 줄거리로 단정하지 않는다.',
+      },
+    },
+  },
   guide: {
     page: {
       title: '콘서트 가이드 | {artist} 고양 팬 가이드',
@@ -181,8 +247,106 @@ export const ko = {
         },
       },
     },
-    countdown: {
-      days: { one: 'D-{n}', other: 'D-{n}' },
+  },
+  setlist: {
+    page: {
+      titleArchived: 'WE WERE HERE | {artist} 고양 팬 가이드',
+      titleExpected: '예상 셋리스트 | {artist} 고양 팬 가이드',
+      description:
+        '최근 2026년 공연 기록을 바탕으로 한 {artist} 고양 공연 예상 셋리스트',
+      headingArchived: '우리는 그곳에 있었다',
+      headingExpected: '예상 셋리스트',
+      intro:
+        '최근 무대의 반복 패턴을 참고한 비공식 예상 순서입니다. 실제 공연은 달라질 수 있어요.',
+    },
+    explorer: {
+      dayVerified: '{day}일차 공연 후 확인',
+      actualHeading: '공연 후 확인된 셋리스트',
+      expectedListAriaLabel: '예상 셋리스트 곡 목록',
+      searchLabel: '곡 검색',
+      searchPlaceholder: '곡 제목으로 찾기',
+      albumFilterLabel: '앨범으로 고르기',
+      allAlbumsOption: '전체 앨범',
+      viewsAriaLabel: '목록 보기',
+      viewAll: '전체',
+      viewEssential: '3분 핵심 10곡',
+      countShown: { one: '{count}곡 표시', other: '{count}곡 표시' },
+      resetButton: '초기화',
+      confidenceLabel: '신뢰도 {level}',
+      beforeHeading: '공연 전에 알면 좋은 한 문장',
+      onStageHeading: '무대에서 볼 것',
+      singAlongHeading: '떼창 포인트',
+      sourcesHeading: '출처',
+      noResults: '검색 결과가 없습니다.',
+    },
+  },
+  sources: {
+    page: {
+      title: '출처와 업데이트 | {artist} 고양 팬 가이드',
+      description:
+        '{artist} 고양 팬 가이드의 출처, 마지막 확인일, 그리고 공연 전후 업데이트 일정',
+      heading: '출처와 업데이트',
+      intro:
+        '이 페이지는 정보의 근거와 확인 시점을 짧게 남깁니다. 운영 공지가 없는 항목은 추정으로 채우지 않습니다.',
+      groupsAriaLabel: '출처 목록',
+    },
+    routeLabels: {
+      home: '홈',
+      setlist: '예상 셋리스트',
+      goyang: '콘서트 가이드',
+    },
+    kind: {
+      official: {
+        title: '공식',
+        description:
+          '아티스트·주최·예매처·레이블이 공개한 원문과 예매처 공식 문자 안내입니다.',
+      },
+      'public-agency': {
+        title: '공공 교통',
+        description: '공공시설·철도·버스 확인에 사용하는 공공 서비스입니다.',
+      },
+      'crowd-sourced': {
+        title: '공연 기록',
+        description:
+          '최근 공연의 반복 패턴을 비교하는 기록입니다. 공식 확정 정보가 아닙니다.',
+      },
+      'editorial-reference': {
+        title: '보조 참고',
+        description:
+          '후보와 용어를 찾는 보조 자료이며, 핵심 사실은 위 원문으로 다시 확인합니다.',
+      },
+    },
+    allCheckedOn: '전체 마지막 확인 {date}',
+    receivedLabel: '수신일',
+    lastCheckedLabel: '마지막 확인',
+    usedInLabel: '사용 위치',
+    usedInAriaLabel: '{name} 사용 위치',
+    wikiReference: {
+      name: '나무위키 PDF',
+      note: '누락 탐색용·핵심 사실 근거 아님',
+    },
+    checkpoints: {
+      heading: '다음 확인 지점',
+      items: [
+        ['Tokyo', '9월 19–20일 이후', '첫 아시아 구성 확인'],
+        ['Jakarta', '9월 26–27일 이후', '게스트 없는 구간과 세트 변화 비교'],
+        ['Singapore', '10월 2–3일 이후', '가장 가까운 비교군 반영'],
+        [
+          '고양 공식 확인',
+          '10월 4–6일',
+          '입장·반입·교통·접근성 공지 최종 확인',
+        ],
+        ['고양 1일차 아카이브', '10월 7일 공연 후', '실제 셋리스트 기록'],
+        [
+          '고양 2일차 아카이브',
+          '10월 8일 공연 후',
+          '실제 셋리스트와 차이 기록',
+        ],
+      ],
+      archiveNote:
+        '실제 고양 공연 기록은 양일 모두 확인한 뒤에만 아카이브로 전환합니다.',
+      coverNote:
+        '앨범 커버는 Spotify CDN에서 직접 불러옵니다(쿠키 없음). 자체 저장·재가공하지 않으며 커버를 누르면 Spotify 앨범 페이지로 이동합니다.',
     },
   },
   ui: {

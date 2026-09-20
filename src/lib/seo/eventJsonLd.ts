@@ -1,5 +1,5 @@
 import type { Locale } from '../i18n/locales';
-import { VENUE, bilingual } from '../i18n/proper-nouns';
+import { VENUE_FULL, bilingual } from '../i18n/proper-nouns';
 
 interface ConcertForJsonLd {
   shows: Array<{ startsAt: string }>;
@@ -41,7 +41,7 @@ export function buildEventJsonLd(
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: bilingual(VENUE, locale),
+      name: bilingual(VENUE_FULL, locale),
       address: 'Goyang-si, Gyeonggi-do, KR',
     },
     performer: { '@type': 'MusicGroup', name: 'The Weeknd' },

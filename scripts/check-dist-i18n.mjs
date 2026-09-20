@@ -183,6 +183,14 @@ function checkPage({ relative, locale, route, html, fail }) {
         'korean text left outside the content area of the english home',
       );
   }
+
+  // Task 8 — the guarantee disclaimer survives translation
+  if (route === 'setlist/') {
+    const want =
+      locale === 'ko' ? '예상 · 보장 아님' : 'Expected · not guaranteed';
+    if (!html.includes(want))
+      fail(relative, `the setlist page does not carry "${want}"`);
+  }
 }
 
 if (failures.length) {

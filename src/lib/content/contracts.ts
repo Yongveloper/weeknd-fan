@@ -1,4 +1,5 @@
 import type { CollectionEntry } from 'astro:content';
+import type { Locale } from '../i18n/locales';
 
 export const TRUST_STATUSES = [
   'official',
@@ -11,13 +12,23 @@ export const TRUST_STATUSES = [
 
 export type TrustStatus = (typeof TRUST_STATUSES)[number];
 
-export const STATUS_LABELS: Record<TrustStatus, string> = {
-  official: '공식 확정',
-  practical: '실용 안내',
-  'post-show': '공연 후 확인',
-  pattern: '반복 패턴',
-  expected: '예상 · 보장 아님',
-  unpublished: '미공개 · 확인 필요',
+export const STATUS_LABELS: Record<Locale, Record<TrustStatus, string>> = {
+  ko: {
+    official: '공식 확정',
+    practical: '실용 안내',
+    'post-show': '공연 후 확인',
+    pattern: '반복 패턴',
+    expected: '예상 · 보장 아님',
+    unpublished: '미공개 · 확인 필요',
+  },
+  en: {
+    official: 'Confirmed by the promoter',
+    practical: 'Practical guidance',
+    'post-show': 'Verified after the show',
+    pattern: 'Recurring pattern',
+    expected: 'Expected · not guaranteed',
+    unpublished: 'Not announced · needs checking',
+  },
 };
 
 export type SourceRecord = CollectionEntry<'sources'>;

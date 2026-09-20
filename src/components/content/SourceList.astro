@@ -1,22 +1,31 @@
 ---
 import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 
 interface Props {
+  locale: Locale;
   sources: SourceRecord[];
 }
 
-const { sources } = Astro.props;
+const { locale, sources } = Astro.props;
+const strings = ui(locale).content.sourceList;
 ---
 
-<ul class="source-list" aria-label="출처">
+<ul class="source-list" aria-label={strings.ariaLabel}>
   {
     sources.map((source) => (
       <li>
         {'medium' in source.data && source.data.medium === 'sms' ? (
           <>
             <span class="source-list__message">{source.data.name}</span>
-            <span>수신일 {formatSeoulDate(source.data.receivedAt)}</span>
+            <span>
+              {strings.receivedOn.replace(
+                '{date}',
+                formatSeoulDate(source.data.receivedAt),
+              )}
+            </span>
           </>
         ) : (
           <>
@@ -24,7 +33,10 @@ const { sources } = Astro.props;
               {source.data.name}
             </a>
             <span>
-              마지막 확인 {formatSeoulDate(source.data.lastCheckedAt)}
+              {strings.lastChecked.replace(
+                '{date}',
+                formatSeoulDate(source.data.lastCheckedAt),
+              )}
             </span>
           </>
         )}

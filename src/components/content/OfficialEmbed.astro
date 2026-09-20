@@ -1,10 +1,16 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
 interface Props {
+  locale: Locale;
   url: string;
   songTitle: string;
 }
 
-const { url, songTitle } = Astro.props;
+const { locale, url, songTitle } = Astro.props;
+const strings = ui(locale).content.officialEmbed;
+const iframeTitle = strings.iframeTitle.replace('{song}', songTitle);
 const allowedProviders = new Set([
   'www.youtube.com',
   'youtube.com',
@@ -26,9 +32,10 @@ if (
   class="official-embed"
   data-embed-url={url}
   data-song-title={songTitle}
+  data-iframe-title={iframeTitle}
 >
-  <a href={url} target="_blank" rel="noreferrer">공식 원문에서 듣기</a>
-  <button type="button" data-load-embed>공식 영상 불러오기</button>
+  <a href={url} target="_blank" rel="noreferrer">{strings.listen}</a>
+  <button type="button" data-load-embed>{strings.loadVideo}</button>
 </official-embed>
 
 <script is:inline>
@@ -62,6 +69,7 @@ if (
 
       const url = embed.dataset.embedUrl;
       const songTitle = embed.dataset.songTitle;
+      const iframeTitle = embed.dataset.iframeTitle ?? songTitle;
       if (!url || !songTitle) return;
 
       let mediaUrl;
@@ -79,7 +87,7 @@ if (
 
       const iframe = document.createElement('iframe');
       iframe.loading = 'lazy';
-      iframe.title = `${songTitle} 공식 미디어`;
+      iframe.title = iframeTitle;
       iframe.src = mediaUrl.href;
       iframe.allow = 'encrypted-media; fullscreen; picture-in-picture';
       iframe.sandbox.add('allow-same-origin', 'allow-scripts');

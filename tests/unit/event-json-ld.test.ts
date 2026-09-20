@@ -4,6 +4,8 @@ import {
   normalizeSiteUrl,
   serializeJsonLd,
 } from '../../src/lib/seo/eventJsonLd';
+import concert from '../../src/data/concert/goyang-2026.json';
+import { VENUE_FULL } from '../../src/lib/i18n/proper-nouns';
 
 const input = {
   venue: '고양종합운동장 주경기장',
@@ -27,7 +29,7 @@ describe('buildEventJsonLd', () => {
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
           '@type': 'Place',
-          name: '고양종합운동장',
+          name: '고양종합운동장 주경기장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
@@ -44,7 +46,7 @@ describe('buildEventJsonLd', () => {
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
           '@type': 'Place',
-          name: '고양종합운동장',
+          name: '고양종합운동장 주경기장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
@@ -84,12 +86,16 @@ describe('buildEventJsonLd', () => {
   it('pairs the venue name with its korean original in english', () => {
     expect(
       buildEventJsonLd(input, 'https://fan-guide.test', 'en')[0]?.location.name,
-    ).toBe('Goyang Stadium · 고양종합운동장');
+    ).toBe('Goyang Sports Complex Main Stadium · 고양종합운동장 주경기장');
   });
 
   it('escapes HTML-significant characters before script injection', () => {
     expect(
       serializeJsonLd({ note: '</script><script>alert(1)</script>' }),
     ).toBe('{"note":"\\u003c/script>\\u003cscript>alert(1)\\u003c/script>"}');
+  });
+
+  it('keeps the structured-data venue name equal to the audited content record', () => {
+    expect(VENUE_FULL.ko).toBe(concert.venue);
   });
 });

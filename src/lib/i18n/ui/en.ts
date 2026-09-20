@@ -12,6 +12,72 @@ export const en: UiStrings = {
     siteMap: 'Site map',
     officialTicketNotice: 'View official ticket notice',
   },
+  content: {
+    albumCover: {
+      alt: '{title} album cover — open on Spotify',
+    },
+    officialEmbed: {
+      listen: 'Listen at the official source',
+      loadVideo: 'Load the official video',
+      iframeTitle: '{song} official media',
+    },
+    sourceList: {
+      ariaLabel: 'Sources',
+      receivedOn: 'Received {date}',
+      lastChecked: 'Last checked {date}',
+    },
+  },
+  discover: {
+    page: {
+      title: 'Get to know {artist} | {artist} Goyang Fan Guide',
+      description:
+        "A three-minute, pre-show primer on {artist}'s career, album lineup, and the two Trilogys",
+    },
+    hero: {
+      heading: 'Flip through {artist}, {phrase}',
+      phrase: 'one album at a time',
+      introDisclosureAriaLabel: 'More on the 3-minute primer',
+      introDisclosureLabel: 'Expand the 3-minute primer',
+    },
+    albums: {
+      heading: 'Six studio albums',
+      note: 'The 2011 mixtapes, the 2012 {trilogy} compilation, and the 2018 {mdm} EP are counted separately from these six.',
+    },
+    timeline: {
+      heading: 'A light timeline, deeper when you want it',
+      careerAriaLabel: "{artist}'s career, era by era",
+      coversAriaLabel: '{era} albums',
+      disclosureAriaLabel: 'More on {era}',
+    },
+    disclosureLabel: 'Learn more',
+    glossary: {
+      disclosureAriaLabel: 'More on the glossary',
+    },
+    visual: {
+      disclosureAriaLabel: 'More on the visual side of the music',
+    },
+    trilogy: {
+      title: "Don't mix up the two Trilogys",
+      intro:
+        'The three early mixtapes and the three recent studio albums share a similar name, but they are classified differently.',
+      early: {
+        heading: 'The early trilogy',
+        coversAriaLabel: 'Early trilogy albums',
+        body: 'Three original mixtapes. The 2012 compilation {album} bundles them together.',
+      },
+      recent: {
+        heading: 'The recent album trilogy',
+        coversAriaLabel: 'Recent album trilogy albums',
+        body: 'An official trilogy formed by three consecutive studio albums.',
+      },
+      interpretation: {
+        ariaLabel: 'One interpretation',
+        eyebrow: 'One interpretation',
+        emphasis: 'Death → Purgatory → Rebirth',
+        body: '{emphasis} is one way fans read the three albums. It is not treated as an official canon or a single storyline.',
+      },
+    },
+  },
   guide: {
     page: {
       title: 'Concert Guide | {artist} Goyang Fan Guide',
@@ -175,8 +241,115 @@ export const en: UiStrings = {
         },
       },
     },
-    countdown: {
-      days: { one: '{n} day to go', other: '{n} days to go' },
+  },
+  setlist: {
+    page: {
+      titleArchived: 'WE WERE HERE | {artist} Goyang Fan Guide',
+      titleExpected: 'Expected Setlist | {artist} Goyang Fan Guide',
+      description:
+        "An unofficial expected setlist for {artist}'s Goyang show, based on recent 2026 show records",
+      headingArchived: 'We were here',
+      headingExpected: 'Expected Setlist',
+      intro:
+        'An unofficial expected order based on recurring patterns from recent shows. The actual show may differ.',
+    },
+    explorer: {
+      dayVerified: 'Day {day} — verified after the show',
+      actualHeading: 'Setlist verified after the show',
+      expectedListAriaLabel: 'Expected setlist song list',
+      searchLabel: 'Search songs',
+      searchPlaceholder: 'Search by song title',
+      albumFilterLabel: 'Filter by album',
+      allAlbumsOption: 'All albums',
+      viewsAriaLabel: 'List view',
+      viewAll: 'All',
+      viewEssential: 'Essential 10 in 3 minutes',
+      countShown: { one: '{count} song shown', other: '{count} songs shown' },
+      resetButton: 'Reset',
+      confidenceLabel: '{level} confidence',
+      beforeHeading: 'One line worth knowing before the show',
+      onStageHeading: 'What to watch for on stage',
+      singAlongHeading: 'Sing-along moment',
+      sourcesHeading: 'Sources',
+      noResults: 'No matching songs.',
+    },
+  },
+  sources: {
+    page: {
+      title: 'Sources and Updates | {artist} Goyang Fan Guide',
+      description:
+        "{artist} Goyang Fan Guide's sources, last-checked dates, and the update schedule around the show",
+      heading: 'Sources and Updates',
+      intro:
+        'This page briefly records where information comes from and when it was checked. Items without an operations notice are not filled in with guesses.',
+      groupsAriaLabel: 'Source list',
+    },
+    routeLabels: {
+      home: 'Home',
+      setlist: 'Expected Setlist',
+      goyang: 'Concert Guide',
+    },
+    kind: {
+      official: {
+        title: 'Official',
+        description:
+          'Original statements published by the artist, promoter, ticket seller, or label, and official SMS notices from the ticket seller.',
+      },
+      'public-agency': {
+        title: 'Public transit',
+        description:
+          'Public services used to check facilities, rail, and bus information.',
+      },
+      'crowd-sourced': {
+        title: 'Show records',
+        description:
+          'Records comparing recurring patterns from recent shows. Not officially confirmed information.',
+      },
+      'editorial-reference': {
+        title: 'Supporting reference',
+        description:
+          'Supporting material for finding candidates and terms; core facts are re-checked against the original sources above.',
+      },
+    },
+    allCheckedOn: 'All last checked {date}',
+    receivedLabel: 'Received',
+    lastCheckedLabel: 'Last checked',
+    usedInLabel: 'Used in',
+    usedInAriaLabel: '{name} used in',
+    wikiReference: {
+      name: 'Namu Wiki PDF',
+      note: 'For finding gaps only · not a source for core facts',
+    },
+    checkpoints: {
+      heading: 'Next checkpoints',
+      items: [
+        ['Tokyo', 'after Sep 19–20', 'confirm the first Asia-leg lineup'],
+        [
+          'Jakarta',
+          'after Sep 26–27',
+          'compare guest-free stretches and set changes',
+        ],
+        ['Singapore', 'after Oct 2–3', 'reflect the closest comparison show'],
+        [
+          'Goyang official notice',
+          'Oct 4–6',
+          'final check on entry, prohibited items, transit, and access notices',
+        ],
+        [
+          'Goyang day 1 archive',
+          'after the Oct 7 show',
+          'record the actual setlist',
+        ],
+        [
+          'Goyang day 2 archive',
+          'after the Oct 8 show',
+          'record differences from the actual setlist',
+        ],
+      ],
+      archiveNote:
+        'The actual Goyang show record switches to an archive only after both dates are confirmed.',
+      coverNote:
+        'Album covers load directly from the Spotify CDN (no cookies). We do not store or re-process them, and tapping a cover opens its Spotify album page.',
     },
   },
   ui: {

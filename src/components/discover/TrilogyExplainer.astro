@@ -2,68 +2,76 @@
 import AlbumCover from '../content/AlbumCover.astro';
 import type { AlbumRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 
 interface Props {
+  locale: Locale;
   albums: AlbumRecord[];
 }
 
-const { albums } = Astro.props;
+const { locale, albums } = Astro.props;
 const pick = (titles: string[]) =>
   titles
     .map((title) => findAlbumByTitle(albums, title))
     .filter((album): album is AlbumRecord => Boolean(album));
 const early = pick(['House of Balloons', 'Thursday', 'Echoes of Silence']);
 const recent = pick(['After Hours', 'Dawn FM', 'Hurry Up Tomorrow']);
+const strings = ui(locale).discover.trilogy;
+// The compilation title stays in its own <em>, so split the sentence around it
+// instead of assembling the sentence from translated fragments.
+const [earlyBodyBefore = '', earlyBodyAfter = ''] =
+  strings.early.body.split('{album}');
+const [interpretationBefore = '', interpretationAfter = ''] =
+  strings.interpretation.body.split('{emphasis}');
 ---
 
 <section class="trilogies" aria-labelledby="trilogy-title">
   <div class="trilogies__intro">
-    <h2 id="trilogy-title">두 개의 Trilogy를 헷갈리지 않기</h2>
-    <p>
-      초기의 세 믹스테이프와 최근의 세 정규 앨범은 이름이 닮았지만 분류가
-      다르다.
-    </p>
+    <h2 id="trilogy-title">{strings.title}</h2>
+    <p>{strings.intro}</p>
   </div>
   <div class="trilogies__sequence">
     <section aria-labelledby="early-trilogy-title">
       <p class="eyebrow">2011 MIXTAPES</p>
-      <h3 id="early-trilogy-title">초기 3부작</h3>
-      <ul class="trilogies__covers" aria-label="초기 3부작 앨범">
+      <h3 id="early-trilogy-title">{strings.early.heading}</h3>
+      <ul class="trilogies__covers" aria-label={strings.early.coversAriaLabel}>
         {
           early.map((album) => (
             <li>
-              <AlbumCover album={album} size={120} />
+              <AlbumCover locale={locale} album={album} size={120} />
             </li>
           ))
         }
       </ul>
       <p>House of Balloons → Thursday → Echoes of Silence</p>
-      <p>
-        세 장의 오리지널 믹스테이프. 2012년 <em>Trilogy</em>는 이들을 묶은
-        컴필레이션이다.
-      </p>
+      <p>{earlyBodyBefore}<em>Trilogy</em>{earlyBodyAfter}</p>
     </section>
     <section aria-labelledby="recent-trilogy-title">
       <p class="eyebrow">STUDIO ALBUMS</p>
-      <h3 id="recent-trilogy-title">최근 앨범 3부작</h3>
-      <ul class="trilogies__covers" aria-label="최근 앨범 3부작 앨범">
+      <h3 id="recent-trilogy-title">{strings.recent.heading}</h3>
+      <ul class="trilogies__covers" aria-label={strings.recent.coversAriaLabel}>
         {
           recent.map((album) => (
             <li>
-              <AlbumCover album={album} size={120} />
+              <AlbumCover locale={locale} album={album} size={120} />
             </li>
           ))
         }
       </ul>
       <p>After Hours → Dawn FM → Hurry Up Tomorrow</p>
-      <p>세 장의 정규 앨범이 이어지는 공식 3부작이다.</p>
+      <p>{strings.recent.body}</p>
     </section>
   </div>
-  <aside class="trilogies__interpretation" aria-label="한 가지 해석">
-    <p class="eyebrow">한 가지 해석</p>
+  <aside
+    class="trilogies__interpretation"
+    aria-label={strings.interpretation.ariaLabel}
+  >
+    <p class="eyebrow">{strings.interpretation.eyebrow}</p>
     <p>
-      <strong>사망 → 연옥 → 환생</strong>은 팬들이 세 장을 읽는 한 방식이다.
-      공식 설정이나 단일한 줄거리로 단정하지 않는다.
+      {interpretationBefore}<strong>{strings.interpretation.emphasis}</strong>{
+        interpretationAfter
+      }
     </p>
   </aside>
 </section>

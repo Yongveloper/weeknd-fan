@@ -10,12 +10,14 @@ describe('OfficialEmbed', () => {
     const [first, second] = await Promise.all([
       container.renderToString(OfficialEmbed, {
         props: {
+          locale: 'ko',
           url: 'https://www.youtube.com/embed/first-video',
           songTitle: 'First Song',
         },
       }),
       container.renderToString(OfficialEmbed, {
         props: {
+          locale: 'ko',
           url: 'https://www.youtube.com/embed/second-video',
           songTitle: 'Second Song',
         },
@@ -55,6 +57,7 @@ describe('OfficialEmbed', () => {
     const container = await AstroContainer.create();
     const markup = await container.renderToString(OfficialEmbed, {
       props: {
+        locale: 'ko',
         url: 'https://www.youtube.com/embed/cleanup-video',
         songTitle: 'Cleanup Song',
       },

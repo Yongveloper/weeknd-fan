@@ -10,7 +10,8 @@ import {
   parseSeoulDate,
   formatSeoulDate,
 } from '../../src/lib/content/audit';
-import { STATUS_LABELS } from '../../src/lib/content/contracts';
+import { STATUS_LABELS, TRUST_STATUSES } from '../../src/lib/content/contracts';
+import { LOCALES } from '../../src/lib/i18n/locales';
 
 describe('content trust contract', () => {
   it('requires an all-or-nothing contiguous editorial essential order', () => {
@@ -469,7 +470,9 @@ describe('content trust contract', () => {
       join(process.cwd(), 'src/components/setlist/SetlistExplorer.astro'),
       'utf8',
     );
-    expect(explorer).toContain('<StatusBadge status={record.data.status} />');
+    expect(explorer).toContain(
+      '<StatusBadge locale={locale} status={record.data.status} />',
+    );
     expect(explorer).not.toContain('<StatusBadge status="post-show" />');
   });
 
@@ -823,7 +826,7 @@ describe('content trust contract', () => {
   });
 
   it('keeps expected content visibly non-official', () => {
-    expect(STATUS_LABELS.expected).toBe('예상 · 보장 아님');
+    expect(STATUS_LABELS.ko.expected).toBe('예상 · 보장 아님');
   });
 
   it('requires two primary sources for concert facts', () => {
@@ -935,5 +938,23 @@ describe('album cover contract', () => {
           .map(({ data }) => data.url),
       }),
     ).toEqual([]);
+  });
+});
+
+describe('status labels', () => {
+  it('covers every status in every locale', () => {
+    for (const locale of LOCALES)
+      for (const status of TRUST_STATUSES)
+        expect(STATUS_LABELS[locale][status]?.trim()).toBeTruthy();
+  });
+
+  it('keeps the expected label honest in both locales', () => {
+    expect(STATUS_LABELS.ko.expected).toContain('보장 아님');
+    expect(STATUS_LABELS.en.expected).toContain('not guaranteed');
+  });
+
+  it('keeps the unpublished label honest in both locales', () => {
+    expect(STATUS_LABELS.ko.unpublished).toContain('확인 필요');
+    expect(STATUS_LABELS.en.unpublished).toContain('needs checking');
   });
 });

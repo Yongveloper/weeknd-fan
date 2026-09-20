@@ -1,13 +1,17 @@
 ---
 import type { AlbumRecord } from '../../lib/content/contracts';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 
 interface Props {
+  locale: Locale;
   album: AlbumRecord;
   size: 32 | 48 | 72 | 120;
 }
 
-const { album, size } = Astro.props;
+const { locale, album, size } = Astro.props;
 const { title, era, spotifyUrl, cover } = album.data;
+const alt = ui(locale).content.albumCover.alt.replace('{title}', title);
 ---
 
 <a
@@ -23,7 +27,7 @@ const { title, era, spotifyUrl, cover } = album.data;
     src={cover.url}
     width={cover.width}
     height={cover.height}
-    alt={`${title} 앨범 커버 — Spotify에서 열기`}
+    alt={alt}
     loading="lazy"
     decoding="async"
     referrerpolicy="no-referrer"

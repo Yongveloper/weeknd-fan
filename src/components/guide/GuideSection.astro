@@ -42,7 +42,7 @@ const pendingItems = Object.values(strings.pendingItems);
         {pendingItems.map((item) => (
           <li>
             <strong>{item}</strong>
-            <StatusBadge status="unpublished" />
+            <StatusBadge locale={locale} status="unpublished" />
             <span>
               {strings.lastCheckedPrefix}{' '}
               {formatSeoulDate(entry.data.lastVerifiedAt)}
@@ -53,7 +53,7 @@ const pendingItems = Object.values(strings.pendingItems);
     ) : (
       <p class="guide-section__meta">
         {!['official', 'practical'].includes(entry.data.status) && (
-          <StatusBadge status={entry.data.status} />
+          <StatusBadge locale={locale} status={entry.data.status} />
         )}
         <span>
           {strings.lastCheckedPrefix}{' '}
@@ -66,7 +66,7 @@ const pendingItems = Object.values(strings.pendingItems);
   <slot name="lead" />
   <div class="guide-section__body"><Content /></div>
   <slot />
-  <SourceList sources={entrySources} />
+  <SourceList locale={locale} sources={entrySources} />
 </section>
 
 <style>

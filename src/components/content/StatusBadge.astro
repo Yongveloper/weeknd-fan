@@ -1,14 +1,16 @@
 ---
 import { STATUS_LABELS, type TrustStatus } from '../../lib/content/contracts';
+import type { Locale } from '../../lib/i18n/locales';
 
 interface Props {
+  locale: Locale;
   status: TrustStatus;
 }
 
-const { status } = Astro.props;
+const { locale, status } = Astro.props;
 ---
 
-<span class="status" data-status={status}>{STATUS_LABELS[status]}</span>
+<span class="status" data-status={status}>{STATUS_LABELS[locale][status]}</span>
 
 <style>
   .status {

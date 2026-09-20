@@ -12,6 +12,8 @@ import {
   resolveSourceReferences,
 } from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
@@ -35,40 +37,57 @@ const { Content: VisualContent } = await render(visual);
 const introSources = resolveSourceReferences(intro.data.sources, sources);
 const glossarySources = resolveSourceReferences(glossary.data.sources, sources);
 const visualSources = resolveSourceReferences(visual.data.sources, sources);
+const strings = ui(locale).discover;
+const pageTitle = strings.page.title.replaceAll('{artist}', ARTIST);
+const pageDescription = strings.page.description.replace('{artist}', ARTIST);
+// The artist name and the emphasized phrase each keep their own styled span,
+// so split the sentence around both slots instead of assembling it from
+// translated fragments.
+const [heroBeforeArtist = '', heroAfterArtist = ''] =
+  strings.hero.heading.split('{artist}');
+const [heroBeforePhrase = '', heroAfterPhrase = ''] =
+  heroAfterArtist.split('{phrase}');
+const [albumsNoteBeforeTrilogy = '', albumsNoteAfterTrilogy = ''] =
+  strings.albums.note.split('{trilogy}');
+const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
+  albumsNoteAfterTrilogy.split('{mdm}');
 ---
 
 <BaseLayout
   locale={locale}
   cloudSky
   coverCdn
-  title="The Weeknd 알기 | The Weeknd 고양 팬 가이드"
-  description="공연 전 3분에 훑는 The Weeknd의 커리어, 앨범 구분, 그리고 두 3부작"
+  title={pageTitle}
+  description={pageDescription}
 >
   <article class="discover shell-content">
     <header class="discover__hero">
       <p class="eyebrow">THREE MINUTES BEFORE THE SHOW</p>
       <h1>
-        <span class="latin">The Weeknd</span>를
-        <span class="discover__hero-phrase">한 장씩</span> 넘겨 보기
+        {heroBeforeArtist}<span class="latin">{ARTIST}</span>{
+          heroBeforePhrase
+        }<span class="discover__hero-phrase">{strings.hero.phrase}</span>{
+          heroAfterPhrase
+        }
       </h1>
       <p>{intro.data.summary}</p>
       <Disclosure
-        ariaLabel="3분 입문 더 깊이 보기"
-        label="3분 입문 펼쳐보기"
+        ariaLabel={strings.hero.introDisclosureAriaLabel}
+        label={strings.hero.introDisclosureLabel}
         class="discover__disclosure"
       >
         <IntroContent />
-        <SourceList sources={introSources} />
+        <SourceList locale={locale} sources={introSources} />
       </Disclosure>
     </header>
 
     <section class="discover__albums" aria-labelledby="studio-albums-title">
-      <h2 id="studio-albums-title">정규 앨범 6장</h2>
-      <ol aria-label="정규 앨범 6장" data-enter-group>
+      <h2 id="studio-albums-title">{strings.albums.heading}</h2>
+      <ol aria-label={strings.albums.heading} data-enter-group>
         {
           studioAlbums.map((album) => (
             <li>
-              <AlbumCover album={album} size={72} />
+              <AlbumCover locale={locale} album={album} size={72} />
               <span>
                 {album.data.year} · <em>{album.data.title}</em>
               </span>
@@ -77,17 +96,22 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         }
       </ol>
       <p>
-        2011년 세 믹스테이프, 2012년 <em>Trilogy</em> 컴필레이션, 2018년 <em
+        {albumsNoteBeforeTrilogy}<em>Trilogy</em>{albumsNoteBeforeMdm}<em
           >My Dear Melancholy,</em
-        > EP는 이 여섯 장과 따로 센다.
+        >{albumsNoteAfterMdm}
       </p>
     </section>
 
-    <TrilogyExplainer albums={albums} />
+    <TrilogyExplainer locale={locale} albums={albums} />
 
     <section class="discover__timeline" aria-labelledby="timeline-title">
-      <h2 id="timeline-title">연표는 가볍게, 필요하면 더 깊게</h2>
-      <CareerTimeline entries={eras} sources={sources} albums={albums} />
+      <h2 id="timeline-title">{strings.timeline.heading}</h2>
+      <CareerTimeline
+        locale={locale}
+        entries={eras}
+        sources={sources}
+        albums={albums}
+      />
     </section>
 
     <section class="discover__closing" aria-labelledby="glossary-title">
@@ -95,24 +119,24 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
         <h2 id="glossary-title">{glossary.data.title}</h2>
         <p>{glossary.data.summary}</p>
         <Disclosure
-          ariaLabel="용어 한 장 더 깊이 보기"
-          label="더 깊이 보기"
+          ariaLabel={strings.glossary.disclosureAriaLabel}
+          label={strings.disclosureLabel}
           class="discover__disclosure"
         >
           <GlossaryContent />
-          <SourceList sources={glossarySources} />
+          <SourceList locale={locale} sources={glossarySources} />
         </Disclosure>
       </div>
       <div>
         <h2>{visual.data.title}</h2>
         <p>{visual.data.summary}</p>
         <Disclosure
-          ariaLabel="보는 음악 더 깊이 보기"
-          label="더 깊이 보기"
+          ariaLabel={strings.visual.disclosureAriaLabel}
+          label={strings.disclosureLabel}
           class="discover__disclosure"
         >
           <VisualContent />
-          <SourceList sources={visualSources} />
+          <SourceList locale={locale} sources={visualSources} />
         </Disclosure>
       </div>
     </section>
@@ -192,7 +216,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
   }
 
   .discover__albums ol {
-    --enter-stagger: 90ms; /* 6장이 한 장씩 읽히도록 기본 60ms보다 넉넉히 */
+    --enter-stagger: 90ms; /* Generous over the 60ms default so all six read one at a time */
 
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

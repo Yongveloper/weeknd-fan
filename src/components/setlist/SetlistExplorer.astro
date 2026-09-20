@@ -12,8 +12,11 @@ import type {
 } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
 import { resolveSourceReferences } from '../../lib/content/queries';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 
 interface Props {
+  locale: Locale;
   entries: SetlistRecord[];
   showRecords: ShowRecord[];
   sources: SourceRecord[];
@@ -21,10 +24,15 @@ interface Props {
   albums: AlbumRecord[];
 }
 
-const { entries, showRecords, sources, archivePublished, albums } = Astro.props;
+const { locale, entries, showRecords, sources, archivePublished, albums } =
+  Astro.props;
+const strings = ui(locale).setlist.explorer;
 const twoDigits = (value: number) => String(value).padStart(2, '0');
 const dayLabel = (showDate: string) =>
-  showDate.endsWith('-07') ? '1일차 공연 후 확인' : '2일차 공연 후 확인';
+  strings.dayVerified.replace('{day}', showDate.endsWith('-07') ? '1' : '2');
+const countShown = (
+  entries.length === 1 ? strings.countShown.one : strings.countShown.other
+).replace('{count}', String(entries.length));
 const albumsInSetlist = [
   ...new Set(entries.map((entry) => entry.data.album)),
 ].sort((left, right) => left.localeCompare(right));
@@ -38,7 +46,7 @@ const hasEssentialSet =
     showRecords.length > 0 && (
       <section class="actual-setlist" aria-labelledby="actual-setlist-title">
         <p class="eyebrow">POST-SHOW RECORD</p>
-        <h2 id="actual-setlist-title">공연 후 확인된 셋리스트</h2>
+        <h2 id="actual-setlist-title">{strings.actualHeading}</h2>
         {showRecords.map((record) => (
           <article>
             <div class="actual-setlist__heading">
@@ -47,7 +55,7 @@ const hasEssentialSet =
                   ? record.data.showDate
                   : dayLabel(record.data.showDate)}
               </h3>
-              <StatusBadge status={record.data.status} />
+              <StatusBadge locale={locale} status={record.data.status} />
             </div>
             <ol>
               {record.data.songs
@@ -61,6 +69,7 @@ const hasEssentialSet =
                 ))}
             </ol>
             <SourceList
+              locale={locale}
               sources={resolveSourceReferences(record.data.sources, sources)}
             />
           </article>
@@ -69,22 +78,22 @@ const hasEssentialSet =
     )
   }
 
-  <section class="expected-setlist" aria-label="예상 셋리스트 곡 목록">
+  <section class="expected-setlist" aria-label={strings.expectedListAriaLabel}>
     <form class="setlist-filter" data-setlist-filter hidden>
       <label class="setlist-filter__search">
-        <span>곡 검색</span>
+        <span>{strings.searchLabel}</span>
         <input
           type="search"
           name="q"
           data-setlist-query
-          placeholder="곡 제목으로 찾기"
+          placeholder={strings.searchPlaceholder}
           autocomplete="off"
         />
       </label>
       <label class="setlist-filter__album">
-        <span>앨범으로 고르기</span>
+        <span>{strings.albumFilterLabel}</span>
         <select name="album" data-setlist-album>
-          <option value="">전체 앨범</option>
+          <option value="">{strings.allAlbumsOption}</option>
           {
             albumsInSetlist.map((album) => (
               <option value={album}>{album}</option>
@@ -94,16 +103,19 @@ const hasEssentialSet =
       </label>
       {
         hasEssentialSet && (
-          <div class="setlist-filter__views" aria-label="목록 보기">
+          <div
+            class="setlist-filter__views"
+            aria-label={strings.viewsAriaLabel}
+          >
             <button type="button" data-setlist-view="all" aria-pressed="true">
-              전체
+              {strings.viewAll}
             </button>
             <button
               type="button"
               data-setlist-view="essential"
               aria-pressed="false"
             >
-              3분 핵심 10곡
+              {strings.viewEssential}
             </button>
           </div>
         )
@@ -116,9 +128,9 @@ const hasEssentialSet =
           role="status"
           tabindex="-1"
         >
-          {entries.length}곡 표시
+          {countShown}
         </p>
-        <button type="button" data-setlist-reset>초기화</button>
+        <button type="button" data-setlist-reset>{strings.resetButton}</button>
       </div>
     </form>
     <ol class="expected-setlist__list" data-setlist-list>
@@ -147,34 +159,38 @@ const hasEssentialSet =
                   {(() => {
                     const album = findAlbumByTitle(albums, entry.data.album);
                     return album ? (
-                      <AlbumCover album={album} size={48} />
+                      <AlbumCover locale={locale} album={album} size={48} />
                     ) : null;
                   })()}
                   <span class="song-meta__album">{entry.data.album}</span>
                   <span class="song-meta__pill">
-                    신뢰도 {entry.data.confidence}
+                    {strings.confidenceLabel.replace(
+                      '{level}',
+                      entry.data.confidence,
+                    )}
                   </span>
                 </div>
 
                 <div class="song-block">
                   <p class="eyebrow">BEFORE</p>
-                  <h3>공연 전에 알면 좋은 한 문장</h3>
+                  <h3>{strings.beforeHeading}</h3>
                   <p>{entry.data.summary}</p>
                 </div>
                 <div class="song-block">
                   <p class="eyebrow">ON STAGE</p>
-                  <h3>무대에서 볼 것</h3>
+                  <h3>{strings.onStageHeading}</h3>
                   <p>{entry.data.liveNote}</p>
                 </div>
                 <div class="song-block">
                   <p class="eyebrow">SING ALONG</p>
-                  <h3>떼창 포인트</h3>
+                  <h3>{strings.singAlongHeading}</h3>
                   <p>{entry.data.singAlongNote}</p>
                 </div>
 
                 {entry.data.officialListenUrl && (
                   <div class="song-embed">
                     <OfficialEmbed
+                      locale={locale}
                       url={entry.data.officialListenUrl}
                       songTitle={entry.data.songTitle}
                     />
@@ -182,8 +198,9 @@ const hasEssentialSet =
                 )}
 
                 <div class="song-sources">
-                  <h3>출처</h3>
+                  <h3>{strings.sourcesHeading}</h3>
                   <SourceList
+                    locale={locale}
                     sources={resolveSourceReferences(
                       entry.data.observedIn,
                       sources,
@@ -197,7 +214,7 @@ const hasEssentialSet =
       }
     </ol>
     <p class="setlist-filter__empty" data-setlist-empty hidden>
-      검색 결과가 없습니다.
+      {strings.noResults}
     </p>
   </section>
 </div>

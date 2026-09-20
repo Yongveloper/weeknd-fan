@@ -1,5 +1,6 @@
 ---
 import SetlistExplorer from '../../components/setlist/SetlistExplorer.astro';
+import StatusBadge from '../../components/content/StatusBadge.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import {
@@ -9,6 +10,8 @@ import {
   getShowRecords,
 } from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
@@ -21,17 +24,14 @@ const [concert, entries, showRecords, sources, albums] = await Promise.all([
   getAlbums(),
 ]);
 const archivePublished = concert.data.archivePublished;
-const title = archivePublished
-  ? 'WE WERE HERE | The Weeknd 고양 팬 가이드'
-  : '예상 셋리스트 | The Weeknd 고양 팬 가이드';
+const strings = ui(locale).setlist.page;
+const title = (
+  archivePublished ? strings.titleArchived : strings.titleExpected
+).replaceAll('{artist}', ARTIST);
+const description = strings.description.replace('{artist}', ARTIST);
 ---
 
-<BaseLayout
-  locale={locale}
-  cloudSky
-  title={title}
-  description="최근 2026년 공연 기록을 바탕으로 한 The Weeknd 고양 공연 예상 셋리스트"
->
+<BaseLayout locale={locale} cloudSky title={title} description={description}>
   <section
     class="setlist-page shell-content"
     aria-labelledby="setlist-page-title"
@@ -39,14 +39,13 @@ const title = archivePublished
     <header>
       <p class="eyebrow">EXPECTED SHOW GUIDE</p>
       <h1 id="setlist-page-title">
-        {archivePublished ? '우리는 그곳에 있었다' : '예상 셋리스트'}
+        {archivePublished ? strings.headingArchived : strings.headingExpected}
       </h1>
-      <p>
-        최근 무대의 반복 패턴을 참고한 비공식 예상 순서입니다. 실제 공연은
-        달라질 수 있어요.
-      </p>
+      {!archivePublished && <StatusBadge locale={locale} status="expected" />}
+      <p>{strings.intro}</p>
     </header>
     <SetlistExplorer
+      locale={locale}
       entries={entries}
       showRecords={showRecords}
       sources={sources}

@@ -6,14 +6,21 @@ import type { AlbumRecord, SourceRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
 import { resolveSourceReferences } from '../../lib/content/queries';
 import Disclosure from '../ui/Disclosure.astro';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 interface Props {
+  locale: Locale;
   entries: CollectionEntry<'discover'>[];
   sources: SourceRecord[];
   albums: AlbumRecord[];
 }
 
-const { entries, sources, albums } = Astro.props;
+const { locale, entries, sources, albums } = Astro.props;
+const strings = ui(locale).discover.timeline;
+const discoverStrings = ui(locale).discover;
+const careerAriaLabel = strings.careerAriaLabel.replace('{artist}', ARTIST);
 const renderedEntries = await Promise.all(
   entries.map(async (entry) => ({
     entry,
@@ -26,7 +33,7 @@ const renderedEntries = await Promise.all(
 );
 ---
 
-<ol class="timeline" aria-label="The Weeknd 시대별 커리어">
+<ol class="timeline" aria-label={careerAriaLabel}>
   {
     renderedEntries.map(({ entry, Content, sources: entrySources, covers }) => (
       <li class="timeline__entry">
@@ -37,24 +44,30 @@ const renderedEntries = await Promise.all(
           {covers.length > 0 && (
             <ul
               class="timeline__covers"
-              aria-label={`${entry.data.title} 앨범`}
+              aria-label={strings.coversAriaLabel.replace(
+                '{era}',
+                entry.data.title,
+              )}
             >
               {covers.map((album) => (
                 <li>
-                  <AlbumCover album={album} size={72} />
+                  <AlbumCover locale={locale} album={album} size={72} />
                 </li>
               ))}
             </ul>
           )}
         </div>
         <Disclosure
-          ariaLabel={`${entry.data.title} 더 깊이 보기`}
-          label="더 깊이 보기"
+          ariaLabel={strings.disclosureAriaLabel.replace(
+            '{era}',
+            entry.data.title,
+          )}
+          label={discoverStrings.disclosureLabel}
           class="timeline__disclosure"
         >
           <div class="timeline__detail">
             <Content />
-            <SourceList sources={entrySources} />
+            <SourceList locale={locale} sources={entrySources} />
           </div>
         </Disclosure>
       </li>
@@ -71,8 +84,9 @@ const renderedEntries = await Promise.all(
     list-style: none;
   }
 
-  /* 단일 열: 디스클로저를 오른쪽 auto 열에 두면 패널이 열릴 때 열 너비가 바뀌어
-     왼쪽 요약 전체가 다시 흐른다(PC 레이아웃 시프트). 요약 아래 같은 폭으로 놓는다. */
+  /* Single column: putting the disclosure in a right-hand auto column shifts
+     that column's width when it opens, reflowing the whole left summary
+     (a layout shift on desktop). Keep it below the summary at the same width. */
   .timeline__entry {
     display: grid;
     gap: 1.25rem;

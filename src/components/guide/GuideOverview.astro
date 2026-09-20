@@ -32,7 +32,7 @@ const groups = [
             group.ids.includes(item.id) &&
             !['official', 'practical'].includes(item.status),
         )
-        .map((item) => STATUS_LABELS[item.status]),
+        .map((item) => STATUS_LABELS[locale][item.status]),
     ),
   ],
 }));

@@ -4,6 +4,8 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatSeoulDate } from '../../lib/content/audit';
 import { getSourceUsageIndex } from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
@@ -12,11 +14,14 @@ const [sources, sourceUsage] = await Promise.all([
   getCollection('sources'),
   getSourceUsageIndex(),
 ]);
+const strings = ui(locale).sources;
+const pageTitle = strings.page.title.replace('{artist}', ARTIST);
+const pageDescription = strings.page.description.replace('{artist}', ARTIST);
 const routeLabels = {
-  '/': '홈',
-  '/discover/': 'The Weeknd',
-  '/setlist/': '예상 셋리스트',
-  '/goyang/': '콘서트 가이드',
+  '/': strings.routeLabels.home,
+  '/discover/': ARTIST,
+  '/setlist/': strings.routeLabels.setlist,
+  '/goyang/': strings.routeLabels.goyang,
 } as const;
 const supportingSources = sources.filter(
   (source) => source.data.kind === 'editorial-reference',
@@ -34,7 +39,7 @@ const sourceDate = (source: SourceEntry): Date => {
   }
   return source.data.lastCheckedAt;
 };
-/** One shared date per group keeps 40+ identical "마지막 확인" lines out of the list. */
+/** One shared date per group keeps 40+ identical "last checked" lines out of the list. */
 const sharedCheckedDate = (records: SourceEntry[]) => {
   const dates = new Set(
     records.map((source) => formatSeoulDate(sourceDate(source))),
@@ -48,50 +53,37 @@ const groups: Array<{
   kinds: string[];
 }> = [
   {
-    title: '공식',
-    description:
-      '아티스트·주최·예매처·레이블이 공개한 원문과 예매처 공식 문자 안내입니다.',
+    title: strings.kind.official.title,
+    description: strings.kind.official.description,
     kinds: ['official'],
   },
   {
-    title: '공공 교통',
-    description: '공공시설·철도·버스 확인에 사용하는 공공 서비스입니다.',
+    title: strings.kind['public-agency'].title,
+    description: strings.kind['public-agency'].description,
     kinds: ['public-agency'],
   },
   {
-    title: '공연 기록',
-    description:
-      '최근 공연의 반복 패턴을 비교하는 기록입니다. 공식 확정 정보가 아닙니다.',
+    title: strings.kind['crowd-sourced'].title,
+    description: strings.kind['crowd-sourced'].description,
     kinds: ['crowd-sourced'],
   },
 ];
 
-const checkpoints = [
-  ['Tokyo', '9월 19–20일 이후', '첫 아시아 구성 확인'],
-  ['Jakarta', '9월 26–27일 이후', '게스트 없는 구간과 세트 변화 비교'],
-  ['Singapore', '10월 2–3일 이후', '가장 가까운 비교군 반영'],
-  ['고양 공식 확인', '10월 4–6일', '입장·반입·교통·접근성 공지 최종 확인'],
-  ['고양 1일차 아카이브', '10월 7일 공연 후', '실제 셋리스트 기록'],
-  ['고양 2일차 아카이브', '10월 8일 공연 후', '실제 셋리스트와 차이 기록'],
-] as const;
+const checkpoints = strings.checkpoints.items;
 ---
 
-<BaseLayout
-  locale={locale}
-  title="출처와 업데이트 | The Weeknd 고양 팬 가이드"
-  description="The Weeknd 고양 팬 가이드의 출처, 마지막 확인일, 그리고 공연 전후 업데이트 일정"
->
+<BaseLayout locale={locale} title={pageTitle} description={pageDescription}>
   <article class="sources-page shell-content">
     <header class="sources-page__hero">
       <p class="eyebrow">PROVENANCE / CHECKPOINTS</p>
-      <h1>출처와 업데이트</h1>
-      <p>
-        이 페이지는 정보의 근거와 확인 시점을 짧게 남깁니다. 운영 공지가 없는
-        항목은 추정으로 채우지 않습니다.
-      </p>
+      <h1>{strings.page.heading}</h1>
+      <p>{strings.page.intro}</p>
     </header>
 
-    <section class="sources-page__groups" aria-label="출처 목록">
+    <section
+      class="sources-page__groups"
+      aria-label={strings.page.groupsAriaLabel}
+    >
       {
         groups.map((group) => {
           const records = sources.filter((source) =>
@@ -108,7 +100,7 @@ const checkpoints = [
                 <p>{group.description}</p>
                 {sharedDate && (
                   <p class="source-group__checked">
-                    전체 마지막 확인 {sharedDate}
+                    {strings.allCheckedOn.replace('{date}', sharedDate)}
                   </p>
                 )}
               </div>
@@ -130,14 +122,23 @@ const checkpoints = [
                     )}
                     {!sharedDate && (
                       <span>
-                        {isSmsSource(source) ? '수신일' : '마지막 확인'}{' '}
+                        {isSmsSource(source)
+                          ? strings.receivedLabel
+                          : strings.lastCheckedLabel}{' '}
                         {formatSeoulDate(sourceDate(source))}
                       </span>
                     )}
                     {sourceUsage.get(source.id) && (
                       <div class="source-usage">
-                        <span class="source-usage__label">사용 위치</span>
-                        <ul aria-label={`${source.data.name} 사용 위치`}>
+                        <span class="source-usage__label">
+                          {strings.usedInLabel}
+                        </span>
+                        <ul
+                          aria-label={strings.usedInAriaLabel.replace(
+                            '{name}',
+                            source.data.name,
+                          )}
+                        >
                           {sourceUsage.get(source.id)?.routes.map((route) => (
                             <li>
                               <a href={route}>{routeLabels[route]}</a>
@@ -155,15 +156,14 @@ const checkpoints = [
       }
       <section class="source-group" aria-labelledby="source-group-supporting">
         <div>
-          <h2 id="source-group-supporting">보조 참고</h2>
-          <p>
-            후보와 용어를 찾는 보조 자료이며, 핵심 사실은 위 원문으로 다시
-            확인합니다.
-          </p>
+          <h2 id="source-group-supporting">
+            {strings.kind['editorial-reference'].title}
+          </h2>
+          <p>{strings.kind['editorial-reference'].description}</p>
           {
             supportingDate && (
               <p class="source-group__checked">
-                전체 마지막 확인 {supportingDate}
+                {strings.allCheckedOn.replace('{date}', supportingDate)}
               </p>
             )
           }
@@ -181,14 +181,23 @@ const checkpoints = [
                 )}
                 {!supportingDate && (
                   <span>
-                    {isSmsSource(source) ? '수신일' : '마지막 확인'}{' '}
+                    {isSmsSource(source)
+                      ? strings.receivedLabel
+                      : strings.lastCheckedLabel}{' '}
                     {formatSeoulDate(sourceDate(source))}
                   </span>
                 )}
                 {sourceUsage.get(source.id) && (
                   <div class="source-usage">
-                    <span class="source-usage__label">사용 위치</span>
-                    <ul aria-label={`${source.data.name} 사용 위치`}>
+                    <span class="source-usage__label">
+                      {strings.usedInLabel}
+                    </span>
+                    <ul
+                      aria-label={strings.usedInAriaLabel.replace(
+                        '{name}',
+                        source.data.name,
+                      )}
+                    >
                       {sourceUsage.get(source.id)?.routes.map((route) => (
                         <li>
                           <a href={route}>{routeLabels[route]}</a>
@@ -201,8 +210,10 @@ const checkpoints = [
             ))
           }
           <li>
-            <span class="source-group__reference">나무위키 PDF</span>
-            <span>누락 탐색용·핵심 사실 근거 아님</span>
+            <span class="source-group__reference">
+              {strings.wikiReference.name}
+            </span>
+            <span>{strings.wikiReference.note}</span>
           </li>
         </ul>
       </section>
@@ -213,7 +224,7 @@ const checkpoints = [
       aria-labelledby="checkpoints-title"
     >
       <p class="eyebrow">UPDATE CALENDAR</p>
-      <h2 id="checkpoints-title">다음 확인 지점</h2>
+      <h2 id="checkpoints-title">{strings.checkpoints.heading}</h2>
       <ol>
         {
           checkpoints.map(([place, timing, action]) => (
@@ -226,13 +237,8 @@ const checkpoints = [
           ))
         }
       </ol>
-      <p class="sources-page__note">
-        실제 고양 공연 기록은 양일 모두 확인한 뒤에만 아카이브로 전환합니다.
-      </p>
-      <p class="sources-page__note">
-        앨범 커버는 Spotify CDN에서 직접 불러옵니다(쿠키 없음). 자체
-        저장·재가공하지 않으며 커버를 누르면 Spotify 앨범 페이지로 이동합니다.
-      </p>
+      <p class="sources-page__note">{strings.checkpoints.archiveNote}</p>
+      <p class="sources-page__note">{strings.checkpoints.coverNote}</p>
     </section>
   </article>
 </BaseLayout>

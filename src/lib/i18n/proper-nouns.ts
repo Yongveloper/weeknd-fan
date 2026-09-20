@@ -11,9 +11,20 @@ export const TOUR = 'After Hours Til Dawn';
 
 export type ProperNoun = { latin: string; ko: string };
 
+/** Wayfinding labels: what people actually say and type into a map app. */
 export const VENUE: ProperNoun = {
   latin: 'Goyang Stadium',
   ko: '고양종합운동장',
+};
+
+/**
+ * Structured data: the venue's full name, which distinguishes the main
+ * stadium from the auxiliary one. Its Korean half must equal the audited
+ * content record — a test enforces that so this constant cannot drift.
+ */
+export const VENUE_FULL: ProperNoun = {
+  latin: 'Goyang Sports Complex Main Stadium',
+  ko: '고양종합운동장 주경기장',
 };
 
 export const STATION_DAEHWA: ProperNoun = {
