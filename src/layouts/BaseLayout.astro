@@ -7,6 +7,8 @@ import { wordmark } from '../components/chrome/navigation';
 import BackToTop from '../components/ui/BackToTop.astro';
 import DawnSky from '../components/visual/DawnSky.astro';
 import FilmGrain from '../components/visual/FilmGrain.astro';
+import type { Locale } from '../lib/i18n/locales';
+import { ui } from '../lib/i18n/ui';
 import { headerFontAssets } from '../lib/fonts/headerFontAssets';
 import '../styles/tokens.css';
 import '../styles/global.css';
@@ -15,6 +17,7 @@ import '../styles/back-to-top.css';
 import '../styles/edition.css';
 
 interface Props {
+  locale: Locale;
   title: string;
   description: string;
   ogImage?: string;
@@ -26,6 +29,7 @@ interface Props {
 }
 
 const {
+  locale,
   title,
   description,
   ogImage = '/og/default.jpg',
@@ -34,6 +38,7 @@ const {
   cloudSky = false,
   coverCdn = false,
 } = Astro.props;
+const strings = ui(locale);
 const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
@@ -44,7 +49,7 @@ const preloadSkyTexture = cloudSky || lunarSky;
 ---
 
 <!doctype html>
-<html lang="ko">
+<html lang={locale}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -105,8 +110,8 @@ const preloadSkyTexture = cloudSky || lunarSky;
       )
     }
     {cloudSky && <DawnSky readingOnly />}
-    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
-    <SiteHeader />
+    <a class="skip-link" href="#content">{strings.chrome.skipToContent}</a>
+    <SiteHeader locale={locale} />
     <main
       id="content"
       class:list={{ 'reading-surface': cloudSky }}
@@ -114,7 +119,7 @@ const preloadSkyTexture = cloudSky || lunarSky;
     >
       <slot />
     </main>
-    <SiteFooter />
+    <SiteFooter locale={locale} />
     <BackToTop />
     <FilmGrain cover={lunarSky} />
     <script src="../scripts/reveal.ts"></script>

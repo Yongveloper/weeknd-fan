@@ -21,8 +21,6 @@ import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-void locale;
-
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();
 const albums = await getAlbums();
@@ -39,6 +37,7 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
 ---
 
 <BaseLayout
+  locale={locale}
   title={title}
   description="The Weeknd 2026 고양 공연을 위한 비공식·비영리 팬 가이드"
   spaceSky

@@ -17,10 +17,20 @@ const ROUTES = [
 const failures = [];
 const fail = (where, why) => failures.push(`${where}: ${why}`);
 
+// Allowed bilingual proper nouns and the switcher's own korean label.
+const ALLOWED_KOREAN = ['고양종합운동장', '대화역', '한국어'];
+
+function stripAllowedKorean(fragment) {
+  return ALLOWED_KOREAN.reduce(
+    (text, allowed) => text.replaceAll(allowed, ''),
+    fragment,
+  );
+}
+
 /** `dist/en/goyang/index.html` → { locale: 'en', route: 'goyang/' } */
 function describe(relative) {
   const withoutFile = relative.replace(/index\.html$/, '');
-  if (withoutFile === 'en/' || withoutFile.startsWith('en/'))
+  if (withoutFile.startsWith('en/'))
     return { locale: 'en', route: withoutFile.slice(3) };
   return { locale: 'ko', route: withoutFile };
 }
@@ -52,7 +62,12 @@ for (const file of pages) {
   const relative = path.relative(DIST, file);
   const { locale, route } = describe(relative);
   const html = await readFile(file, 'utf8');
-  const head = html.slice(0, html.indexOf('</head>'));
+  const headEnd = html.indexOf('</head>');
+  if (headEnd === -1) {
+    fail(relative, 'no </head> — cannot check head-only assertions');
+    continue;
+  }
+  const head = html.slice(0, headEnd);
 
   const lang = /<html[^>]*\blang="([^"]+)"/.exec(html)?.[1];
   if (lang !== locale)
@@ -77,11 +92,54 @@ for (const file of pages) {
 
 /** Assertions later tasks extend. Kept separate so each task adds one block. */
 function checkPage({ relative, locale, route, html, fail }) {
-  void relative;
-  void locale;
-  void route;
-  void html;
-  void fail;
+  // Task 4 — chrome
+  const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
+  void main; // unused here; Task 7 reuses this exact binding
+
+  // Only the parts this task localizes. Page <head> metadata and body-level
+  // widgets are translated by tasks 6-9 and are checked at the end of the
+  // phase (Task 10 widens this to the full chrome including <head>).
+  const headerStart = html.indexOf('<header');
+  const headerEnd = html.indexOf('</header>');
+  if (headerStart === -1 || headerEnd === -1) {
+    fail(relative, 'no <header>');
+    return;
+  }
+  const footerStart = html.indexOf('<footer');
+  const footerEnd = html.indexOf('</footer>');
+  if (footerStart === -1 || footerEnd === -1) {
+    fail(relative, 'no <footer>');
+    return;
+  }
+  const header = html.slice(headerStart, headerEnd + 9);
+  const footer = html.slice(footerStart, footerEnd + 9);
+  const skipLink =
+    /<a[^>]*class="skip-link"[^>]*>[\s\S]*?<\/a>/.exec(html)?.[0] ?? '';
+  const chrome = `${header}${footer}${skipLink}`;
+
+  const switcherLinks = [...chrome.matchAll(/<a\b[^>]*>/g)]
+    .map(([tag]) => tag)
+    .filter((tag) => /hreflang="(?:ko|en)"/.test(tag));
+
+  if (switcherLinks.length !== 2)
+    fail(relative, `${switcherLinks.length} locale switcher links, expected 2`);
+
+  for (const tag of switcherLinks) {
+    const target = /hreflang="(ko|en)"/.exec(tag)?.[1];
+    const href = /href="([^"]+)"/.exec(tag)?.[1];
+    const want = target === 'ko' ? `/${route}` : `/en/${route}`;
+    if (href !== want)
+      fail(relative, `${target} switcher points at ${href}, expected ${want}`);
+  }
+
+  const currentTag = switcherLinks.find((tag) =>
+    /aria-current="true"/.test(tag),
+  );
+  if (/hreflang="(ko|en)"/.exec(currentTag ?? '')?.[1] !== locale)
+    fail(relative, 'the switcher does not mark the current locale');
+
+  if (locale === 'en' && /[가-힣]/.test(stripAllowedKorean(chrome)))
+    fail(relative, 'korean text left in the english chrome');
 }
 
 if (failures.length) {

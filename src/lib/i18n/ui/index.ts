@@ -8,7 +8,11 @@ import { ko } from './ko';
  * every leaf to `string` so English may differ from the Korean literal.
  */
 type SameShape<T> = {
-  readonly [K in keyof T]: T[K] extends string ? string : SameShape<T[K]>;
+  readonly [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends object
+      ? SameShape<T[K]>
+      : never;
 };
 
 export type UiStrings = SameShape<typeof ko>;

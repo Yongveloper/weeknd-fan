@@ -10,14 +10,13 @@ import { localeFromParam, localePaths } from '../../../lib/i18n/routes';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-void locale;
-
 const expectedSetlist = await getExpectedSetlist();
 const { version } = getSetlistEditorialMetadata(expectedSetlist);
 const songs = expectedSetlist.map((entry) => entry.data.songTitle);
 ---
 
 <BaseLayout
+  locale={locale}
   title="Setlist Card | The Weeknd 고양 팬 가이드"
   description="브라우저 안에서만 생성하는 The Weeknd 고양 예상 셋리스트 카드"
 >

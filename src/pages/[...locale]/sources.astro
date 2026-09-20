@@ -8,8 +8,6 @@ import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-void locale;
-
 const [sources, sourceUsage] = await Promise.all([
   getCollection('sources'),
   getSourceUsageIndex(),
@@ -79,6 +77,7 @@ const checkpoints = [
 ---
 
 <BaseLayout
+  locale={locale}
   title="출처와 업데이트 | The Weeknd 고양 팬 가이드"
   description="The Weeknd 고양 팬 가이드의 출처, 마지막 확인일, 그리고 공연 전후 업데이트 일정"
 >

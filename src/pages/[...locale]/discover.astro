@@ -16,8 +16,6 @@ import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-void locale;
-
 const discover = await getDiscoverContent();
 const sources = await getCollection('sources');
 const albums = await getAlbums();
@@ -40,6 +38,7 @@ const visualSources = resolveSourceReferences(visual.data.sources, sources);
 ---
 
 <BaseLayout
+  locale={locale}
   cloudSky
   coverCdn
   title="The Weeknd 알기 | The Weeknd 고양 팬 가이드"

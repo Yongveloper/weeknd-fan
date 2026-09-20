@@ -114,7 +114,10 @@ test('every header subset exists and is a fraction of its fontsource slice', () 
     const file = path.join(HEADER_FONT_DIR, entry.file);
     expect(existsSync(file), `${entry.file} missing`).toBe(true);
     expect(statSync(file).size).toBe(entry.bytes);
-    expect(entry.bytes).toBeLessThan(6 * 1024);
+    // The union slice (both locales' nav labels) needs more room than a
+    // single-locale one; 8KiB still keeps each subset a sliver of the
+    // ~15KiB fontsource source slice it's cut from.
+    expect(entry.bytes).toBeLessThan(8 * 1024);
     expect(entry.characters.length).toBeGreaterThan(0);
   }
 });

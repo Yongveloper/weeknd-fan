@@ -17,8 +17,6 @@ import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-void locale;
-
 const [guides, sources] = await Promise.all([
   getGuideContent(),
   getCollection('sources'),
@@ -43,6 +41,7 @@ const overviewItems = jump.map(({ id, label }) => {
 ---
 
 <BaseLayout
+  locale={locale}
   cloudSky
   title="콘서트 가이드 | The Weeknd 고양 팬 가이드"
   description="The Weeknd 2026 고양 공연 당일 가이드 — 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물"

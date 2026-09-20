@@ -1,4 +1,4 @@
-import { DEFAULT_LOCALE, LOCALES, isLocale, type Locale } from './locales';
+import { DEFAULT_LOCALE, LOCALES, isLocale, type Locale } from './locales.ts';
 
 /** Korean keeps the bare root, so only the others carry a path prefix. */
 const PREFIXED = LOCALES.filter((locale) => locale !== DEFAULT_LOCALE);

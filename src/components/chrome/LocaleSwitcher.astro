@@ -1,0 +1,50 @@
+---
+import { LOCALES, type Locale } from '../../lib/i18n/locales';
+import { localeHref, pathWithoutLocale } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale);
+const bare = pathWithoutLocale(Astro.url.pathname);
+const labels: Record<Locale, string> = {
+  ko: strings.chrome.localeKo,
+  en: strings.chrome.localeEn,
+};
+---
+
+<nav class="locale-switcher" aria-label={strings.chrome.localeSwitcher}>
+  <ul>
+    {
+      LOCALES.map((candidate) => (
+        <li>
+          <a
+            hreflang={candidate}
+            href={localeHref(candidate, bare)}
+            lang={candidate}
+            aria-current={candidate === locale ? 'true' : undefined}
+          >
+            {labels[candidate]}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .locale-switcher ul {
+    display: flex;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .locale-switcher a[aria-current='true'] {
+    text-decoration: underline;
+  }
+</style>

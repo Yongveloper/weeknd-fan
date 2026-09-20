@@ -20,11 +20,14 @@ function flatten(value: unknown, prefix = ''): Array<[string, string]> {
 
 describe('ui dictionaries', () => {
   it('exposes the same key set in every locale', () => {
-    const [first, ...rest] = LOCALES.map((locale) =>
+    const keySets = LOCALES.map((locale) =>
       flatten(ui(locale))
         .map(([key]) => key)
         .sort(),
     );
+    const [first, ...rest] = keySets;
+    expect(first).toBeDefined();
+    expect(rest.length).toBeGreaterThan(0);
     for (const keys of rest) expect(keys).toEqual(first);
   });
 

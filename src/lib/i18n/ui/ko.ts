@@ -17,5 +17,10 @@ export const ko = {
     localeSwitcher: '언어',
     localeKo: '한국어',
     localeEn: 'English',
+    homeSuffix: '고양 팬 가이드 홈',
+    disclaimer: '비공식·비영리 팬 가이드',
+    verifiedPrefix: '공식 정보 마지막 확인',
+    siteMap: '사이트 지도',
+    officialTicketNotice: '공식 티켓 공지 보기',
   },
 } as const;

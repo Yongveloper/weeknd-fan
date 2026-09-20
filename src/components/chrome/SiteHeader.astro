@@ -1,8 +1,20 @@
 ---
-import { navigation, wordmark } from './navigation';
+import type { Locale } from '../../lib/i18n/locales';
+import { localeHref } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import LocaleSwitcher from './LocaleSwitcher.astro';
+import { navigationFor, wordmark } from './navigation';
 import Wordmark from './Wordmark.astro';
 
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale);
+const navigation = navigationFor(locale);
 const pathname = Astro.url.pathname;
+const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 ---
 
 <script is:inline>
@@ -13,8 +25,8 @@ const pathname = Astro.url.pathname;
   <div class="shell-content site-header__inner">
     <a
       class="site-header__wordmark"
-      href="/"
-      aria-label={`${wordmark.name} · The Weeknd 고양 팬 가이드 홈`}
+      href={localeHref(locale, '/')}
+      aria-label={homeLabel}
     >
       <span class="site-header__name" aria-hidden="true">
         <Wordmark spread />
@@ -23,11 +35,16 @@ const pathname = Astro.url.pathname;
         >{wordmark.edition}</span
       >
     </a>
-    <nav class="site-header__nav" aria-label="주요 메뉴">
+    <nav class="site-header__nav" aria-label={strings.chrome.primaryMenu}>
       <mobile-navigation>
-        <details aria-label="주요 메뉴" data-disclosure data-motion="fast" open>
-          <summary aria-label="메뉴">
-            메뉴
+        <details
+          aria-label={strings.chrome.primaryMenu}
+          data-disclosure
+          data-motion="fast"
+          open
+        >
+          <summary aria-label={strings.chrome.menu}>
+            {strings.chrome.menu}
             <span class="site-header__menu-icon" aria-hidden="true">
               <span></span>
               <span></span>
@@ -51,6 +68,7 @@ const pathname = Astro.url.pathname;
           </div>
         </details>
       </mobile-navigation>
+      <LocaleSwitcher locale={locale} />
     </nav>
   </div>
 </header>

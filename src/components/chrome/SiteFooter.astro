@@ -1,9 +1,18 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
 import { formatSeoulDate } from '../../lib/content/audit';
 import { getConcert } from '../../lib/content/queries';
-import { footerNavigation } from './navigation';
+import { ui } from '../../lib/i18n/ui';
+import { footerNavigationFor } from './navigation';
 import Wordmark from './Wordmark.astro';
 
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale);
+const footerNavigation = footerNavigationFor(locale);
 const concert = await getConcert();
 const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
 ---
@@ -12,10 +21,13 @@ const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
   <div class="shell-content site-footer__inner" data-enter-group>
     <div>
       <p class="eyebrow"><Wordmark /> / GOYANG 2026</p>
-      <p class="site-footer__disclaimer">비공식·비영리 팬 가이드</p>
-      <p class="site-footer__verified">공식 정보 마지막 확인 {lastVerified}</p>
+      <p class="site-footer__disclaimer">{strings.chrome.disclaimer}</p>
+      <p class="site-footer__verified">
+        {strings.chrome.verifiedPrefix}
+        {lastVerified}
+      </p>
     </div>
-    <nav class="site-footer__nav" aria-label="사이트 지도">
+    <nav class="site-footer__nav" aria-label={strings.chrome.siteMap}>
       <ul>
         {
           footerNavigation.map(({ href, label }) => (
@@ -32,7 +44,8 @@ const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
       target="_blank"
       rel="noreferrer"
     >
-      공식 티켓 공지 보기 <span aria-hidden="true">↗</span>
+      {strings.chrome.officialTicketNotice}
+      <span aria-hidden="true">↗</span>
     </a>
   </div>
 </footer>
