@@ -1831,6 +1831,64 @@ EOF
 
 ## Task 8: discover·setlist·content·sources 문자열 이관
 
+- [ ] **Step 0: JSON-LD의 공연장 이름을 콘텐츠 기록으로 되돌린다**
+
+Task 5가 `location.name` 을 `concert.data.venue` 에서 `bilingual(VENUE, locale)` 로
+바꾸면서 구조화 데이터가 **감사받은 콘텐츠 기록보다 부정확해졌다.**
+
+```
+src/data/concert/goyang-2026.json  venue: '고양종합운동장 주경기장'
+JSON-LD 현재                        "name":"고양종합운동장"
+```
+
+`주경기장` 이 빠졌다. 이 종합운동장에는 보조경기장도 있어서 구분이 사라졌고, 검색엔진과
+지도 카드가 읽는 값이 사이트가 출처·날짜로 보증한 값과 달라졌다. 더 나쁜 건 공연장 이름이
+신뢰 계약 밖으로 나갔다는 점이다 — 코드 상수는 `lastVerifiedAt` 도 출처도 없다.
+
+짧은 이름은 길찾기 라벨에 필요하므로 둘을 분리한다. `src/lib/i18n/proper-nouns.ts`:
+
+```ts
+/** Wayfinding labels: what people actually say and type into a map app. */
+export const VENUE: ProperNoun = {
+  latin: 'Goyang Stadium',
+  ko: '고양종합운동장',
+};
+
+/**
+ * Structured data: the venue's full name, which distinguishes the main
+ * stadium from the auxiliary one. Its Korean half must equal the audited
+ * content record — a test enforces that so this constant cannot drift.
+ */
+export const VENUE_FULL: ProperNoun = {
+  latin: 'Goyang Sports Complex Main Stadium',
+  ko: '고양종합운동장 주경기장',
+};
+```
+
+`buildEventJsonLd()` 의 `location.name` 을 `bilingual(VENUE_FULL, locale)` 로 바꾼다.
+
+**드리프트 방지 테스트를 신설한다.** `tests/unit/event-json-ld.test.ts` 에 더한다:
+
+```ts
+import concert from '../../src/data/concert/goyang-2026.json';
+import { VENUE_FULL } from '../../src/lib/i18n/proper-nouns';
+
+it('keeps the structured-data venue name equal to the audited content record', () => {
+  expect(VENUE_FULL.ko).toBe(concert.venue);
+});
+```
+
+이 테스트가 이 상수를 다시 신뢰 계약 안으로 끌어온다. 콘텐츠의 `venue` 가 바뀌면
+상수도 같이 바뀌어야 빌드가 통과한다.
+
+```bash
+npm run verify:core
+grep -o '"name":"[^"]*운동장[^"]*"' dist/index.html | head -2
+```
+Expected: `"name":"고양종합운동장 주경기장"` (한국어 라우트), 영어 라우트는 병기형.
+
+
+
 **Files:**
 - Modify: `src/components/discover/CareerTimeline.astro` (6) `TrilogyExplainer.astro` (14)
 - Modify: `src/components/setlist/SetlistExplorer.astro` (18)

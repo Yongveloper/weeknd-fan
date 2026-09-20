@@ -1333,10 +1333,11 @@ EOF
 - **URL·`kind`·`lastCheckedAt` 은 오버레이에 넣지 않는다.**
 
 **`concert` 번역 규칙.**
-- `venue` 는 **오버레이에 넣지 않는다.** Phase 1 Task 5 이후 `concert.data.venue` 를
-  렌더하는 코드가 없다 — 공연장 이름은 `src/lib/i18n/proper-nouns.ts` 의 `VENUE` 에서
-  `bilingual(VENUE, locale)` 로 나온다. 정본 JSON의 `venue` 필드는 스키마가 요구하므로
-  남지만 번역 대상이 아니다.
+- `venue` 는 **오버레이에 넣지 않는다.** 공연장 이름은 `src/lib/i18n/proper-nouns.ts` 의
+  `VENUE`(길찾기 라벨용 짧은 이름)와 `VENUE_FULL`(구조화 데이터용 정식 명칭)에서
+  `bilingual()` 로 나오고, `VENUE_FULL.ko` 는 단위 테스트가 정본 `concert.venue` 와
+  같은지 검사한다. 즉 이미 정본에 묶여 있으므로 오버레이가 중복 관리할 이유가 없다.
+  정본 JSON의 `venue` 필드는 그 테스트의 기준값으로 계속 쓰인다.
 - `ageRestriction` 「만 19세 이상」 → `19 and over (Korean age reckoning)`. 관람객이 오해하면 입장이 막히므로 기준을 명시한다.
 - `shows[].dateLabel` 「2026.10.07 WED」 → `Wed 7 Oct 2026`. 배열 길이는 정본과 같아야 하며(`.length(2)`), 순서도 같다.
 
