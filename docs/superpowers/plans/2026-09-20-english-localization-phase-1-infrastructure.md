@@ -27,6 +27,36 @@
 - 커밋: Conventional Commits, 영어 소문자 subject ≤ 72자. 커밋 메시지 끝에 `Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>` 를 붙인다.
 - 각 태스크 마지막 커밋 전 최소한 `npm run check && npm run lint && npx prettier --check <변경 파일>` 을 통과시킨다.
 
+### `audit:content` 는 이 작업 이전부터 16건 실패한다 — 기준선을 고정한다
+
+2026-09-20 기준 `npm run audit:content` 는 **16건**으로 실패한다. 8개 휘발성 가이드가
+각각 `volatile-content-stale` 과 `volatile-sources-stale` 을 낸다.
+
+```
+guides/10-transport  30-tips-standing  31-tips-seating  32-tips-entry
+guides/33-tips-return  34-tips-packing  40-return  50-packing
+```
+
+원인은 이 작업과 무관하다. 해당 가이드의 `lastVerifiedAt` 이 2026-08-29~09-01이고
+공연(2026-10-07)이 다가오면서 신선도 창을 넘겼다. 콘텐츠를 실제로 재확인해야 풀리는
+문제이며, **날짜를 손으로 올리는 것은 금지다** — 그것이 이 저장소가 막으려는 바로 그
+신뢰 위반이다.
+
+따라서:
+
+- `verify:core` 에 `audit:content` 를 **넣지 않는다.**
+- 대신 각 태스크는 실패 집합이 **커지지 않았는지**만 확인한다:
+
+```bash
+npm run --silent audit:content 2>&1 | grep -c 'volatile-'
+```
+Expected: `16`
+
+```bash
+npm run --silent audit:content 2>&1 | grep 'code":' | grep -cv 'volatile-'
+```
+Expected: `0` — 휘발성 외의 새 코드가 하나라도 생기면 이 작업이 깨뜨린 것이다.
+
 ### 검증 수단: 빌드 산출물 정적 검사. e2e는 쓰지 않는다
 
 `tests/e2e/` 의 13개 스펙은 이 작업 이전부터 관리되지 않아 **현재 전부 실패한다.** 이 계획은 그것을 고치지 않고, 그것에 기대지도 않는다.
@@ -459,10 +489,11 @@ process.stdout.write(`dist i18n ok\t${pages.length} pages\n`);
 
 ```json
     "check:dist": "node scripts/check-dist-i18n.mjs",
-    "verify:core": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run check:dist",
+    "verify:core": "npm run lint && npm run format:check && npm run check && npm run test:unit && npm run build && npm run budget && npm run check:dist",
 ```
 
-> `verify:core` 는 `verify` 에서 `test:e2e` 만 뺀 것이다. 기존 `verify` 는 **지우지 않는다** — e2e 스위트를 나중에 복구할 때 쓸 자리다.
+> `verify:core` 는 `verify` 에서 `test:e2e` 와 `audit:content` 를 뺀 것이다. `audit:content` 는
+> 이 작업 이전부터 16건 실패하므로 별도 기준선 비교로 다룬다(위 절 참조). 기존 `verify` 는 **지우지 않는다** — e2e 스위트를 나중에 복구할 때 쓸 자리다.
 
 - [ ] **Step 3: 실패를 확인한다**
 
@@ -2188,7 +2219,7 @@ npm run preview
 ```bash
 npm run verify:core
 ```
-Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → check:dist
+Expected: PASS — lint → format:check → check → test:unit → build → budget → check:dist
 
 - [ ] **Step 9: 배포 구성을 확인한다**
 

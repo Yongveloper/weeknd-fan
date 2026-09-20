@@ -12,6 +12,10 @@
 
 **전제:** Phase 1(`docs/superpowers/plans/2026-09-20-english-localization-phase-1-infrastructure.md`)이 완료돼 있다. 14개 라우트가 뜨고 UI는 두 로케일, 본문은 한국어다.
 
+**`audit:content` 기준선:** 이 작업 이전부터 16건 실패한다(8개 휘발성 가이드 × 2코드).
+Phase 2가 더하는 번역 규칙은 `auditTranslations()` 단위 테스트와 디스크 기반 계약 테스트로
+따로 검증하므로 이 기준선에 가리지 않는다. 기준선이 **커지면** 이 작업이 깨뜨린 것이다.
+
 **검증 수단:** `tests/e2e/` 의 13개 스펙은 이 작업 이전부터 관리되지 않아 현재 전부 실패한다. **`npm run test:e2e` 와 `npx playwright test` 를 실행하지 않는다.** Phase 1 Task 2에서 만든 `scripts/check-dist-i18n.mjs`(`npm run check:dist`)가 빌드 산출물을 정적으로 검사하고, 게이트는 `npm run verify:core` 다. 레이아웃 확인만 **Playwright MCP** 헤디드 투어로 한다.
 
 ## Global Constraints
@@ -1504,7 +1508,7 @@ mv /tmp/overlay-backup.md src/data/i18n/en/guides/32-tips-entry.md
 ```bash
 npm run verify:core
 ```
-Expected: PASS — lint → format:check → check → audit:content → test:unit → build → budget → check:dist
+Expected: PASS — lint → format:check → check → test:unit → build → budget → check:dist
 
 - [ ] **Step 5: 사이트맵과 배포 구성을 확인한다**
 
