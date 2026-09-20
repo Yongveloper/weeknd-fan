@@ -1,13 +1,19 @@
 ---
-import SetlistExplorer from '../components/setlist/SetlistExplorer.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
+import SetlistExplorer from '../../components/setlist/SetlistExplorer.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import {
   getAlbums,
   getConcert,
   getExpectedSetlist,
   getShowRecords,
-} from '../lib/content/queries';
+} from '../../lib/content/queries';
+import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const [concert, entries, showRecords, sources, albums] = await Promise.all([
   getConcert(),

@@ -1,8 +1,14 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { formatSeoulDate } from '../lib/content/audit';
-import { getSourceUsageIndex } from '../lib/content/queries';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { formatSeoulDate } from '../../lib/content/audit';
+import { getSourceUsageIndex } from '../../lib/content/queries';
+import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const [sources, sourceUsage] = await Promise.all([
   getCollection('sources'),

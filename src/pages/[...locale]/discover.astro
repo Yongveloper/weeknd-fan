@@ -1,16 +1,22 @@
 ---
 import { getCollection, render } from 'astro:content';
-import AlbumCover from '../components/content/AlbumCover.astro';
-import SourceList from '../components/content/SourceList.astro';
-import CareerTimeline from '../components/discover/CareerTimeline.astro';
-import TrilogyExplainer from '../components/discover/TrilogyExplainer.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import Disclosure from '../components/ui/Disclosure.astro';
+import AlbumCover from '../../components/content/AlbumCover.astro';
+import SourceList from '../../components/content/SourceList.astro';
+import CareerTimeline from '../../components/discover/CareerTimeline.astro';
+import TrilogyExplainer from '../../components/discover/TrilogyExplainer.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclosure from '../../components/ui/Disclosure.astro';
 import {
   getAlbums,
   getDiscoverContent,
   resolveSourceReferences,
-} from '../lib/content/queries';
+} from '../../lib/content/queries';
+import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const discover = await getDiscoverContent();
 const sources = await getCollection('sources');

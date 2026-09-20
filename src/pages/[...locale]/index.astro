@@ -1,21 +1,27 @@
 ---
 import { getCollection } from 'astro:content';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import '../styles/eclipse-impact.css';
-import FanNote from '../components/home/FanNote.astro';
-import GuideShortcuts from '../components/home/GuideShortcuts.astro';
-import HomeHero from '../components/home/HomeHero.astro';
-import PamphletContents from '../components/home/PamphletContents.astro';
-import IntroSummary from '../components/home/IntroSummary.astro';
-import SetlistPreview from '../components/home/SetlistPreview.astro';
-import DawnSky from '../components/visual/DawnSky.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import '../../styles/eclipse-impact.css';
+import FanNote from '../../components/home/FanNote.astro';
+import GuideShortcuts from '../../components/home/GuideShortcuts.astro';
+import HomeHero from '../../components/home/HomeHero.astro';
+import PamphletContents from '../../components/home/PamphletContents.astro';
+import IntroSummary from '../../components/home/IntroSummary.astro';
+import SetlistPreview from '../../components/home/SetlistPreview.astro';
+import DawnSky from '../../components/visual/DawnSky.astro';
 import {
   getAlbums,
   getConcert,
   getExpectedSetlist,
   getSetlistEditorialMetadata,
-} from '../lib/content/queries';
-import { buildEventJsonLd, serializeJsonLd } from '../lib/seo/eventJsonLd';
+} from '../../lib/content/queries';
+import { buildEventJsonLd, serializeJsonLd } from '../../lib/seo/eventJsonLd';
+import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const title = 'The Weeknd 고양 팬 가이드';
 const concert = await getConcert();

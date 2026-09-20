@@ -1,7 +1,13 @@
 ---
-import TicketBuilder from '../../components/share/TicketBuilder.astro';
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import { getConcert, getExpectedSetlist } from '../../lib/content/queries';
+import TicketBuilder from '../../../components/share/TicketBuilder.astro';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getConcert, getExpectedSetlist } from '../../../lib/content/queries';
+import { localeFromParam, localePaths } from '../../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const [concert, expectedSetlist] = await Promise.all([
   getConcert(),
