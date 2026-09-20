@@ -330,7 +330,7 @@ npx prettier --write src/lib/i18n tests/unit/i18n-routes.test.ts astro.config.mj
 npm run check && npm run lint
 git add src/lib/i18n tests/unit/i18n-routes.test.ts astro.config.mjs 'src/pages/[...locale]'
 git commit -m "$(cat <<'EOF'
-feat(i18n): add locale primitives and move the guide route under [...locale]
+feat(i18n): add locale primitives, move goyang under [...locale]
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -557,7 +557,7 @@ npx prettier --write 'src/pages' scripts/check-dist-i18n.mjs package.json
 npm run check && npm run lint
 git add src/pages scripts/check-dist-i18n.mjs package.json
 git commit -m "$(cat <<'EOF'
-feat(i18n): route every page through [...locale] and add the dist checker
+feat(i18n): route pages through [...locale], add the dist checker
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -1119,7 +1119,7 @@ npx prettier --write src/components/chrome src/layouts src/lib/i18n src/pages te
 npm run check && npm run lint
 git add src/components/chrome src/layouts src/lib/i18n src/pages src/assets/fonts/header tests
 git commit -m "$(cat <<'EOF'
-feat(chrome): localize the header, footer and skip link, add a locale switcher
+feat(chrome): localize the chrome and add a locale switcher
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -1344,7 +1344,7 @@ npx prettier --write src/lib/seo src/layouts astro.config.mjs tests
 npm run check && npm run lint
 git add src/lib/seo src/layouts astro.config.mjs src/pages tests
 git commit -m "$(cat <<'EOF'
-feat(seo): emit per-locale canonical, hreflang alternates and sitemap entries
+feat(seo): emit per-locale canonical, hreflang and sitemap entries
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -1898,7 +1898,7 @@ npx prettier --write src/components src/lib src/pages tests
 npm run check && npm run lint
 git add src/components src/lib src/pages tests
 git commit -m "$(cat <<'EOF'
-feat(content): localize trust labels and the discover, setlist and sources ui
+feat(content): localize trust labels and the remaining page ui
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
@@ -2059,7 +2059,7 @@ npx prettier --write src tests
 npm run check && npm run lint
 git add src tests
 git commit -m "$(cat <<'EOF'
-feat(share): inject localized copy into the card builders and client scripts
+feat(share): inject localized copy into the builders and scripts
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF

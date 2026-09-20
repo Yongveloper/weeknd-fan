@@ -1047,7 +1047,7 @@ npx prettier --write src tests
 npm run check && npm run lint
 git add src tests
 git commit -m "$(cat <<'EOF'
-feat(audit): fail the build on stale, orphaned or under-cited translations
+feat(audit): fail the build on stale or under-cited translations
 
 Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>
 EOF
