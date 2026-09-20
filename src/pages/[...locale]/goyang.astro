@@ -1,17 +1,23 @@
 ---
 import { getCollection } from 'astro:content';
-import AccessMap from '../components/guide/AccessMap.astro';
-import AccessTable from '../components/guide/AccessTable.astro';
-import DirectionsLinks from '../components/guide/DirectionsLinks.astro';
-import GuideJumpNav from '../components/guide/GuideJumpNav.astro';
-import GuideOverview from '../components/guide/GuideOverview.astro';
-import GuideSection from '../components/guide/GuideSection.astro';
-import LiveMap from '../components/guide/LiveMap.astro';
-import SeatMap from '../components/guide/SeatMap.astro';
-import TipsTabs from '../components/guide/TipsTabs.astro';
-import TransportOperations from '../components/guide/TransportOperations.astro';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { getGuideContent } from '../lib/content/queries';
+import AccessMap from '../../components/guide/AccessMap.astro';
+import AccessTable from '../../components/guide/AccessTable.astro';
+import DirectionsLinks from '../../components/guide/DirectionsLinks.astro';
+import GuideJumpNav from '../../components/guide/GuideJumpNav.astro';
+import GuideOverview from '../../components/guide/GuideOverview.astro';
+import GuideSection from '../../components/guide/GuideSection.astro';
+import LiveMap from '../../components/guide/LiveMap.astro';
+import SeatMap from '../../components/guide/SeatMap.astro';
+import TipsTabs from '../../components/guide/TipsTabs.astro';
+import TransportOperations from '../../components/guide/TransportOperations.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getGuideContent } from '../../lib/content/queries';
+import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+
+export const getStaticPaths = localePaths;
+
+const locale = localeFromParam(Astro.params.locale);
+void locale;
 
 const [guides, sources] = await Promise.all([
   getGuideContent(),

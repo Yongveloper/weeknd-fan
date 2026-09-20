@@ -8,6 +8,12 @@ const publicSiteUrl = resolvePublicSiteUrl(process.env.PUBLIC_SITE_URL);
 export default defineConfig({
   output: 'static',
   site: publicSiteUrl,
+  i18n: {
+    defaultLocale: 'ko',
+    locales: ['ko', 'en'],
+    // Korean keeps the bare root so every shared URL stays valid.
+    routing: { prefixDefaultLocale: false },
+  },
   integrations: [
     ...(publicSiteUrl ? [sitemap()] : []),
     excludeSupersededLunarAssets(),
