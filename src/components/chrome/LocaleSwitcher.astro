@@ -2,6 +2,7 @@
 import { LOCALES, type Locale } from '../../lib/i18n/locales';
 import { localeHref, pathWithoutLocale } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
+import { localeLabels } from './navigation';
 
 interface Props {
   locale: Locale;
@@ -10,10 +11,6 @@ interface Props {
 const { locale } = Astro.props;
 const strings = ui(locale);
 const bare = pathWithoutLocale(Astro.url.pathname);
-const labels: Record<Locale, string> = {
-  ko: strings.chrome.localeKo,
-  en: strings.chrome.localeEn,
-};
 ---
 
 <nav class="locale-switcher" aria-label={strings.chrome.localeSwitcher}>
@@ -27,7 +24,7 @@ const labels: Record<Locale, string> = {
             lang={candidate}
             aria-current={candidate === locale ? 'true' : undefined}
           >
-            {labels[candidate]}
+            {localeLabels[candidate]}
           </a>
         </li>
       ))

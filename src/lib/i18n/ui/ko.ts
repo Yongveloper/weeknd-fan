@@ -15,8 +15,6 @@ export const ko = {
     primaryMenu: '주요 메뉴',
     menu: '메뉴',
     localeSwitcher: '언어',
-    localeKo: '한국어',
-    localeEn: 'English',
     homeSuffix: '고양 팬 가이드 홈',
     disclaimer: '비공식·비영리 팬 가이드',
     verifiedPrefix: '공식 정보 마지막 확인',

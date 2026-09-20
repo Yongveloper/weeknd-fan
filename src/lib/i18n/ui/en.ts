@@ -6,8 +6,6 @@ export const en: UiStrings = {
     primaryMenu: 'Primary',
     menu: 'Menu',
     localeSwitcher: 'Language',
-    localeKo: '한국어',
-    localeEn: 'English',
     homeSuffix: 'Goyang fan guide home',
     disclaimer: 'Unofficial, non-commercial fan guide',
     verifiedPrefix: 'Official info last checked',

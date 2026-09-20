@@ -1,4 +1,4 @@
-import { wordmark } from '../../components/chrome/navigation';
+import { wordmark } from '../../components/chrome/wordmark';
 
 export type DrawCommand =
   | { kind: 'surface'; width: number; height: number }

@@ -93,9 +93,6 @@ for (const file of pages) {
 /** Assertions later tasks extend. Kept separate so each task adds one block. */
 function checkPage({ relative, locale, route, html, fail }) {
   // Task 4 — chrome
-  const main = html.slice(html.indexOf('<main'), html.indexOf('</main>'));
-  void main; // unused here; Task 7 reuses this exact binding
-
   // Only the parts this task localizes. Page <head> metadata and body-level
   // widgets are translated by tasks 6-9 and are checked at the end of the
   // phase (Task 10 widens this to the full chrome including <head>).

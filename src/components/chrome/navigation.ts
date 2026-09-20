@@ -4,13 +4,9 @@ import {
   type Locale,
 } from '../../lib/i18n/locales.ts';
 import { localeHref } from '../../lib/i18n/routes.ts';
+import { wordmark } from './wordmark.ts';
 
-/** Header/footer chrome text. Kept in one place so the header font preload
- *  (src/lib/fonts) can compute exactly which font slices the chrome needs. */
-export const wordmark = {
-  name: 'INTO:DAWN',
-  edition: 'THE WEEKND · GOYANG 26',
-} as const;
+export { wordmark } from './wordmark.ts';
 
 type NavItem = { path: string; label: Record<Locale, string> };
 
@@ -27,6 +23,13 @@ const FOOTER_ONLY: readonly NavItem[] = [
     label: { ko: '출처·업데이트', en: 'Sources & updates' },
   },
 ] as const;
+
+/** Endonyms for the locale switcher — identical in both dictionaries, so
+ *  they live here once instead of duplicated in ui/ko.ts and ui/en.ts. */
+export const localeLabels: Record<Locale, string> = {
+  ko: '한국어',
+  en: 'English',
+};
 
 function resolve(items: readonly NavItem[], locale: Locale) {
   return items.map(({ path, label }) => ({
@@ -52,6 +55,7 @@ export const chromeText = {
     ...LOCALES.flatMap((locale) =>
       [...NAV, ...FOOTER_ONLY].map(({ label }) => label[locale]),
     ),
+    ...LOCALES.map((locale) => localeLabels[locale]),
   ].join(''),
 };
 
