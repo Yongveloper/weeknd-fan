@@ -20,7 +20,7 @@ export default defineConfig({
           sitemap({
             i18n: {
               defaultLocale: 'ko',
-              locales: { ko: 'ko-KR', en: 'en' },
+              locales: { ko: 'ko', en: 'en' },
             },
           }),
         ]

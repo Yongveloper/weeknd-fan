@@ -1,15 +1,28 @@
 ---
 import 'leaflet/dist/leaflet.css';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { VENUE, bilingual } from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.liveMap;
+const venue = bilingual(VENUE, locale);
+const ariaLabel = strings.ariaLabel.replace('{venue}', venue);
+const note = strings.note.replace('{venue}', venue);
 ---
 
-<div class="live-map" role="region" aria-label="고양종합운동장 지도">
+<div class="live-map" role="region" aria-label={ariaLabel}>
   <div class="live-map__canvas" data-venue-map inert aria-hidden="true"></div>
   <p class="live-map__status" role="status" data-map-status>
-    지도가 표시되지 않으면 위 공식 약도와 길찾기 버튼을 이용하세요.
+    {strings.statusFallback}
   </p>
 </div>
 <p class="live-map__note">
-  고양종합운동장 · 지도를 확대하거나 위 길찾기 버튼으로 경로를 확인하세요.
+  {note}
 </p>
 
 <script src="../../scripts/venue-map.ts"></script>

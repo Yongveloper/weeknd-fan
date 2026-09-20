@@ -1,16 +1,22 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { VENUE, bilingual } from '../../lib/i18n/proper-nouns';
 import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
 import { resolveSourceReferences } from '../../lib/content/queries';
 
 interface Props {
+  locale: Locale;
   entries: CollectionEntry<'guides'>[];
   sources: SourceRecord[];
 }
 
-const { entries, sources } = Astro.props;
+const { locale, entries, sources } = Astro.props;
+const strings = ui(locale).guide.tips;
+const intro = strings.intro.replace('{venue}', bilingual(VENUE, locale));
 const panels = await Promise.all(
   entries.map(async (entry) => ({
     entry,
@@ -34,19 +40,17 @@ const latest = entries.reduce(
 >
   <div class="tips__heading">
     <p class="eyebrow">FROM PEOPLE WHO WERE THERE</p>
-    <h2 id="tips-title">현장 팁</h2>
+    <h2 id="tips-title">{strings.heading}</h2>
     <p>
-      고양종합운동장에서 열린 다른 공연의 관람 후기와 기사에서 반복된
-      경험입니다. 이 공연의 운영 공지가 아니며, 공지가 나오면 그 내용이
-      우선합니다.
+      {intro}
     </p>
     <p class="tips__meta">
-      <span>마지막 확인 {formatSeoulDate(latest)}</span>
+      <span>{strings.lastCheckedPrefix} {formatSeoulDate(latest)}</span>
     </p>
   </div>
 
   <tips-tabs class="tips__tabs">
-    <div role="tablist" aria-label="현장 팁 주제">
+    <div role="tablist" aria-label={strings.tablistAriaLabel}>
       {
         panels.map(({ entry }, index) => (
           <button

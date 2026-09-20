@@ -1,18 +1,27 @@
 ---
-const metroAreas = [
-  '잠실역',
-  '서울역',
-  '합정역',
-  '사당역',
-  '강남역',
-  '노원역',
-  '왕십리역',
-  '신도림역',
-  '미금역',
-  '영통역',
-  '부평역',
-];
-const regionalAreas = ['대전', '대구', '전주', '광주', '부산', '천안', '청주'];
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  SHUTTLE_METRO_STOPS,
+  SHUTTLE_REGIONAL_STOPS,
+  STATION_KINTEX,
+  VENUE,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.transport;
+const metroAreas = SHUTTLE_METRO_STOPS.map((stop) => bilingual(stop, locale));
+const regionalAreas = SHUTTLE_REGIONAL_STOPS.map((stop) =>
+  bilingual(stop, locale),
+);
+const shuttleRoute = strings.shuttleRouteTemplate
+  .replace('{kintex}', bilingual(STATION_KINTEX, locale))
+  .replace('{venue}', bilingual(VENUE, locale));
 ---
 
 <section
@@ -20,51 +29,52 @@ const regionalAreas = ['대전', '대구', '전주', '광주', '부산', '천안
   aria-labelledby="transport-operations-title"
 >
   <div class="transport-operations__heading">
-    <p>공식 안내</p>
-    <h3 id="transport-operations-title">공식 교통 운영 안내</h3>
+    <p>{strings.eyebrow}</p>
+    <h3 id="transport-operations-title">{strings.heading}</h3>
   </div>
 
   <div class="transport-operations__parking">
-    <strong>공연장 내부 주차 불가</strong>
+    <strong>{strings.noParkingHeading}</strong>
     <p>
-      공연 당일에는 공연장 내부에 주차할 수 없어 대중교통 이용을 권장합니다.
+      {strings.noParkingBody}
     </p>
   </div>
 
   <div class="transport-operations__option">
-    <h4>유료 순환버스 임시 운영 예정</h4>
+    <h4>{strings.shuttleHeading}</h4>
     <p>
-      <strong>GTX-A 킨텍스역 1번 출구 ↔ 고양종합운동장</strong> 구간에서 운행합니다.
+      <strong>{shuttleRoute}</strong>
+      {strings.shuttleRouteSuffix}
     </p>
     <p class="transport-operations__pending">
-      운행 시간 · 요금 · 배차 간격 · 운동장 승차 위치는 미공개
+      {strings.shuttlePending}
     </p>
   </div>
 
   <div class="transport-operations__option">
-    <h4>카카오 T 유료 셔틀</h4>
+    <h4>{strings.kakaoHeading}</h4>
     <p>
-      수도권 11곳과 지방 7곳에서 출발하는 예약형 셔틀입니다.
+      {strings.kakaoIntro}
       <a href="https://kko.to/NSrfta0uxT" target="_blank" rel="noreferrer"
-        >카카오 T 셔틀 예약 <span aria-hidden="true">↗</span></a
+        >{strings.kakaoReserveLabel} <span aria-hidden="true">↗</span></a
       >
     </p>
     <div class="transport-operations__areas">
       <div>
-        <strong>수도권 11곳</strong>
-        <ul aria-label="카카오 T 셔틀 수도권 출발지">
+        <strong>{strings.metroAreasHeading}</strong>
+        <ul aria-label={strings.metroAreasAriaLabel}>
           {metroAreas.map((area) => <li>{area}</li>)}
         </ul>
       </div>
       <div>
-        <strong>지방 7곳</strong>
-        <ul aria-label="카카오 T 셔틀 지방 출발지">
+        <strong>{strings.regionalAreasHeading}</strong>
+        <ul aria-label={strings.regionalAreasAriaLabel}>
           {regionalAreas.map((area) => <li>{area}</li>)}
         </ul>
       </div>
     </div>
     <p class="transport-operations__detail">
-      자세한 사항은 카카오 T 앱과 예약 전 유의사항에서 확인합니다.
+      {strings.kakaoDetail}
     </p>
   </div>
 </section>

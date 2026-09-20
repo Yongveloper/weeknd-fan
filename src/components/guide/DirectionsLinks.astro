@@ -1,26 +1,40 @@
 ---
-// 좌표 확인: https://en.wikipedia.org/wiki/Goyang_Stadium (37.6763528, 126.7432083), 2026-08-29 확인.
-// 기준값 37.6755 / 126.7448 과의 차이는 위도 0.0009°, 경도 0.0016° 로 허용 범위(±0.003°) 안입니다.
+// Coordinate check: https://en.wikipedia.org/wiki/Goyang_Stadium
+// (37.6763528, 126.7432083), confirmed 2026-08-29.
+// The difference from our 37.6755 / 126.7448 baseline is 0.0009° latitude,
+// 0.0016° longitude — within the ±0.003° tolerance.
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { VENUE } from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.directions;
 const LAT = 37.6764;
 const LNG = 126.7432;
-const NAME = '고양종합운동장';
+// Domestic map apps resolve the korean name reliably; a translated name
+// often does not, so the query param stays korean regardless of locale.
+const NAME = VENUE.ko;
 const links = [
   {
-    label: '카카오맵 길찾기',
+    label: strings.kakaoMapLabel,
     href: `https://map.kakao.com/link/to/${encodeURIComponent(NAME)},${LAT},${LNG}`,
   },
   {
-    label: '네이버지도에서 열기',
+    label: strings.naverMapLabel,
     href: `https://map.naver.com/p/search/${encodeURIComponent(NAME)}`,
   },
   {
-    label: '구글맵 길찾기',
+    label: strings.googleMapLabel,
     href: `https://www.google.com/maps/dir/?api=1&destination=${LAT},${LNG}&travelmode=transit`,
   },
 ];
 ---
 
-<nav class="directions" aria-label="길찾기 앱 열기" data-enter-group>
+<nav class="directions" aria-label={strings.navAriaLabel} data-enter-group>
   {
     links.map((link) => (
       <a href={link.href} target="_blank" rel="noreferrer">

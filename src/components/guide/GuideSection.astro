@@ -2,26 +2,23 @@
 import { render, type CollectionEntry } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
 import { resolveSourceReferences } from '../../lib/content/queries';
 
 interface Props {
+  locale: Locale;
   entry: CollectionEntry<'guides'>;
   sources: SourceRecord[];
 }
 
-const { entry, sources } = Astro.props;
+const { locale, entry, sources } = Astro.props;
+const strings = ui(locale).guide.section;
 const { Content } = await render(entry);
 const entrySources = resolveSourceReferences(entry.data.sources, sources);
-const pendingItems = [
-  '입장 게이트',
-  '반입 금지 물품',
-  '교통 통제',
-  '순환버스 세부 운영',
-  '접근성 지원',
-  '스탠딩·Early Entry 운영',
-];
+const pendingItems = Object.values(strings.pendingItems);
 ---
 
 <section
@@ -41,13 +38,14 @@ const pendingItems = [
 
   {
     entry.data.section === 'pending' ? (
-      <ul class="pending-list" aria-label="공식 발표 대기 항목">
+      <ul class="pending-list" aria-label={strings.pendingAriaLabel}>
         {pendingItems.map((item) => (
           <li>
             <strong>{item}</strong>
             <StatusBadge status="unpublished" />
             <span>
-              마지막 확인 {formatSeoulDate(entry.data.lastVerifiedAt)}
+              {strings.lastCheckedPrefix}{' '}
+              {formatSeoulDate(entry.data.lastVerifiedAt)}
             </span>
           </li>
         ))}
@@ -57,7 +55,10 @@ const pendingItems = [
         {!['official', 'practical'].includes(entry.data.status) && (
           <StatusBadge status={entry.data.status} />
         )}
-        <span>마지막 확인 {formatSeoulDate(entry.data.lastVerifiedAt)}</span>
+        <span>
+          {strings.lastCheckedPrefix}{' '}
+          {formatSeoulDate(entry.data.lastVerifiedAt)}
+        </span>
       </p>
     )
   }
@@ -103,8 +104,9 @@ const pendingItems = [
   .guide-section__body :global(ul) {
     margin: 0;
   }
-  /* "**대화역 3번 출구**로 나오면…" — the bold opener is the scan anchor of each
-     paragraph; color it like the section's h3 so the eye can skip between them. */
+  /* Guide body markdown opens each paragraph with a bold anchor phrase (e.g.
+     "**Exit 3 of Daehwa Station**, then…"); color it like the section's h3
+     so the eye can skip between them. */
   .guide-section__body :global(p > strong:first-child) {
     color: var(--amber);
   }

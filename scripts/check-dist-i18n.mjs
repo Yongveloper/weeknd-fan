@@ -158,6 +158,14 @@ function checkPage({ relative, locale, route, html, fail }) {
   )?.[1];
   if (ogLocale !== (locale === 'ko' ? 'ko_KR' : 'en_US'))
     fail(relative, `og:locale is ${ogLocale}`);
+
+  // Task 6 — guide chrome is translated, the venue keeps its korean original
+  if (route === 'goyang/') {
+    if (!html.includes('고양종합운동장'))
+      fail(relative, 'the venue lost its korean original');
+    if (locale === 'en' && !html.includes('Goyang Stadium · 고양종합운동장'))
+      fail(relative, 'the english venue is not shown bilingually');
+  }
 }
 
 if (failures.length) {

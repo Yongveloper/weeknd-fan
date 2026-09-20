@@ -2,7 +2,6 @@ import type { Locale } from '../i18n/locales';
 import { VENUE, bilingual } from '../i18n/proper-nouns';
 
 interface ConcertForJsonLd {
-  venue: string;
   shows: Array<{ startsAt: string }>;
 }
 

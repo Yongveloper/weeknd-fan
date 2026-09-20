@@ -1,4 +1,6 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
 import { STATUS_LABELS, type TrustStatus } from '../../lib/content/contracts';
 
 interface GuideItem {
@@ -8,15 +10,17 @@ interface GuideItem {
 }
 
 interface Props {
+  locale: Locale;
   items: GuideItem[];
 }
 
-const { items } = Astro.props;
+const { locale, items } = Astro.props;
+const strings = ui(locale).guide.overview;
 const groups = [
-  { label: '도착 전', ids: ['transport', 'packing'] },
-  { label: '입장', ids: ['official', 'pending'] },
-  { label: '관람', ids: ['seating', 'tips'] },
-  { label: '귀가', ids: ['return'] },
+  { label: strings.beforeArrival, ids: ['transport', 'packing'] },
+  { label: strings.entry, ids: ['official', 'pending'] },
+  { label: strings.show, ids: ['seating', 'tips'] },
+  { label: strings.goingHome, ids: ['return'] },
 ].map((group) => ({
   ...group,
   items: group.ids.flatMap((id) => items.filter((item) => item.id === id)),
@@ -34,7 +38,7 @@ const groups = [
 }));
 ---
 
-<nav class="guide-overview" aria-label="당일 행동 요약">
+<nav class="guide-overview" aria-label={strings.summaryAriaLabel}>
   {
     groups.map((group) => (
       <a href={`#${group.ids[0]}`}>

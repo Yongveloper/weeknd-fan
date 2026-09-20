@@ -1,13 +1,18 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
 interface Props {
+  locale: Locale;
   items: Array<{ id: string; label: string }>;
 }
 
-const { items } = Astro.props;
+const { locale, items } = Astro.props;
+const strings = ui(locale).guide.jumpNav;
 ---
 
 <guide-jump-nav class="guide-jump">
-  <nav aria-label="가이드 섹션">
+  <nav aria-label={strings.sectionsAriaLabel}>
     {items.map((item) => <a href={`#${item.id}`}>{item.label}</a>)}
   </nav>
 </guide-jump-nav>

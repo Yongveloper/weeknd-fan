@@ -1,18 +1,41 @@
 ---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  ILSANSEOGU_OFFICE,
+  STATION_DAEHWA,
+  STATION_KINTEX,
+  VENUE,
+  VENUE_ADDRESS,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.accessTable;
+const daehwa = bilingual(STATION_DAEHWA, locale);
+const kintex = bilingual(STATION_KINTEX, locale);
+// The two bus stops join place names with a bare "·" in korean but a spaced
+// " · " in english, matching how `bilingual()` itself formats its own output.
+const stopSeparator = locale === 'ko' ? '·' : ' · ';
+
 const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
 const rows = [
-  { label: '주소', value: ['경기도 고양시 일산서구 중앙로 1601 (대화동)'] },
+  { label: strings.addressLabel, value: [bilingual(VENUE_ADDRESS, locale)] },
   {
-    label: '지하철',
+    label: strings.subwayLabel,
     value: [
-      '3호선 대화역 3번 출구 · 도보 약 3분',
-      'GTX-A 킨텍스역 1번 출구 · 도보 약 20분',
+      strings.subwayDaehwaLine.replaceAll('{daehwa}', daehwa),
+      strings.subwayKintexLine.replaceAll('{kintex}', kintex),
     ],
   },
 ];
 const buses = [
   {
-    stop: '대화역 정류장',
+    stop: daehwa,
     routes: [
       'M7731',
       '55',
@@ -35,7 +58,7 @@ const buses = [
     ],
   },
   {
-    stop: '고양종합운동장·일산서구청 정류장',
+    stop: `${bilingual(VENUE, locale)}${stopSeparator}${bilingual(ILSANSEOGU_OFFICE, locale)}`,
     routes: ['55', '88A', '88B', '999', '1100'],
   },
 ];
@@ -58,11 +81,14 @@ const buses = [
     {
       buses.map((bus) => (
         <div class="access-table__row">
-          <dt>버스 · {bus.stop}</dt>
+          <dt>{strings.busDtLabel.replace('{stop}', bus.stop)}</dt>
           <dd>
             <ul
               class="access-table__routes"
-              aria-label={`${bus.stop} 정차 노선`}
+              aria-label={strings.busRoutesAriaLabel.replace(
+                '{stop}',
+                bus.stop,
+              )}
             >
               {bus.routes.map((route) => (
                 <li>{route}</li>
@@ -74,16 +100,16 @@ const buses = [
     }
   </dl>
   <p class="access-table__source">
-    오는 길 정보 출처:
+    {strings.sourcePrefix}
     <a href={INTERPARK} target="_blank" rel="noreferrer"
-      >인터파크 티켓 공연 상세</a
+      >{strings.sourceLinkLabel}</a
     >
-    <span class="nowrap">(2026-08-29 확인)</span>
+    <span class="nowrap">{strings.confirmedOn}</span>
   </p>
 </div>
 
 <style>
-  /* "(2026-08-29 확인)" would otherwise split at the hyphen on narrow screens */
+  /* The parenthetical confirmation note would otherwise split at the hyphen on narrow screens */
   .nowrap {
     white-space: nowrap;
   }

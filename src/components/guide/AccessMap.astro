@@ -1,7 +1,25 @@
 ---
 import { Picture } from 'astro:assets';
 import accessMap from '../../assets/guide/access-map-interpark.png';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  STATION_DAEHWA,
+  STATION_KINTEX,
+  VENUE,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
 
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.accessMap;
+const alt = strings.alt
+  .replaceAll('{daehwa}', bilingual(STATION_DAEHWA, locale))
+  .replaceAll('{kintex}', bilingual(STATION_KINTEX, locale))
+  .replaceAll('{venue}', bilingual(VENUE, locale));
 const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
 ---
 
@@ -10,7 +28,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
     href={accessMap.src}
     target="_blank"
     rel="noreferrer"
-    aria-label="오는 길 안내 원본 이미지 열기"
+    aria-label={strings.openOriginalAriaLabel}
   >
     <Picture
       src={accessMap}
@@ -18,21 +36,20 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
       sizes="(max-width: 34rem) 100vw, 499px"
       formats={['avif', 'webp']}
       quality={70}
-      alt="인터파크 오는 길 안내. 3호선 대화역과 GTX-A 킨텍스역 사이 격자 도로 위에 고양종합운동장(현대카드 슈퍼콘서트 28 위켄드), 보조경기장, 킨텍스 제1·제2 전시장, 일산백병원, 대화마을 위치를 표시한 약도와 주소·지하철·버스 안내."
+      alt={alt}
     />
   </a>
   <figcaption>
-    오는 길 안내 출처:
+    {strings.sourcePrefix}
     <a href={INTERPARK} target="_blank" rel="noreferrer"
-      >인터파크 티켓 공연 상세</a
+      >{strings.sourceLinkLabel}</a
     >
-    <span class="nowrap">(2026-08-29 확인)</span>. 탭하면 원본 이미지가 새
-    탭에서 열립니다.
+    <span class="nowrap">{strings.confirmedOn}</span>. {strings.opensNewTabNote}
   </figcaption>
 </figure>
 
 <style>
-  /* "(2026-08-29 확인)" would otherwise split at the hyphen on narrow screens */
+  /* The parenthetical confirmation note would otherwise split at the hyphen on narrow screens */
   .nowrap {
     white-space: nowrap;
   }

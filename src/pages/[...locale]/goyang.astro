@@ -13,10 +13,15 @@ import TransportOperations from '../../components/guide/TransportOperations.astr
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getGuideContent } from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
+const strings = ui(locale).guide;
+const pageTitle = strings.page.title.replace('{artist}', ARTIST);
+const pageDescription = strings.page.description.replace('{artist}', ARTIST);
 const [guides, sources] = await Promise.all([
   getGuideContent(),
   getCollection('sources'),
@@ -29,7 +34,7 @@ const jump = [
     label: entry.data.title,
     order: entry.data.order,
   })),
-  { id: 'tips', label: '현장 팁', order: tips[0]?.data.order ?? 30 },
+  { id: 'tips', label: strings.tips.heading, order: tips[0]?.data.order ?? 30 },
 ].sort((a, b) => a.order - b.order);
 const overviewItems = jump.map(({ id, label }) => {
   const entry =
@@ -43,8 +48,8 @@ const overviewItems = jump.map(({ id, label }) => {
 <BaseLayout
   locale={locale}
   cloudSky
-  title="콘서트 가이드 | The Weeknd 고양 팬 가이드"
-  description="The Weeknd 2026 고양 공연 당일 가이드 — 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물"
+  title={pageTitle}
+  description={pageDescription}
 >
   <section
     class="guide-page shell-content"
@@ -52,36 +57,35 @@ const overviewItems = jump.map(({ id, label }) => {
   >
     <header>
       <p class="eyebrow">CONCERT GUIDE</p><h1 id="goyang-guide-title">
-        콘서트 가이드
+        {strings.page.heading}
       </h1><p>
-        확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 두고, 다른 공연
-        후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.
+        {strings.page.intro}
       </p>
     </header>
-    <GuideOverview items={overviewItems} />
+    <GuideOverview locale={locale} items={overviewItems} />
     <div class="guide-body">
-      <GuideJumpNav items={jump} />
+      <GuideJumpNav locale={locale} items={jump} />
       {
         sections.map((entry) => (
           <>
-            <GuideSection entry={entry} sources={sources}>
+            <GuideSection locale={locale} entry={entry} sources={sources}>
               {entry.data.section === 'transport' && (
                 <div class="guide-transport-lead" slot="lead">
-                  <TransportOperations />
-                  <AccessTable />
+                  <TransportOperations locale={locale} />
+                  <AccessTable locale={locale} />
                 </div>
               )}
               {entry.data.section === 'transport' && (
                 <div class="guide-transport">
-                  <AccessMap />
-                  <DirectionsLinks />
-                  <LiveMap />
+                  <AccessMap locale={locale} />
+                  <DirectionsLinks locale={locale} />
+                  <LiveMap locale={locale} />
                 </div>
               )}
-              {entry.data.section === 'seating' && <SeatMap />}
+              {entry.data.section === 'seating' && <SeatMap locale={locale} />}
             </GuideSection>
             {entry.data.section === 'seating' && (
-              <TipsTabs entries={tips} sources={sources} />
+              <TipsTabs locale={locale} entries={tips} sources={sources} />
             )}
           </>
         ))
