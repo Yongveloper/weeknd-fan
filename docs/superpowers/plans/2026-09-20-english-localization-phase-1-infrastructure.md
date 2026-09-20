@@ -885,6 +885,44 @@ npm run build && npm run check:dist
 Expected: 실패 건수가 보강 전과 같다(이 시점 21건). 보강은 동작을 바꾸지 않고
 잘못된 입력에서 침묵하지 않게만 만든다.
 
+사전 타입에도 바닥을 깐다. 지금 `SameShape<T>` 의 else 분기는 문자열이 아닌 잎
+(숫자·불리언)을 만나면 `keyof number` 를 훑으며 조용히 이상한 타입을 만든다. 이 태스크부터
+사전에 문자열 수백 개가 들어오므로, 실수로 문자열 아닌 값을 넣으면 컴파일이 서게 한다.
+
+`src/lib/i18n/ui/index.ts`:
+
+```ts
+type SameShape<T> = {
+  readonly [K in keyof T]: T[K] extends string
+    ? string
+    : T[K] extends object
+      ? SameShape<T[K]>
+      : never;
+};
+```
+
+`tests/unit/i18n-dictionary.test.ts` 의 키 집합 비교가 공허하게 통과하지 않게 막는다.
+현재는 `LOCALES` 가 한 개로 줄면 루프가 돌지 않고도 통과한다:
+
+```ts
+  it('exposes the same key set in every locale', () => {
+    const keySets = LOCALES.map((locale) =>
+      flatten(ui(locale))
+        .map(([key]) => key)
+        .sort(),
+    );
+    const [first, ...rest] = keySets;
+    expect(first).toBeDefined();
+    expect(rest.length).toBeGreaterThan(0);
+    for (const keys of rest) expect(keys).toEqual(first);
+  });
+```
+
+```bash
+npx vitest run tests/unit/i18n-dictionary.test.ts && npm run check
+```
+Expected: PASS, 0 errors.
+
 - [ ] **Step 1: 실패하는 테스트를 쓴다**
 
 `scripts/check-dist-i18n.mjs` 의 `checkPage()` 에 블록을 더한다:
