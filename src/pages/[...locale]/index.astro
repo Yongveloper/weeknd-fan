@@ -29,6 +29,7 @@ const { observationCount } = getSetlistEditorialMetadata(setlist);
 const eventJsonLd = buildEventJsonLd(
   concert.data,
   (Astro.site ?? Astro.url).toString(),
+  locale,
 );
 const sources = await getCollection('sources');
 const officialNoticeUrl = sources.find((source) => source.id === 'nol-notice')

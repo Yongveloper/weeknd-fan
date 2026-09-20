@@ -5,18 +5,17 @@ import {
   serializeJsonLd,
 } from '../../src/lib/seo/eventJsonLd';
 
+const input = {
+  venue: '고양종합운동장 주경기장',
+  shows: [
+    { startsAt: '2026-10-07T19:45:00+09:00' },
+    { startsAt: '2026-10-08T19:45:00+09:00' },
+  ],
+};
+
 describe('buildEventJsonLd', () => {
   it('emits one conservative MusicEvent per Goyang date', () => {
-    const events = buildEventJsonLd(
-      {
-        venue: '고양종합운동장 주경기장',
-        shows: [
-          { startsAt: '2026-10-07T19:45:00+09:00' },
-          { startsAt: '2026-10-08T19:45:00+09:00' },
-        ],
-      },
-      'https://fan-guide.test',
-    );
+    const events = buildEventJsonLd(input, 'https://fan-guide.test', 'ko');
 
     expect(events).toEqual([
       {
@@ -28,12 +27,13 @@ describe('buildEventJsonLd', () => {
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
           '@type': 'Place',
-          name: '고양종합운동장 주경기장',
+          name: '고양종합운동장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
+        inLanguage: 'ko-KR',
       },
       {
         '@context': 'https://schema.org',
@@ -44,12 +44,13 @@ describe('buildEventJsonLd', () => {
         eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
         location: {
           '@type': 'Place',
-          name: '고양종합운동장 주경기장',
+          name: '고양종합운동장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
+        inLanguage: 'ko-KR',
       },
     ]);
   });
@@ -64,11 +65,26 @@ describe('buildEventJsonLd', () => {
       'https://fan-guide.test/',
     );
     expect(
-      buildEventJsonLd(concert, 'https://fan-guide.test/path/')[0]?.url,
+      buildEventJsonLd(concert, 'https://fan-guide.test/path/', 'ko')[0]?.url,
     ).toBe('https://tickets.interpark.com/contents/notice/detail/14180');
-    expect(() => buildEventJsonLd(concert, 'ftp://fan-guide.test')).toThrow(
-      'siteUrl must be an absolute HTTP(S) URL',
-    );
+    expect(() =>
+      buildEventJsonLd(concert, 'ftp://fan-guide.test', 'ko'),
+    ).toThrow('siteUrl must be an absolute HTTP(S) URL');
+  });
+
+  it('declares the rendered language', () => {
+    expect(
+      buildEventJsonLd(input, 'https://fan-guide.test', 'ko')[0]?.inLanguage,
+    ).toBe('ko-KR');
+    expect(
+      buildEventJsonLd(input, 'https://fan-guide.test', 'en')[0]?.inLanguage,
+    ).toBe('en');
+  });
+
+  it('pairs the venue name with its korean original in english', () => {
+    expect(
+      buildEventJsonLd(input, 'https://fan-guide.test', 'en')[0]?.location.name,
+    ).toBe('Goyang Stadium · 고양종합운동장');
   });
 
   it('escapes HTML-significant characters before script injection', () => {

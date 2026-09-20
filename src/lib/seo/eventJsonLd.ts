@@ -1,3 +1,6 @@
+import type { Locale } from '../i18n/locales';
+import { VENUE, bilingual } from '../i18n/proper-nouns';
+
 interface ConcertForJsonLd {
   venue: string;
   shows: Array<{ startsAt: string }>;
@@ -18,6 +21,7 @@ export interface MusicEventJsonLd {
   performer: { '@type': 'MusicGroup'; name: 'The Weeknd' };
   organizer: { '@type': 'Organization'; name: '현대카드' };
   url: 'https://tickets.interpark.com/contents/notice/detail/14180';
+  inLanguage: string;
 }
 
 const eventName = 'The Weeknd: After Hours Til Dawn Tour — Goyang';
@@ -25,6 +29,7 @@ const eventName = 'The Weeknd: After Hours Til Dawn Tour — Goyang';
 export function buildEventJsonLd(
   concert: ConcertForJsonLd,
   siteUrl: string,
+  locale: Locale,
 ): MusicEventJsonLd[] {
   normalizeSiteUrl(siteUrl);
 
@@ -37,12 +42,13 @@ export function buildEventJsonLd(
     eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
     location: {
       '@type': 'Place',
-      name: concert.venue,
+      name: bilingual(VENUE, locale),
       address: 'Goyang-si, Gyeonggi-do, KR',
     },
     performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
     organizer: { '@type': 'Organization', name: '현대카드' },
     url: 'https://tickets.interpark.com/contents/notice/detail/14180',
+    inLanguage: locale === 'ko' ? 'ko-KR' : 'en',
   }));
 }
 

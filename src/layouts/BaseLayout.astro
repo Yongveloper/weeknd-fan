@@ -8,6 +8,7 @@ import BackToTop from '../components/ui/BackToTop.astro';
 import DawnSky from '../components/visual/DawnSky.astro';
 import FilmGrain from '../components/visual/FilmGrain.astro';
 import type { Locale } from '../lib/i18n/locales';
+import { alternateLinks } from '../lib/seo/alternates';
 import { ui } from '../lib/i18n/ui';
 import { headerFontAssets } from '../lib/fonts/headerFontAssets';
 import '../styles/tokens.css';
@@ -43,6 +44,9 @@ const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
 const pageTitle = `${wordmark.name} | ${title}`;
+const alternates = alternateLinks(Astro.url.pathname, site);
+const ogLocale = locale === 'ko' ? 'ko_KR' : 'en_US';
+const ogAlternates = locale === 'ko' ? ['en_US'] : ['ko_KR'];
 // Both sky variants paint the same texture first; it is the LCP element on
 // every page that has a sky (audit 2026-09-18 §3).
 const preloadSkyTexture = cloudSky || lunarSky;
@@ -55,10 +59,21 @@ const preloadSkyTexture = cloudSky || lunarSky;
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {
+      alternates.map(({ hreflang, href }) => (
+        <link rel="alternate" hreflang={hreflang} href={href} />
+      ))
+    }
     <meta property="og:title" content={pageTitle} />
     <meta property="og:site_name" content={wordmark.name} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:locale" content={ogLocale} />
+    {
+      ogAlternates.map((value) => (
+        <meta property="og:locale:alternate" content={value} />
+      ))
+    }
     <meta property="og:url" content={canonical} />
     <meta property="og:image" content={ogImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />

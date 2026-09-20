@@ -2,6 +2,8 @@ import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 
+/* global URL */
+
 const DIST = path.resolve(process.env.CHECK_DIST_ROOT ?? 'dist');
 
 const ROUTES = [
@@ -137,6 +139,25 @@ function checkPage({ relative, locale, route, html, fail }) {
 
   if (locale === 'en' && /[가-힣]/.test(stripAllowedKorean(chrome)))
     fail(relative, 'korean text left in the english chrome');
+
+  // Task 5 — canonical and x-default targets
+  const canonical =
+    /<link[^>]+rel="canonical"[^>]+href="([^"]+)"/.exec(html)?.[1] ?? '';
+  const canonicalPath = new URL(canonical, 'https://placeholder.test').pathname;
+  const wantCanonical = locale === 'ko' ? `/${route}` : `/en/${route}`;
+  if (canonicalPath !== wantCanonical)
+    fail(relative, `canonical is ${canonicalPath}, expected ${wantCanonical}`);
+
+  const xDefault =
+    /<link[^>]+hreflang="x-default"[^>]+href="([^"]+)"/.exec(html)?.[1] ?? '';
+  if (new URL(xDefault, 'https://placeholder.test').pathname !== `/${route}`)
+    fail(relative, 'x-default does not point at the korean route');
+
+  const ogLocale = /<meta[^>]+property="og:locale"[^>]+content="([^"]+)"/.exec(
+    html,
+  )?.[1];
+  if (ogLocale !== (locale === 'ko' ? 'ko_KR' : 'en_US'))
+    fail(relative, `og:locale is ${ogLocale}`);
 }
 
 if (failures.length) {

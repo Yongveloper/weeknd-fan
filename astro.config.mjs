@@ -15,7 +15,16 @@ export default defineConfig({
     routing: { prefixDefaultLocale: false },
   },
   integrations: [
-    ...(publicSiteUrl ? [sitemap()] : []),
+    ...(publicSiteUrl
+      ? [
+          sitemap({
+            i18n: {
+              defaultLocale: 'ko',
+              locales: { ko: 'ko-KR', en: 'en' },
+            },
+          }),
+        ]
+      : []),
     excludeSupersededLunarAssets(),
   ],
   image: {
