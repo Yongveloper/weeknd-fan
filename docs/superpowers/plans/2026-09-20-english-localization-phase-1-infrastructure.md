@@ -2470,8 +2470,13 @@ Expected: PASS. **실제 배포는 하지 않는다.**
 grep -rn '[가-힣]' src/components src/scripts src/pages src/layouts src/lib \
   | grep -v 'src/lib/i18n/ui/ko.ts' \
   | grep -v 'src/lib/i18n/proper-nouns.ts' \
-  | grep -v 'src/lib/content/contracts.ts'
+  | grep -v 'src/lib/content/contracts.ts' \
+  | grep -v 'src/components/chrome/navigation.ts'
 ```
+
+> 네 번째 예외가 필요한 이유: `navigation.ts` 의 `NAV`·`FOOTER_ONLY`·`localeLabels` 는
+> 이미 `{ ko, en }` 로 키잉된 정당한 사전이다. 사전 파일이 아니라서 목록에 빠졌을 뿐이다.
+> **이 목록에 예외를 더 늘려 통과시키지 않는다** — 걸린 문자열은 사전으로 옮긴다.
 Expected: 0건. 남은 것이 있으면 사전으로 옮긴다.
 
 - [ ] **Step 11: 커밋**
