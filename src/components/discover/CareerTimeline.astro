@@ -58,6 +58,7 @@ const renderedEntries = await Promise.all(
           )}
         </div>
         <Disclosure
+          locale={locale}
           ariaLabel={strings.disclosureAriaLabel.replace(
             '{era}',
             entry.data.title,

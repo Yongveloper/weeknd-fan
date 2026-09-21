@@ -1,5 +1,5 @@
 ---
-import { DEFAULT_LOCALE, type Locale } from '../../lib/i18n/locales';
+import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
   id?: string;
   open?: boolean;
   class?: string;
-  locale?: Locale;
+  locale: Locale;
 }
 
 type DisclosureMotion = 'scene' | 'fast' | 'none';
@@ -23,11 +23,12 @@ const {
   id,
   open = false,
   class: className,
-  locale = DEFAULT_LOCALE,
+  locale,
 } = Astro.props;
 const hasSummarySlot = Astro.slots.has('summary');
-// Callers that don't yet pass a locale keep the korean default via
-// DEFAULT_LOCALE, so their rendered output is unchanged.
+// `locale` is required: the open-state label is swapped in by
+// scripts/disclosure.ts, so a defaulted locale would ship korean to an
+// english reader in a place no dist check can see.
 const resolvedOpenLabel = openLabel ?? ui(locale).ui.collapse;
 ---
 

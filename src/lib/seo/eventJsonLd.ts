@@ -60,7 +60,7 @@ export function buildEventJsonLd(
       name: ORGANIZER_NAME[locale],
     },
     url: 'https://tickets.interpark.com/contents/notice/detail/14180',
-    inLanguage: locale === 'ko' ? 'ko-KR' : 'en',
+    inLanguage: locale,
   }));
 }
 

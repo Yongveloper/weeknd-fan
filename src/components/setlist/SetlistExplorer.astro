@@ -144,7 +144,11 @@ const hasEssentialSet =
             data-song-album={entry.data.album}
             data-essential-order={entry.data.essentialOrder ?? ''}
           >
-            <Disclosure motion="fast" class="expected-setlist__item">
+            <Disclosure
+              locale={locale}
+              motion="fast"
+              class="expected-setlist__item"
+            >
               <span slot="summary" class="expected-setlist__song">
                 {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
               </span>

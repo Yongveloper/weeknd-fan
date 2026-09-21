@@ -37,6 +37,14 @@ describe('ui dictionaries', () => {
         expect(value.trim(), `${locale}.${key}`).not.toBe('');
   });
 
+  it('keeps korean out of the english dictionary', () => {
+    // The only source-level net for this. A korean string reaching an english
+    // page inside <main>, or into a json-ld attribute, is invisible to
+    // check:dist — which reads rendered text outside <main>.
+    for (const [key, value] of flatten(ui('en')))
+      expect(value, `en.${key}`).not.toMatch(/[가-힣]/);
+  });
+
   it('never embeds the artist or tour name in a dictionary value', () => {
     for (const locale of LOCALES)
       for (const [key, value] of flatten(ui(locale))) {

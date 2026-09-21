@@ -18,7 +18,16 @@ const { locale, entry, sources } = Astro.props;
 const strings = ui(locale).guide.section;
 const { Content } = await render(entry);
 const entrySources = resolveSourceReferences(entry.data.sources, sources);
-const pendingItems = Object.values(strings.pendingItems);
+// Listed rather than Object.values(): the dictionary key-set test sorts its
+// keys, so a reorder in en.ts would silently reorder the rendered list.
+const pendingItems = [
+  strings.pendingItems.entryGate,
+  strings.pendingItems.prohibitedItems,
+  strings.pendingItems.trafficControl,
+  strings.pendingItems.shuttleOperations,
+  strings.pendingItems.accessibilitySupport,
+  strings.pendingItems.standingEarlyEntry,
+];
 ---
 
 <section

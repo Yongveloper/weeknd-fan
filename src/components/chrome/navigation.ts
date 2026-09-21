@@ -1,8 +1,4 @@
-import {
-  DEFAULT_LOCALE,
-  LOCALES,
-  type Locale,
-} from '../../lib/i18n/locales.ts';
+import { LOCALES, type Locale } from '../../lib/i18n/locales.ts';
 import { localeHref } from '../../lib/i18n/routes.ts';
 import { wordmark } from './wordmark.ts';
 
@@ -58,5 +54,3 @@ export const chromeText = {
     ...LOCALES.map((locale) => localeLabels[locale]),
   ].join(''),
 };
-
-export const navigation = navigationFor(DEFAULT_LOCALE);

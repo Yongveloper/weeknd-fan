@@ -19,8 +19,12 @@ const ROUTES = [
 const failures = [];
 const fail = (where, why) => failures.push(`${where}: ${why}`);
 
-// Allowed bilingual proper nouns and the switcher's own korean label.
-const ALLOWED_KOREAN = ['고양종합운동장', '대화역', '한국어'];
+// The locale switcher names korean in korean on every page, including the
+// english ones. Nothing else korean is allowed outside <main>. Bilingual
+// proper nouns are not listed here: they render inside <main>, which the
+// chrome check already excludes. Add to this list only for a string that a
+// failing run actually names.
+const ALLOWED_KOREAN = ['한국어'];
 
 function stripAllowedKorean(fragment) {
   return ALLOWED_KOREAN.reduce(
@@ -49,15 +53,24 @@ async function walk(dir) {
 
 const pages = await walk(DIST);
 
-// 1. Every route exists in both locales, and only there.
-for (const route of ROUTES) {
-  for (const prefix of ['', 'en/']) {
-    const expected = path.join(DIST, prefix, route, 'index.html');
-    if (!pages.includes(expected)) fail(`${prefix}${route}`, 'route missing');
-  }
-}
-if (pages.some((file) => path.relative(DIST, file).startsWith('en/en/')))
-  fail('en/en', 'locale prefix doubled');
+// 1. Every route exists in both locales, and nothing else is built.
+// Both halves matter. Without the second, a page added outside the localized
+// route tree ships korean-only with hreflang pointing at a 404, and the
+// checker still exits 0 — the page count is printed, never checked.
+const expectedPages = new Set(
+  ROUTES.flatMap((route) =>
+    ['', 'en/'].map((prefix) => path.join(DIST, prefix, route, 'index.html')),
+  ),
+);
+for (const expected of expectedPages)
+  if (!pages.includes(expected))
+    fail(path.relative(DIST, expected), 'route missing');
+for (const file of pages)
+  if (!expectedPages.has(file))
+    fail(
+      path.relative(DIST, file),
+      'unexpected page — add the route to ROUTES or remove the page',
+    );
 
 // 2-6. Per-page assertions.
 for (const file of pages) {
@@ -171,23 +184,6 @@ function checkPage({ relative, locale, route, html, fail }) {
       fail(relative, 'the english venue is not shown bilingually');
   }
 
-  // Task 7 — the english home carries no korean ui label
-  if (locale === 'en' && route === '') {
-    const mainStart = html.indexOf('<main');
-    const mainEnd = html.indexOf('</main>');
-    if (mainStart === -1 || mainEnd === -1) {
-      fail(relative, 'no <main> — cannot check the content area');
-      return;
-    }
-    const main = html.slice(mainStart, mainEnd);
-    const body = html.slice(html.indexOf('<body'));
-    if (/[가-힣]/.test(stripAllowedKorean(body.replace(main, ''))))
-      fail(
-        relative,
-        'korean text left outside the content area of the english home',
-      );
-  }
-
   // Task 8 — the guarantee disclaimer survives translation
   if (route === 'setlist/') {
     const want =
@@ -206,14 +202,7 @@ function checkPage({ relative, locale, route, html, fail }) {
 
   // Task 9 — the english share builders carry no korean form copy
   if (locale === 'en' && route.startsWith('share/')) {
-    const mainStart = html.indexOf('<main');
-    const mainEnd = html.indexOf('</main>');
-    if (mainStart === -1 || mainEnd === -1) {
-      fail(relative, 'no <main> — cannot check the content area');
-      return;
-    }
-    const main = html.slice(mainStart, mainEnd);
-    if (/[가-힣]/.test(stripAllowedKorean(main)))
+    if (/[가-힣]/.test(stripAllowedKorean(chromeMain)))
       fail(relative, 'korean text left in the english share builder');
   }
 }

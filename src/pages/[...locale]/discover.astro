@@ -72,6 +72,7 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
       </h1>
       <p>{intro.data.summary}</p>
       <Disclosure
+        locale={locale}
         ariaLabel={strings.hero.introDisclosureAriaLabel}
         label={strings.hero.introDisclosureLabel}
         class="discover__disclosure"
@@ -119,6 +120,7 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
         <h2 id="glossary-title">{glossary.data.title}</h2>
         <p>{glossary.data.summary}</p>
         <Disclosure
+          locale={locale}
           ariaLabel={strings.glossary.disclosureAriaLabel}
           label={strings.disclosureLabel}
           class="discover__disclosure"
@@ -131,6 +133,7 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
         <h2>{visual.data.title}</h2>
         <p>{visual.data.summary}</p>
         <Disclosure
+          locale={locale}
           ariaLabel={strings.visual.disclosureAriaLabel}
           label={strings.disclosureLabel}
           class="discover__disclosure"

@@ -83,7 +83,7 @@ export const en: UiStrings = {
       title: 'Concert Guide | {artist} Goyang Fan Guide',
       description:
         "A day-of guide for {artist}'s 2026 Goyang concert — directions, seating, on-site tips, and what to bring home",
-      heading: 'Concert Guide',
+      heading: 'Concert guide',
       intro:
         'An unofficial fan guide that keeps confirmed show details separate from operations not yet announced, and separately flags experiences repeated in reviews of other concerts.',
     },
@@ -138,7 +138,7 @@ export const en: UiStrings = {
       ariaLabel: '{venue} map',
       statusFallback:
         'If the map does not load, use the official sketch map and directions buttons above.',
-      note: '{venue} · Zoom the map or use the directions buttons above to check your route.',
+      note: '{venue} — Zoom the map or use the directions buttons above to check your route.',
       loadingLabel: 'Loading the map…',
       unavailableLabel:
         "The map couldn't load. Use the official sketch map and directions buttons above.",
@@ -174,7 +174,7 @@ export const en: UiStrings = {
         'Operating hours, fare, interval, and the stadium boarding point are unpublished',
       kakaoHeading: 'Kakao T paid shuttle',
       kakaoIntro:
-        'A reservation-based shuttle departing from 11 stops in the Seoul metro area and 7 regional cities.',
+        'A reservation-based shuttle departing from 11 stops in the Seoul metro area and 7 regional stops.',
       kakaoReserveLabel: 'Reserve a Kakao T shuttle',
       metroAreasHeading: '11 Seoul metro area stops',
       metroAreasAriaLabel: 'Kakao T shuttle Seoul metro area departure points',
@@ -196,7 +196,7 @@ export const en: UiStrings = {
       cta: 'Make your own D-day ticket',
     },
     shortcuts: {
-      heading: 'Concert Guide',
+      heading: 'Concert guide',
       navAriaLabel: 'Concert guide shortcuts',
       official: 'Official show information',
       directions: 'Getting there',
@@ -212,10 +212,10 @@ export const en: UiStrings = {
       cta: 'Browse the album timeline',
     },
     setlistPreview: {
-      heading: 'Expected Setlist',
+      heading: 'Expected setlist',
       comparison: {
-        one: 'Compared against 1 show from the 2026 tour',
-        other: 'Compared against {count} shows from the 2026 tour',
+        one: 'Compared against 1 recent 2026 show',
+        other: 'Compared against {count} recent 2026 shows',
       },
       empty:
         "We're still confirming the latest show's lineup. The verified song order will appear here soon.",
@@ -255,7 +255,7 @@ export const en: UiStrings = {
       description:
         "An unofficial expected setlist for {artist}'s Goyang show, based on recent 2026 show records",
       headingArchived: 'We were here',
-      headingExpected: 'Expected Setlist',
+      headingExpected: 'Expected setlist',
       intro:
         'An unofficial expected order based on recurring patterns from recent shows. The actual show may differ.',
     },
@@ -368,8 +368,8 @@ export const en: UiStrings = {
     },
     routeLabels: {
       home: 'Home',
-      setlist: 'Expected Setlist',
-      goyang: 'Concert Guide',
+      setlist: 'Expected setlist',
+      goyang: 'Concert guide',
     },
     kind: {
       official: {

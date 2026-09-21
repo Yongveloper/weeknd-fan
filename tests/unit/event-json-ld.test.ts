@@ -35,7 +35,7 @@ describe('buildEventJsonLd', () => {
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
-        inLanguage: 'ko-KR',
+        inLanguage: 'ko',
       },
       {
         '@context': 'https://schema.org',
@@ -52,7 +52,7 @@ describe('buildEventJsonLd', () => {
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
-        inLanguage: 'ko-KR',
+        inLanguage: 'ko',
       },
     ]);
   });
@@ -77,7 +77,7 @@ describe('buildEventJsonLd', () => {
   it('declares the rendered language', () => {
     expect(
       buildEventJsonLd(input, 'https://fan-guide.test', 'ko')[0]?.inLanguage,
-    ).toBe('ko-KR');
+    ).toBe('ko');
     expect(
       buildEventJsonLd(input, 'https://fan-guide.test', 'en')[0]?.inLanguage,
     ).toBe('en');
