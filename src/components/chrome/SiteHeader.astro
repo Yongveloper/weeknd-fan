@@ -223,7 +223,13 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
     transform: scaleX(1);
   }
 
-  @media (max-width: 44rem) {
+  /* The hamburger has to appear before the menu wraps, not after. The
+     english labels are wider than the korean ones, so the english nav
+     folds to a second row at 872px while korean holds to 780px — both
+     above the old 44rem (704px) threshold, which left a broken band in
+     each locale. 56rem clears the wider of the two with margin. Keep
+     this in step with the matchMedia query below. */
+  @media (max-width: 56rem) {
     .site-header__inner {
       flex-wrap: wrap;
       gap: 1rem;
@@ -383,7 +389,7 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 
 <script>
   class MobileNavigation extends HTMLElement {
-    private readonly mobileQuery = window.matchMedia('(max-width: 44rem)');
+    private readonly mobileQuery = window.matchMedia('(max-width: 56rem)');
     private details: HTMLDetailsElement | null = null;
 
     private synchronizeMenu = () => {
