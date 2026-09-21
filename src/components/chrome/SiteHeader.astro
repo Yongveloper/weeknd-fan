@@ -124,12 +124,16 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
   }
 
   .site-header__nav {
+    display: flex;
     flex: 1 1 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.6rem;
   }
 
   .site-header__nav > mobile-navigation {
     display: block;
-    width: 100%;
+    flex: 1 1 auto;
   }
 
   .site-header__nav details {

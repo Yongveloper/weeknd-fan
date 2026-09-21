@@ -33,15 +33,73 @@ const bare = pathWithoutLocale(Astro.url.pathname);
 </nav>
 
 <style>
+  /* The switcher is a sibling of the primary menu, so it uses the primary
+     menu's vocabulary exactly: same face, size and weight, muted until
+     current, amber bar for the active one. Before this it rendered at the
+     browser default — 16px/400 at full opacity against the nav's
+     13px/700 at 70% — so the secondary control outweighed the primary one,
+     and both links carried the default underline, which made `aria-current`
+     invisible. */
+  .locale-switcher {
+    flex: 0 0 auto;
+    border-inline-start: 1px solid
+      color-mix(in srgb, var(--ivory) 16%, transparent);
+    padding-inline-start: 0.5rem;
+  }
+
   .locale-switcher ul {
     display: flex;
-    gap: 0.75rem;
+    align-items: center;
+    gap: 0.1rem;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  .locale-switcher li {
+    display: flex;
+    align-items: center;
+  }
+
+  .locale-switcher li + li::before {
+    margin-inline-end: 0.1rem;
+    color: var(--ink-muted);
+    content: '·';
+  }
+
+  .locale-switcher a {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-block-size: 44px;
+    padding: 0.45rem 0.45rem;
+    color: var(--ink-muted);
+    font-family: 'Noto Sans KR Header', var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color var(--motion-fast) var(--ease-cinematic);
+  }
+
+  .locale-switcher a::after {
+    position: absolute;
+    inset: auto 0.45rem 0.4rem;
+    height: 2px;
+    background: var(--amber);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--motion-fast) var(--ease-cinematic);
+  }
+
+  .locale-switcher a:hover,
   .locale-switcher a[aria-current='true'] {
-    text-decoration: underline;
+    color: var(--ivory);
+  }
+
+  .locale-switcher a:hover::after,
+  .locale-switcher a:focus-visible::after,
+  .locale-switcher a[aria-current='true']::after {
+    transform: scaleX(1);
   }
 </style>

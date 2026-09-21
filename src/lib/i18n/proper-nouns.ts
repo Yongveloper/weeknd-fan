@@ -83,3 +83,14 @@ export const SHUTTLE_REGIONAL_STOPS: ProperNoun[] = [
 export function bilingual(noun: ProperNoun, locale: Locale): string {
   return locale === DEFAULT_LOCALE ? noun.ko : `${noun.latin} · ${noun.ko}`;
 }
+
+/**
+ * One name only, for fixed-width chips where the bilingual pair cannot fit.
+ * `Gangnam Station · 강남역` is 22 characters in a 71px box, so english broke
+ * mid-word on 11 of the 18 shuttle stops while korean's 3-character `강남역`
+ * never did. The pair still appears in the surrounding prose, which is where
+ * a visitor copies the korean from.
+ */
+export function singleName(noun: ProperNoun, locale: Locale): string {
+  return locale === DEFAULT_LOCALE ? noun.ko : noun.latin;
+}

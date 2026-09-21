@@ -7,6 +7,7 @@ import {
   STATION_KINTEX,
   VENUE,
   bilingual,
+  singleName,
 } from '../../lib/i18n/proper-nouns';
 
 interface Props {
@@ -15,9 +16,9 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.transport;
-const metroAreas = SHUTTLE_METRO_STOPS.map((stop) => bilingual(stop, locale));
+const metroAreas = SHUTTLE_METRO_STOPS.map((stop) => singleName(stop, locale));
 const regionalAreas = SHUTTLE_REGIONAL_STOPS.map((stop) =>
-  bilingual(stop, locale),
+  singleName(stop, locale),
 );
 const shuttleRoute = strings.shuttleRoute
   .replace('{kintex}', bilingual(STATION_KINTEX, locale))
@@ -58,7 +59,7 @@ const shuttleRoute = strings.shuttleRoute
         >{strings.kakaoReserveLabel} <span aria-hidden="true">↗</span></a
       >
     </p>
-    <div class="transport-operations__areas">
+    <div class="transport-operations__areas" data-locale={locale}>
       <div>
         <strong>{strings.metroAreasHeading}</strong>
         <ul aria-label={strings.metroAreasAriaLabel}>
@@ -150,11 +151,22 @@ const shuttleRoute = strings.shuttleRoute
      its label, which left the seventh region alone on a row of its own. */
   .transport-operations__areas ul {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(var(--chip-track), 1fr));
     gap: 0.35rem;
     margin: 0.45rem 0 0;
     padding: 0;
     list-style: none;
+  }
+  /* 4rem fits `강남역`. It does not fit `Gangnam Station`, and the inherited
+     `overflow-wrap: anywhere` — correct for korean, where it pairs with
+     `word-break: keep-all` — shatters the english mid-word instead
+     (`Gangna/m`, `Wangsi/mni`). Widen the track for english; keeping korean
+     at 4rem stops its pills from sitting mostly empty. */
+  .transport-operations__areas {
+    --chip-track: 4rem;
+  }
+  .transport-operations__areas[data-locale='en'] {
+    --chip-track: 7.5rem;
   }
   .transport-operations__areas li {
     text-align: center;
