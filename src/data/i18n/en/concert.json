@@ -1,1 +1,13 @@
-{}
+{
+  "goyang-2026": {
+    "title": "The Weeknd: After Hours Til Dawn Tour — Goyang",
+    "summary": "A Korea tour stop at Goyang Sports Complex Main Stadium · 고양종합운동장 주경기장 on 7–8 October 2026.",
+    "ageRestriction": "Ages 19 and over",
+    "shows": [
+      { "dateLabel": "Wed 7 Oct 2026" },
+      { "dateLabel": "Thu 8 Oct 2026" }
+    ],
+    "sourceHash": "51698299392e7e0b",
+    "translatedAt": "2026-09-21"
+  }
+}

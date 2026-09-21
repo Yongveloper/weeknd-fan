@@ -1,1 +1,227 @@
-{}
+{
+  "apple-music-trilogy": {
+    "name": "Apple Music — Trilogy release details",
+    "sourceHash": "f078bfa3f469e291",
+    "translatedAt": "2026-09-21"
+  },
+  "goyang-bis": {
+    "name": "Goyang City BIS",
+    "sourceHash": "3e8e23f3dfab529d",
+    "translatedAt": "2026-09-21"
+  },
+  "gys-goyang-sports": {
+    "name": "Goyang Urban Management Corporation — Goyang Stadium · 고양종합운동장 facility guide",
+    "sourceHash": "c18afbf1c3cefce4",
+    "translatedAt": "2026-09-21"
+  },
+  "hyundai-card-announcement": {
+    "name": "Hyundai Card — concert announcement",
+    "sourceHash": "4cc897959123feae",
+    "translatedAt": "2026-09-21"
+  },
+  "interpark-goods-26006903": {
+    "name": "Interpark Ticket — Hyundai Card Super Concert 28 The Weeknd event details",
+    "sourceHash": "7b2b198796d8ef72",
+    "translatedAt": "2026-09-21"
+  },
+  "interpark-standing-notice-08004615": {
+    "name": "Interpark — standing-area entry notice for another concert (example)",
+    "sourceHash": "593e7569792ffa2c",
+    "translatedAt": "2026-09-21"
+  },
+  "kakao-t-weeknd-shuttle": {
+    "name": "Kakao T — The Weeknd paid shuttle booking",
+    "sourceHash": "21a7b9b1ed2dbca3",
+    "translatedAt": "2026-09-21"
+  },
+  "korail-metropolitan-map": {
+    "name": "Korea Railroad Corporation (KORAIL) — metropolitan railway map",
+    "sourceHash": "f9eee5de58f0d47d",
+    "translatedAt": "2026-09-21"
+  },
+  "live-nation-goyang": {
+    "name": "Live Nation Korea — Goyang show",
+    "sourceHash": "aeb80684f9076ade",
+    "translatedAt": "2026-09-21"
+  },
+  "namu-goyang-stadium": {
+    "name": "Namuwiki — Goyang Sports Complex Main Stadium · 고양종합운동장 주경기장",
+    "sourceHash": "f1cde9d4e69d8eac",
+    "translatedAt": "2026-09-21"
+  },
+  "news-daum-blackpink-refund": {
+    "name": "Daum News — Blackpink Goyang show sightline dispute refunds (2025-08)",
+    "sourceHash": "23478de3c62d97fe",
+    "translatedAt": "2026-09-21"
+  },
+  "news-ohmynews-2025-04": {
+    "name": "OhmyNews — Coldplay Goyang show, traffic on the ground (2025-04)",
+    "sourceHash": "6a01b342f1993296",
+    "translatedAt": "2026-09-21"
+  },
+  "nol-notice": {
+    "name": "NOL Ticket — official notice",
+    "sourceHash": "3dde461ba5761de3",
+    "translatedAt": "2026-09-21"
+  },
+  "nol-weeknd-transport-sms": {
+    "name": "NOL Ticket — SMS notice",
+    "sourceHash": "cee44a64276747e8",
+    "translatedAt": "2026-09-21"
+  },
+  "republic-echoes-of-silence": {
+    "name": "Republic Records — Echoes of Silence",
+    "sourceHash": "27a1cf9c08235154",
+    "translatedAt": "2026-09-21"
+  },
+  "republic-xo": {
+    "name": "Republic Records — XO and The Weeknd",
+    "sourceHash": "76ebe71829b84dce",
+    "translatedAt": "2026-09-21"
+  },
+  "review-alljoylog-seatview": {
+    "name": "alljoylog — concert review: Goyang Stadium · 고양종합운동장 seat sightlines (updated 2026-05)",
+    "sourceHash": "4d581094a1aeadb3",
+    "translatedAt": "2026-09-21"
+  },
+  "review-clien-bts-2026": {
+    "name": "Clien community review — BTS Goyang show, 3rd-floor seating (2026-04)",
+    "sourceHash": "161f00a33eb0473b",
+    "translatedAt": "2026-09-21"
+  },
+  "review-dcinside-bigbang-2026": {
+    "name": "DCInside community review — Goyang Stadium · 고양종합운동장 viewing tips roundup (2026-08)",
+    "sourceHash": "06a6a67363ab5d59",
+    "translatedAt": "2026-09-21"
+  },
+  "review-lingoculture-guide": {
+    "name": "lingoculture — concert guide: Goyang Stadium · 고양종합운동장 seating and what to bring",
+    "sourceHash": "9250d0622d7bd82e",
+    "translatedAt": "2026-09-21"
+  },
+  "review-moneyroan-bts-parking": {
+    "name": "moneyroan — concert review: BTS Goyang show transit and parking (2026-04)",
+    "sourceHash": "2a03d39889b9f154",
+    "translatedAt": "2026-09-21"
+  },
+  "review-teamblind-return": {
+    "name": "Blind community review — getting home after a Goyang Stadium · 고양종합운동장 show (2025-04)",
+    "sourceHash": "213acf6da552529f",
+    "translatedAt": "2026-09-21"
+  },
+  "review-tndlrs-hero-2026": {
+    "name": "tndlrs — concert review: Lim Young-woong Goyang show entry and prohibited items (2026-07)",
+    "sourceHash": "a579d0d4ed9b8a6e",
+    "translatedAt": "2026-09-21"
+  },
+  "review-vitaria-coldplay-2025": {
+    "name": "vitariaplus — concert review: Coldplay Goyang standing-area, day 1 (2025-04)",
+    "sourceHash": "fc44f6df865532ba",
+    "translatedAt": "2026-09-21"
+  },
+  "setlist-london-2026-08-14": {
+    "name": "setlist.fm — London, 2026-08-14",
+    "sourceHash": "e567bf16f069bdc4",
+    "translatedAt": "2026-09-21"
+  },
+  "setlist-london-2026-08-15": {
+    "name": "setlist.fm — London, 2026-08-15",
+    "sourceHash": "c91f2ece09129f03",
+    "translatedAt": "2026-09-21"
+  },
+  "setlist-manchester-2026-06-12": {
+    "name": "setlist.fm — Manchester, 2026-06-12",
+    "sourceHash": "0d1b6aa80fa4d19d",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-after-hours": {
+    "name": "Spotify — After Hours album",
+    "sourceHash": "2cadfd8063b47bb4",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-beauty-behind-the-madness": {
+    "name": "Spotify — Beauty Behind the Madness album",
+    "sourceHash": "d16e9fe46c4e16ec",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-dawn-fm": {
+    "name": "Spotify — Dawn FM album",
+    "sourceHash": "082ea28924eb07bd",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-echoes-of-silence": {
+    "name": "Spotify — Echoes of Silence album",
+    "sourceHash": "1dc91431e9588435",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-house-of-balloons": {
+    "name": "Spotify — House of Balloons album",
+    "sourceHash": "c4071ea789330d37",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-hurry-up-tomorrow": {
+    "name": "Spotify — Hurry Up Tomorrow album",
+    "sourceHash": "4148b804a4e273e3",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-kiss-land": {
+    "name": "Spotify — Kiss Land album",
+    "sourceHash": "e9797471e36c7605",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-my-dear-melancholy": {
+    "name": "Spotify — My Dear Melancholy, EP release info",
+    "sourceHash": "b6721bd3a47729eb",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-starboy": {
+    "name": "Spotify — Starboy album",
+    "sourceHash": "8da15361265adf0a",
+    "translatedAt": "2026-09-21"
+  },
+  "spotify-thursday": {
+    "name": "Spotify — Thursday album",
+    "sourceHash": "f042e35754f52ce1",
+    "translatedAt": "2026-09-21"
+  },
+  "subway-koreatriptips-daehwa": {
+    "name": "Unofficial subway timetable (koreatriptips) — Daehwa Station · 대화역",
+    "sourceHash": "13e17eda611d4380",
+    "translatedAt": "2026-09-21"
+  },
+  "the-weeknd-tour": {
+    "name": "The Weeknd — official tour",
+    "sourceHash": "3e85fee1a30cdce7",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-abel-tesfaye": {
+    "name": "Universal Music Canada — Abel ‘The Weeknd’ Tesfaye",
+    "sourceHash": "99a2716917dfe291",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-after-hours": {
+    "name": "Universal Music Canada — After Hours release",
+    "sourceHash": "7456ecc9c3daeb80",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-dawn-fm": {
+    "name": "Universal Music Canada — Dawn FM release",
+    "sourceHash": "91b246a0c1df91f0",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-hurry-up-tomorrow": {
+    "name": "Universal Music Canada — Hurry Up Tomorrow release",
+    "sourceHash": "9e4e87d608847893",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-kiss-land": {
+    "name": "Universal Music Canada — Kiss Land announcement",
+    "sourceHash": "e62803ad739c9fba",
+    "translatedAt": "2026-09-21"
+  },
+  "umc-starboy": {
+    "name": "Universal Music Canada — Starboy announcement",
+    "sourceHash": "2bb2c4939c09b4c2",
+    "translatedAt": "2026-09-21"
+  }
+}
