@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 
 interface Props {
   locale: Locale;
@@ -18,7 +19,7 @@ const strings = ui(locale).home.fanNote;
   <div class="shell-content fan-note__inner">
     <h2 id="fan-note-title">{strings.heading}</h2>
     <p>{strings.body}</p>
-    <a class="fan-note__cta" href="/share/ticket/"
+    <a class="fan-note__cta" href={localeHref(locale, '/share/ticket/')}
       >{strings.cta} <span aria-hidden="true">→</span></a
     >
     <p class="fan-note__caption">FROM ONE FAN TO ANOTHER</p>

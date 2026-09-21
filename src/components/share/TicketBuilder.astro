@@ -2,6 +2,7 @@
 import '@fontsource/anton/latin.css';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 interface Props {
@@ -126,7 +127,7 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
         </div>
         <code data-share-url>{shareUrl}</code>
       </div>
-      <a class="share-builder__back" href="/"
+      <a class="share-builder__back" href={localeHref(locale, '/')}
         >{strings.ticket.backLink} <span aria-hidden="true">→</span></a
       >
     </form>

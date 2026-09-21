@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 
 interface Props {
   officialNoticeUrl: string;
@@ -8,13 +9,18 @@ interface Props {
 }
 const { officialNoticeUrl, locale } = Astro.props;
 const strings = ui(locale).home.pamphlet;
+// Only the route links take `localeHref`: the `#…` entries stay on the page
+// they are already on, and the official notice is an external url.
 const chapters = [
   {
     title: strings.chapters.beforeDawn.title,
     links: [
-      ['/discover/#timeline-title', strings.chapters.beforeDawn.albumTimeline],
+      [
+        localeHref(locale, '/discover/#timeline-title'),
+        strings.chapters.beforeDawn.albumTimeline,
+      ],
       ['#setlist', strings.chapters.beforeDawn.setlist],
-      ['/setlist/', strings.chapters.beforeDawn.points],
+      [localeHref(locale, '/setlist/'), strings.chapters.beforeDawn.points],
     ],
   },
   {
@@ -27,8 +33,8 @@ const chapters = [
   {
     title: strings.chapters.keepsake.title,
     links: [
-      ['/share/setlist/', strings.chapters.keepsake.poster],
-      ['/share/ticket/', strings.chapters.keepsake.ticket],
+      [localeHref(locale, '/share/setlist/'), strings.chapters.keepsake.poster],
+      [localeHref(locale, '/share/ticket/'), strings.chapters.keepsake.ticket],
     ],
   },
 ];

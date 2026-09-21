@@ -3,6 +3,7 @@ import Disclosure from '../ui/Disclosure.astro';
 import type { LocalizedSetlist } from '../../lib/content/queries';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 
 interface Props {
   entries: LocalizedSetlist[];
@@ -67,10 +68,12 @@ const comparisonLabel = comparisonTemplate.replace(
         )
       }
     </Disclosure>
-    <a class="setlist-preview__link" href="/setlist/"
+    <a class="setlist-preview__link" href={localeHref(locale, '/setlist/')}
       >{strings.pointsLink} <span aria-hidden="true">→</span></a
     >
-    <a class="setlist-preview__link" href="/share/setlist/"
+    <a
+      class="setlist-preview__link"
+      href={localeHref(locale, '/share/setlist/')}
       >{strings.posterLink} <span aria-hidden="true">→</span></a
     >
   </div>

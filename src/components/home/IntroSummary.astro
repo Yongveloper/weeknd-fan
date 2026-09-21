@@ -4,6 +4,7 @@ import type { AlbumRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 interface Props {
@@ -46,7 +47,7 @@ const [headingBefore = '', headingAfter = ''] =
         ))
       }
     </ul>
-    <a href="/discover/#timeline-title"
+    <a href={localeHref(locale, '/discover/#timeline-title')}
       >{strings.cta} <span aria-hidden="true">→</span></a
     >
   </div>

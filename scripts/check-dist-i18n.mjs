@@ -26,6 +26,9 @@ const fail = (where, why) => failures.push(`${where}: ${why}`);
 // failing run actually names.
 const ALLOWED_KOREAN = ['한국어'];
 
+// Files, not routes: these are served from one place for both editions.
+const ASSET_HREF = /\.(?:png|jpe?g|webp|avif|svg|mp4|xml|txt|ico|json|css|js)$/;
+
 function stripAllowedKorean(fragment) {
   return ALLOWED_KOREAN.reduce(
     (text, allowed) => text.replaceAll(allowed, ''),
@@ -204,6 +207,21 @@ function checkPage({ relative, locale, route, html, fail }) {
   if (locale === 'en' && route.startsWith('share/')) {
     if (/[가-힣]/.test(stripAllowedKorean(chromeMain)))
       fail(relative, 'korean text left in the english share builder');
+  }
+
+  // The chosen locale has to survive a click. An `href="/setlist/"` on an
+  // english page drops the reader back into korean, and every other check here
+  // still passes: the page is english, its alternates are right, its canonical
+  // is right. Only the destination is wrong, so only the link can catch it.
+  // The switcher is exempt by design — pointing at korean is its whole job.
+  if (locale === 'en') {
+    for (const [tag] of html.matchAll(/<a\b[^>]*>/g)) {
+      if (/hreflang="ko"/.test(tag)) continue;
+      const href = /href="([^"]+)"/.exec(tag)?.[1];
+      if (!href || !href.startsWith('/') || href.startsWith('/en/')) continue;
+      if (ASSET_HREF.test(href.split(/[#?]/)[0])) continue;
+      fail(relative, `link leaves the english edition: ${href}`);
+    }
   }
 
   // Phase 2 Task 4 — translated bodies land, untranslated ones say so

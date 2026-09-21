@@ -1,6 +1,7 @@
 ---
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import { localeHref } from '../../lib/i18n/routes';
 
 interface Props {
   locale: Locale;
@@ -9,11 +10,11 @@ interface Props {
 const { locale } = Astro.props;
 const strings = ui(locale).home.shortcuts;
 const shortcuts = [
-  ['/goyang/#official', strings.official],
-  ['/goyang/#transport', strings.directions],
-  ['/goyang/#seating', strings.seating],
-  ['/goyang/#packing', strings.packing],
-  ['/goyang/#return', strings.returning],
+  [localeHref(locale, '/goyang/#official'), strings.official],
+  [localeHref(locale, '/goyang/#transport'), strings.directions],
+  [localeHref(locale, '/goyang/#seating'), strings.seating],
+  [localeHref(locale, '/goyang/#packing'), strings.packing],
+  [localeHref(locale, '/goyang/#return'), strings.returning],
 ] as const;
 ---
 
