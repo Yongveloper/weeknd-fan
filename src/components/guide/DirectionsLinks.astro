@@ -47,9 +47,13 @@ const links = [
 <style>
   /* Equal tracks, so the three buttons never stack at three different widths
      when the row is too narrow to hold two of them. */
+  /* `min(14rem, 100%)` rather than a bare `14rem`: the floor is a rem, so at
+     200% text zoom it becomes 448px and a 320px page scrolls sideways. The
+     `min()` lets the track fall back to the row's own width when the rem no
+     longer fits, which changes nothing at default zoom. */
   .directions {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
     gap: 0.7rem;
   }
   .directions a {

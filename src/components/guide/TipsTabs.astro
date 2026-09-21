@@ -205,6 +205,15 @@ const latest = entries.reduce(
       flex-wrap: wrap;
       overflow: visible;
     }
+    /* The row stops scrolling here and wraps instead, so a tab wider than the
+       row has nowhere to go: `flex: 0 0 auto` holds it at content width and it
+       pushes the page sideways. Korean labels are two or three syllables and
+       never reach that width; english runs to three words, and at 200% text
+       zoom `Seats and Sightlines` is 388px inside a 240px row. Capping the tab
+       at the row width lets the label wrap inside its own pill. */
+    .tips__tabs [role='tab'] {
+      max-width: 100%;
+    }
   }
   .tips__panel {
     display: grid;
