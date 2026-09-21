@@ -221,21 +221,23 @@ function checkPage({ relative, locale, route, html, fail }) {
     fail(relative, 'the fallback notice leaked onto a korean page');
 
   // Every untranslated section carries the notice. Phase 2 Task 10 tightens
-  // this to zero once all 25 overlays exist.
+  // this to zero once all 25 overlays exist. Phase 2 Task 6 already retires
+  // it for goyang/: all 11 guides overlays now exist, so the page that
+  // renders only the guides collection has nothing left to flag.
   if (locale === 'en') {
     const notices = (html.match(NOTICE_ELEMENT) ?? []).length;
-    if (route === 'goyang/' && notices === 0)
-      fail(relative, 'no fallback notice on a page with untranslated sections');
+    if (route === 'goyang/' && notices !== 0)
+      fail(relative, 'a fallback notice remains on a fully translated page');
   }
 
   // Phase 2 Task 4 fix round 1 — an untranslated body is marked lang="ko" so
   // assistive tech doesn't read korean prose in an english voice, and a
   // translated one is marked with the page's own locale, not left at "ko".
-  // The translated body is the "Entry" tips panel (`.tips__body`); the other
-  // guide sections (`.guide-section__body`) are all still untranslated.
+  // Phase 2 Task 6 translated the remaining guide sections (`.guide-section__body`),
+  // so none should still carry the fallback `lang="ko"`.
   if (locale === 'en' && route === 'goyang/') {
-    if (!/class="guide-section__body" lang="ko"/.test(chromeMain))
-      fail(relative, 'an untranslated guide body is not marked lang="ko"');
+    if (/class="guide-section__body" lang="ko"/.test(chromeMain))
+      fail(relative, 'a translated guide body is still marked lang="ko"');
     // Several `.tips__body` divs exist (one per tip); find the one that
     // actually wraps the translated text, not just the first of the class.
     const tipsBody = chromeMain
