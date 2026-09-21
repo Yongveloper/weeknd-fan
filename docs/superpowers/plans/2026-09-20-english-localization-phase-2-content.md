@@ -327,7 +327,6 @@ export function translatableJsonFields(collection, file) {
   if (collection === 'sources') return [file.name];
   if (collection === 'concert')
     return [
-      file.venue,
       file.ageRestriction,
       ...file.shows.map((show) => show.dateLabel),
     ];

@@ -2419,6 +2419,36 @@ npm run preview
 
 영어에서만 넘치면 해당 라벨을 더 짧은 완성 문장으로 바꾼다. **CSS로 `overflow: hidden` 을 덮지 않는다** — 문장을 고친다.
 
+- [ ] **Step 7a: 좁혀 뒀던 크롬 검사를 전체로 되돌린다**
+
+Task 4는 `korean text left in the english chrome` 단언을 헤더·푸터·스킵링크로 한정했다.
+그때는 페이지 `<head>` 메타와 `BackToTop` 이 아직 한국어였고, 그것들은 Task 6~9가 옮겼다.
+**이 원복이 이 단계의 마지막 그물이다** — 안 하면 Task 4의 축소가 영구화되고, 영어 페이지가
+한국어 `<title>`·`description`·`og:description` 을 달고 나가도 모든 게이트가 통과한다.
+
+`scripts/check-dist-i18n.mjs` 의 Task 4 블록에서 `chrome` 정의를 바꾼다:
+
+```js
+  // Every part of an english page outside the content area must be english:
+  // <head> metadata, the header, the footer and body-level widgets.
+  const chrome = html.replace(main, '');
+```
+
+헤더·푸터 슬라이스와 그 `-1` 가드는 더 이상 필요 없으면 지운다.
+
+```bash
+npm run build && npm run check:dist
+```
+Expected: `dist i18n ok  14 pages` — 0건.
+
+실패하면 그 문자열이 아직 사전으로 안 옮겨진 것이다. **검사를 다시 좁히지 말고** 문자열을
+옮긴다. 가장 흔한 누락은 각 페이지가 `BaseLayout` 에 넘기는 `title` 과 `description` 이다:
+
+```bash
+grep -rn 'title=\|description=' 'src/pages/[...locale]' | grep '[가-힣]'
+```
+Expected: 0건 — 영어 라우트도 같은 페이지 파일을 쓰므로 두 로케일 모두 `ui(locale)` 에서 와야 한다.
+
 - [ ] **Step 8: 전체 체인을 돌린다**
 
 ```bash
