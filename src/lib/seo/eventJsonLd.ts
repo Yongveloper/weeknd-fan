@@ -1,9 +1,5 @@
 import type { Locale } from '../i18n/locales';
-import {
-  ORGANIZER_HYUNDAI_CARD,
-  VENUE_FULL,
-  bilingual,
-} from '../i18n/proper-nouns';
+import { VENUE_FULL, bilingual } from '../i18n/proper-nouns';
 
 interface ConcertForJsonLd {
   shows: Array<{ startsAt: string }>;
@@ -29,6 +25,16 @@ export interface MusicEventJsonLd {
 
 const eventName = 'The Weeknd: After Hours Til Dawn Tour — Goyang';
 
+/**
+ * Unlike `location.name`, this is not wayfinding — no one needs the Korean
+ * string to reach the organizer. It's matched by crawlers against a
+ * canonical org entity, so each locale gets one name, not a combined form.
+ */
+const ORGANIZER_NAME: Record<Locale, string> = {
+  ko: '현대카드',
+  en: 'Hyundai Card',
+};
+
 export function buildEventJsonLd(
   concert: ConcertForJsonLd,
   siteUrl: string,
@@ -51,7 +57,7 @@ export function buildEventJsonLd(
     performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
     organizer: {
       '@type': 'Organization',
-      name: bilingual(ORGANIZER_HYUNDAI_CARD, locale),
+      name: ORGANIZER_NAME[locale],
     },
     url: 'https://tickets.interpark.com/contents/notice/detail/14180',
     inLanguage: locale === 'ko' ? 'ko-KR' : 'en',

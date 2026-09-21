@@ -48,12 +48,6 @@ export const VENUE_ADDRESS: ProperNoun = {
   ko: '경기도 고양시 일산서구 중앙로 1601 (대화동)',
 };
 
-/** Event organizer, cited in structured data. */
-export const ORGANIZER_HYUNDAI_CARD: ProperNoun = {
-  latin: 'Hyundai Card',
-  ko: '현대카드',
-};
-
 /**
  * Kakao T shuttle departure points (TransportOperations). Every stop is
  * something a fan has to physically find, so each keeps its korean original.
