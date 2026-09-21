@@ -65,6 +65,7 @@ const latest = entries.reduce(
             aria-controls={`tips-panel-${entry.data.order}`}
             aria-selected={index === 0 ? 'true' : 'false'}
             tabindex="0"
+            lang={entry.translated ? locale : DEFAULT_LOCALE}
           >
             {entry.data.title}
           </button>
@@ -72,25 +73,30 @@ const latest = entries.reduce(
       }
     </div>
     {
-      panels.map(({ entry, Content, sources: panelSources }) => (
-        <div
-          role="tabpanel"
-          id={`tips-panel-${entry.data.order}`}
-          aria-labelledby={`tips-tab-${entry.data.order}`}
-          tabindex="0"
-          class="tips__panel"
-        >
-          <h3>{entry.data.title}</h3>
-          <p class="tips__summary">{entry.data.summary}</p>
-          {!entry.translated && locale !== DEFAULT_LOCALE && (
-            <SourceLanguageNotice locale={locale} />
-          )}
-          <div class="tips__body">
-            <Content />
+      panels.map(({ entry, Content, sources: panelSources }) => {
+        const contentLang = entry.translated ? locale : DEFAULT_LOCALE;
+        return (
+          <div
+            role="tabpanel"
+            id={`tips-panel-${entry.data.order}`}
+            aria-labelledby={`tips-tab-${entry.data.order}`}
+            tabindex="0"
+            class="tips__panel"
+          >
+            <h3 lang={contentLang}>{entry.data.title}</h3>
+            <p class="tips__summary" lang={contentLang}>
+              {entry.data.summary}
+            </p>
+            {!entry.translated && locale !== DEFAULT_LOCALE && (
+              <SourceLanguageNotice locale={locale} />
+            )}
+            <div class="tips__body" lang={contentLang}>
+              <Content />
+            </div>
+            <SourceList locale={locale} sources={panelSources} />
           </div>
-          <SourceList locale={locale} sources={panelSources} />
-        </div>
-      ))
+        );
+      })
     }
   </tips-tabs>
 </section>

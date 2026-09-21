@@ -25,6 +25,10 @@ export const ko = {
     // 한국어 경로에서는 렌더되지 않지만 타입 원본이라 값이 필요하다
     koreanSourceNotice: '이 항목은 한국어 원문입니다.',
     koreanSourceLink: '한국어판 보기',
+    // 출처 목록처럼 한 줄짜리 항목이 여러 개 나열될 때 쓰는 짧은 표시.
+    // 문장형 koreanSourceNotice를 항목 수만큼 반복하면 페이지가 그 문장으로
+    // 뒤덮이므로 별도로 둔다.
+    untranslatedSourceNote: '(한국어 표기)',
     albumCover: {
       alt: '{title} 앨범 커버 — Spotify에서 열기',
     },

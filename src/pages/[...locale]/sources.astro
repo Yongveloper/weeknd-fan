@@ -6,6 +6,8 @@ import {
   getSourceUsageIndex,
   resolveSourceReferences,
 } from '../../lib/content/queries';
+import { sourcesOverlay } from '../../lib/i18n/content/overlays';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
@@ -25,7 +27,13 @@ const sources = resolveSourceReferences(
   allSources,
   locale,
 );
+// A per-row signal, not a single banner over the whole listing: this list
+// mixes translated and untranslated names (they translate on their own
+// schedule), so the "shown in Korean" marker has to travel with each row.
+const sourceOverlay = sourcesOverlay(locale);
+const isSourceTranslated = (id: string) => Boolean(sourceOverlay[id]);
 const strings = ui(locale).sources;
+const contentStrings = ui(locale).content;
 const pageTitle = strings.page.title.replace('{artist}', ARTIST);
 const pageDescription = strings.page.description.replace('{artist}', ARTIST);
 const routeLabels = {
@@ -116,50 +124,60 @@ const checkpoints = strings.checkpoints.items;
                 )}
               </div>
               <ul>
-                {records.map((source) => (
-                  <li>
-                    {isSmsSource(source) ? (
-                      <span class="source-group__message">
-                        {source.data.name}
-                      </span>
-                    ) : (
-                      <a
-                        href={source.data.url}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {source.data.name}
-                      </a>
-                    )}
-                    {!sharedDate && (
-                      <span>
-                        {isSmsSource(source)
-                          ? strings.receivedLabel
-                          : strings.lastCheckedLabel}{' '}
-                        {formatSeoulDate(sourceDate(source))}
-                      </span>
-                    )}
-                    {sourceUsage.get(source.id) && (
-                      <div class="source-usage">
-                        <span class="source-usage__label">
-                          {strings.usedInLabel}
+                {records.map((source) => {
+                  const translated = isSourceTranslated(source.id);
+                  const nameLang = translated ? locale : DEFAULT_LOCALE;
+                  return (
+                    <li>
+                      {isSmsSource(source) ? (
+                        <span class="source-group__message" lang={nameLang}>
+                          {source.data.name}
                         </span>
-                        <ul
-                          aria-label={strings.usedInAriaLabel.replace(
-                            '{name}',
-                            source.data.name,
-                          )}
+                      ) : (
+                        <a
+                          href={source.data.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          lang={nameLang}
                         >
-                          {sourceUsage.get(source.id)?.routes.map((route) => (
-                            <li>
-                              <a href={route}>{routeLabels[route]}</a>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </li>
-                ))}
+                          {source.data.name}
+                        </a>
+                      )}
+                      {!translated && locale !== DEFAULT_LOCALE && (
+                        <span class="source-group__untranslated">
+                          {contentStrings.untranslatedSourceNote}
+                        </span>
+                      )}
+                      {!sharedDate && (
+                        <span>
+                          {isSmsSource(source)
+                            ? strings.receivedLabel
+                            : strings.lastCheckedLabel}{' '}
+                          {formatSeoulDate(sourceDate(source))}
+                        </span>
+                      )}
+                      {sourceUsage.get(source.id) && (
+                        <div class="source-usage">
+                          <span class="source-usage__label">
+                            {strings.usedInLabel}
+                          </span>
+                          <ul
+                            aria-label={strings.usedInAriaLabel.replace(
+                              '{name}',
+                              source.data.name,
+                            )}
+                          >
+                            {sourceUsage.get(source.id)?.routes.map((route) => (
+                              <li>
+                                <a href={route}>{routeLabels[route]}</a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </section>
           );
@@ -181,44 +199,60 @@ const checkpoints = strings.checkpoints.items;
         </div>
         <ul>
           {
-            supportingSources.map((source) => (
-              <li>
-                {isSmsSource(source) ? (
-                  <span class="source-group__message">{source.data.name}</span>
-                ) : (
-                  <a href={source.data.url} target="_blank" rel="noreferrer">
-                    {source.data.name}
-                  </a>
-                )}
-                {!supportingDate && (
-                  <span>
-                    {isSmsSource(source)
-                      ? strings.receivedLabel
-                      : strings.lastCheckedLabel}{' '}
-                    {formatSeoulDate(sourceDate(source))}
-                  </span>
-                )}
-                {sourceUsage.get(source.id) && (
-                  <div class="source-usage">
-                    <span class="source-usage__label">
-                      {strings.usedInLabel}
+            supportingSources.map((source) => {
+              const translated = isSourceTranslated(source.id);
+              const nameLang = translated ? locale : DEFAULT_LOCALE;
+              return (
+                <li>
+                  {isSmsSource(source) ? (
+                    <span class="source-group__message" lang={nameLang}>
+                      {source.data.name}
                     </span>
-                    <ul
-                      aria-label={strings.usedInAriaLabel.replace(
-                        '{name}',
-                        source.data.name,
-                      )}
+                  ) : (
+                    <a
+                      href={source.data.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      lang={nameLang}
                     >
-                      {sourceUsage.get(source.id)?.routes.map((route) => (
-                        <li>
-                          <a href={route}>{routeLabels[route]}</a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </li>
-            ))
+                      {source.data.name}
+                    </a>
+                  )}
+                  {!translated && locale !== DEFAULT_LOCALE && (
+                    <span class="source-group__untranslated">
+                      {contentStrings.untranslatedSourceNote}
+                    </span>
+                  )}
+                  {!supportingDate && (
+                    <span>
+                      {isSmsSource(source)
+                        ? strings.receivedLabel
+                        : strings.lastCheckedLabel}{' '}
+                      {formatSeoulDate(sourceDate(source))}
+                    </span>
+                  )}
+                  {sourceUsage.get(source.id) && (
+                    <div class="source-usage">
+                      <span class="source-usage__label">
+                        {strings.usedInLabel}
+                      </span>
+                      <ul
+                        aria-label={strings.usedInAriaLabel.replace(
+                          '{name}',
+                          source.data.name,
+                        )}
+                      >
+                        {sourceUsage.get(source.id)?.routes.map((route) => (
+                          <li>
+                            <a href={route}>{routeLabels[route]}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </li>
+              );
+            })
           }
           <li>
             <span class="source-group__reference">
@@ -322,6 +356,9 @@ const checkpoints = strings.checkpoints.items;
   }
   .source-group__checked {
     font-weight: 700;
+  }
+  .source-group__untranslated {
+    font-style: italic;
   }
 
   .source-usage {

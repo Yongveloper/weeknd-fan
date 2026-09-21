@@ -40,47 +40,50 @@ const renderedEntries = await Promise.all(
 
 <ol class="timeline" aria-label={careerAriaLabel}>
   {
-    renderedEntries.map(({ entry, Content, sources: entrySources, covers }) => (
-      <li class="timeline__entry">
-        <div class="timeline__summary">
-          <p class="eyebrow">{entry.data.title.split('·')[0]?.trim()}</p>
-          <h2>{entry.data.title}</h2>
-          <p>{entry.data.summary}</p>
-          {covers.length > 0 && (
-            <ul
-              class="timeline__covers"
-              aria-label={strings.coversAriaLabel.replace(
-                '{era}',
-                entry.data.title,
-              )}
-            >
-              {covers.map((album) => (
-                <li>
-                  <AlbumCover locale={locale} album={album} size={72} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <Disclosure
-          locale={locale}
-          ariaLabel={strings.disclosureAriaLabel.replace(
-            '{era}',
-            entry.data.title,
-          )}
-          label={discoverStrings.disclosureLabel}
-          class="timeline__disclosure"
-        >
-          <div class="timeline__detail">
-            {!entry.translated && locale !== DEFAULT_LOCALE && (
-              <SourceLanguageNotice locale={locale} />
+    renderedEntries.map(({ entry, Content, sources: entrySources, covers }) => {
+      const contentLang = entry.translated ? locale : DEFAULT_LOCALE;
+      return (
+        <li class="timeline__entry">
+          <div class="timeline__summary">
+            <p class="eyebrow">{entry.data.title.split('·')[0]?.trim()}</p>
+            <h2 lang={contentLang}>{entry.data.title}</h2>
+            <p lang={contentLang}>{entry.data.summary}</p>
+            {covers.length > 0 && (
+              <ul
+                class="timeline__covers"
+                aria-label={strings.coversAriaLabel.replace(
+                  '{era}',
+                  entry.data.title,
+                )}
+              >
+                {covers.map((album) => (
+                  <li>
+                    <AlbumCover locale={locale} album={album} size={72} />
+                  </li>
+                ))}
+              </ul>
             )}
-            <Content />
-            <SourceList locale={locale} sources={entrySources} />
           </div>
-        </Disclosure>
-      </li>
-    ))
+          <Disclosure
+            locale={locale}
+            ariaLabel={strings.disclosureAriaLabel.replace(
+              '{era}',
+              entry.data.title,
+            )}
+            label={discoverStrings.disclosureLabel}
+            class="timeline__disclosure"
+          >
+            <div class="timeline__detail" lang={contentLang}>
+              {!entry.translated && locale !== DEFAULT_LOCALE && (
+                <SourceLanguageNotice locale={locale} />
+              )}
+              <Content />
+              <SourceList locale={locale} sources={entrySources} />
+            </div>
+          </Disclosure>
+        </li>
+      );
+    })
   }
 </ol>
 

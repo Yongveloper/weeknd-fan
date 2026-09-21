@@ -51,6 +51,12 @@ const visualSources = resolveSourceReferences(
   sources,
   locale,
 );
+// Each section's title, summary and body are korean source text until its
+// own overlay translates them; mark that explicitly so assistive tech
+// doesn't speak korean prose in an english voice.
+const introLang = intro.translated ? locale : DEFAULT_LOCALE;
+const glossaryLang = glossary.translated ? locale : DEFAULT_LOCALE;
+const visualLang = visual.translated ? locale : DEFAULT_LOCALE;
 const strings = ui(locale).discover;
 const pageTitle = strings.page.title.replaceAll('{artist}', ARTIST);
 const pageDescription = strings.page.description.replace('{artist}', ARTIST);
@@ -84,7 +90,7 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
           heroAfterPhrase
         }
       </h1>
-      <p>{intro.data.summary}</p>
+      <p lang={introLang}>{intro.data.summary}</p>
       <Disclosure
         locale={locale}
         ariaLabel={strings.hero.introDisclosureAriaLabel}
@@ -96,7 +102,9 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
             <SourceLanguageNotice locale={locale} />
           )
         }
-        <IntroContent />
+        <div lang={introLang}>
+          <IntroContent />
+        </div>
         <SourceList locale={locale} sources={introSources} />
       </Disclosure>
     </header>
@@ -136,8 +144,10 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
 
     <section class="discover__closing" aria-labelledby="glossary-title">
       <div>
-        <h2 id="glossary-title">{glossary.data.title}</h2>
-        <p>{glossary.data.summary}</p>
+        <h2 id="glossary-title" lang={glossaryLang}>
+          {glossary.data.title}
+        </h2>
+        <p lang={glossaryLang}>{glossary.data.summary}</p>
         <Disclosure
           locale={locale}
           ariaLabel={strings.glossary.disclosureAriaLabel}
@@ -149,13 +159,15 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
               <SourceLanguageNotice locale={locale} />
             )
           }
-          <GlossaryContent />
+          <div lang={glossaryLang}>
+            <GlossaryContent />
+          </div>
           <SourceList locale={locale} sources={glossarySources} />
         </Disclosure>
       </div>
       <div>
-        <h2>{visual.data.title}</h2>
-        <p>{visual.data.summary}</p>
+        <h2 lang={visualLang}>{visual.data.title}</h2>
+        <p lang={visualLang}>{visual.data.summary}</p>
         <Disclosure
           locale={locale}
           ariaLabel={strings.visual.disclosureAriaLabel}
@@ -167,7 +179,9 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
               <SourceLanguageNotice locale={locale} />
             )
           }
-          <VisualContent />
+          <div lang={visualLang}>
+            <VisualContent />
+          </div>
           <SourceList locale={locale} sources={visualSources} />
         </Disclosure>
       </div>

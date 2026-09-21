@@ -7,7 +7,11 @@ import {
   setlistOverlay,
   sourcesOverlay,
 } from '../i18n/content/overlays';
-import { overlayId, type Localized } from '../i18n/content/merge';
+import {
+  overlayEntryKey,
+  overlayId,
+  type Localized,
+} from '../i18n/content/merge';
 
 type EditorialSetlistEntry = {
   data: { lastVerifiedAt: Date; observedIn: Array<{ id: string }> };
@@ -43,16 +47,6 @@ function formatSeoulIsoDate(date: Date): string {
   return `${value.year}-${value.month}-${value.day}`;
 }
 
-// The glob loader keeps the pattern's collection-name segment in the id (a
-// file at `src/data/i18n/en/guides/32-tips-entry.md` gets the id
-// `en/guides/32-tips-entry`, not `en/32-tips-entry`), so a lookup keyed by
-// `overlayId(locale, sourceId)` (`<locale>/<id>`) has to drop that middle
-// segment before it can match.
-function overlayEntryKey(id: string): string {
-  const [locale, , ...rest] = id.split('/');
-  return `${locale}/${rest.join('/')}`;
-}
-
 type ConcertEntry = Awaited<
   ReturnType<typeof getCollection<'concert'>>
 >[number];
@@ -63,9 +57,7 @@ export type LocalizedConcert = {
   translated: boolean;
 };
 
-export async function getConcert(
-  locale: Locale = DEFAULT_LOCALE,
-): Promise<LocalizedConcert> {
+export async function getConcert(locale: Locale): Promise<LocalizedConcert> {
   const entries = await getCollection('concert');
   const entry = entries.find((item) => item.id === 'goyang-2026');
   if (!entry) throw new Error('Missing concert record: goyang-2026');
@@ -105,7 +97,7 @@ export type LocalizedSetlist = {
 };
 
 export async function getExpectedSetlist(
-  locale: Locale = DEFAULT_LOCALE,
+  locale: Locale,
 ): Promise<LocalizedSetlist[]> {
   const entries = (await getCollection('setlist')).sort(
     (a, b) => a.data.expectedOrder - b.data.expectedOrder,
@@ -155,7 +147,7 @@ export type LocalizedDiscover = Localized<
 > & { entry: DiscoverEntry };
 
 export async function getDiscoverContent(
-  locale: Locale = DEFAULT_LOCALE,
+  locale: Locale,
 ): Promise<LocalizedDiscover[]> {
   const entries = (await getCollection('discover')).sort(
     (a, b) => a.data.order - b.data.order,
@@ -177,9 +169,11 @@ export async function getDiscoverContent(
       entry,
     ]),
   );
+  const claimed = new Set<string>();
 
-  return entries.map((entry) => {
-    const overlay = overlays.get(overlayId(locale, entry.id));
+  const result = entries.map((entry) => {
+    const key = overlayId(locale, entry.id);
+    const overlay = overlays.get(key);
     if (!overlay)
       return {
         entry,
@@ -187,6 +181,7 @@ export async function getDiscoverContent(
         renderEntry: entry,
         translated: false,
       };
+    claimed.add(key);
     return {
       entry,
       data: {
@@ -198,12 +193,20 @@ export async function getDiscoverContent(
       translated: true,
     };
   });
+
+  const orphans = [...overlays.keys()].filter((key) => !claimed.has(key));
+  if (orphans.length > 0)
+    throw new Error(
+      `Discover overlay(s) match no source entry: ${orphans.join(', ')}`,
+    );
+
+  return result;
 }
 
 export function resolveSourceReferences(
   sourceRefs: ReferenceDataEntry<'sources'>[],
   sources: SourceRecord[],
-  locale: Locale = DEFAULT_LOCALE,
+  locale: Locale,
 ): SourceRecord[] {
   const sourceById = new Map(sources.map((source) => [source.id, source]));
   const resolve = (id: string): SourceRecord => {
@@ -238,7 +241,7 @@ export type LocalizedGuide = Localized<
 > & { entry: GuideEntry };
 
 export async function getGuideContent(
-  locale: Locale = DEFAULT_LOCALE,
+  locale: Locale,
 ): Promise<LocalizedGuide[]> {
   const entries = (await getCollection('guides')).sort(
     (a, b) => a.data.order - b.data.order,
@@ -260,9 +263,11 @@ export async function getGuideContent(
       entry,
     ]),
   );
+  const claimed = new Set<string>();
 
-  return entries.map((entry) => {
-    const overlay = overlays.get(overlayId(locale, entry.id));
+  const result = entries.map((entry) => {
+    const key = overlayId(locale, entry.id);
+    const overlay = overlays.get(key);
     if (!overlay)
       return {
         entry,
@@ -270,6 +275,7 @@ export async function getGuideContent(
         renderEntry: entry,
         translated: false,
       };
+    claimed.add(key);
     return {
       entry,
       data: {
@@ -281,6 +287,14 @@ export async function getGuideContent(
       translated: true,
     };
   });
+
+  const orphans = [...overlays.keys()].filter((key) => !claimed.has(key));
+  if (orphans.length > 0)
+    throw new Error(
+      `Guide overlay(s) match no source entry: ${orphans.join(', ')}`,
+    );
+
+  return result;
 }
 
 export async function getSourceUsageIndex() {

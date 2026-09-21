@@ -2,6 +2,7 @@
 import AlbumCover from '../content/AlbumCover.astro';
 import OfficialEmbed from '../content/OfficialEmbed.astro';
 import SourceList from '../content/SourceList.astro';
+import SourceLanguageNotice from '../content/SourceLanguageNotice.astro';
 import StatusBadge from '../content/StatusBadge.astro';
 import Disclosure from '../ui/Disclosure.astro';
 import type {
@@ -15,6 +16,7 @@ import {
   type LocalizedSetlist,
 } from '../../lib/content/queries';
 import type { Locale } from '../../lib/i18n/locales';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 
 interface Props {
@@ -176,6 +178,9 @@ const hasEssentialSet =
                 {entry.data.album}
               </span>
               <div class="expected-setlist__detail">
+                {!entry.translated && locale !== DEFAULT_LOCALE && (
+                  <SourceLanguageNotice locale={locale} />
+                )}
                 <div class="song-meta">
                   {(() => {
                     const album = findAlbumByTitle(albums, entry.data.album);

@@ -16,6 +16,9 @@ export const en: UiStrings = {
     koreanSourceNotice:
       'This section is shown in Korean. The Korean text is the source of record.',
     koreanSourceLink: 'Read the Korean page',
+    // Short per-row marker for listings (e.g. the sources page) where
+    // repeating the full sentence above once per row would bury the list.
+    untranslatedSourceNote: '(shown in Korean)',
     albumCover: {
       alt: '{title} album cover — open on Spotify',
     },

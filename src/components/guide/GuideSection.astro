@@ -27,6 +27,10 @@ const entrySources = resolveSourceReferences(
   sources,
   locale,
 );
+// The title, summary and body are korean source text until an overlay
+// translates them; mark that explicitly so assistive tech doesn't speak
+// korean prose in an english voice.
+const contentLang = entry.translated ? locale : DEFAULT_LOCALE;
 // Listed rather than Object.values(): the dictionary key-set test sorts its
 // keys, so a reorder in en.ts would silently reorder the rendered list.
 const pendingItems = [
@@ -48,10 +52,14 @@ const pendingItems = [
 >
   <div class="guide-section__heading">
     <p class="eyebrow">CONCERT GUIDE</p>
-    <h2 id={`${entry.data.section}-title`} data-guide-heading>
+    <h2
+      id={`${entry.data.section}-title`}
+      data-guide-heading
+      lang={contentLang}
+    >
       {entry.data.title}
     </h2>
-    <p>{entry.data.summary}</p>
+    <p lang={contentLang}>{entry.data.summary}</p>
   </div>
 
   {
@@ -87,7 +95,7 @@ const pendingItems = [
       <SourceLanguageNotice locale={locale} />
     )
   }
-  <div class="guide-section__body"><Content /></div>
+  <div class="guide-section__body" lang={contentLang}><Content /></div>
   <slot />
   <SourceList locale={locale} sources={entrySources} />
 </section>

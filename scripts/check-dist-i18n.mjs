@@ -207,20 +207,43 @@ function checkPage({ relative, locale, route, html, fail }) {
   }
 
   // Phase 2 Task 4 — translated bodies land, untranslated ones say so
+  // Matched by element, not by the english sentence it happens to render:
+  // matching the sentence text passed even with the locale guard around the
+  // notice deleted entirely, because a korean page would then render
+  // `ui('ko').content.koreanSourceNotice` (a different, korean, string) and
+  // never trip an assertion that only ever looked for the english one.
+  const NOTICE_ELEMENT = /<p[^>]*class="source-language-notice/g;
   if (locale === 'en' && route === 'goyang/') {
     if (!html.includes('Cross one crosswalk from Exit 3'))
       fail(relative, 'the translated guide body did not render');
   }
-  if (locale === 'ko' && html.includes('This section is shown in Korean.'))
+  if (locale === 'ko' && NOTICE_ELEMENT.test(html))
     fail(relative, 'the fallback notice leaked onto a korean page');
 
   // Every untranslated section carries the notice. Phase 2 Task 10 tightens
   // this to zero once all 25 overlays exist.
   if (locale === 'en') {
-    const notices = (html.match(/This section is shown in Korean\./g) ?? [])
-      .length;
+    const notices = (html.match(NOTICE_ELEMENT) ?? []).length;
     if (route === 'goyang/' && notices === 0)
       fail(relative, 'no fallback notice on a page with untranslated sections');
+  }
+
+  // Phase 2 Task 4 fix round 1 — an untranslated body is marked lang="ko" so
+  // assistive tech doesn't read korean prose in an english voice, and a
+  // translated one is marked with the page's own locale, not left at "ko".
+  // The translated body is the "Entry" tips panel (`.tips__body`); the other
+  // guide sections (`.guide-section__body`) are all still untranslated.
+  if (locale === 'en' && route === 'goyang/') {
+    if (!/class="guide-section__body" lang="ko"/.test(chromeMain))
+      fail(relative, 'an untranslated guide body is not marked lang="ko"');
+    // Several `.tips__body` divs exist (one per tip); find the one that
+    // actually wraps the translated text, not just the first of the class.
+    const tipsBody = chromeMain
+      .split('<div class="tips__body"')
+      .slice(1)
+      .find((segment) => segment.includes('Cross one crosswalk from Exit 3'));
+    if (/^\s*lang="(ko|en)"/.exec(tipsBody ?? '')?.[1] !== 'en')
+      fail(relative, 'the translated guide body is not marked lang="en"');
   }
 }
 
