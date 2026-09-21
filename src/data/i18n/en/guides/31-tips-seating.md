@@ -1,7 +1,7 @@
 ---
 title: Seats and Sightlines
 summary: Section-by-section sightline and sound experiences reported repeatedly in reviews of other concerts.
-sourceHash: e75f14b8416f61dc
+sourceHash: 270be9685108c448
 translatedAt: 2026-09-21
 ---
 
@@ -10,3 +10,4 @@ translatedAt: 2026-09-21
 - A review of watching BTS (2026-04) from the 3rd floor reports that the view wasn't bad, thanks to the large screens. — [Community review, 2026-04](https://www.clien.net/service/board/park/19176744)
 - At the BLACKPINK concert (2025-07), the organizer issued refunds after complaints about poor sightlines in some sections. The sections marked as limited-view seats are in the upper left and right corners of the original seating chart. — [Daum News, 2025-08](https://v.daum.net/v/20250816174638726)
 - Seat-view photo collections: [myseatcheck](https://myseatcheck.com/고양종합운동장/), [offmate](https://www.offmate.kr/seat-map/16)
+- The official ticket seller now names the obstructed seats itself: row 1 on the 1st and 3rd floors, row 11 on the 2nd floor, and the seats beside the gates (rows 17 and 18 on the 2nd floor, rows 5 and 7 on the 3rd) may have their view blocked by a railing, and no refund or change is granted on that ground on the day. — [NOL show notices](https://nol.yanolja.com/ticket/products/26006903#important-info)

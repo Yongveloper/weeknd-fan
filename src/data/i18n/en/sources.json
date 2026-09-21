@@ -20,13 +20,8 @@
     "translatedAt": "2026-09-21"
   },
   "interpark-goods-26006903": {
-    "name": "Interpark Ticket — Hyundai Card Super Concert 28 The Weeknd event details",
-    "sourceHash": "7b2b198796d8ef72",
-    "translatedAt": "2026-09-21"
-  },
-  "interpark-standing-notice-08004615": {
-    "name": "Interpark — standing-area entry notice for another concert (example)",
-    "sourceHash": "593e7569792ffa2c",
+    "name": "NOL — Hyundai Card Super Concert 28 The Weeknd show page",
+    "sourceHash": "234bdfb0b3c5838e",
     "translatedAt": "2026-09-21"
   },
   "kakao-t-weeknd-shuttle": {
@@ -60,8 +55,8 @@
     "translatedAt": "2026-09-21"
   },
   "nol-notice": {
-    "name": "NOL Ticket — official notice",
-    "sourceHash": "3dde461ba5761de3",
+    "name": "NOL — show notices and must-read information",
+    "sourceHash": "c9bd9671d08cbfe2",
     "translatedAt": "2026-09-21"
   },
   "nol-weeknd-transport-sms": {

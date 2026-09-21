@@ -2,7 +2,7 @@
 title: 귀가 확인
 summary: 공연 종료 시각은 연장될 수 있으니 귀가 경로를 따로 준비하는 편이 안전합니다.
 status: practical
-lastVerifiedAt: 2026-09-01
+lastVerifiedAt: 2026-09-21
 sources:
   - goyang-bis
   - korail-metropolitan-map
