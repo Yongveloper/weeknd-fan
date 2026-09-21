@@ -22,6 +22,9 @@ export const ko = {
     officialTicketNotice: '공식 티켓 공지 보기',
   },
   content: {
+    // 한국어 경로에서는 렌더되지 않지만 타입 원본이라 값이 필요하다
+    koreanSourceNotice: '이 항목은 한국어 원문입니다.',
+    koreanSourceLink: '한국어판 보기',
     albumCover: {
       alt: '{title} 앨범 커버 — Spotify에서 열기',
     },

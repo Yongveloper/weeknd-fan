@@ -1,18 +1,23 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import AlbumCover from '../content/AlbumCover.astro';
 import SourceList from '../content/SourceList.astro';
+import SourceLanguageNotice from '../content/SourceLanguageNotice.astro';
 import type { AlbumRecord, SourceRecord } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
-import { resolveSourceReferences } from '../../lib/content/queries';
+import {
+  resolveSourceReferences,
+  type LocalizedDiscover,
+} from '../../lib/content/queries';
 import Disclosure from '../ui/Disclosure.astro';
 import type { Locale } from '../../lib/i18n/locales';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 interface Props {
   locale: Locale;
-  entries: CollectionEntry<'discover'>[];
+  entries: LocalizedDiscover[];
   sources: SourceRecord[];
   albums: AlbumRecord[];
 }
@@ -24,8 +29,8 @@ const careerAriaLabel = strings.careerAriaLabel.replace('{artist}', ARTIST);
 const renderedEntries = await Promise.all(
   entries.map(async (entry) => ({
     entry,
-    Content: (await render(entry)).Content,
-    sources: resolveSourceReferences(entry.data.sources, sources),
+    Content: (await render(entry.renderEntry)).Content,
+    sources: resolveSourceReferences(entry.data.sources, sources, locale),
     covers: entry.data.relatedAlbums
       .map((title) => findAlbumByTitle(albums, title))
       .filter((album): album is AlbumRecord => Boolean(album)),
@@ -67,6 +72,9 @@ const renderedEntries = await Promise.all(
           class="timeline__disclosure"
         >
           <div class="timeline__detail">
+            {!entry.translated && locale !== DEFAULT_LOCALE && (
+              <SourceLanguageNotice locale={locale} />
+            )}
             <Content />
             <SourceList locale={locale} sources={entrySources} />
           </div>

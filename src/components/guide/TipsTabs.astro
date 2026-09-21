@@ -1,16 +1,21 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
+import SourceLanguageNotice from '../content/SourceLanguageNotice.astro';
 import type { Locale } from '../../lib/i18n/locales';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 import { VENUE, bilingual } from '../../lib/i18n/proper-nouns';
 import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
-import { resolveSourceReferences } from '../../lib/content/queries';
+import {
+  resolveSourceReferences,
+  type LocalizedGuide,
+} from '../../lib/content/queries';
 
 interface Props {
   locale: Locale;
-  entries: CollectionEntry<'guides'>[];
+  entries: LocalizedGuide[];
   sources: SourceRecord[];
 }
 
@@ -20,8 +25,8 @@ const intro = strings.intro.replace('{venue}', bilingual(VENUE, locale));
 const panels = await Promise.all(
   entries.map(async (entry) => ({
     entry,
-    Content: (await render(entry)).Content,
-    sources: resolveSourceReferences(entry.data.sources, sources),
+    Content: (await render(entry.renderEntry)).Content,
+    sources: resolveSourceReferences(entry.data.sources, sources, locale),
   })),
 );
 const latest = entries.reduce(
@@ -77,6 +82,9 @@ const latest = entries.reduce(
         >
           <h3>{entry.data.title}</h3>
           <p class="tips__summary">{entry.data.summary}</p>
+          {!entry.translated && locale !== DEFAULT_LOCALE && (
+            <SourceLanguageNotice locale={locale} />
+          )}
           <div class="tips__body">
             <Content />
           </div>

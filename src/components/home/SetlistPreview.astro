@@ -1,11 +1,11 @@
 ---
 import Disclosure from '../ui/Disclosure.astro';
-import type { SetlistRecord } from '../../lib/content/contracts';
+import type { LocalizedSetlist } from '../../lib/content/queries';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 
 interface Props {
-  entries: SetlistRecord[];
+  entries: LocalizedSetlist[];
   previewCount: number;
   observationCount: number;
   locale: Locale;

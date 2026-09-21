@@ -14,8 +14,8 @@ export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
 const [concert, expectedSetlist] = await Promise.all([
-  getConcert(),
-  getExpectedSetlist(),
+  getConcert(locale),
+  getExpectedSetlist(locale),
 ]);
 const { version } = getSetlistEditorialMetadata(expectedSetlist);
 const songs = expectedSetlist.map((entry) => entry.data.songTitle);

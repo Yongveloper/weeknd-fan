@@ -23,7 +23,7 @@ const strings = ui(locale).guide;
 const pageTitle = strings.page.title.replace('{artist}', ARTIST);
 const pageDescription = strings.page.description.replace('{artist}', ARTIST);
 const [guides, sources] = await Promise.all([
-  getGuideContent(),
+  getGuideContent(locale),
   getCollection('sources'),
 ]);
 const tips = guides.filter((entry) => entry.data.section === 'tips');

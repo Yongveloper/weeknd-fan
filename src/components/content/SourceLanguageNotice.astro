@@ -1,0 +1,32 @@
+---
+import type { Locale } from '../../lib/i18n/locales';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
+import { localeHref } from '../../lib/i18n/routes';
+import { pathWithoutLocale } from '../../lib/i18n/routes';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale);
+const koreanHref = localeHref(
+  DEFAULT_LOCALE,
+  pathWithoutLocale(Astro.url.pathname),
+);
+---
+
+<p class="source-language-notice" lang={locale}>
+  {strings.content.koreanSourceNotice}
+  <a href={koreanHref} hreflang={DEFAULT_LOCALE}>
+    {strings.content.koreanSourceLink}
+  </a>
+</p>
+
+<style>
+  .source-language-notice {
+    font-size: 0.875rem;
+    opacity: 0.8;
+  }
+</style>

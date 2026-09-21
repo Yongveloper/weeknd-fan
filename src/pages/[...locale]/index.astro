@@ -26,9 +26,9 @@ const locale = localeFromParam(Astro.params.locale);
 const strings = ui(locale).home.page;
 const title = strings.title.replace('{artist}', ARTIST);
 const description = strings.description.replace('{artist}', ARTIST);
-const concert = await getConcert();
+const concert = await getConcert(locale);
 const albums = await getAlbums();
-const setlist = await getExpectedSetlist();
+const setlist = await getExpectedSetlist(locale);
 const { observationCount } = getSetlistEditorialMetadata(setlist);
 const eventJsonLd = buildEventJsonLd(
   concert.data,

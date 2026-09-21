@@ -205,6 +205,23 @@ function checkPage({ relative, locale, route, html, fail }) {
     if (/[가-힣]/.test(stripAllowedKorean(chromeMain)))
       fail(relative, 'korean text left in the english share builder');
   }
+
+  // Phase 2 Task 4 — translated bodies land, untranslated ones say so
+  if (locale === 'en' && route === 'goyang/') {
+    if (!html.includes('Cross one crosswalk from Exit 3'))
+      fail(relative, 'the translated guide body did not render');
+  }
+  if (locale === 'ko' && html.includes('This section is shown in Korean.'))
+    fail(relative, 'the fallback notice leaked onto a korean page');
+
+  // Every untranslated section carries the notice. Phase 2 Task 10 tightens
+  // this to zero once all 25 overlays exist.
+  if (locale === 'en') {
+    const notices = (html.match(/This section is shown in Korean\./g) ?? [])
+      .length;
+    if (route === 'goyang/' && notices === 0)
+      fail(relative, 'no fallback notice on a page with untranslated sections');
+  }
 }
 
 if (failures.length) {

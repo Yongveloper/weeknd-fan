@@ -1,23 +1,32 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
+import { render } from 'astro:content';
 import SourceList from '../content/SourceList.astro';
 import StatusBadge from '../content/StatusBadge.astro';
+import SourceLanguageNotice from '../content/SourceLanguageNotice.astro';
 import type { Locale } from '../../lib/i18n/locales';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
-import { resolveSourceReferences } from '../../lib/content/queries';
+import {
+  resolveSourceReferences,
+  type LocalizedGuide,
+} from '../../lib/content/queries';
 
 interface Props {
   locale: Locale;
-  entry: CollectionEntry<'guides'>;
+  entry: LocalizedGuide;
   sources: SourceRecord[];
 }
 
 const { locale, entry, sources } = Astro.props;
 const strings = ui(locale).guide.section;
-const { Content } = await render(entry);
-const entrySources = resolveSourceReferences(entry.data.sources, sources);
+const { Content } = await render(entry.renderEntry);
+const entrySources = resolveSourceReferences(
+  entry.data.sources,
+  sources,
+  locale,
+);
 // Listed rather than Object.values(): the dictionary key-set test sorts its
 // keys, so a reorder in en.ts would silently reorder the rendered list.
 const pendingItems = [
@@ -73,6 +82,11 @@ const pendingItems = [
   }
 
   <slot name="lead" />
+  {
+    !entry.translated && locale !== DEFAULT_LOCALE && (
+      <SourceLanguageNotice locale={locale} />
+    )
+  }
   <div class="guide-section__body"><Content /></div>
   <slot />
   <SourceList locale={locale} sources={entrySources} />

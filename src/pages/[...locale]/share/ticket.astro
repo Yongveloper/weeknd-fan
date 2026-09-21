@@ -10,8 +10,8 @@ export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
 const [concert, expectedSetlist] = await Promise.all([
-  getConcert(),
-  getExpectedSetlist(),
+  getConcert(locale),
+  getExpectedSetlist(locale),
 ]);
 const showDates = concert.data.shows.map((show) =>
   show.startsAt.slice(0, 10),

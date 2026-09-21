@@ -6,18 +6,20 @@ import StatusBadge from '../content/StatusBadge.astro';
 import Disclosure from '../ui/Disclosure.astro';
 import type {
   AlbumRecord,
-  SetlistRecord,
   ShowRecord,
   SourceRecord,
 } from '../../lib/content/contracts';
 import { findAlbumByTitle } from '../../lib/content/albums';
-import { resolveSourceReferences } from '../../lib/content/queries';
+import {
+  resolveSourceReferences,
+  type LocalizedSetlist,
+} from '../../lib/content/queries';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 
 interface Props {
   locale: Locale;
-  entries: SetlistRecord[];
+  entries: LocalizedSetlist[];
   showRecords: ShowRecord[];
   sources: SourceRecord[];
   archivePublished: boolean;
@@ -70,7 +72,11 @@ const hasEssentialSet =
             </ol>
             <SourceList
               locale={locale}
-              sources={resolveSourceReferences(record.data.sources, sources)}
+              sources={resolveSourceReferences(
+                record.data.sources,
+                sources,
+                locale,
+              )}
             />
           </article>
         ))}
@@ -148,7 +154,7 @@ const hasEssentialSet =
       {
         entries.map((entry) => (
           <li
-            data-song-id={entry.id}
+            data-song-id={entry.entry.id}
             data-song-title={entry.data.songTitle.toLocaleLowerCase()}
             data-song-album={entry.data.album}
             data-essential-order={entry.data.essentialOrder ?? ''}
@@ -219,6 +225,7 @@ const hasEssentialSet =
                     sources={resolveSourceReferences(
                       entry.data.observedIn,
                       sources,
+                      locale,
                     )}
                   />
                 </div>

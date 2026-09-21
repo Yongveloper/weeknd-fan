@@ -13,7 +13,7 @@ interface Props {
 const { locale } = Astro.props;
 const strings = ui(locale);
 const footerNavigation = footerNavigationFor(locale);
-const concert = await getConcert();
+const concert = await getConcert(locale);
 const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
 ---
 

@@ -13,6 +13,9 @@ export const en: UiStrings = {
     officialTicketNotice: 'View official ticket notice',
   },
   content: {
+    koreanSourceNotice:
+      'This section is shown in Korean. The Korean text is the source of record.',
+    koreanSourceLink: 'Read the Korean page',
     albumCover: {
       alt: '{title} album cover — open on Spotify',
     },

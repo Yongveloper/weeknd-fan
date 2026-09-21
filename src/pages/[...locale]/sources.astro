@@ -2,7 +2,10 @@
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { formatSeoulDate } from '../../lib/content/audit';
-import { getSourceUsageIndex } from '../../lib/content/queries';
+import {
+  getSourceUsageIndex,
+  resolveSourceReferences,
+} from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
@@ -10,10 +13,18 @@ import { ARTIST } from '../../lib/i18n/proper-nouns';
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-const [sources, sourceUsage] = await Promise.all([
+const [allSources, sourceUsage] = await Promise.all([
   getCollection('sources'),
   getSourceUsageIndex(),
 ]);
+// Translate each source's display name (when an overlay exists) without
+// touching any other field — status, dates and kind stay the source of
+// record regardless of locale.
+const sources = resolveSourceReferences(
+  allSources.map((source) => ({ id: source.id, collection: 'sources' })),
+  allSources,
+  locale,
+);
 const strings = ui(locale).sources;
 const pageTitle = strings.page.title.replace('{artist}', ARTIST);
 const pageDescription = strings.page.description.replace('{artist}', ARTIST);

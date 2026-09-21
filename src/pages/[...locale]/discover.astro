@@ -2,6 +2,7 @@
 import { getCollection, render } from 'astro:content';
 import AlbumCover from '../../components/content/AlbumCover.astro';
 import SourceList from '../../components/content/SourceList.astro';
+import SourceLanguageNotice from '../../components/content/SourceLanguageNotice.astro';
 import CareerTimeline from '../../components/discover/CareerTimeline.astro';
 import TrilogyExplainer from '../../components/discover/TrilogyExplainer.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
@@ -12,13 +13,14 @@ import {
   resolveSourceReferences,
 } from '../../lib/content/queries';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
+import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
 
 export const getStaticPaths = localePaths;
 
 const locale = localeFromParam(Astro.params.locale);
-const discover = await getDiscoverContent();
+const discover = await getDiscoverContent(locale);
 const sources = await getCollection('sources');
 const albums = await getAlbums();
 const studioAlbums = albums.filter((album) => album.data.kind === 'studio');
@@ -31,12 +33,24 @@ if (!intro || !glossary || !visual) {
   throw new Error('Missing required discover content');
 }
 
-const { Content: IntroContent } = await render(intro);
-const { Content: GlossaryContent } = await render(glossary);
-const { Content: VisualContent } = await render(visual);
-const introSources = resolveSourceReferences(intro.data.sources, sources);
-const glossarySources = resolveSourceReferences(glossary.data.sources, sources);
-const visualSources = resolveSourceReferences(visual.data.sources, sources);
+const { Content: IntroContent } = await render(intro.renderEntry);
+const { Content: GlossaryContent } = await render(glossary.renderEntry);
+const { Content: VisualContent } = await render(visual.renderEntry);
+const introSources = resolveSourceReferences(
+  intro.data.sources,
+  sources,
+  locale,
+);
+const glossarySources = resolveSourceReferences(
+  glossary.data.sources,
+  sources,
+  locale,
+);
+const visualSources = resolveSourceReferences(
+  visual.data.sources,
+  sources,
+  locale,
+);
 const strings = ui(locale).discover;
 const pageTitle = strings.page.title.replaceAll('{artist}', ARTIST);
 const pageDescription = strings.page.description.replace('{artist}', ARTIST);
@@ -77,6 +91,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
         label={strings.hero.introDisclosureLabel}
         class="discover__disclosure"
       >
+        {
+          !intro.translated && locale !== DEFAULT_LOCALE && (
+            <SourceLanguageNotice locale={locale} />
+          )
+        }
         <IntroContent />
         <SourceList locale={locale} sources={introSources} />
       </Disclosure>
@@ -125,6 +144,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
           label={strings.disclosureLabel}
           class="discover__disclosure"
         >
+          {
+            !glossary.translated && locale !== DEFAULT_LOCALE && (
+              <SourceLanguageNotice locale={locale} />
+            )
+          }
           <GlossaryContent />
           <SourceList locale={locale} sources={glossarySources} />
         </Disclosure>
@@ -138,6 +162,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
           label={strings.disclosureLabel}
           class="discover__disclosure"
         >
+          {
+            !visual.translated && locale !== DEFAULT_LOCALE && (
+              <SourceLanguageNotice locale={locale} />
+            )
+          }
           <VisualContent />
           <SourceList locale={locale} sources={visualSources} />
         </Disclosure>
