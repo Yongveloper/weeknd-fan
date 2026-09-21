@@ -28,8 +28,9 @@
 
 1. 프로덕션 origin은 리포 variable `PUBLIC_SITE_URL`에 있다(현재 `https://weeknd-goyang-guide.yongveloper.workers.dev`). `deploy` job이 이 값으로 다시 빌드하므로 canonical URL·sitemap·OG URL이 실제 게시 origin을 가리킨다. `verify` job은 `https://fan-guide.test`로 빌드한다 — CI를 origin 설정과 무관하게 유지하기 위한 것이고, origin은 예산·i18n 검사 결과에 영향을 주지 않는다.
 2. 자격 증명은 리포 secret `CLOUDFLARE_API_TOKEN`(Workers Scripts: Edit)과 `CLOUDFLARE_ACCOUNT_ID`에 있다.
-3. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
-4. 배포 후 실제 origin에서 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 점검한다.
-5. 되돌리려면 `git revert` 후 `main`에 push한다. CD가 이전 상태를 다시 게시한다.
-6. 로컬 확인은 `npx wrangler deploy --dry-run`까지만 한다. 구성과 `dist/`를 검증하며 게시하지 않는다.
-7. 커스텀 도메인으로 옮길 때는 Cloudflare에 도메인을 연결하고 리포 variable `PUBLIC_SITE_URL`을 새 origin으로 바꾼 뒤 `main`에 push한다. 워크플로는 손대지 않는다.
+3. 리포 variable `PUBLIC_ANALYTICS_TOKEN`은 Cloudflare Web Analytics beacon 토큰이며 `deploy` job에만 주입된다. 공개값이라 페이지 마크업에 그대로 실린다. 비워 두면 beacon이 빌드에서 빠지고, 그게 로컬·CI 빌드의 정상 상태다. 쿠키를 쓰지 않으므로 동의 배너나 처리방침이 필요 없다.
+4. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
+5. 배포 후 실제 origin에서 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 점검한다.
+6. 되돌리려면 `git revert` 후 `main`에 push한다. CD가 이전 상태를 다시 게시한다.
+7. 로컬 확인은 `npx wrangler deploy --dry-run`까지만 한다. 구성과 `dist/`를 검증하며 게시하지 않는다.
+8. 커스텀 도메인으로 옮길 때는 Cloudflare에 도메인을 연결하고 리포 variable `PUBLIC_SITE_URL`을 새 origin으로 바꾼 뒤 `main`에 push한다. Web Analytics 사이트에는 호스트명만 추가하면 되고, 워크플로와 beacon 토큰은 손대지 않는다.

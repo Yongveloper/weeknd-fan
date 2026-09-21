@@ -25,6 +25,7 @@ npx prettier --write .                        # format:check가 verify에 포함
 
 - `npm run deploy`는 **실제 프로덕션 게시**. 사람도 에이전트도 로컬에서 실행하지 않는다 — `main` push 시 GitHub Actions `deploy` job이 돌린다. 로컬은 dry-run만.
 - `PUBLIC_SITE_URL`: 절대 HTTP(S) URL이 아니면 빌드 실패, 없으면 sitemap 미생성. 로컬·CI는 `https://fan-guide.test`.
+- `PUBLIC_ANALYTICS_TOKEN`: Cloudflare Web Analytics beacon 토큰. **deploy job에서만** 설정한다. 로컬·CI·e2e preview 빌드에는 없어야 한다 — 있으면 테스트 트래픽이 수집된다. 따라서 `performance.spec.ts`의 홈 JS 실측에는 beacon 9.9KiB가 빠져 있다.
 
 ## 구조
 
