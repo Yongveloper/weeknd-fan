@@ -29,6 +29,7 @@ class DawnSky extends HTMLElement {
   private observer?: IntersectionObserver;
   private generation = 0;
   private coverVisible = true;
+  private focused = true;
 
   connectedCallback() {
     this.abort = new AbortController();
@@ -39,6 +40,25 @@ class DawnSky extends HTMLElement {
     document.addEventListener('visibilitychange', () => this.syncPlayback(), {
       signal,
     });
+    // A window left behind another application stays "visible" to the
+    // document, yet nobody watches its clouds drift. Rest while the window
+    // has no focus and resume the moment it is brought back.
+    window.addEventListener(
+      'blur',
+      () => {
+        this.focused = false;
+        this.syncPlayback();
+      },
+      { signal },
+    );
+    window.addEventListener(
+      'focus',
+      () => {
+        this.focused = true;
+        this.syncPlayback();
+      },
+      { signal },
+    );
     // The cover sky scrolls away with the hero. Once the hero has left the
     // viewport there is nothing of it to draw, and the fixed reading sky is
     // already running behind the programme sheet.
@@ -95,7 +115,10 @@ class DawnSky extends HTMLElement {
 
   private syncPlayback() {
     this.renderer?.setPlaying(
-      !document.hidden && !this.reduced.matches && this.coverVisible,
+      !document.hidden &&
+        this.focused &&
+        !this.reduced.matches &&
+        this.coverVisible,
     );
   }
 }

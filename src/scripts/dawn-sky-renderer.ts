@@ -955,6 +955,12 @@ export async function createDawnRenderer(
   let elapsed = 0;
   let previous = 0;
   let renderedAt = 0;
+  let frameInterval = 32;
+  // On a phone the fixed reading sky sits behind the 63% programme glass and
+  // never scrolls, so its slow drift is invisible there. It draws one frame
+  // and rests, redrawing only when its size changes.
+  let still = false;
+  let desktop = false;
   let progress = 0;
   let revealPausedFor = 0;
   let revealPauseStarted: number | undefined;
@@ -1091,6 +1097,11 @@ export async function createDawnRenderer(
     width = entry.contentRect.width;
     height = entry.contentRect.height;
     resize = true;
+    // A resting sky redraws once for its new size.
+    if (still && playing && !disposed) {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(draw);
+    }
   });
   observer.observe(host);
   const coverObserver = new ResizeObserver(invalidateGeometry);
@@ -1134,13 +1145,18 @@ export async function createDawnRenderer(
   }
   function draw(now: number) {
     if (!playing || disposed) return;
-    frame = requestAnimationFrame(draw);
+    // A resting sky still loops until its first frame is prepared.
+    const loops = !still || !prepared;
+    if (loops) frame = requestAnimationFrame(draw);
     if (previous) elapsed += Math.min(now - previous, 100) / 1000;
     previous = now;
     // A soft, atmospheric scene needs 30 fps, not full device DPR rendering.
     // Neither surface follows the page: the cover scrolls natively with the
     // hero and the reading sky is fixed, so a skipped frame never shows.
-    if (now - renderedAt < 32) return;
+    // Phones get 15 fps: the currents move about six CSS pixels a second, so
+    // even the halved rate advances them under half a pixel per frame, while
+    // the sustained GPU load that heats a handset drops with it.
+    if (loops && now - renderedAt < frameInterval) return;
     renderedAt = now;
     // Only the dawn progress reads the scroll position, and it reads it here
     // rather than from scroll events, which mobile Safari coalesces heavily.
@@ -1158,11 +1174,37 @@ export async function createDawnRenderer(
       if (!prepared) return;
     }
     if (resize) {
-      const scale = Math.min(1.25, 1000 / Math.max(width, 1));
       const desktopAtmosphere = matchMedia('(min-width: 42.001rem)').matches;
-      for (const { canvas, gl, uniforms } of passes) {
-        canvas.width = Math.max(1, Math.round(width * scale));
-        canvas.height = Math.max(1, Math.round(height * scale));
+      desktop = desktopAtmosphere;
+      // The cover shades an 800 px wide grid on desktop (6.7 ms of GPU time
+      // per pass at 1000 px on an M1 Pro) and 0.75 CSS pixels per fragment
+      // on phones: the clouds are soft enough to upscale unnoticed.
+      const coverScale = desktopAtmosphere
+        ? Math.min(1.25, 800 / Math.max(width, 1))
+        : 0.75;
+      // The reading sky is only ever seen through the 63% programme glass and
+      // its 10px backdrop blur, which discard far more detail than halving
+      // the fragment grid does. Each pass measured 8 ms of GPU time per draw
+      // at the cover resolution on an M1 Pro; at 30 fps the two passes kept
+      // the GPU half busy behind a static page.
+      const scale =
+        readingOnly && desktopAtmosphere ? coverScale / 2 : coverScale;
+      // The desktop cover opens at 30 fps: its four-second reveal reads as
+      // stuttering at 20. Everything else runs at 15 fps, and the cover
+      // joins them once the scene has settled (see the end of draw).
+      frameInterval = desktopAtmosphere && !readingOnly ? 32 : 66;
+      still = readingOnly && !desktopAtmosphere;
+      // Widening past the phone breakpoint restarts the loop this frame
+      // skipped scheduling.
+      if (!loops && !still) frame = requestAnimationFrame(draw);
+      for (const pass of passes) {
+        const { canvas, gl, uniforms } = pass;
+        // The mist veil is a soft plate by design; half its grid upscales
+        // without a visible difference and spares a third of the cover's
+        // GPU time.
+        const passScale = pass === mist && !readingOnly ? scale / 2 : scale;
+        canvas.width = Math.max(1, Math.round(width * passScale));
+        canvas.height = Math.max(1, Math.round(height * passScale));
         gl.viewport(0, 0, canvas.width, canvas.height);
         gl.uniform2f(uniforms.resolution, canvas.width, canvas.height);
         gl.uniform1f(uniforms.desktopAtmosphere, desktopAtmosphere ? 1 : 0);
@@ -1218,6 +1260,12 @@ export async function createDawnRenderer(
         : moon?.dataset.phase === 'loop' || moon?.dataset.fallback === 'true'
           ? 'dawn'
           : 'revealing';
+    // Once the moon loops, the clouds have arrived and the title glow holds,
+    // what remains in the cover is the six-pixel-a-second drift and the slow
+    // dawn brightening, both of which 15 fps carries without a visible step.
+    if (desktop && !readingOnly)
+      frameInterval =
+        host.dataset.state === 'dawn' && reveal >= 1 && energy >= 1 ? 66 : 32;
   }
   const contextLost = (event: Event) => {
     event.preventDefault();

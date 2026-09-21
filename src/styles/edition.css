@@ -475,6 +475,15 @@ body[data-edition] .back-to-top {
   body[data-edition] .site-footer__inner {
     gap: 1.75rem;
   }
+  /* The programme sheet scrolls over a fixed, animated sky, so a backdrop
+     blur is recomputed across the whole viewport on every scroll frame.
+     Behind the 63% glass the soft clouds read the same without it, and the
+     phone stays cool. */
+  body[data-edition] .reading-panel,
+  body[data-edition] .reading-surface {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
 }
 @media (prefers-reduced-transparency: reduce) {
   body[data-edition]
