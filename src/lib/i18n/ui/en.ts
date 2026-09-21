@@ -315,7 +315,7 @@ export const en: UiStrings = {
     receivedLabel: 'Received',
     lastCheckedLabel: 'Last checked',
     usedInLabel: 'Used in',
-    usedInAriaLabel: '{name} used in',
+    usedInAriaLabel: 'Where {name} is used',
     wikiReference: {
       name: 'Namu Wiki PDF',
       note: 'For finding gaps only · not a source for core facts',

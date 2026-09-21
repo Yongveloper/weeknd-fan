@@ -22,7 +22,7 @@ export const STATUS_LABELS: Record<Locale, Record<TrustStatus, string>> = {
     unpublished: '미공개 · 확인 필요',
   },
   en: {
-    official: 'Confirmed by the promoter',
+    official: 'Officially confirmed',
     practical: 'Practical guidance',
     'post-show': 'Verified after the show',
     pattern: 'Recurring pattern',
