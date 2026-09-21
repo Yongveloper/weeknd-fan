@@ -140,7 +140,15 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
     width: 100%;
   }
 
+  /* Hidden by default, revealed only inside the mobile query below. Stating
+     it as a default rather than as a `min-width` counterpart keeps the
+     hamburger on exactly one axis: a paired query has to be kept in step with
+     the mobile breakpoint, and when it was not, 705-896px hid the hamburger
+     while the script still collapsed the menu — no way to reach the nav at
+     tablet portrait. A default cannot fall out of step, and it leaves no
+     fractional gap at the boundary either. */
   .site-header__nav summary {
+    display: none;
     list-style: none;
   }
 
@@ -371,12 +379,6 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 
     .site-header__nav-list a::after {
       inset-inline: var(--gutter);
-    }
-  }
-
-  @media (min-width: 44.0625rem) {
-    .site-header__nav summary {
-      display: none;
     }
   }
 
