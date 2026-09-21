@@ -159,11 +159,39 @@ const albums = defineCollection({
   }),
 });
 
+// Markdown frontmatter dates parse as YAML dates (JS `Date` objects), not
+// strings, so this accepts both — matching `editorialDate` above — and
+// normalizes to the plain ISO date string the `OverlayMeta` type promises.
+const overlayTranslatedAt = z
+  .union([z.date(), z.iso.date()])
+  .transform((value) =>
+    value instanceof Date ? value.toISOString().slice(0, 10) : value,
+  );
+
+const overlayCommon = z.object({
+  title: z.string(),
+  summary: z.string(),
+  sourceHash: z.string().regex(/^[0-9a-f]{16}$/),
+  translatedAt: overlayTranslatedAt,
+});
+
+const guidesI18n = defineCollection({
+  loader: glob({ base: './src/data/i18n', pattern: '*/guides/**/*.md' }),
+  schema: overlayCommon,
+});
+
+const discoverI18n = defineCollection({
+  loader: glob({ base: './src/data/i18n', pattern: '*/discover/**/*.md' }),
+  schema: overlayCommon,
+});
+
 export const collections = {
   albums,
   concert,
   discover,
+  discoverI18n,
   guides,
+  guidesI18n,
   setlist,
   showRecords,
   sources,
