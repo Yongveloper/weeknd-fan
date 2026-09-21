@@ -8,8 +8,9 @@ Node **22.14.0** (CI 동일). 최초 1회 `npm ci && npx playwright install chro
 
 ```bash
 npm run dev                                   # http://localhost:4321
-npm run verify                                # CI와 동일한 전체 체인 (아래 순서)
-#  lint → format:check → check → audit:content → test:unit → build → budget → test:e2e
+npm run verify:core                           # CI와 동일한 체인 (아래 순서)
+#  lint → format:check → check → test:unit → audit:translations → build → budget → check:dist
+npm run verify                                # verify:core + audit:content 전체 + test:e2e (로컬 전용)
 PUBLIC_SITE_URL=https://fan-guide.test npm run build   # sitemap/canonical/OG 포함 빌드
 npm run test:unit                             # vitest (content-audit 제외)
 npm run audit:content                         # 콘텐츠 신뢰 계약 감사 — 날짜 민감
@@ -22,7 +23,7 @@ npx wrangler deploy --dry-run                 # 구성 + dist 검증, 게시 안
 npx prettier --write .                        # format:check가 verify에 포함됨
 ```
 
-- `npm run deploy`는 **실제 프로덕션 게시**. 에이전트는 실행하지 않는다. dry-run만.
+- `npm run deploy`는 **실제 프로덕션 게시**. 사람도 에이전트도 로컬에서 실행하지 않는다 — `main` push 시 GitHub Actions `deploy` job이 돌린다. 로컬은 dry-run만.
 - `PUBLIC_SITE_URL`: 절대 HTTP(S) URL이 아니면 빌드 실패, 없으면 sitemap 미생성. 로컬·CI는 `https://fan-guide.test`.
 
 ## 구조
@@ -37,7 +38,7 @@ src/lib/{seo,share}/, src/lib/countdown.ts
 src/scripts/        클라이언트 TS — disclosure.ts, reveal.ts
 src/styles/         tokens.css → global.css → motion.css
 scripts/*.mjs       check-performance-budget, assert-production-origin, refresh-album-covers, build-space-assets
-tests/unit/         vitest        tests/e2e/   playwright (axe a11y, no-JS, reduced-motion, visual)
+tests/unit/         vitest        tests/e2e/   playwright (axe a11y, no-JS, 내비·공유·고양 계약, 성능 evidence)
 public/_headers     → dist/_headers 보안·캐시 헤더
 docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배포 절차 — 콘텐츠 건드리기 전 읽기
 ```
@@ -60,7 +61,7 @@ docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배�
 - tsconfig `strict` + `noUncheckedIndexedAccess`. 배열 인덱스 접근은 `undefined` 처리 필요.
 - e2e는 `baseURL` 사용(`http://127.0.0.1:4321` 하드코딩 금지).
 - Astro image: `layout: 'constrained'`, `responsiveStyles: true` 전역. `<picture>`는 AVIF 우선.
-- 홈 long task 예산 50ms(`tests/e2e/visual.spec.ts` 모바일 evidence). `Intl.DateTimeFormat`에 `timeZone` 주면 첫 생성이 20~60ms — 클라이언트 번들에서 쓰지 않는다(`src/lib/countdown.ts`는 고정 UTC+9). Noto Sans KR은 `astro.config.mjs` Vite 플러그인이 `font-display: optional`로 바꿔 swap 재레이아웃 제거 — 첫 방문은 시스템 한글 폰트로 렌더될 수 있음.
+- 홈 long task 예산 50ms(`tests/e2e/performance.spec.ts` 모바일 evidence). `Intl.DateTimeFormat`에 `timeZone` 주면 첫 생성이 20~60ms — 클라이언트 번들에서 쓰지 않는다(`src/lib/countdown.ts`는 고정 UTC+9). Noto Sans KR은 `astro.config.mjs` Vite 플러그인이 `font-display: optional`로 바꿔 swap 재레이아웃 제거 — 첫 방문은 시스템 한글 폰트로 렌더될 수 있음.
 - 히어로 비디오: `src/lib/media-policy.ts`가 `saveData`·`effectiveType`(slow-2g/2g/3g) → 포스터, `≤42rem` → `-720.mp4`, 그 외 원본을 선택. 예산 스크립트가 mp4 합계 13MiB, `-720` 합계 3MiB를 검사한다. 원본 mp4를 바꾸면 `node scripts/build-compact-moon-video.mjs`를 다시 돌린다.
 - 헤더 폰트는 `src/assets/fonts/header/`의 서브셋을 preload한다. `navigation.ts`의 워드마크·메뉴 문구를 바꾸면 `npm run fonts:header`를 실행하고 결과를 커밋한다 — `tests/unit/header-fonts.test.ts`가 manifest와 `chromeText` 불일치를 실패로 잡는다.
 
@@ -75,7 +76,7 @@ test(budget): raise the aggregate raster fixture to the new 1300KiB ceiling
 content: refresh Tokyo verification      # 콘텐츠 갱신 전용 형식 (runbook 참조)
 ```
 
-커밋 전 `npm run verify` 통과. `docs/handoff-context.md`, `.superpowers/`, `.worktrees/`, `tmp/`, `.playwright-mcp/`는 gitignore/로컬 — 커밋하지 않는다.
+커밋 전 `npm run verify:core` 통과 — CI가 도는 것과 같다. e2e는 CI에서 돌지 않으니 UI를 건드렸으면 `npm run test:e2e`를 따로 돌린다. `docs/handoff-context.md`, `.superpowers/`, `.worktrees/`, `tmp/`, `.playwright-mcp/`는 gitignore/로컬 — 커밋하지 않는다.
 
 ## 새 에디션 작업 경계
 

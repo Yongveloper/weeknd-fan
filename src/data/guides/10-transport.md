@@ -2,7 +2,7 @@
 title: 가는 길
 summary: 3호선 대화역 3번 출구에서 도보 3분. 버스는 대화역 정류장이 노선이 가장 많습니다.
 status: practical
-lastVerifiedAt: 2026-09-01
+lastVerifiedAt: 2026-09-21
 sources:
   - interpark-goods-26006903
   - nol-weeknd-transport-sms

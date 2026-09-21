@@ -2,7 +2,7 @@
 title: 귀가
 summary: 타 공연 후기에서 반복된 종료 후 혼잡·대체 동선·주차 경험입니다.
 status: practical
-lastVerifiedAt: 2026-09-01
+lastVerifiedAt: 2026-09-21
 sources:
   - nol-weeknd-transport-sms
   - review-dcinside-bigbang-2026

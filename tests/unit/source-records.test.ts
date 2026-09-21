@@ -19,7 +19,11 @@ describe('official transport sources', () => {
       receivedAt: '2026-09-01',
     });
     expect(source).not.toHaveProperty('url');
-    expect(source).not.toHaveProperty('lastCheckedAt');
+    // The transcript itself never changes, so lastCheckedAt records when it
+    // was last confirmed that no newer official notice supersedes it.
+    expect(
+      new Date(source.lastCheckedAt as string).getTime(),
+    ).toBeGreaterThanOrEqual(new Date(source.receivedAt as string).getTime());
     expect(source.transcript).toContain('카카오 T 유료 셔틀 운행 및 예약 안내');
   });
 
@@ -32,7 +36,8 @@ describe('official transport sources', () => {
       name: '카카오 T — The Weeknd 유료 셔틀 예약',
       url: 'https://kko.to/NSrfta0uxT',
       kind: 'official',
-      lastCheckedAt: '2026-09-01',
+      // Every content refresh moves this date, so only its presence is fixed.
+      lastCheckedAt: expect.any(String),
     });
   });
 });

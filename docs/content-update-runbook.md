@@ -24,7 +24,12 @@
 
 ## Cloudflare 정적 배포 운영
 
-1. 배포 전 Node.js 22.14.0에서 `npm ci`, `PUBLIC_SITE_URL=https://fan-guide.test npm run verify`, `npx wrangler deploy --dry-run`을 순서대로 실행한다. dry-run은 구성과 `dist/`만 검증하며 게시하지 않는다.
-2. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
-3. 실제 배포는 인증된 Cloudflare 계정과 명시적 프로덕션 권한이 있을 때만 실행한다. 최초 bootstrap은 `PUBLIC_SITE_URL=https://fan-guide.test npm run deploy`이며, 이 명령은 canonical URL·sitemap·OG URL에 테스트 origin을 **일시적으로 게시**한다. 검증이나 콘텐츠 갱신 목적으로 실행하지 않는다.
-4. bootstrap 후 Wrangler가 출력한 실제 HTTPS origin을 기록하고 `PUBLIC_SITE_URL=https://<wrangler-origin> npm run deploy`로 다시 빌드·배포한다. 이 두 번째 배포 뒤 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 실제 HTTPS origin에서 점검한다. 권한 없는 자동화와 콘텐츠 갱신은 실제 배포를 실행하지 않는다.
+배포는 GitHub Actions가 한다. `main`에 push하면 `verify` job이 통과한 뒤 `deploy` job이 `npm run deploy`(= `assert-production-origin` → `build` → `wrangler deploy`)를 실행한다. 사람이 로컬에서 `npm run deploy`를 돌릴 일은 없다.
+
+1. 프로덕션 origin은 리포 variable `PUBLIC_SITE_URL`에 있다(현재 `https://weeknd-goyang-guide.yongveloper.workers.dev`). `deploy` job이 이 값으로 다시 빌드하므로 canonical URL·sitemap·OG URL이 실제 게시 origin을 가리킨다. `verify` job은 `https://fan-guide.test`로 빌드한다 — CI를 origin 설정과 무관하게 유지하기 위한 것이고, origin은 예산·i18n 검사 결과에 영향을 주지 않는다.
+2. 자격 증명은 리포 secret `CLOUDFLARE_API_TOKEN`(Workers Scripts: Edit)과 `CLOUDFLARE_ACCOUNT_ID`에 있다.
+3. `wrangler.jsonc`는 `assets.directory: "./dist"`와 `run_worker_first: false`만으로 정적 자산을 제공한다. `main`, assets binding, SSR adapter, Functions route를 추가하지 않는다. `public/_headers`는 `dist/_headers`로 복사되어 정적 응답의 보안·캐시 정책을 제공한다.
+4. 배포 후 실제 origin에서 canonical URL, sitemap, OG URL과 Kakao/X 미리보기를 점검한다.
+5. 되돌리려면 `git revert` 후 `main`에 push한다. CD가 이전 상태를 다시 게시한다.
+6. 로컬 확인은 `npx wrangler deploy --dry-run`까지만 한다. 구성과 `dist/`를 검증하며 게시하지 않는다.
+7. 커스텀 도메인으로 옮길 때는 Cloudflare에 도메인을 연결하고 리포 variable `PUBLIC_SITE_URL`을 새 origin으로 바꾼 뒤 `main`에 push한다. 워크플로는 손대지 않는다.
