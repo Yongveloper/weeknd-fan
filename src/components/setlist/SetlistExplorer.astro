@@ -78,7 +78,16 @@ const hasEssentialSet =
     )
   }
 
-  <section class="expected-setlist" aria-label={strings.expectedListAriaLabel}>
+  <section class="expected-setlist" aria-labelledby="expected-setlist-title">
+    {
+      /* The page badge sits above the intro; by song 30 on a phone it is far
+        off screen, and every note below is bare directive advice. The claim
+        is repeated here, outside the filter form, which is hidden without
+        javascript. */
+    }
+    <h2 id="expected-setlist-title" class="expected-setlist__title">
+      {strings.expectedListHeading}
+    </h2>
     <form class="setlist-filter" data-setlist-filter hidden>
       <label class="setlist-filter__search">
         <span>{strings.searchLabel}</span>
@@ -231,6 +240,14 @@ const hasEssentialSet =
   .setlist-explorer {
     display: grid;
     gap: clamp(3rem, 8vw, 6rem);
+  }
+
+  .expected-setlist__title {
+    margin: 0 0 1rem;
+    color: var(--mist);
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
   .expected-setlist,

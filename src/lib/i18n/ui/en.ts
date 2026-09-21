@@ -262,7 +262,7 @@ export const en: UiStrings = {
     explorer: {
       dayVerified: 'Day {day} — verified after the show',
       actualHeading: 'Setlist verified after the show',
-      expectedListAriaLabel: 'Expected setlist song list',
+      expectedListHeading: 'Song list — Expected · not guaranteed',
       searchLabel: 'Search songs',
       searchPlaceholder: 'Search by song title',
       albumFilterLabel: 'Filter by album',

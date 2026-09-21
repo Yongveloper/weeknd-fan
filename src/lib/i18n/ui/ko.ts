@@ -268,7 +268,7 @@ export const ko = {
     explorer: {
       dayVerified: '{day}일차 공연 후 확인',
       actualHeading: '공연 후 확인된 셋리스트',
-      expectedListAriaLabel: '예상 셋리스트 곡 목록',
+      expectedListHeading: '곡 목록 — 예상 · 보장 아님',
       searchLabel: '곡 검색',
       searchPlaceholder: '곡 제목으로 찾기',
       albumFilterLabel: '앨범으로 고르기',
