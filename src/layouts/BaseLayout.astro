@@ -41,6 +41,13 @@ const {
   coverCdn = false,
 } = Astro.props;
 const strings = ui(locale);
+// Only the deploy job sets this, so local builds, CI builds and the preview
+// server the end-to-end tests drive stay out of the analytics data. The token
+// is public: it ships in the markup of every page it measures.
+// Cloudflare hands out the tag as type="module"; the beacon is an IIFE bundle,
+// so defer runs it at the same point without depending on the CDN's CORS
+// headers. Keep it that way.
+const analyticsToken = import.meta.env.PUBLIC_ANALYTICS_TOKEN;
 const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
@@ -145,5 +152,15 @@ const preloadSkyTexture = cloudSky || lunarSky;
     <FilmGrain cover={lunarSky} />
     <script src="../scripts/reveal.ts"></script>
     <script src="../scripts/back-to-top.ts"></script>
+    {
+      analyticsToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: analyticsToken })}
+        />
+      )
+    }
   </body>
 </html>
