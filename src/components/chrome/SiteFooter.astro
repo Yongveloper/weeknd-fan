@@ -86,7 +86,12 @@ const credits = ['yongveloper99@gmail.com', 'rbp0324@gmail.com'].map(
 
   .site-footer__inner {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto auto;
+    /* The nav and ticket columns are `auto`, so they hold their max-content
+       width and the brand column absorbs every shortfall. Without a floor it
+       collapsed to ~50px on tablets, breaking the disclaimer mid-word. The
+       floor makes the nav take the squeeze instead, which it can: its list
+       wraps. */
+    grid-template-columns: minmax(min(100%, 18rem), 1fr) auto auto;
     gap: 2rem 3rem;
     align-items: end;
     padding-block: clamp(2.5rem, 6vw, 4.5rem);
@@ -182,7 +187,11 @@ const credits = ['yongveloper99@gmail.com', 'rbp0324@gmail.com'].map(
     color: var(--amber);
   }
 
-  @media (max-width: 48rem) {
+  /* 64rem, not 48rem: the three-column row needs room for the brand column
+     floor plus the nav and ticket columns at their content width. Below that
+     the nav wrapped down to one item per line and the footer grew taller than
+     the stacked layout it was avoiding. */
+  @media (max-width: 64rem) {
     .site-footer__inner {
       grid-template-columns: 1fr;
       gap: 1.5rem;
