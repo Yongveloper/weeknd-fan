@@ -10,7 +10,7 @@ describe('overlayId', () => {
     expect(overlayId('en', 'sub/entry')).toBe('en/sub/entry');
   });
 
-  it('matches a bare JSON-bundle key unchanged', () => {
+  it('builds an overlay id from a bare json-bundle key', () => {
     // setlistOverlay/sourcesOverlay/concertOverlay are hand-authored objects
     // keyed by the bare source id; only markdown overlays go through
     // overlayEntryKey. overlayId still has to produce something sane if ever
