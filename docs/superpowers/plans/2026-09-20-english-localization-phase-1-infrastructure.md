@@ -2116,6 +2116,35 @@ EOF
 
 ## Task 9: 공유 빌더와 클라이언트 스크립트 문자열 주입
 
+- [ ] **Step 0: 공유 카드 페이지에도 보장 부인을 단다 (사용자 승인 완료)**
+
+AGENTS.md는 예상 셋리스트의 `예상 · 보장 아님` 표기를 **페이지와 공유 카드 모두**
+유지하라고 규정하지만, 실제로는 두 표면 어디에도 없었다. 한국어로 "예상 셋리스트"라고만
+적혀 있었고 "보장 아님"은 독자의 추론에 맡겨져 있었다. Task 8이 `/setlist/` 에 배지를
+추가했고 사용자가 승인했다. 이 태스크가 `/share/setlist/` 에도 같은 표기를 단다.
+
+```bash
+sed -e 's/<[^>]*>/ /g' dist/share/setlist/index.html | grep -o '보장 아님'
+```
+Expected: 한국어 라우트에서 1건 이상. 영어 라우트는 `not guaranteed`.
+
+**카드 이미지는 건드리지 않는다.** 포스터는 승인된 아트워크이고 AGENTS.md가 재조판·재인코딩을
+금지한다. 표기는 카드 **바깥** 페이지 UI에 둔다.
+
+검사기에 단언을 더한다:
+
+```js
+  // Task 9 — the share surface carries the same disclaimer as the page
+  if (route === 'share/setlist/') {
+    const want =
+      locale === 'ko' ? '예상 · 보장 아님' : 'Expected · not guaranteed';
+    if (!html.includes(want))
+      fail(relative, `the setlist share page does not carry "${want}"`);
+  }
+```
+
+
+
 **Files:**
 - Modify: `src/components/share/TicketBuilder.astro` (33) `SetlistCardBuilder.astro` (33)
 - Modify: `src/pages/[...locale]/share/ticket.astro` (2) `setlist.astro` (2)
