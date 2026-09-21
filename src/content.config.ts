@@ -41,7 +41,7 @@ const sources = defineCollection({
     z.object({
       name: z.string(),
       url: z.never().optional(),
-      lastCheckedAt: z.never().optional(),
+      lastCheckedAt: editorialDate.optional(),
       kind: z.literal('official'),
       medium: z.literal('sms'),
       sender: z.string(),
