@@ -95,26 +95,19 @@ for (const file of pages) {
 /** Assertions later tasks extend. Kept separate so each task adds one block. */
 function checkPage({ relative, locale, route, html, fail }) {
   // Task 4 — chrome
-  // Only the parts this task localizes. Page <head> metadata and body-level
-  // widgets are translated by tasks 6-9 and are checked at the end of the
-  // phase (Task 10 widens this to the full chrome including <head>).
-  const headerStart = html.indexOf('<header');
-  const headerEnd = html.indexOf('</header>');
-  if (headerStart === -1 || headerEnd === -1) {
-    fail(relative, 'no <header>');
+  // Every part of an english page outside the content area must be english:
+  // <head> metadata, the header, the footer and body-level widgets.
+  const chromeMainStart = html.indexOf('<main');
+  const chromeMainEnd = html.indexOf('</main>');
+  if (chromeMainStart === -1 || chromeMainEnd === -1) {
+    fail(relative, 'no <main> — cannot check the chrome');
     return;
   }
-  const footerStart = html.indexOf('<footer');
-  const footerEnd = html.indexOf('</footer>');
-  if (footerStart === -1 || footerEnd === -1) {
-    fail(relative, 'no <footer>');
-    return;
-  }
-  const header = html.slice(headerStart, headerEnd + 9);
-  const footer = html.slice(footerStart, footerEnd + 9);
-  const skipLink =
-    /<a[^>]*class="skip-link"[^>]*>[\s\S]*?<\/a>/.exec(html)?.[0] ?? '';
-  const chrome = `${header}${footer}${skipLink}`;
+  const chromeMain = html.slice(
+    chromeMainStart,
+    chromeMainEnd + '</main>'.length,
+  );
+  const chrome = html.replace(chromeMain, '');
 
   const switcherLinks = [...chrome.matchAll(/<a\b[^>]*>/g)]
     .map(([tag]) => tag)
@@ -139,6 +132,17 @@ function checkPage({ relative, locale, route, html, fail }) {
 
   if (locale === 'en' && /[가-힣]/.test(stripAllowedKorean(chrome)))
     fail(relative, 'korean text left in the english chrome');
+
+  // Task 10 — the switcher must stay a plain link so it works without js
+  const switcherMarkup =
+    /<nav[^>]+class="locale-switcher"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+  if (!switcherMarkup) fail(relative, 'no locale switcher found');
+  if (
+    /<script|onclick=|data-astro-cid-[^"]*"[^>]*type="module"/.test(
+      switcherMarkup,
+    )
+  )
+    fail(relative, 'the locale switcher depends on javascript');
 
   // Task 5 — canonical and x-default targets
   const canonical =

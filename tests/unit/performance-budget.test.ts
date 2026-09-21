@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { afterEach, expect, test } from 'vitest';
+import { rasterBudgetFor } from '../../scripts/check-performance-budget.mjs';
 
 const execFileAsync = promisify(execFile);
 const fixtures: string[] = [];
@@ -99,6 +100,13 @@ test('rejects compact media variants that exceed the compact media budget', asyn
   await expect(runBudget(fixture)).rejects.toThrow(
     'Compact media budget exceeded',
   );
+});
+
+test('gives the english home the home budget, not the other-page budget', () => {
+  expect(rasterBudgetFor('en/index.html')).toBe(700 * 1024);
+  expect(rasterBudgetFor('index.html')).toBe(700 * 1024);
+  expect(rasterBudgetFor('en/goyang/index.html')).toBe(400 * 1024);
+  expect(rasterBudgetFor('goyang/index.html')).toBe(400 * 1024);
 });
 
 test('reports media usage without counting it as raster', async () => {

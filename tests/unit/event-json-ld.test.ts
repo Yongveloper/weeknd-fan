@@ -89,6 +89,13 @@ describe('buildEventJsonLd', () => {
     ).toBe('Goyang Sports Complex Main Stadium · 고양종합운동장 주경기장');
   });
 
+  it('pairs the organizer name with its korean original in english', () => {
+    expect(
+      buildEventJsonLd(input, 'https://fan-guide.test', 'en')[0]?.organizer
+        .name,
+    ).toBe('Hyundai Card · 현대카드');
+  });
+
   it('escapes HTML-significant characters before script injection', () => {
     expect(
       serializeJsonLd({ note: '</script><script>alert(1)</script>' }),

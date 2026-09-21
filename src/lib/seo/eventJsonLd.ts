@@ -1,5 +1,9 @@
 import type { Locale } from '../i18n/locales';
-import { VENUE_FULL, bilingual } from '../i18n/proper-nouns';
+import {
+  ORGANIZER_HYUNDAI_CARD,
+  VENUE_FULL,
+  bilingual,
+} from '../i18n/proper-nouns';
 
 interface ConcertForJsonLd {
   shows: Array<{ startsAt: string }>;
@@ -18,7 +22,7 @@ export interface MusicEventJsonLd {
     address: 'Goyang-si, Gyeonggi-do, KR';
   };
   performer: { '@type': 'MusicGroup'; name: 'The Weeknd' };
-  organizer: { '@type': 'Organization'; name: '현대카드' };
+  organizer: { '@type': 'Organization'; name: string };
   url: 'https://tickets.interpark.com/contents/notice/detail/14180';
   inLanguage: string;
 }
@@ -45,7 +49,10 @@ export function buildEventJsonLd(
       address: 'Goyang-si, Gyeonggi-do, KR',
     },
     performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
-    organizer: { '@type': 'Organization', name: '현대카드' },
+    organizer: {
+      '@type': 'Organization',
+      name: bilingual(ORGANIZER_HYUNDAI_CARD, locale),
+    },
     url: 'https://tickets.interpark.com/contents/notice/detail/14180',
     inLanguage: locale === 'ko' ? 'ko-KR' : 'en',
   }));

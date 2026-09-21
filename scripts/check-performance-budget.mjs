@@ -12,88 +12,126 @@ const viewport = { width: 390, deviceScaleFactor: 3 };
 // Hero video: 1440×1440 intro/loop plus the ≤42rem compact encodes. Not
 // raster, not JS — tracked separately so growth is never invisible.
 const mediaBudgets = { aggregate: 13 * 1024 * 1024, compact: 3 * 1024 * 1024 };
-const files = await walk(distRoot);
-const htmlFiles = files.filter((file) => file.endsWith('.html')).sort();
-const builtJavaScript = files.filter((file) => file.endsWith('.js'));
-// User-provided print originals are explicit downloads, never page imagery.
-// Keep the existing page/aggregate limits; account for downloads separately.
-const downloadRasters = files.filter(
-  (file) =>
-    isRasterAsset(file) &&
-    path.relative(distRoot, file).startsWith(`downloads${path.sep}`),
-);
-const builtRasters = files.filter(
-  (file) => isRasterAsset(file) && !downloadRasters.includes(file),
-);
-const downloadBytes = await byteSize(downloadRasters);
-assertWithinBudget('Download originals raster', downloadBytes, 8 * 1024 * 1024);
-process.stdout.write(
-  `download-originals\traster=${formatBytes(downloadBytes)}/8192.0KiB\n`,
-);
 
-const builtMedia = files.filter(isMediaAsset);
-const compactMedia = builtMedia.filter((file) => /-720\.mp4$/i.test(file));
-const [mediaBytes, compactMediaBytes] = await Promise.all([
-  byteSize(builtMedia),
-  byteSize(compactMedia),
-]);
-assertWithinBudget('Aggregate media', mediaBytes, mediaBudgets.aggregate);
-assertWithinBudget('Compact media', compactMediaBytes, mediaBudgets.compact);
-process.stdout.write(
-  `media\ttotal=${formatBytes(mediaBytes)}/${formatBytes(mediaBudgets.aggregate)}\tcompact=${formatBytes(compactMediaBytes)}/${formatBytes(mediaBudgets.compact)}\n`,
-);
+// A locale-prefixed route (e.g. `en/goyang/`) shares its budget with the
+// bare route it mirrors — strip the prefix before classifying the page.
+const LOCALE_PREFIXES = ['en/'];
 
-if (htmlFiles.length === 0) {
-  throw new Error(
-    'No production HTML found. Run npm run build before npm run budget.',
-  );
+function bareRoute(relativePath) {
+  for (const prefix of LOCALE_PREFIXES)
+    if (relativePath.startsWith(prefix))
+      return relativePath.slice(prefix.length);
+  return relativePath;
 }
 
-const [aggregateJavaScript, aggregateRaster] = await Promise.all([
-  gzipBytes(builtJavaScript),
-  byteSize(builtRasters),
-]);
-writeBudget(
-  'aggregate',
-  aggregateJavaScript,
-  javascriptBudget,
-  aggregateRaster,
-  aggregateRasterBudget,
-);
-assertWithinBudget(
-  'Aggregate JavaScript gzip',
-  aggregateJavaScript,
-  javascriptBudget,
-);
-assertWithinBudget('Aggregate raster', aggregateRaster, aggregateRasterBudget);
+/** Raster budget for a dist-relative html path (e.g. `en/index.html`). */
+export function rasterBudgetFor(relativePath) {
+  return bareRoute(relativePath) === 'index.html'
+    ? pageRasterBudgets.home
+    : pageRasterBudgets.other;
+}
 
-for (const htmlFile of htmlFiles) {
-  const html = await readFile(htmlFile, 'utf8');
-  const route = routeFor(htmlFile);
-  const [initialJavaScript, rasters] = await Promise.all([
-    collectInitialJavaScript(html, htmlFile),
-    collectPageRasters(html, htmlFile),
-  ]);
-  const [javascriptBytes, rasterBytes] = await Promise.all([
-    gzipBytes(initialJavaScript),
-    byteSize(rasters),
-  ]);
-  const rasterBudget =
-    route === '/' ? pageRasterBudgets.home : pageRasterBudgets.other;
+// Only run the check when this file is executed directly — tests import
+// rasterBudgetFor above without triggering a full dist walk.
+if (import.meta.url === `file://${process.argv[1]}`) {
+  await main();
+}
 
+async function main() {
+  const files = await walk(distRoot);
+  const htmlFiles = files.filter((file) => file.endsWith('.html')).sort();
+  const builtJavaScript = files.filter((file) => file.endsWith('.js'));
+  // User-provided print originals are explicit downloads, never page imagery.
+  // Keep the existing page/aggregate limits; account for downloads separately.
+  const downloadRasters = files.filter(
+    (file) =>
+      isRasterAsset(file) &&
+      path.relative(distRoot, file).startsWith(`downloads${path.sep}`),
+  );
+  const builtRasters = files.filter(
+    (file) => isRasterAsset(file) && !downloadRasters.includes(file),
+  );
+  const downloadBytes = await byteSize(downloadRasters);
+  assertWithinBudget(
+    'Download originals raster',
+    downloadBytes,
+    8 * 1024 * 1024,
+  );
+  process.stdout.write(
+    `download-originals\traster=${formatBytes(downloadBytes)}/8192.0KiB\n`,
+  );
+
+  const builtMedia = files.filter(isMediaAsset);
+  const compactMedia = builtMedia.filter((file) => /-720\.mp4$/i.test(file));
+  const [mediaBytes, compactMediaBytes] = await Promise.all([
+    byteSize(builtMedia),
+    byteSize(compactMedia),
+  ]);
+  assertWithinBudget('Aggregate media', mediaBytes, mediaBudgets.aggregate);
+  assertWithinBudget('Compact media', compactMediaBytes, mediaBudgets.compact);
+  process.stdout.write(
+    `media\ttotal=${formatBytes(mediaBytes)}/${formatBytes(mediaBudgets.aggregate)}\tcompact=${formatBytes(compactMediaBytes)}/${formatBytes(mediaBudgets.compact)}\n`,
+  );
+
+  if (htmlFiles.length === 0) {
+    throw new Error(
+      'No production HTML found. Run npm run build before npm run budget.',
+    );
+  }
+
+  const [aggregateJavaScript, aggregateRaster] = await Promise.all([
+    gzipBytes(builtJavaScript),
+    byteSize(builtRasters),
+  ]);
   writeBudget(
-    route,
-    javascriptBytes,
+    'aggregate',
+    aggregateJavaScript,
     javascriptBudget,
-    rasterBytes,
-    rasterBudget,
+    aggregateRaster,
+    aggregateRasterBudget,
   );
   assertWithinBudget(
-    `${route} initial JavaScript gzip`,
-    javascriptBytes,
+    'Aggregate JavaScript gzip',
+    aggregateJavaScript,
     javascriptBudget,
   );
-  assertWithinBudget(`${route} raster`, rasterBytes, rasterBudget);
+  assertWithinBudget(
+    'Aggregate raster',
+    aggregateRaster,
+    aggregateRasterBudget,
+  );
+
+  for (const htmlFile of htmlFiles) {
+    const html = await readFile(htmlFile, 'utf8');
+    const route = routeFor(htmlFile);
+    const relativePath = path
+      .relative(distRoot, htmlFile)
+      .split(path.sep)
+      .join('/');
+    const [initialJavaScript, rasters] = await Promise.all([
+      collectInitialJavaScript(html, htmlFile),
+      collectPageRasters(html, htmlFile),
+    ]);
+    const [javascriptBytes, rasterBytes] = await Promise.all([
+      gzipBytes(initialJavaScript),
+      byteSize(rasters),
+    ]);
+    const rasterBudget = rasterBudgetFor(relativePath);
+
+    writeBudget(
+      route,
+      javascriptBytes,
+      javascriptBudget,
+      rasterBytes,
+      rasterBudget,
+    );
+    assertWithinBudget(
+      `${route} initial JavaScript gzip`,
+      javascriptBytes,
+      javascriptBudget,
+    );
+    assertWithinBudget(`${route} raster`, rasterBytes, rasterBudget);
+  }
 }
 
 async function collectInitialJavaScript(html, htmlFile) {
