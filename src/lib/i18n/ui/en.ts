@@ -98,8 +98,8 @@ export const en: UiStrings = {
     accessTable: {
       addressLabel: 'Address',
       subwayLabel: 'Subway',
-      subwayDaehwaLine: 'Line 3 {daehwa} Exit 3 · about 3 min on foot',
-      subwayKintexLine: 'GTX-A {kintex} Exit 1 · about 20 min on foot',
+      subwayDaehwaLine: 'Line 3 {daehwa}, Exit 3 — about 3 min on foot',
+      subwayKintexLine: 'GTX-A {kintex}, Exit 1 — about 20 min on foot',
       busDtLabel: '{stop} bus stop',
       busRoutesAriaLabel: 'Bus routes serving {stop}',
       sourcePrefix: 'Directions info source:',
@@ -169,7 +169,7 @@ export const en: UiStrings = {
         'On the day of the show, parking inside the venue is unavailable, so public transit is recommended.',
       shuttleHeading: 'Paid shuttle bus — temporary service planned',
       shuttleRoute:
-        'The shuttle runs between GTX-A {kintex} Exit 1 and {venue}.',
+        'The shuttle runs between Exit 1 of GTX-A {kintex} and {venue}.',
       shuttlePending:
         'Operating hours, fare, interval, and the stadium boarding point are unpublished',
       kakaoHeading: 'Kakao T paid shuttle',

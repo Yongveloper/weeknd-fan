@@ -207,6 +207,16 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
     white-space: nowrap;
   }
 
+  @media (max-width: 42rem) {
+    /* Same relaxation global.css makes for .latin: the phrase is held
+       together so it reads as one unit, but english runs to four words where
+       korean runs to three syllables, and holding it pushes a 320px page
+       sideways — at 200% text zoom, to 671px. */
+    .discover__hero-phrase {
+      white-space: normal;
+    }
+  }
+
   .discover :global(.discover__disclosure) {
     max-width: 42rem;
     color: var(--mist);
