@@ -5,6 +5,8 @@ export type TicketLayoutInput = {
   showDate: string;
   dDayLabel: string;
   songs: [string, string, string] | string[];
+  /** Shown in a slot the reader has not filled yet. */
+  emptySongLabel: string;
 };
 export const TICKET_WIDTH = 2070;
 export const TICKET_HEIGHT = 990;
@@ -66,7 +68,7 @@ export function buildTicketLayout(input: TicketLayoutInput): DrawCommand[] {
       paper([718, 1157, 1620][i]!, 689, [414, 446, 396][i]!, 93),
       {
         kind: 'text',
-        value: input.songs[i] || '곡을 선택해 주세요',
+        value: input.songs[i] || input.emptySongLabel,
         x: [722, 1162, 1626][i]!,
         y: 746,
         font: `700 ${input.songs[i] ? 50 : 32}px "Noto Sans KR Variable", sans-serif`,

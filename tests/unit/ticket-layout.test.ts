@@ -6,6 +6,7 @@ test('keeps editable dates and songs on the approved wide artwork', () => {
     showDate: '2026-10-07',
     dDayLabel: 'D-39',
     songs: ['After Hours', 'Wake Me Up', 'Blinding Lights'],
+    emptySongLabel: 'Choose a song',
   });
   const text = commands
     .filter((command) => command.kind === 'text')

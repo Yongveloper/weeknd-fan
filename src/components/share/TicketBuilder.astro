@@ -1,13 +1,21 @@
 ---
 import '@fontsource/anton/latin.css';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
+
 interface Props {
+  locale: Locale;
   showDates: [string, string];
   showStarts: [string, string];
   songs: string[];
   shareUrl: string;
 }
 
-const { showDates, showStarts, songs, shareUrl } = Astro.props;
+const { locale, showDates, showStarts, songs, shareUrl } = Astro.props;
+const strings = ui(locale).share;
+const shareTitle = strings.ticket.shareTitle.replace('{artist}', ARTIST);
+const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
 ---
 
 <section
@@ -15,10 +23,27 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
   data-ticket-builder
   data-show-starts={JSON.stringify(showStarts)}
   data-songs={JSON.stringify(songs)}
+  data-msg-image-load-failed={strings.errors.imageLoadFailed}
+  data-msg-canvas-unavailable={strings.errors.canvasUnavailable}
+  data-msg-export-failed={strings.errors.exportFailed}
+  data-empty-song-label={strings.ticket.emptySong}
+  data-preview-expand-label={strings.ticket.previewExpand}
+  data-preview-collapse-label={strings.ticket.previewCollapse}
+  data-copy-fallback-template={strings.common.copyFallback}
+  data-copied-status={strings.common.copiedStatus}
+  data-generating-status={strings.common.generatingStatus}
+  data-validation-error={strings.ticket.validationError}
+  data-saved-status={strings.ticket.savedStatus}
+  data-share-label={strings.common.shareLabel}
+  data-share-title={shareTitle}
+  data-shared-status={strings.ticket.sharedStatus}
+  data-share-cancelled={strings.common.shareCancelled}
+  data-share-failed={strings.common.shareFailed}
+  data-clipboard-text-template={clipboardText}
 >
   <header>
     <h1>D-DAY TICKET</h1>
-    <p>관람일과 가장 기다리는 세 곡을 골라 가로형 티켓을 만드세요.</p>
+    <p>{strings.ticket.intro}</p>
   </header>
 
   <div class="share-builder__grid">
@@ -29,15 +54,14 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
         width="2070"
         height="990"
         role="img"
-        aria-label="D-day 티켓 미리보기"
+        aria-label={strings.ticket.previewAriaLabel}
       >
-        미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
-        이미지와 같은 티켓입니다.
+        {strings.ticket.previewFallback}
       </canvas>
       <figcaption>
-        <span>가로형 티켓 · 저장되는 이미지와 같습니다</span>
+        <span>{strings.ticket.previewCaption}</span>
         <a href="/downloads/into-dawn-ticket-original.png" download
-          >원본 디자인 PNG</a
+          >{strings.common.originalPngLabel}</a
         >
         <button
           type="button"
@@ -45,14 +69,14 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           data-preview-toggle
           aria-expanded="false"
           aria-controls="ticket-preview-canvas"
-          hidden>미리보기 크게 보기</button
+          hidden>{strings.ticket.previewExpand}</button
         >
       </figcaption>
     </figure>
 
     <form novalidate>
       <fieldset>
-        <legend>관람일</legend>
+        <legend>{strings.ticket.dateLegend}</legend>
         {
           showDates.map((date, index) => (
             <label class="choice">
@@ -70,11 +94,11 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
 
       <div class="song-fields">
         {
-          ['첫 번째 곡', '두 번째 곡', '세 번째 곡'].map((label, index) => (
+          strings.ticket.songLabels.map((label, index) => (
             <label>
               <span>{label}</span>
               <select required aria-label={label} data-song-select={index}>
-                <option value="">곡을 선택해 주세요</option>
+                <option value="">{strings.ticket.emptySong}</option>
                 {songs.map((song) => (
                   <option value={song}>{song}</option>
                 ))}
@@ -84,23 +108,26 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
         }
       </div>
 
-      <button type="button" data-download-ticket>D-day 티켓 저장</button>
+      <button type="button" data-download-ticket
+        >{strings.ticket.downloadButton}</button
+      >
       <p class="privacy-note">
-        서로 다른 세 곡을 고르면 티켓에 담겨요. 이미지는 이 브라우저 안에서만
-        생성되며 선택값을 저장하지 않습니다.
+        {strings.ticket.privacyNote}
       </p>
       <p class="status" aria-live="polite" data-status></p>
       <p class="error" role="alert" hidden data-error></p>
       <div class="share-fallback">
-        <p class="share-fallback__title">이미지 저장이 안 되면</p>
+        <p class="share-fallback__title">{strings.common.fallbackHeading}</p>
         <div class="share-fallback__actions">
-          <a href="/og/default.jpg">기본 공유 이미지 보기</a>
-          <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+          <a href="/og/default.jpg">{strings.common.fallbackImageLink}</a>
+          <button type="button" data-copy-share
+            >{strings.common.fallbackCopyButton}</button
+          >
         </div>
         <code data-share-url>{shareUrl}</code>
       </div>
       <a class="share-builder__back" href="/"
-        >공연 안내로 돌아가기 <span aria-hidden="true">→</span></a
+        >{strings.ticket.backLink} <span aria-hidden="true">→</span></a
       >
     </form>
   </div>
@@ -140,6 +167,28 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
       let isGenerating = false;
       let shareButton: HTMLButtonElement | undefined;
 
+      // Localized copy comes in as data-* so this script never imports the
+      // ui dictionary — two of them would land in the client JS budget.
+      const messages = {
+        imageLoadFailed: root.dataset.msgImageLoadFailed ?? '',
+        canvasUnavailable: root.dataset.msgCanvasUnavailable ?? '',
+        exportFailed: root.dataset.msgExportFailed ?? '',
+      };
+      const emptySongLabel = root.dataset.emptySongLabel ?? '';
+      const previewExpandLabel = root.dataset.previewExpandLabel ?? '';
+      const previewCollapseLabel = root.dataset.previewCollapseLabel ?? '';
+      const copyFallbackTemplate = root.dataset.copyFallbackTemplate ?? '';
+      const copiedStatus = root.dataset.copiedStatus ?? '';
+      const generatingStatus = root.dataset.generatingStatus ?? '';
+      const validationError = root.dataset.validationError ?? '';
+      const savedStatus = root.dataset.savedStatus ?? '';
+      const shareLabel = root.dataset.shareLabel ?? '';
+      const shareTitle = root.dataset.shareTitle ?? '';
+      const sharedStatus = root.dataset.sharedStatus ?? '';
+      const shareCancelled = root.dataset.shareCancelled ?? '';
+      const shareFailed = root.dataset.shareFailed ?? '';
+      const clipboardTextTemplate = root.dataset.clipboardTextTemplate ?? '';
+
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
 
       if (previewToggle && previewFigure) {
@@ -150,8 +199,8 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           previewToggle.setAttribute('aria-expanded', String(expanded));
           previewFigure.classList.toggle('card-preview--expanded', expanded);
           previewToggle.textContent = expanded
-            ? '미리보기 작게 보기'
-            : '미리보기 크게 보기';
+            ? previewCollapseLabel
+            : previewExpandLabel;
           // Keep the control reachable when the enlarged preview collapses.
           previewToggle.focus();
           previewToggle.scrollIntoView({
@@ -173,10 +222,12 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           showDate: showDate ?? '2026-10-07',
           dDayLabel: getSelectedShowLabel({ now: new Date(), showStart }),
           songs: selections(),
+          emptySongLabel,
         });
       };
       const renderPreview = () => {
-        if (preview) renderCommands(preview, getLayout()).catch(() => {});
+        if (preview)
+          renderCommands(preview, getLayout(), messages).catch(() => {});
       };
       const refresh = () => {
         const selected = selections();
@@ -207,19 +258,21 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
 
       const currentShareUrl = window.location.href;
       if (shareUrl) shareUrl.textContent = currentShareUrl;
+      const copyFallback = () =>
+        copyFallbackTemplate.replace('{url}', currentShareUrl);
 
       copyShare?.addEventListener('click', async () => {
         if (!navigator.clipboard?.writeText) {
-          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
+          status.textContent = copyFallback();
           return;
         }
         try {
           await navigator.clipboard.writeText(
-            `The Weeknd 고양 팬 가이드 — ${currentShareUrl}`,
+            clipboardTextTemplate.replace('{url}', currentShareUrl),
           );
-          status.textContent = '텍스트 공유 문구를 복사했습니다.';
+          status.textContent = copiedStatus;
         } catch {
-          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
+          status.textContent = copyFallback();
         }
       });
 
@@ -227,7 +280,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
         if (isGenerating) return;
         const selected = selections();
         if (selected.length !== 3 || new Set(selected).size !== 3) {
-          error.textContent = '서로 다른 세 곡을 선택해 주세요.';
+          error.textContent = validationError;
           error.hidden = false;
           return;
         }
@@ -237,11 +290,11 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           button.disabled = true;
           error.hidden = true;
           error.textContent = '';
-          status.textContent = '이미지를 생성하고 있습니다…';
+          status.textContent = generatingStatus;
           const canvas = document.createElement('canvas');
-          const blob = await renderCommands(canvas, getLayout());
+          const blob = await renderCommands(canvas, getLayout(), messages);
           downloadBlob(blob, 'weeknd-goyang-dday-ticket.jpg');
-          status.textContent = 'JPEG 티켓을 저장했습니다.';
+          status.textContent = savedStatus;
           const file = new File([blob], 'weeknd-goyang-dday-ticket.jpg', {
             type: 'image/jpeg',
           });
@@ -249,26 +302,24 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
             shareButton?.remove();
             shareButton = document.createElement('button');
             shareButton.type = 'button';
-            shareButton.textContent = '공유';
+            shareButton.textContent = shareLabel;
             shareButton.addEventListener('click', async () => {
               try {
                 await navigator.share({
                   files: [file],
-                  title: 'The Weeknd 고양 D-day 티켓',
-                  text: 'The Weeknd 고양 D-day 티켓',
+                  title: shareTitle,
+                  text: shareTitle,
                   url: currentShareUrl,
                 });
-                status.textContent = '티켓 이미지를 공유했습니다.';
+                status.textContent = sharedStatus;
               } catch (shareError) {
                 if (
                   shareError instanceof DOMException &&
                   shareError.name === 'AbortError'
                 ) {
-                  status.textContent =
-                    '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.';
+                  status.textContent = shareCancelled;
                 } else {
-                  error.textContent =
-                    '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.';
+                  error.textContent = shareFailed;
                   error.hidden = false;
                 }
               }
@@ -277,9 +328,7 @@ const { showDates, showStarts, songs, shareUrl } = Astro.props;
           }
         } catch (caught) {
           error.textContent =
-            caught instanceof Error
-              ? caught.message
-              : '이미지 생성에 실패했습니다. 다시 시도해 주세요.';
+            caught instanceof Error ? caught.message : messages.exportFailed;
           error.hidden = false;
           status.textContent = '';
         } finally {

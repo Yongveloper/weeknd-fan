@@ -191,6 +191,27 @@ function checkPage({ relative, locale, route, html, fail }) {
     if (!html.includes(want))
       fail(relative, `the setlist page does not carry "${want}"`);
   }
+
+  // Task 9 — the share surface carries the same disclaimer as the page
+  if (route === 'share/setlist/') {
+    const want =
+      locale === 'ko' ? '예상 · 보장 아님' : 'Expected · not guaranteed';
+    if (!html.includes(want))
+      fail(relative, `the setlist share page does not carry "${want}"`);
+  }
+
+  // Task 9 — the english share builders carry no korean form copy
+  if (locale === 'en' && route.startsWith('share/')) {
+    const mainStart = html.indexOf('<main');
+    const mainEnd = html.indexOf('</main>');
+    if (mainStart === -1 || mainEnd === -1) {
+      fail(relative, 'no <main> — cannot check the content area');
+      return;
+    }
+    const main = html.slice(mainStart, mainEnd);
+    if (/[가-힣]/.test(stripAllowedKorean(main)))
+      fail(relative, 'korean text left in the english share builder');
+  }
 }
 
 if (failures.length) {

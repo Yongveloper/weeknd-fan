@@ -6,7 +6,15 @@ async function showMap(element: HTMLElement) {
   const wrapper = element.closest<HTMLElement>('.live-map');
   const status = wrapper?.querySelector<HTMLElement>('[data-map-status]');
   if (!wrapper || !status) return;
-  status.textContent = '지도를 불러오는 중입니다.';
+  // Localized copy comes in as data-* so this script never imports the ui
+  // dictionary — two of them would land in the client JS budget.
+  const loadingLabel = element.dataset.msgLoading ?? '';
+  const unavailableLabel = element.dataset.msgUnavailable ?? '';
+  const zoomInLabel = element.dataset.zoomInLabel ?? '';
+  const zoomOutLabel = element.dataset.zoomOutLabel ?? '';
+  const markerTitle = element.dataset.markerTitle ?? '';
+  const markerAlt = element.dataset.markerAlt ?? '';
+  status.textContent = loadingLabel;
 
   const unavailable = () => {
     clearTimeout(timeout);
@@ -14,8 +22,7 @@ async function showMap(element: HTMLElement) {
     element.setAttribute('aria-hidden', 'true');
     wrapper.dataset.mapState = 'error';
     status.hidden = false;
-    status.textContent =
-      '지도를 불러오지 못했습니다. 위 공식 약도와 길찾기 버튼을 이용하세요.';
+    status.textContent = unavailableLabel;
   };
   const timeout = setTimeout(unavailable, 15000);
 
@@ -28,7 +35,7 @@ async function showMap(element: HTMLElement) {
       minZoom: 10,
     }).setView(venue, 16);
     L.control
-      .zoom({ zoomInTitle: '지도 확대', zoomOutTitle: '지도 축소' })
+      .zoom({ zoomInTitle: zoomInLabel, zoomOutTitle: zoomOutLabel })
       .addTo(map);
     const tiles = L.tileLayer(
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -52,8 +59,8 @@ async function showMap(element: HTMLElement) {
     });
     tiles.addTo(map);
     L.marker(venue, {
-      title: '고양종합운동장',
-      alt: '고양종합운동장 위치',
+      title: markerTitle,
+      alt: markerAlt,
       icon: L.divIcon({
         className: 'venue-pin',
         iconSize: [28, 28],
@@ -61,7 +68,7 @@ async function showMap(element: HTMLElement) {
       }),
     })
       .addTo(map)
-      .bindTooltip('고양종합운동장', {
+      .bindTooltip(markerTitle, {
         permanent: true,
         direction: 'top',
         offset: [0, -18],

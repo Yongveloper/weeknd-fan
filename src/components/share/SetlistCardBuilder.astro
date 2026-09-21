@@ -1,11 +1,31 @@
 ---
+import StatusBadge from '../content/StatusBadge.astro';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
+
 interface Props {
+  locale: Locale;
   version: string;
   songs: string[];
   shareUrl: string;
+  archivePublished: boolean;
 }
-const { version, songs, shareUrl } = Astro.props;
+const { locale, version, songs, shareUrl, archivePublished } = Astro.props;
 const updated = version.replaceAll('-', '.');
+const strings = ui(locale).share;
+const countKey = songs.length === 1 ? 'one' : 'other';
+const lead = strings.setlist.lead[countKey].replace(
+  '{count}',
+  String(songs.length),
+);
+const songsCount = strings.setlist.songsCount[countKey].replace(
+  '{count}',
+  String(songs.length),
+);
+const basisValue = strings.setlist.basisValue.replace('{date}', updated);
+const shareTitle = strings.setlist.shareTitle.replace('{artist}', ARTIST);
+const clipboardText = strings.setlist.clipboardText.replace('{artist}', ARTIST);
 ---
 
 <section
@@ -13,13 +33,25 @@ const updated = version.replaceAll('-', '.');
   data-setlist-builder
   data-version={version}
   data-songs={JSON.stringify(songs)}
+  data-msg-image-load-failed={strings.errors.imageLoadFailed}
+  data-msg-canvas-unavailable={strings.errors.canvasUnavailable}
+  data-msg-export-failed={strings.errors.exportFailed}
+  data-copy-fallback-template={strings.common.copyFallback}
+  data-copied-status={strings.common.copiedStatus}
+  data-generating-status={strings.common.generatingStatus}
+  data-saved-status={strings.setlist.savedStatus}
+  data-share-label={strings.common.shareLabel}
+  data-share-title={shareTitle}
+  data-shared-status={strings.setlist.sharedStatus}
+  data-share-cancelled={strings.common.shareCancelled}
+  data-share-failed={strings.common.shareFailed}
+  data-clipboard-text-template={clipboardText}
 >
   <header>
     <h1>SETLIST POSTER</h1>
+    {!archivePublished && <StatusBadge locale={locale} status="expected" />}
     <p class="lead">
-      예상 셋리스트 {songs.length}곡을 세로형 이미지 한 장(1080×1638)으로
-      만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에
-      넣어 두세요.
+      {lead}
     </p>
   </header>
 
@@ -30,15 +62,14 @@ const updated = version.replaceAll('-', '.');
         width="1080"
         height="1638"
         role="img"
-        aria-label="예상 셋리스트 카드 미리보기"
+        aria-label={strings.setlist.previewAriaLabel}
       >
-        미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는
-        이미지와 같은 카드입니다.
+        {strings.setlist.previewFallback}
       </canvas>
       <figcaption>
-        미리보기 · 저장되는 이미지와 같습니다
+        {strings.setlist.previewCaption}
         <a href="/downloads/into-dawn-poster-original.png" download
-          >원본 디자인 PNG</a
+          >{strings.common.originalPngLabel}</a
         >
       </figcaption>
     </figure>
@@ -46,33 +77,37 @@ const updated = version.replaceAll('-', '.');
     <div class="share-builder__controls">
       <dl class="card-facts">
         <div>
-          <dt>담기는 곡</dt>
-          <dd>{songs.length}곡</dd>
+          <dt>{strings.setlist.songsIncludedLabel}</dt>
+          <dd>{songsCount}</dd>
         </div>
         <div>
-          <dt>기준</dt>
-          <dd>최근 2026년 공연 기록 · UPDATED {updated}</dd>
+          <dt>{strings.setlist.basisLabel}</dt>
+          <dd>{basisValue}</dd>
         </div>
       </dl>
 
-      <button type="button" data-download-setlist>셋리스트 카드 저장</button>
+      <button type="button" data-download-setlist
+        >{strings.setlist.downloadButton}</button
+      >
       <p class="privacy-note">
-        이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.
+        {strings.setlist.privacyNote}
       </p>
       <p class="status" aria-live="polite" data-status></p>
       <p class="error" role="alert" hidden data-error></p>
 
       <div class="share-fallback">
-        <p class="share-fallback__title">이미지 저장이 안 되면</p>
+        <p class="share-fallback__title">{strings.common.fallbackHeading}</p>
         <div class="share-fallback__actions">
-          <a href="/og/default.jpg">기본 공유 이미지 보기</a>
-          <button type="button" data-copy-share>텍스트 공유 문구 복사</button>
+          <a href="/og/default.jpg">{strings.common.fallbackImageLink}</a>
+          <button type="button" data-copy-share
+            >{strings.common.fallbackCopyButton}</button
+          >
         </div>
         <code data-share-url>{shareUrl}</code>
       </div>
 
       <a class="share-builder__back" href="/setlist/"
-        >곡별 관람 포인트 보기 <span aria-hidden="true">→</span></a
+        >{strings.setlist.backLink} <span aria-hidden="true">→</span></a
       >
     </div>
   </div>
@@ -99,29 +134,50 @@ const updated = version.replaceAll('-', '.');
       let shareButton: HTMLButtonElement | undefined;
       if (!button || !status || !error) return;
 
+      // Localized copy comes in as data-* so this script never imports the
+      // ui dictionary — two of them would land in the client JS budget.
+      const messages = {
+        imageLoadFailed: root.dataset.msgImageLoadFailed ?? '',
+        canvasUnavailable: root.dataset.msgCanvasUnavailable ?? '',
+        exportFailed: root.dataset.msgExportFailed ?? '',
+      };
+      const copyFallbackTemplate = root.dataset.copyFallbackTemplate ?? '';
+      const copiedStatus = root.dataset.copiedStatus ?? '';
+      const generatingStatus = root.dataset.generatingStatus ?? '';
+      const savedStatus = root.dataset.savedStatus ?? '';
+      const shareLabel = root.dataset.shareLabel ?? '';
+      const shareTitle = root.dataset.shareTitle ?? '';
+      const sharedStatus = root.dataset.sharedStatus ?? '';
+      const shareCancelled = root.dataset.shareCancelled ?? '';
+      const shareFailed = root.dataset.shareFailed ?? '';
+      const clipboardTextTemplate = root.dataset.clipboardTextTemplate ?? '';
+
       const layout = buildSetlistCardLayout();
 
-      // 미리보기: 저장되는 카드와 같은 명령을 화면 캔버스에 그린다.
-      // renderCommands 는 그린 뒤 JPEG blob 까지 만들므로 blob 실패는 무시한다(그림은 이미 남아 있다).
+      // Preview: draws the same commands as the saved card onto the on-screen
+      // canvas. renderCommands also builds a JPEG blob after drawing, so a
+      // blob failure here is ignored — the drawing itself already landed.
       if (preview) {
-        renderCommands(preview, layout).catch(() => {});
+        renderCommands(preview, layout, messages).catch(() => {});
       }
 
       const currentShareUrl = window.location.href;
       if (shareUrl) shareUrl.textContent = currentShareUrl;
+      const copyFallback = () =>
+        copyFallbackTemplate.replace('{url}', currentShareUrl);
 
       copyShare?.addEventListener('click', async () => {
         if (!navigator.clipboard?.writeText) {
-          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
+          status.textContent = copyFallback();
           return;
         }
         try {
           await navigator.clipboard.writeText(
-            `The Weeknd 고양 예상 셋리스트 — ${currentShareUrl}`,
+            clipboardTextTemplate.replace('{url}', currentShareUrl),
           );
-          status.textContent = '텍스트 공유 문구를 복사했습니다.';
+          status.textContent = copiedStatus;
         } catch {
-          status.textContent = `공유 문구를 직접 복사해 주세요: ${currentShareUrl}`;
+          status.textContent = copyFallback();
         }
       });
 
@@ -131,13 +187,14 @@ const updated = version.replaceAll('-', '.');
           isGenerating = true;
           button.disabled = true;
           error.hidden = true;
-          status.textContent = '이미지를 생성하고 있습니다…';
+          status.textContent = generatingStatus;
           const blob = await renderCommands(
             document.createElement('canvas'),
             layout,
+            messages,
           );
           downloadBlob(blob, 'weeknd-goyang-expected-setlist.jpg');
-          status.textContent = 'JPEG 셋리스트 카드를 저장했습니다.';
+          status.textContent = savedStatus;
           const file = new File([blob], 'weeknd-goyang-expected-setlist.jpg', {
             type: 'image/jpeg',
           });
@@ -145,26 +202,24 @@ const updated = version.replaceAll('-', '.');
             shareButton?.remove();
             shareButton = document.createElement('button');
             shareButton.type = 'button';
-            shareButton.textContent = '공유';
+            shareButton.textContent = shareLabel;
             shareButton.addEventListener('click', async () => {
               try {
                 await navigator.share({
                   files: [file],
-                  title: 'The Weeknd 고양 예상 셋리스트',
-                  text: 'The Weeknd 고양 예상 셋리스트',
+                  title: shareTitle,
+                  text: shareTitle,
                   url: currentShareUrl,
                 });
-                status.textContent = '셋리스트 카드를 공유했습니다.';
+                status.textContent = sharedStatus;
               } catch (shareError) {
                 if (
                   shareError instanceof DOMException &&
                   shareError.name === 'AbortError'
                 ) {
-                  status.textContent =
-                    '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.';
+                  status.textContent = shareCancelled;
                 } else {
-                  error.textContent =
-                    '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.';
+                  error.textContent = shareFailed;
                   error.hidden = false;
                 }
               }
@@ -173,9 +228,7 @@ const updated = version.replaceAll('-', '.');
           }
         } catch (caught) {
           error.textContent =
-            caught instanceof Error
-              ? caught.message
-              : '이미지 생성에 실패했습니다. 다시 시도해 주세요.';
+            caught instanceof Error ? caught.message : messages.exportFailed;
           error.hidden = false;
           status.textContent = '';
         } finally {

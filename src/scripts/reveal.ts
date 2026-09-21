@@ -34,8 +34,9 @@ if (!reduce) {
     });
   }
 
-  // 로드 후 삽입된 노드는 관찰되지 않음(정적 사이트, ClientRouter 없음).
-  // data-enter와 data-enter-group을 같은 요소에 함께 쓰지 않는다(불투명도 중복).
+  // Nodes inserted after load are never observed (static site, no
+  // ClientRouter). Never combine data-enter and data-enter-group on the
+  // same element — their opacity transitions would stack.
   const targets = document.querySelectorAll<HTMLElement>(
     '[data-enter]:not([data-enter="in"]):not([data-song-id]), [data-enter-group]:not([data-enter="in"]):not([data-song-id])',
   );

@@ -148,6 +148,12 @@ export const ko = {
       statusFallback:
         '지도가 표시되지 않으면 위 공식 약도와 길찾기 버튼을 이용하세요.',
       note: '{venue} · 지도를 확대하거나 위 길찾기 버튼으로 경로를 확인하세요.',
+      loadingLabel: '지도를 불러오는 중입니다.',
+      unavailableLabel:
+        '지도를 불러오지 못했습니다. 위 공식 약도와 길찾기 버튼을 이용하세요.',
+      zoomInLabel: '지도 확대',
+      zoomOutLabel: '지도 축소',
+      markerAlt: '{venue} 위치',
     },
     seatMap: {
       openOriginalAriaLabel: '좌석 안내도 원본 이미지 열기',
@@ -278,6 +284,80 @@ export const ko = {
       singAlongHeading: '떼창 포인트',
       sourcesHeading: '출처',
       noResults: '검색 결과가 없습니다.',
+    },
+  },
+  share: {
+    errors: {
+      imageLoadFailed: '배경 이미지를 불러오지 못했습니다. 다시 시도해 주세요.',
+      canvasUnavailable: '이미지를 그릴 수 없습니다. 다시 시도해 주세요.',
+      exportFailed: '이미지 생성에 실패했습니다. 다시 시도해 주세요.',
+    },
+    common: {
+      originalPngLabel: '원본 디자인 PNG',
+      fallbackHeading: '이미지 저장이 안 되면',
+      fallbackImageLink: '기본 공유 이미지 보기',
+      fallbackCopyButton: '텍스트 공유 문구 복사',
+      generatingStatus: '이미지를 생성하고 있습니다…',
+      shareLabel: '공유',
+      shareCancelled:
+        '공유를 취소했습니다. JPEG를 저장하거나 문구를 복사할 수 있습니다.',
+      shareFailed:
+        '공유에 실패했습니다. JPEG를 저장하거나 문구를 복사해 주세요.',
+      copiedStatus: '텍스트 공유 문구를 복사했습니다.',
+      copyFallback: '공유 문구를 직접 복사해 주세요: {url}',
+    },
+    ticket: {
+      page: {
+        title: 'D-day Ticket | {artist} 고양 팬 가이드',
+        description: '브라우저 안에서만 생성하는 {artist} 고양 D-day 티켓',
+      },
+      intro: '관람일과 가장 기다리는 세 곡을 골라 가로형 티켓을 만드세요.',
+      previewAriaLabel: 'D-day 티켓 미리보기',
+      previewFallback:
+        '미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는 이미지와 같은 티켓입니다.',
+      previewCaption: '가로형 티켓 · 저장되는 이미지와 같습니다',
+      previewExpand: '미리보기 크게 보기',
+      previewCollapse: '미리보기 작게 보기',
+      dateLegend: '관람일',
+      songLabels: ['첫 번째 곡', '두 번째 곡', '세 번째 곡'],
+      emptySong: '곡을 선택해 주세요',
+      downloadButton: 'D-day 티켓 저장',
+      privacyNote:
+        '서로 다른 세 곡을 고르면 티켓에 담겨요. 이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.',
+      backLink: '공연 안내로 돌아가기',
+      validationError: '서로 다른 세 곡을 선택해 주세요.',
+      savedStatus: 'JPEG 티켓을 저장했습니다.',
+      shareTitle: '{artist} 고양 D-day 티켓',
+      sharedStatus: '티켓 이미지를 공유했습니다.',
+      clipboardText: '{artist} 고양 팬 가이드 — {url}',
+    },
+    setlist: {
+      page: {
+        title: 'Setlist Card | {artist} 고양 팬 가이드',
+        description:
+          '브라우저 안에서만 생성하는 {artist} 고양 예상 셋리스트 카드',
+      },
+      lead: {
+        one: '예상 셋리스트 {count}곡을 세로형 이미지 한 장(1080×1638)으로 만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에 넣어 두세요.',
+        other:
+          '예상 셋리스트 {count}곡을 세로형 이미지 한 장(1080×1638)으로 만듭니다. 저장해서 스토리·단톡방에 올리거나, 공연 전 예습용으로 갤러리에 넣어 두세요.',
+      },
+      previewAriaLabel: '예상 셋리스트 카드 미리보기',
+      previewFallback:
+        '미리보기는 JavaScript가 켜져 있을 때 표시됩니다. 저장 버튼으로 만드는 이미지와 같은 카드입니다.',
+      previewCaption: '미리보기 · 저장되는 이미지와 같습니다',
+      songsIncludedLabel: '담기는 곡',
+      songsCount: { one: '{count}곡', other: '{count}곡' },
+      basisLabel: '기준',
+      basisValue: '최근 2026년 공연 기록 · UPDATED {date}',
+      downloadButton: '셋리스트 카드 저장',
+      privacyNote:
+        '이미지는 이 브라우저 안에서만 생성되며 선택값을 저장하지 않습니다.',
+      backLink: '곡별 관람 포인트 보기',
+      savedStatus: 'JPEG 셋리스트 카드를 저장했습니다.',
+      shareTitle: '{artist} 고양 예상 셋리스트',
+      sharedStatus: '셋리스트 카드를 공유했습니다.',
+      clipboardText: '{artist} 고양 예상 셋리스트 — {url}',
     },
   },
   sources: {

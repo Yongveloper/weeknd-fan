@@ -2,10 +2,21 @@ import { CARD_WIDTH, CARD_HEIGHT, type DrawCommand } from './cardDesign';
 
 export { CARD_WIDTH, CARD_HEIGHT } from './cardDesign';
 
+/** Localized failure text. Passed in so this client module never imports a
+ *  dictionary — two of them would land in the JS budget. */
+export type CanvasMessages = {
+  imageLoadFailed: string;
+  canvasUnavailable: string;
+  exportFailed: string;
+};
+
 const images = new Map<string, Promise<HTMLImageElement>>();
 const generations = new WeakMap<HTMLCanvasElement, number>();
 
-function loadImage(src: string): Promise<HTMLImageElement> {
+function loadImage(
+  src: string,
+  imageLoadFailed: string,
+): Promise<HTMLImageElement> {
   let pending = images.get(src);
   if (!pending) {
     pending = new Promise((resolve, reject) => {
@@ -13,9 +24,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
       image.onload = () => resolve(image);
       image.onerror = () => {
         images.delete(src);
-        reject(
-          new Error('배경 이미지를 불러오지 못했습니다. 다시 시도해 주세요.'),
-        );
+        reject(new Error(imageLoadFailed));
       };
       image.src = src;
     });
@@ -27,6 +36,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 export async function renderCommands(
   canvas: HTMLCanvasElement,
   commands: DrawCommand[],
+  messages: CanvasMessages,
 ): Promise<Blob> {
   const generation = (generations.get(canvas) ?? 0) + 1;
   generations.set(canvas, generation);
@@ -46,7 +56,10 @@ export async function renderCommands(
     ...commands
       .filter((command) => command.kind === 'image')
       .map(async (command) => {
-        loadedImages.set(command.src, await loadImage(command.src));
+        loadedImages.set(
+          command.src,
+          await loadImage(command.src, messages.imageLoadFailed),
+        );
       }),
     ...[...fontText].map(([font, text]) => document.fonts?.load(font, text)),
   ]);
@@ -57,8 +70,7 @@ export async function renderCommands(
   canvas.width = surface?.width ?? CARD_WIDTH;
   canvas.height = surface?.height ?? CARD_HEIGHT;
   const context = canvas.getContext('2d');
-  if (!context)
-    throw new Error('이미지를 그릴 수 없습니다. 다시 시도해 주세요.');
+  if (!context) throw new Error(messages.canvasUnavailable);
 
   for (const command of commands) {
     if (command.kind === 'surface') continue;
@@ -202,11 +214,7 @@ export async function renderCommands(
   return new Promise((resolve, reject) => {
     canvas.toBlob(
       (blob) =>
-        blob
-          ? resolve(blob)
-          : reject(
-              new Error('이미지 생성에 실패했습니다. 다시 시도해 주세요.'),
-            ),
+        blob ? resolve(blob) : reject(new Error(messages.exportFailed)),
       'image/jpeg',
       0.92,
     );

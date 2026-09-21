@@ -139,6 +139,12 @@ export const en: UiStrings = {
       statusFallback:
         'If the map does not load, use the official sketch map and directions buttons above.',
       note: '{venue} · Zoom the map or use the directions buttons above to check your route.',
+      loadingLabel: 'Loading the map…',
+      unavailableLabel:
+        "The map couldn't load. Use the official sketch map and directions buttons above.",
+      zoomInLabel: 'Zoom in',
+      zoomOutLabel: 'Zoom out',
+      markerAlt: '{venue} location',
     },
     seatMap: {
       openOriginalAriaLabel: 'Open the original seating guide image',
@@ -272,6 +278,82 @@ export const en: UiStrings = {
       singAlongHeading: 'Sing-along moment',
       sourcesHeading: 'Sources',
       noResults: 'No matching songs.',
+    },
+  },
+  share: {
+    errors: {
+      imageLoadFailed: 'Could not load the background image. Please try again.',
+      canvasUnavailable: 'Could not draw the image. Please try again.',
+      exportFailed: 'Could not generate the image. Please try again.',
+    },
+    common: {
+      originalPngLabel: 'Original design PNG',
+      fallbackHeading: "If the image won't save",
+      fallbackImageLink: 'View the default share image',
+      fallbackCopyButton: 'Copy the text share caption',
+      generatingStatus: 'Generating the image…',
+      shareLabel: 'Share',
+      shareCancelled:
+        'Share canceled. You can save the JPEG or copy the caption instead.',
+      shareFailed:
+        'Share failed. Please save the JPEG or copy the caption instead.',
+      copiedStatus: 'Copied the text share caption.',
+      copyFallback: 'Please copy this share caption yourself: {url}',
+    },
+    ticket: {
+      page: {
+        title: 'D-day Ticket | {artist} Goyang Fan Guide',
+        description:
+          'A {artist} Goyang D-day ticket, generated entirely in your browser',
+      },
+      intro:
+        "Choose your show date and the three songs you're most looking forward to, then build a landscape ticket.",
+      previewAriaLabel: 'D-day ticket preview',
+      previewFallback:
+        "The preview appears only when JavaScript is on. It's the same ticket as the image the save button creates.",
+      previewCaption: 'Landscape ticket · same as the saved image',
+      previewExpand: 'Expand the preview',
+      previewCollapse: 'Collapse the preview',
+      dateLegend: 'Show date',
+      songLabels: ['First song', 'Second song', 'Third song'],
+      emptySong: 'Choose a song',
+      downloadButton: 'Save D-day ticket',
+      privacyNote:
+        "Pick three different songs and they'll appear on your ticket. The image is generated only in this browser, and your choices are not saved.",
+      backLink: 'Back to the concert guide',
+      validationError: 'Please choose three different songs.',
+      savedStatus: 'Saved the JPEG ticket.',
+      shareTitle: '{artist} Goyang D-day Ticket',
+      sharedStatus: 'Shared the ticket image.',
+      clipboardText: '{artist} Goyang Fan Guide — {url}',
+    },
+    setlist: {
+      page: {
+        title: 'Setlist Card | {artist} Goyang Fan Guide',
+        description:
+          'A {artist} Goyang expected setlist card, generated entirely in your browser',
+      },
+      lead: {
+        one: 'This turns the 1 song in the expected setlist into a single portrait image (1080×1638). Save it to post to your story or group chat, or keep it in your gallery to preview before the show.',
+        other:
+          'This turns the {count} songs in the expected setlist into a single portrait image (1080×1638). Save it to post to your story or group chat, or keep it in your gallery to preview before the show.',
+      },
+      previewAriaLabel: 'Expected setlist card preview',
+      previewFallback:
+        "The preview appears only when JavaScript is on. It's the same card as the image the save button creates.",
+      previewCaption: 'Preview · same as the saved image',
+      songsIncludedLabel: 'Songs included',
+      songsCount: { one: '1 song', other: '{count} songs' },
+      basisLabel: 'Basis',
+      basisValue: 'Based on recent 2026 show records · UPDATED {date}',
+      downloadButton: 'Save setlist card',
+      privacyNote:
+        'The image is generated only in this browser, and your choices are not saved.',
+      backLink: 'See what to watch for, song by song',
+      savedStatus: 'Saved the JPEG setlist card.',
+      shareTitle: '{artist} Goyang Expected Setlist',
+      sharedStatus: 'Shared the setlist card.',
+      clipboardText: '{artist} Goyang Expected Setlist — {url}',
     },
   },
   sources: {

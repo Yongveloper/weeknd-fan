@@ -15,6 +15,8 @@ const albumSelect = root?.querySelector<HTMLSelectElement>(
   '[data-setlist-album]',
 );
 const count = root?.querySelector<HTMLElement>('[data-setlist-count]');
+const countOneTemplate = count?.dataset.countOne ?? '';
+const countOtherTemplate = count?.dataset.countOther ?? '';
 const empty = root?.parentElement?.querySelector<HTMLElement>(
   '[data-setlist-empty]',
 );
@@ -97,7 +99,9 @@ if (root && list && queryInput && albumSelect && count && empty && reset) {
       entry.row.hidden = hidden;
     }
     for (const entry of visible) list.append(entry.row);
-    count.textContent = `${visible.length}곡 표시`;
+    const template =
+      visible.length === 1 ? countOneTemplate : countOtherTemplate;
+    count.textContent = template.replace('{count}', String(visible.length));
     empty.hidden = visible.length !== 0;
     syncControls();
     if (shouldFocusCount) count.focus();

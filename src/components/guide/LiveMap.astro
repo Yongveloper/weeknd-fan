@@ -13,10 +13,23 @@ const strings = ui(locale).guide.liveMap;
 const venue = bilingual(VENUE, locale);
 const ariaLabel = strings.ariaLabel.replace('{venue}', venue);
 const note = strings.note.replace('{venue}', venue);
+const markerAlt = strings.markerAlt.replace('{venue}', venue);
 ---
 
 <div class="live-map" role="region" aria-label={ariaLabel}>
-  <div class="live-map__canvas" data-venue-map inert aria-hidden="true"></div>
+  <div
+    class="live-map__canvas"
+    data-venue-map
+    data-msg-loading={strings.loadingLabel}
+    data-msg-unavailable={strings.unavailableLabel}
+    data-zoom-in-label={strings.zoomInLabel}
+    data-zoom-out-label={strings.zoomOutLabel}
+    data-marker-title={venue}
+    data-marker-alt={markerAlt}
+    inert
+    aria-hidden="true"
+  >
+  </div>
   <p class="live-map__status" role="status" data-map-status>
     {strings.statusFallback}
   </p>
