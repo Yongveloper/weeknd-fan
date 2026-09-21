@@ -102,4 +102,23 @@ const bare = pathWithoutLocale(Astro.url.pathname);
   .locale-switcher a[aria-current='true']::after {
     transform: scaleX(1);
   }
+
+  @media (max-width: 44rem) {
+    /* Inside the dropdown it is a row under the menu items, not a control
+       beside them, so the rule moves from the inline start to the block
+       start and the labels align with the links above. */
+    .locale-switcher {
+      border-inline-start: 0;
+      border-block-start: 1px solid
+        color-mix(in srgb, var(--ivory) 14%, transparent);
+      margin-block-start: 0.35rem;
+      padding-block-start: 0.35rem;
+      padding-inline-start: 0;
+    }
+
+    .locale-switcher ul {
+      justify-content: flex-start;
+      padding-inline: var(--gutter);
+    }
+  }
 </style>

@@ -65,10 +65,10 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
                 ))
               }
             </ul>
+            <LocaleSwitcher locale={locale} />
           </div>
         </details>
       </mobile-navigation>
-      <LocaleSwitcher locale={locale} />
     </nav>
   </div>
 </header>
@@ -149,7 +149,15 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
   }
 
   .site-header__nav .disclosure__panel {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.6rem;
     width: 100%;
+  }
+
+  .site-header__nav .disclosure__panel > .site-header__nav-list {
+    flex: 1 1 auto;
   }
 
   .site-header__edition {
@@ -316,6 +324,17 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 
     .site-header__nav-list li {
       width: 100%;
+    }
+
+    /* On a phone the panel is a dropdown, so the switcher belongs in it as a
+       final row rather than beside the hamburger, where it competed with the
+       wordmark for the only line it had. */
+    .site-header__nav .disclosure__panel {
+      display: grid;
+      grid-template-columns: 1fr;
+      justify-content: stretch;
+      justify-items: stretch;
+      gap: 0;
     }
 
     .site-header__nav details:not([open]) > .disclosure__panel {
