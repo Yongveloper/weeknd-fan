@@ -168,12 +168,17 @@ const overlayTranslatedAt = z
     value instanceof Date ? value.toISOString().slice(0, 10) : value,
   );
 
-const overlayCommon = z.object({
-  title: z.string(),
-  summary: z.string(),
-  sourceHash: z.string().regex(/^[0-9a-f]{16}$/),
-  translatedAt: overlayTranslatedAt,
-});
+// .strict() so a stray or misspelled field (a leftover `status` copied from
+// the Korean frontmatter, `translated_at`, ...) fails the build instead of
+// silently vanishing — there is no other guard on 106 hand-written overlays.
+const overlayCommon = z
+  .object({
+    title: z.string(),
+    summary: z.string(),
+    sourceHash: z.string().regex(/^[0-9a-f]{16}$/),
+    translatedAt: overlayTranslatedAt,
+  })
+  .strict();
 
 const guidesI18n = defineCollection({
   loader: glob({ base: './src/data/i18n', pattern: '*/guides/**/*.md' }),

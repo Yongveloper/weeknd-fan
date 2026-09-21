@@ -6,37 +6,50 @@ import enSources from '../../../data/i18n/en/sources.json';
 
 export type OverlayMeta = { sourceHash: string; translatedAt: string };
 
+// JSON never carries a `Date`, but this stays tolerant of one (and
+// normalizes to the plain ISO date string `OverlayMeta` promises) so it
+// matches `overlayCommon` in content.config.ts and can be exercised with
+// the same fixtures a test constructs directly.
+const overlayTranslatedAt = z
+  .union([z.date(), z.iso.date()])
+  .transform((value) =>
+    value instanceof Date ? value.toISOString().slice(0, 10) : value,
+  );
+
 const meta = {
   sourceHash: z.string().regex(/^[0-9a-f]{16}$/),
-  translatedAt: z.iso.date(),
+  translatedAt: overlayTranslatedAt,
 };
 
-const setlistSchema = z.record(
-  z.string(),
-  z.object({
+// .strict() so a stray or misspelled key in a hand-written JSON bundle entry
+// (e.g. a leftover `status`) fails the build instead of vanishing silently.
+export const setlistEntrySchema = z
+  .object({
     title: z.string(),
     summary: z.string(),
     liveNote: z.string(),
     singAlongNote: z.string(),
     ...meta,
-  }),
-);
+  })
+  .strict();
 
-const sourcesSchema = z.record(
-  z.string(),
-  z.object({ name: z.string(), ...meta }),
-);
+export const sourceEntrySchema = z
+  .object({ name: z.string(), ...meta })
+  .strict();
 
-const concertSchema = z.record(
-  z.string(),
-  z.object({
+export const concertEntrySchema = z
+  .object({
     title: z.string(),
     summary: z.string(),
     ageRestriction: z.string(),
     shows: z.array(z.object({ dateLabel: z.string() })).length(2),
     ...meta,
-  }),
-);
+  })
+  .strict();
+
+const setlistSchema = z.record(z.string(), setlistEntrySchema);
+const sourcesSchema = z.record(z.string(), sourceEntrySchema);
+const concertSchema = z.record(z.string(), concertEntrySchema);
 
 export type SetlistOverlay = z.infer<typeof setlistSchema>[string];
 export type SourceOverlay = z.infer<typeof sourcesSchema>[string];
