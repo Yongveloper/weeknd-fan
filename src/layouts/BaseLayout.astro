@@ -8,6 +8,7 @@ import BackToTop from '../components/ui/BackToTop.astro';
 import DawnSky from '../components/visual/DawnSky.astro';
 import FilmGrain from '../components/visual/FilmGrain.astro';
 import type { Locale } from '../lib/i18n/locales';
+import { localePreferenceScript } from '../lib/i18n/preference';
 import { alternateLinks } from '../lib/seo/alternates';
 import { ui } from '../lib/i18n/ui';
 import { headerFontAssets } from '../lib/fonts/headerFontAssets';
@@ -57,6 +58,11 @@ const preloadSkyTexture = cloudSky || lunarSky;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {
+      /* First in <head>: it may replace this document, and everything below
+        would be work thrown away. See lib/i18n/preference.ts. */
+    }
+    <script is:inline set:html={localePreferenceScript} />
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     {
