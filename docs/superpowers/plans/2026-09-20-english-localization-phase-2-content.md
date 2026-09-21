@@ -1338,7 +1338,7 @@ EOF
   `bilingual()` 로 나오고, `VENUE_FULL.ko` 는 단위 테스트가 정본 `concert.venue` 와
   같은지 검사한다. 즉 이미 정본에 묶여 있으므로 오버레이가 중복 관리할 이유가 없다.
   정본 JSON의 `venue` 필드는 그 테스트의 기준값으로 계속 쓰인다.
-- `ageRestriction` 「만 19세 이상」 → `19 and over (Korean age reckoning)`. 관람객이 오해하면 입장이 막히므로 기준을 명시한다.
+- `ageRestriction` 「만 19세 이상」 → `Ages 19 and over`. `만`은 이미 국제 통용 나이 계산(만 나이)을 뜻하므로 괄호 설명을 덧붙이면 존재하지 않는 별도 규정이 있다는 오해를 부른다.
 - `shows[].dateLabel` 「2026.10.07 WED」 → `Wed 7 Oct 2026`. 배열 길이는 정본과 같아야 하며(`.length(2)`), 순서도 같다.
 
 - [ ] **Step 1: sources 대상과 해시를 뽑는다**
@@ -1382,7 +1382,7 @@ npm run i18n:hash -- concert/goyang-2026
   "goyang-2026": {
     "title": "The Weeknd: After Hours Til Dawn Tour — Goyang",
     "summary": "Two nights at Goyang Stadium · 고양종합운동장 on 7–8 October 2026.",
-    "ageRestriction": "19 and over (Korean age reckoning)",
+    "ageRestriction": "Ages 19 and over",
     "shows": [
       { "dateLabel": "Wed 7 Oct 2026" },
       { "dateLabel": "Thu 8 Oct 2026" }

@@ -61,20 +61,22 @@ export function jsonTranslatableText(collection, file, id) {
  * The JSON fields a translator rewrites beyond title/summary, in a fixed
  * order. Includes the shared `body` field (present on `setlist` and
  * `concert` via the common content schema) alongside each collection's own
- * prose fields — `transcript` for an SMS source record is rendered to
- * readers, so it is translatable too.
+ * prose fields. `sources` has none: it translates `name` only, which
+ * `jsonTranslatableText`'s `title` fallback already covers. `concert`
+ * excludes `venue` — the venue name is not translated; it is pinned to
+ * `proper-nouns.ts` by a unit test, and the overlay carries no `venue`
+ * field to update.
  */
 export function translatableJsonFields(collection, file) {
   if (collection === 'setlist') {
     return [file.body ?? '', file.liveNote, file.singAlongNote];
   }
   if (collection === 'sources') {
-    return [file.transcript ?? ''];
+    return [];
   }
   if (collection === 'concert') {
     return [
       file.body ?? '',
-      file.venue,
       file.ageRestriction,
       ...file.shows.map((show) => show.dateLabel),
     ];
