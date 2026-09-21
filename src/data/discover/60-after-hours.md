@@ -1,6 +1,6 @@
 ---
 title: 2020 · After Hours
-summary: After Hours는 2020년의 네 번째 정규 앨범(이 가이드 기준)이자 최근 앨범 3부작의 첫 장이다.
+summary: After Hours는 2020년의 네 번째 정규 앨범이자 최근 앨범 3부작의 첫 장이다.
 status: official
 lastVerifiedAt: 2026-08-29
 sources: [umc-after-hours, umc-hurry-up-tomorrow]

@@ -1,6 +1,6 @@
 ---
 title: 2015 · Beauty Behind the Madness
-summary: Beauty Behind the Madness는 2015년의 두 번째 정규 앨범(이 가이드 기준)으로, 넓은 팝 청중과 만난 전환점이다.
+summary: Beauty Behind the Madness는 2015년의 두 번째 정규 앨범으로, 넓은 팝 청중과 만난 전환점이다.
 status: official
 lastVerifiedAt: 2026-08-29
 sources: [umc-starboy]
