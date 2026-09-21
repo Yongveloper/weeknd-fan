@@ -11,6 +11,11 @@ export const en: UiStrings = {
     verifiedPrefix: 'Official info last checked',
     siteMap: 'Site map',
     officialTicketNotice: 'View official ticket notice',
+    credits: {
+      label: 'Credits',
+      build: 'Concept, content, and engineering',
+      design: 'Concept and design',
+    },
   },
   content: {
     koreanSourceNotice:

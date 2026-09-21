@@ -20,6 +20,11 @@ export const ko = {
     verifiedPrefix: '공식 정보 마지막 확인',
     siteMap: '사이트 지도',
     officialTicketNotice: '공식 티켓 공지 보기',
+    credits: {
+      label: '만든 사람',
+      build: '기획·콘텐츠·개발',
+      design: '기획·디자인',
+    },
   },
   content: {
     // 한국어 경로에서는 렌더되지 않지만 타입 원본이라 값이 필요하다

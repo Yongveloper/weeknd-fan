@@ -15,6 +15,21 @@ const strings = ui(locale);
 const footerNavigation = footerNavigationFor(locale);
 const concert = await getConcert(locale);
 const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
+
+/** `<wbr>` after the local part so a narrow column breaks the address where
+ *  a reader expects it, rather than mid-domain the way `overflow-wrap` would.
+ *  Built as markup because whitespace between JSX children would render as a
+ *  space inside the address. */
+const credits = ['yongveloper99@gmail.com', 'rbp0324@gmail.com'].map(
+  (email, index) => ({
+    role:
+      index === 0
+        ? strings.chrome.credits.build
+        : strings.chrome.credits.design,
+    email,
+    html: email.replace('@', '<wbr />@'),
+  }),
+);
 ---
 
 <footer class="site-footer">
@@ -47,6 +62,19 @@ const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
       {strings.chrome.officialTicketNotice}
       <span aria-hidden="true">↗</span>
     </a>
+    <div class="site-footer__colophon">
+      <p class="eyebrow">{strings.chrome.credits.label}</p>
+      <ul class="site-footer__credits">
+        {
+          credits.map(({ role, email, html }) => (
+            <li>
+              <span class="site-footer__role">{role}</span>
+              <a href={`mailto:${email}`} set:html={html} />
+            </li>
+          ))
+        }
+      </ul>
+    </div>
   </div>
 </footer>
 
@@ -111,11 +139,59 @@ const lastVerified = formatSeoulDate(new Date(concert.data.lastVerifiedAt));
     gap: 0.55rem;
   }
 
+  .site-footer__colophon {
+    grid-column: 1 / -1;
+    padding-top: 1.35rem;
+    border-top: 1px solid rgb(218 177 122 / 22%);
+  }
+
+  .site-footer__credits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 3rem;
+    margin: 0.85rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .site-footer__credits li {
+    min-width: 0;
+  }
+
+  .site-footer__role {
+    display: block;
+    color: var(--mist);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+  }
+
+  .site-footer__credits a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    overflow-wrap: anywhere;
+    color: var(--ivory);
+    font-size: 0.85rem;
+    font-weight: 450;
+    text-decoration: none;
+  }
+
+  .site-footer__credits a:hover,
+  .site-footer__credits a:focus-visible {
+    color: var(--amber);
+  }
+
   @media (max-width: 48rem) {
     .site-footer__inner {
       grid-template-columns: 1fr;
       gap: 1.5rem;
       align-items: start;
+    }
+
+    .site-footer__credits {
+      flex-direction: column;
+      gap: 0.9rem;
     }
   }
 </style>
