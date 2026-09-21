@@ -17,5 +17,7 @@ jobs:
           node-version: '22.14.0'
           cache: npm
       - run: npm ci
+      # tests/unit/official-embed.test.ts drives the custom element in a real browser.
+      - run: npx playwright install --with-deps chromium
       - run: npm run verify:core
       - run: npx wrangler deploy --dry-run
