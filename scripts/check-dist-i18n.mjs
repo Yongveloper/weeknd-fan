@@ -247,6 +247,22 @@ function checkPage({ relative, locale, route, html, fail }) {
     if (/^\s*lang="(ko|en)"/.exec(tipsBody ?? '')?.[1] !== 'en')
       fail(relative, 'the translated guide body is not marked lang="en"');
   }
+
+  // Phase 2 Task 4 — an untranslated body stays marked lang="ko" so assistive
+  // tech doesn't read korean prose in an english voice. goyang/ is fully
+  // translated as of Task 6; discover/ and setlist/ still carry the
+  // untranslated case. Note the `(?<!href)`: without it the check counts
+  // `hreflang="ko"` on the locale-switcher link and passes on a page with no
+  // real marking at all.
+  if (locale === 'en' && (route === 'discover/' || route === 'setlist/')) {
+    const notices = (chromeMain.match(NOTICE_ELEMENT) ?? []).length;
+    const marked = (chromeMain.match(/(?<!href)lang="ko"/g) ?? []).length;
+    if (notices > 0 && marked < notices)
+      fail(
+        relative,
+        `${notices} fallback notices but only ${marked} lang="ko" bodies`,
+      );
+  }
 }
 
 if (failures.length) {

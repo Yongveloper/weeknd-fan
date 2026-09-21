@@ -154,90 +154,96 @@ const hasEssentialSet =
     </form>
     <ol class="expected-setlist__list" data-setlist-list>
       {
-        entries.map((entry) => (
-          <li
-            data-song-id={entry.entry.id}
-            data-song-title={entry.data.songTitle.toLocaleLowerCase()}
-            data-song-album={entry.data.album}
-            data-essential-order={entry.data.essentialOrder ?? ''}
-          >
-            <Disclosure
-              locale={locale}
-              motion="fast"
-              class="expected-setlist__item"
+        entries.map((entry) => {
+          // The summary, liveNote and singAlongNote are korean source text
+          // until an overlay translates them; mark that explicitly so
+          // assistive tech doesn't speak korean prose in an english voice.
+          const contentLang = entry.translated ? locale : DEFAULT_LOCALE;
+          return (
+            <li
+              data-song-id={entry.entry.id}
+              data-song-title={entry.data.songTitle.toLocaleLowerCase()}
+              data-song-album={entry.data.album}
+              data-essential-order={entry.data.essentialOrder ?? ''}
             >
-              <span slot="summary" class="expected-setlist__song">
-                {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
-              </span>
-              {/* Visual density hint only — album is announced in the expanded metadata below. */}
-              <span
-                slot="meta"
-                class="expected-setlist__album-tag"
-                aria-hidden="true"
+              <Disclosure
+                locale={locale}
+                motion="fast"
+                class="expected-setlist__item"
               >
-                {entry.data.album}
-              </span>
-              <div class="expected-setlist__detail">
-                {!entry.translated && locale !== DEFAULT_LOCALE && (
-                  <SourceLanguageNotice locale={locale} />
-                )}
-                <div class="song-meta">
-                  {(() => {
-                    const album = findAlbumByTitle(albums, entry.data.album);
-                    return album ? (
-                      <AlbumCover locale={locale} album={album} size={48} />
-                    ) : null;
-                  })()}
-                  <span class="song-meta__album">{entry.data.album}</span>
-                  <span class="song-meta__pill">
-                    {strings.confidenceLabel.replace(
-                      '{level}',
-                      entry.data.confidence,
-                    )}
-                  </span>
-                </div>
+                <span slot="summary" class="expected-setlist__song">
+                  {twoDigits(entry.data.expectedOrder)} {entry.data.songTitle}
+                </span>
+                {/* Visual density hint only — album is announced in the expanded metadata below. */}
+                <span
+                  slot="meta"
+                  class="expected-setlist__album-tag"
+                  aria-hidden="true"
+                >
+                  {entry.data.album}
+                </span>
+                <div class="expected-setlist__detail">
+                  {!entry.translated && locale !== DEFAULT_LOCALE && (
+                    <SourceLanguageNotice locale={locale} />
+                  )}
+                  <div class="song-meta">
+                    {(() => {
+                      const album = findAlbumByTitle(albums, entry.data.album);
+                      return album ? (
+                        <AlbumCover locale={locale} album={album} size={48} />
+                      ) : null;
+                    })()}
+                    <span class="song-meta__album">{entry.data.album}</span>
+                    <span class="song-meta__pill">
+                      {strings.confidenceLabel.replace(
+                        '{level}',
+                        entry.data.confidence,
+                      )}
+                    </span>
+                  </div>
 
-                <div class="song-block">
-                  <p class="eyebrow">BEFORE</p>
-                  <h3>{strings.beforeHeading}</h3>
-                  <p>{entry.data.summary}</p>
-                </div>
-                <div class="song-block">
-                  <p class="eyebrow">ON STAGE</p>
-                  <h3>{strings.onStageHeading}</h3>
-                  <p>{entry.data.liveNote}</p>
-                </div>
-                <div class="song-block">
-                  <p class="eyebrow">SING ALONG</p>
-                  <h3>{strings.singAlongHeading}</h3>
-                  <p>{entry.data.singAlongNote}</p>
-                </div>
+                  <div class="song-block">
+                    <p class="eyebrow">BEFORE</p>
+                    <h3>{strings.beforeHeading}</h3>
+                    <p lang={contentLang}>{entry.data.summary}</p>
+                  </div>
+                  <div class="song-block">
+                    <p class="eyebrow">ON STAGE</p>
+                    <h3>{strings.onStageHeading}</h3>
+                    <p lang={contentLang}>{entry.data.liveNote}</p>
+                  </div>
+                  <div class="song-block">
+                    <p class="eyebrow">SING ALONG</p>
+                    <h3>{strings.singAlongHeading}</h3>
+                    <p lang={contentLang}>{entry.data.singAlongNote}</p>
+                  </div>
 
-                {entry.data.officialListenUrl && (
-                  <div class="song-embed">
-                    <OfficialEmbed
+                  {entry.data.officialListenUrl && (
+                    <div class="song-embed">
+                      <OfficialEmbed
+                        locale={locale}
+                        url={entry.data.officialListenUrl}
+                        songTitle={entry.data.songTitle}
+                      />
+                    </div>
+                  )}
+
+                  <div class="song-sources">
+                    <h3>{strings.sourcesHeading}</h3>
+                    <SourceList
                       locale={locale}
-                      url={entry.data.officialListenUrl}
-                      songTitle={entry.data.songTitle}
+                      sources={resolveSourceReferences(
+                        entry.data.observedIn,
+                        sources,
+                        locale,
+                      )}
                     />
                   </div>
-                )}
-
-                <div class="song-sources">
-                  <h3>{strings.sourcesHeading}</h3>
-                  <SourceList
-                    locale={locale}
-                    sources={resolveSourceReferences(
-                      entry.data.observedIn,
-                      sources,
-                      locale,
-                    )}
-                  />
                 </div>
-              </div>
-            </Disclosure>
-          </li>
-        ))
+              </Disclosure>
+            </li>
+          );
+        })
       }
     </ol>
     <p class="setlist-filter__empty" data-setlist-empty hidden>
