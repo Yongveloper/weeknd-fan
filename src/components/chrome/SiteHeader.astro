@@ -323,8 +323,10 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
       width: auto;
       padding: 0.35rem 0;
       border-block: 1px solid color-mix(in srgb, var(--ivory) 14%, transparent);
-      background: color-mix(in srgb, var(--night) 94%, transparent);
-      backdrop-filter: blur(16px);
+      /* Opaque: the panel covers the page's own text, so anything showing
+         through lands behind the menu labels. edition.css restates this with
+         the edition surface colour. */
+      background: var(--night);
     }
 
     .site-header__nav-list {

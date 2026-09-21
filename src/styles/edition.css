@@ -271,11 +271,18 @@ body[data-edition][data-cloud-sky] .site-footer {
   backdrop-filter: blur(10px) saturate(1.06);
   -webkit-backdrop-filter: blur(10px) saturate(1.06);
 }
-@media (max-width: 44rem) {
+/* 56rem, not 44rem: this has to cover the whole range where the nav is a
+   dropdown, which SiteHeader.astro widened to 56rem. Left at 44rem, the panel
+   between 705px and 896px fell back to the plain header styling.
+
+   The panel is opaque where the header bar is glass. The bar sits above the
+   page and reads against it; the dropdown sits over the page's own text, and
+   at 69.7% the article below it showed through the menu labels. Blur alone did
+   not separate them. `#10100d` is the colour the reduced-transparency branch
+   below already substitutes, so this adds no new surface. */
+@media (max-width: 56rem) {
   body[data-edition] .site-header .site-header__nav .disclosure__panel {
-    background: var(--glass-reflection), rgb(8 8 7 / 69.7%);
-    backdrop-filter: blur(10px) saturate(1.06);
-    -webkit-backdrop-filter: blur(10px) saturate(1.06);
+    background: var(--glass-reflection), #10100d;
   }
 }
 
