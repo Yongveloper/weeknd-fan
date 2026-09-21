@@ -1,7 +1,7 @@
 ---
 title: 2025 · Hurry Up Tomorrow
-summary: Hurry Up Tomorrow is the sixth studio album (as this guide counts them), released in 2025, and the final chapter of the trilogy connecting After Hours and Dawn FM.
-sourceHash: cf6512fe0e3b4f6e
+summary: Hurry Up Tomorrow is the sixth studio album, released in 2025, and the final chapter of the trilogy connecting After Hours and Dawn FM.
+sourceHash: b6dc3e29d13ec56f
 translatedAt: 2026-09-21
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: 2022 · Dawn FM
-summary: Dawn FM is the fifth studio album (as this guide counts them), released in 2022, and the second chapter of the recent album trilogy.
-sourceHash: f1d09b61aa397397
+summary: Dawn FM is the fifth studio album, released in 2022, and the second chapter of the recent album trilogy.
+sourceHash: 1b8a7ff45381aef7
 translatedAt: 2026-09-21
 ---
 

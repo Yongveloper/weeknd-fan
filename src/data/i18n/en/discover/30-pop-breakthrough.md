@@ -1,7 +1,7 @@
 ---
 title: 2015 · Beauty Behind the Madness
-summary: Beauty Behind the Madness is the second studio album (as this guide counts them), released in 2015, and the turning point where it met a wider pop audience.
-sourceHash: f95dcca577c12291
+summary: Beauty Behind the Madness is the second studio album, released in 2015, and the turning point where it met a wider pop audience.
+sourceHash: 2408366f647bdafa
 translatedAt: 2026-09-21
 ---
 

@@ -1,7 +1,7 @@
 ---
 title: 2020 · After Hours
-summary: After Hours is the fourth studio album (as this guide counts them), released in 2020, and the first chapter of the recent album trilogy.
-sourceHash: 1b615fa14a34902e
+summary: After Hours is the fourth studio album, released in 2020, and the first chapter of the recent album trilogy.
+sourceHash: 50de447c87fdf6b2
 translatedAt: 2026-09-21
 ---
 
