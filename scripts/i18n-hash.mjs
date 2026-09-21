@@ -8,6 +8,15 @@ import { readFile } from 'node:fs/promises';
 import process from 'node:process';
 import { translatableHash } from '../src/lib/i18n/content/hash.ts';
 import { parseMarkdownSource } from '../src/lib/i18n/content/source-text.ts';
+import {
+  jsonTranslatableText,
+  translatableJsonFields,
+} from '../src/lib/i18n/content/json-text.ts';
+
+// Re-exported (not just used locally) so this stays the one place that
+// imports the JSON-collection hashing logic from `src/`; `i18n-status.mjs`
+// and existing tests import it from here rather than duplicating the path.
+export { jsonTranslatableText, translatableJsonFields };
 
 const MARKDOWN_COLLECTIONS = ['guides', 'discover'];
 
@@ -37,49 +46,4 @@ export async function hashOf(target) {
     await readFile(`src/data/${collection}/${id}.json`, 'utf8'),
   );
   return translatableHash(jsonTranslatableText(collection, file, target));
-}
-
-/**
- * Builds the translatable text for one JSON source record.
- *
- * `setlist` and `concert` have `title`/`summary` like the markdown
- * collections. `sources` has neither — only `name` (and, for the SMS
- * variant, no `url`/`lastCheckedAt` either) — so `title` falls back to
- * `name` and `summary` is empty.
- */
-export function jsonTranslatableText(collection, file, id) {
-  const title = file.title ?? file.name;
-  if (!title) throw new Error(`Expected a title or name in ${id}`);
-  return {
-    title,
-    summary: file.summary ?? '',
-    body: JSON.stringify(translatableJsonFields(collection, file)),
-  };
-}
-
-/**
- * The JSON fields a translator rewrites beyond title/summary, in a fixed
- * order. Includes the shared `body` field (present on `setlist` and
- * `concert` via the common content schema) alongside each collection's own
- * prose fields. `sources` has none: it translates `name` only, which
- * `jsonTranslatableText`'s `title` fallback already covers. `concert`
- * excludes `venue` — the venue name is not translated; it is pinned to
- * `proper-nouns.ts` by a unit test, and the overlay carries no `venue`
- * field to update.
- */
-export function translatableJsonFields(collection, file) {
-  if (collection === 'setlist') {
-    return [file.body ?? '', file.liveNote, file.singAlongNote];
-  }
-  if (collection === 'sources') {
-    return [];
-  }
-  if (collection === 'concert') {
-    return [
-      file.body ?? '',
-      file.ageRestriction,
-      ...file.shows.map((show) => show.dateLabel),
-    ];
-  }
-  throw new Error(`Unknown collection: ${collection}`);
 }

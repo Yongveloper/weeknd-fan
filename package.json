@@ -15,6 +15,7 @@
     "test": "vitest run --passWithNoTests",
     "test:unit": "vitest run --passWithNoTests --exclude tests/unit/content-audit.test.ts",
     "audit:content": "vitest run tests/unit/content-audit.test.ts",
+    "audit:translations": "vitest run tests/unit/content-audit.test.ts -t \"translation audit\"",
     "test:e2e": "playwright test",
     "budget": "node scripts/check-performance-budget.mjs",
     "covers:verify": "node scripts/refresh-album-covers.mjs --verify",
@@ -24,7 +25,7 @@
     "i18n:hash": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/i18n-hash.mjs",
     "verify": "npm run lint && npm run format:check && npm run check && npm run audit:content && npm run test:unit && npm run build && npm run budget && npm run test:e2e",
     "check:dist": "node scripts/check-dist-i18n.mjs",
-    "verify:core": "npm run lint && npm run format:check && npm run check && npm run test:unit && npm run build && npm run budget && npm run check:dist",
+    "verify:core": "npm run lint && npm run format:check && npm run check && npm run test:unit && npm run audit:translations && npm run build && npm run budget && npm run check:dist",
     "deploy:dry-run": "wrangler deploy --dry-run",
     "assert:production-origin": "node scripts/assert-production-origin.mjs",
     "deploy": "npm run assert:production-origin && npm run build && wrangler deploy"

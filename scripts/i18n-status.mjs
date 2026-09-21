@@ -6,12 +6,19 @@
 // entry is `ok`.
 //   npm run i18n:status
 // Requires Node 22 type stripping to import the .ts hash/parser directly, so
-// the app and this tooling share one copy of the hashing logic.
-import { readFile, readdir } from 'node:fs/promises';
+// the app and this tooling share one copy of the hashing logic. The
+// directory walk itself lives in `src/lib/i18n/content/collect.ts` — shared
+// with the `translation-orphan`/`translation-stale` audit
+// (`tests/unit/content-audit.test.ts`) — so this script and that audit
+// cannot silently disagree about what "every overlay" means.
 import process from 'node:process';
 import { translatableHash } from '../src/lib/i18n/content/hash.ts';
 import { parseMarkdownSource } from '../src/lib/i18n/content/source-text.ts';
-import { jsonTranslatableText } from './i18n-hash.mjs';
+import { jsonTranslatableText } from '../src/lib/i18n/content/json-text.ts';
+import {
+  walkJsonCollection,
+  walkMarkdownCollection,
+} from '../src/lib/i18n/content/collect.ts';
 
 const LOCALES = ['en'];
 const MARKDOWN_COLLECTIONS = ['guides', 'discover'];
@@ -32,30 +39,27 @@ process.exit(failed ? 1 : 0);
 
 /**
  * Markdown collections keep one overlay file per id, mirroring the source
- * layout: `src/data/i18n/<locale>/<collection>/<id>.md`.
+ * layout: `src/data/i18n/<locale>/<collection>/<id>.md`. Only source-side
+ * entries are reported here — an overlay with no matching source is an
+ * orphan, which `npm run audit:translations` catches, not this status list.
  */
 async function checkMarkdownCollection(locale, collection) {
-  const names = (await readdir(`src/data/${collection}`))
-    .filter((name) => name.endsWith('.md'))
-    .sort();
-  for (const name of names) {
-    const id = name.replace(/\.md$/, '');
-    const raw = await readFile(`src/data/${collection}/${name}`, 'utf8');
+  for (const entry of await walkMarkdownCollection(locale, collection)) {
+    if (entry.sourceRaw === undefined) continue;
     const current = translatableHash(
-      parseMarkdownSource(raw, `${collection}/${id}`),
+      parseMarkdownSource(entry.sourceRaw, entry.id),
     );
-    let state;
-    try {
-      const overlay = await readFile(
-        `src/data/i18n/${locale}/${collection}/${name}`,
-        'utf8',
-      );
-      const recorded = /^sourceHash: (\S+)$/m.exec(overlay)?.[1];
-      state = recorded === current ? 'ok' : 'stale';
-    } catch {
-      state = 'missing';
-    }
-    report(locale, `${collection}/${id}`, state, current);
+    const recorded =
+      entry.overlayRaw === undefined
+        ? undefined
+        : /^sourceHash: (\S+)$/m.exec(entry.overlayRaw)?.[1];
+    const state =
+      recorded === undefined
+        ? 'missing'
+        : recorded === current
+          ? 'ok'
+          : 'stale';
+    report(locale, entry.id, state, current);
   }
 }
 
@@ -65,36 +69,19 @@ async function checkMarkdownCollection(locale, collection) {
  * translation, with a `sourceHash` field per id.
  */
 async function checkJsonCollection(locale, collection) {
-  const names = (await readdir(`src/data/${collection}`))
-    .filter((name) => name.endsWith('.json'))
-    .sort();
-  const overlay = await readJsonOverlay(locale, collection);
-  for (const name of names) {
-    const id = name.replace(/\.json$/, '');
-    const file = JSON.parse(
-      await readFile(`src/data/${collection}/${name}`, 'utf8'),
-    );
+  for (const entry of await walkJsonCollection(locale, collection)) {
+    if (entry.sourceFile === undefined) continue;
     const current = translatableHash(
-      jsonTranslatableText(collection, file, `${collection}/${id}`),
+      jsonTranslatableText(collection, entry.sourceFile, entry.id),
     );
-    const recorded = overlay?.[id]?.sourceHash;
+    const recorded = entry.overlayEntry?.sourceHash;
     const state =
       recorded === undefined
         ? 'missing'
         : recorded === current
           ? 'ok'
           : 'stale';
-    report(locale, `${collection}/${id}`, state, current);
-  }
-}
-
-async function readJsonOverlay(locale, collection) {
-  try {
-    return JSON.parse(
-      await readFile(`src/data/i18n/${locale}/${collection}.json`, 'utf8'),
-    );
-  } catch {
-    return null;
+    report(locale, entry.id, state, current);
   }
 }
 
