@@ -7,11 +7,13 @@ import {
   auditEssentialOrders,
   auditPublishedContent,
   auditSetlistRecords,
+  auditTranslations,
   parseSeoulDate,
   formatSeoulDate,
 } from '../../src/lib/content/audit';
 import { STATUS_LABELS, TRUST_STATUSES } from '../../src/lib/content/contracts';
 import { LOCALES } from '../../src/lib/i18n/locales';
+import { collectTranslationRecords } from '../../src/lib/i18n/content/collect';
 
 describe('content trust contract', () => {
   it('requires an all-or-nothing contiguous editorial essential order', () => {
@@ -956,5 +958,54 @@ describe('status labels', () => {
   it('keeps the unpublished label honest in both locales', () => {
     expect(STATUS_LABELS.ko.unpublished).toContain('확인 필요');
     expect(STATUS_LABELS.en.unpublished).toContain('needs checking');
+  });
+});
+
+describe('translation audit', () => {
+  const base = {
+    id: 'guides/32-tips-entry',
+    locale: 'en',
+    sourceExists: true,
+    sourceHash: 'aaaaaaaaaaaaaaaa',
+    currentHash: 'aaaaaaaaaaaaaaaa',
+    sourceUrls: ['https://a.test'],
+    translatedUrls: ['https://a.test'],
+  };
+
+  it('passes a translation that matches its source', () => {
+    expect(auditTranslations([base])).toEqual([]);
+  });
+
+  it('fails a translation whose source prose has moved on', () => {
+    expect(
+      auditTranslations([{ ...base, currentHash: 'bbbbbbbbbbbbbbbb' }]),
+    ).toEqual([{ id: 'en/guides/32-tips-entry', code: 'translation-stale' }]);
+  });
+
+  it('fails a translation that dropped a citation', () => {
+    expect(auditTranslations([{ ...base, translatedUrls: [] }])).toEqual([
+      { id: 'en/guides/32-tips-entry', code: 'translation-url-mismatch' },
+    ]);
+  });
+
+  it('fails a translation that invented a citation', () => {
+    expect(
+      auditTranslations([
+        { ...base, translatedUrls: ['https://a.test', 'https://b.test'] },
+      ]),
+    ).toEqual([
+      { id: 'en/guides/32-tips-entry', code: 'translation-url-mismatch' },
+    ]);
+  });
+
+  it('fails an overlay with no source entry', () => {
+    expect(auditTranslations([{ ...base, sourceExists: false }])).toEqual([
+      { id: 'en/guides/32-tips-entry', code: 'translation-orphan' },
+    ]);
+  });
+
+  it('has no stale, orphaned or under-cited translation on disk', async () => {
+    const records = await collectTranslationRecords();
+    expect(auditTranslations(records)).toEqual([]);
   });
 });

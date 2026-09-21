@@ -427,3 +427,38 @@ export function auditAlbums(input: {
 
   return issues;
 }
+
+export type TranslationAuditRecord = {
+  id: string;
+  locale: string;
+  sourceExists: boolean;
+  sourceHash: string;
+  currentHash: string;
+  sourceUrls: readonly string[];
+  translatedUrls: readonly string[];
+};
+
+/**
+ * Korean is the source of record. A translation that has drifted from it
+ * would publish wrong gate, time or prohibited-item information, so a
+ * mismatch stops the build rather than reaching a reader.
+ */
+export function auditTranslations(
+  records: TranslationAuditRecord[],
+): AuditIssue[] {
+  const issues: AuditIssue[] = [];
+  for (const record of records) {
+    const id = `${record.locale}/${record.id}`;
+    if (!record.sourceExists) {
+      issues.push({ id, code: 'translation-orphan' });
+      continue;
+    }
+    if (record.sourceHash !== record.currentHash)
+      issues.push({ id, code: 'translation-stale' });
+    const same =
+      record.sourceUrls.length === record.translatedUrls.length &&
+      record.sourceUrls.every((url, i) => url === record.translatedUrls[i]);
+    if (!same) issues.push({ id, code: 'translation-url-mismatch' });
+  }
+  return issues;
+}
