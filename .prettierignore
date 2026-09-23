@@ -11,3 +11,5 @@ playwright-report/
 # Local generated preview retained for reference; excluded from production.
 public/visual/eclipse-source-faithful-v1/
 .impeccable/
+# HyperFrames project — linted by `hyperframes check`
+video/

@@ -12,6 +12,7 @@ export default tseslint.config(
       'output/**',
       'test-results/**',
       'playwright-report/**',
+      'video/**',
     ],
   },
   eslint.configs.recommended,
