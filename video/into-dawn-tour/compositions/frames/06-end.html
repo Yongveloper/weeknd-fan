@@ -61,58 +61,81 @@
         position: absolute;
         margin: 0;
       }
-      /* Scene 1 — the site's glass surface under the real footer top block */
+      /* Scene 1 — the site's glass surface under the real footer top block, centered low */
       [id="06-end-glass"],
       [id="06-end-card"] {
-        top: 24%;
-        left: 75.6px;
-        width: 928.8px;
-        height: 432px;
+        top: 870px;
+        left: 161px;
+        width: 758px; /* footer text starts 64px in from the card's left */
+        height: 272px;
         box-sizing: border-box;
       }
       [id="06-end-glass"] {
-        background: rgb(12 12 10 / 63%);
+        background: rgb(12 12 10 / 43%);
         border: 1px solid #2A2926;
         backdrop-filter: blur(10px) saturate(1.06);
         -webkit-backdrop-filter: blur(10px) saturate(1.06);
       }
-      /* Footer screenshot cropped to source y 90–500 (stops above nav + emails);
-         lighten drops its dark page ground so the glass + sky show through */
+      /* The footer screenshot's three lines, each cropped as its own slice so the kicker and
+         the date can shrink to 70% while the title stays 1:1; lighten drops the dark page
+         ground so the glass + sky show through */
       [id="06-end-card"] {
         overflow: hidden;
         border: 1px solid transparent;
         mix-blend-mode: lighten;
       }
-      [id="06-end-footer"] {
+      [id="06-end-lines"] {
         position: absolute;
-        top: -94.8px;
+        inset: 0;
+        transform-origin: 0 0;
+      }
+      [id="06-end-lines"] > div {
+        position: absolute;
+        width: 758px;
+        overflow: hidden;
+        transform-origin: 0 0;
+      }
+      [id="06-end-lines"] img {
+        position: absolute;
         left: 0;
         width: 1232.8px;
         height: auto;
         max-width: none;
         display: block;
-        transform-origin: 0 0;
+        /* Push the screenshot's own dark ground (RGB ≤ 20) to black so lighten drops it and the
+           glass shows through evenly; text colors shift by under 1% */
+        filter: url(#hf06-drop-ground);
       }
-      /* Scene 2 — hairline + wordmark */
+      /* Slice = footer rows in video px (text band ± padding); top/left place the scaled text
+         at 44px top/bottom padding and 40/44px line gaps, left edge on the original 66px */
+      [id="06-end-line-kicker"] { top: 37.8px; left: 19.9px; height: 50px; transform: scale(0.7); }
+      [id="06-end-line-kicker"] img { top: -166px; }
+      [id="06-end-line-title"] { top: 98.2px; left: 0; height: 68px; }
+      [id="06-end-line-title"] img { top: -261px; }
+      [id="06-end-line-date"] { top: 195.1px; left: 19.9px; height: 56px; transform: scale(0.7); }
+      [id="06-end-line-date"] img { top: -385px; }
+      /* Scene 2 — wordmark + CTA sit centered at the top; the hairline divides them from the card */
       [id="06-end-hair"] {
-        top: 52%;
-        left: 75.6px;
-        right: 75.6px;
+        top: 850px;
+        left: 161px;
+        right: 161px;
         height: 1px;
         background: #2A2926;
         transform-origin: 0 50%;
       }
       [id="06-end-mark-mask"] {
-        top: 55%;
-        left: 75.6px;
+        top: 410px;
+        left: 0;
         height: 194.4px;
-        width: 864px;
+        width: 1080px;
         overflow: hidden;
       }
       [id="06-end-mark"] {
         position: absolute;
         top: 0;
         left: 0;
+        width: 100%;
+        text-align: center;
         margin: 0;
         font-family: "Bebas Neue", sans-serif;
         font-weight: 400;
@@ -124,11 +147,13 @@
       }
       /* Scene 3 — identity + CTA line */
       [id="06-end-cta"] {
-        top: 66%;
-        left: 75.6px;
+        top: 622px;
+        left: 0;
+        width: 1080px;
+        text-align: center;
         font-family: "Noto Sans KR", sans-serif;
         font-weight: 700;
-        font-size: 49.68px;
+        font-size: 34.8px; /* 70% of 49.68px: narrower than the wordmark */
         letter-spacing: -0.02em;
         line-height: 1.18;
         white-space: nowrap;
@@ -152,7 +177,12 @@
     <div data-hf-id="hf-261j" id="06-end-stage" class="clip" data-start="0" data-duration="3.2" data-track-index="2">
       <div data-hf-id="hf-06gl" id="06-end-glass"></div>
       <div data-hf-id="hf-q4wu" id="06-end-card">
-        <img data-hf-id="hf-ka69" id="06-end-footer" src="assets/screen-footer.png" alt="">
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="hf06-drop-ground" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.085" intercept="-0.085"/><feFuncG type="linear" slope="1.085" intercept="-0.085"/><feFuncB type="linear" slope="1.085" intercept="-0.085"/></feComponentTransfer></filter></svg>
+        <div data-hf-id="hf-ka69" id="06-end-lines">
+          <div id="06-end-line-kicker"><img src="assets/screen-footer.png" alt=""></div>
+          <div id="06-end-line-title"><img src="assets/screen-footer.png" alt=""></div>
+          <div id="06-end-line-date"><img src="assets/screen-footer.png" alt=""></div>
+        </div>
       </div>
       <div data-hf-id="hf-xcug" id="06-end-hair"></div>
       <div data-hf-id="hf-v5ao" id="06-end-mark-mask"><p data-hf-id="hf-kdei" id="06-end-mark">INTO:DAWN</p></div>
@@ -180,7 +210,7 @@
           0.05
         );
         tl.fromTo(
-          q("footer"),
+          q("lines"),
           { scale: 1.04 },
           { scale: 1, duration: 0.8, ease: "power2.out" },
           0.05
