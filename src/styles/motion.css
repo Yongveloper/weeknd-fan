@@ -78,12 +78,6 @@ html[data-motion-ready] [data-enter-group][data-enter='in'] > * {
   transition-delay: calc(var(--enter-i, 0) * var(--enter-stagger));
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  [data-motion-scene='running'] .eclipse-countdown__moon {
-    will-change: transform;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -14,7 +14,6 @@ class MoonLight extends HTMLElement {
   private switching = false;
   private reduced = matchMedia('(prefers-reduced-motion: reduce)');
   private hero?: HTMLElement;
-  private atmosphere?: HTMLElement;
   private observer?: IntersectionObserver;
   private visible = true;
   private variant: HeroVideoVariant = 'full';
@@ -24,8 +23,6 @@ class MoonLight extends HTMLElement {
     this.variant = heroVideoVariant(readMediaPolicy());
     this.dataset.variant = this.variant;
     this.hero = this.closest<HTMLElement>('[data-home-hero]') ?? undefined;
-    this.atmosphere =
-      document.querySelector<HTMLElement>('lunar-atmosphere') ?? undefined;
     this.observer = new IntersectionObserver(([entry]) => {
       this.visible = entry?.isIntersecting ?? false;
       if (this.visible && !document.hidden && !this.reduced.matches)
@@ -141,9 +138,6 @@ class MoonLight extends HTMLElement {
 
   private setLight(value: number) {
     this.dataset.light = value.toFixed(4);
-    const atmosphere = this.atmosphere;
-    atmosphere?.style.setProperty('--moon-light', value.toFixed(4));
-    if (atmosphere) atmosphere.dataset.light = value.toFixed(4);
     this.hero?.style.setProperty(
       '--scene-energy',
       Math.max(0, Math.min(value, 1)).toFixed(4),
@@ -156,7 +150,6 @@ class MoonLight extends HTMLElement {
   }
 
   private setPaused(paused: boolean) {
-    if (this.atmosphere) this.atmosphere.dataset.paused = String(paused);
     if (this.hero) this.hero.dataset.dawnPaused = String(paused);
   }
 

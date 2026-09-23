@@ -15,8 +15,3 @@ export function moonLightAt(time: number, phase: MoonPhase): number {
   const b = curve.values[index + 1] ?? a;
   return a + (b - a) * (frame - index);
 }
-
-/** Reading panels provide contrast; the underlying scene stays intact. */
-export function atmosphereAt() {
-  return { cloud: 0.35, dense: 1, light: 1, moon: 1 };
-}
