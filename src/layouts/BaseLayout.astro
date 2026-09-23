@@ -54,7 +54,7 @@ const analyticsToken = import.meta.env.PUBLIC_ANALYTICS_TOKEN;
 const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
-const pageTitle = `${wordmark.name} | ${title}`;
+const pageTitle = `${title} | ${wordmark.name}`;
 const alternates = noindex ? [] : alternateLinks(Astro.url.pathname, site);
 const ogLocale = locale === 'ko' ? 'ko_KR' : 'en_US';
 const ogAlternates = locale === 'ko' ? ['en_US'] : ['ko_KR'];

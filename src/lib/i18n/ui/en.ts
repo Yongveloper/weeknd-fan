@@ -316,7 +316,7 @@ export const en: UiStrings = {
       page: {
         title: 'D-day Ticket | {artist} Goyang Fan Guide',
         description:
-          'A {artist} Goyang D-day ticket, generated entirely in your browser',
+          "A D-day ticket for {artist}'s Goyang show, generated entirely in your browser",
       },
       intro:
         "Choose your show date and the three songs you're most looking forward to, then build a landscape ticket.",
@@ -343,7 +343,7 @@ export const en: UiStrings = {
       page: {
         title: 'Setlist Card | {artist} Goyang Fan Guide',
         description:
-          'A {artist} Goyang expected setlist card, generated entirely in your browser',
+          "An expected setlist card for {artist}'s Goyang show, generated entirely in your browser",
       },
       lead: {
         one: 'This turns the 1 song in the expected setlist into a single portrait image (1080×1638). Save it to post to your story or group chat, or keep it in your gallery to preview before the show.',

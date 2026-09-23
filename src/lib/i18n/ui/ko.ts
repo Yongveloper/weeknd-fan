@@ -54,9 +54,9 @@ export const ko = {
   },
   discover: {
     page: {
-      title: '{artist} 알기 | {artist} 고양 팬 가이드',
+      title: '위켄드 입문: 커리어·앨범·3부작 정리',
       description:
-        '공연 전 3분에 훑는 {artist}의 커리어, 앨범 구분, 그리고 두 3부작',
+        '공연 전 3분에 훑는 {artist}(위켄드)의 커리어, 앨범 구분, 그리고 두 3부작',
     },
     hero: {
       heading: '{artist}를 {phrase} 넘겨 보기',
@@ -105,9 +105,9 @@ export const ko = {
   },
   guide: {
     page: {
-      title: '콘서트 가이드 | {artist} 고양 팬 가이드',
+      title: '위켄드 고양종합운동장 콘서트 가이드',
       description:
-        '{artist} 2026 고양 공연 당일 가이드 — 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물',
+        '위켄드 내한 공연 당일 가이드. 고양종합운동장 오는 길, 좌석 안내, 현장 팁, 귀가와 준비물.',
       heading: '콘서트 가이드',
       intro:
         '확정된 공연 정보와 아직 발표되지 않은 운영 정보를 분리해 두고, 다른 공연 후기에서 반복된 경험은 따로 표시한 비공식 팬 가이드입니다.',
@@ -204,8 +204,9 @@ export const ko = {
   },
   home: {
     page: {
-      title: '{artist} 고양 팬 가이드',
-      description: '{artist} 2026 고양 공연을 위한 비공식·비영리 팬 가이드',
+      title: '위켄드 고양 내한 공연 팬 가이드 2026',
+      description:
+        '{artist}(위켄드) 2026년 10월 7·8일 고양종합운동장 내한 공연 비공식 팬 가이드. 예상 셋리스트, 오는 길과 좌석, 앨범 입문까지 한곳에.',
     },
     fanNote: {
       heading: '팬의 한마디',
@@ -269,9 +270,9 @@ export const ko = {
   setlist: {
     page: {
       titleArchived: 'WE WERE HERE | {artist} 고양 팬 가이드',
-      titleExpected: '예상 셋리스트 | {artist} 고양 팬 가이드',
+      titleExpected: '위켄드 내한 예상 셋리스트 2026 고양',
       description:
-        '최근 2026년 공연 기록을 바탕으로 한 {artist} 고양 공연 예상 셋리스트',
+        '최근 2026년 공연 기록을 바탕으로 한 {artist}(위켄드) 고양 공연 예상 셋리스트. 보장이 아닌 예상입니다.',
       headingArchived: '우리는 그곳에 있었다',
       headingExpected: '예상 셋리스트',
       intro:
