@@ -1,0 +1,63 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><title>INTO:DAWN — 실제 화면 투어 (B안)</title><style>
+@font-face{font-family:"Bebas Neue";src:url("assets/fonts/BebasNeue-400.woff2") format("woff2");}
+:root{--bg:#0B0B0A;--alt:#141310;--gold:#DAB17A;--ink:#F1EEE7;--muted:#C0BEB7;--hint:#8A877F;--line:#2A2926;
+--ko:"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;--disp:"Bebas Neue",Impact,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#050504;color:var(--ink);font-family:var(--ko);padding:40px 32px 80px}
+header.sheet{max-width:1400px;margin:0 auto 28px;display:flex;justify-content:space-between;align-items:end;border-bottom:1px solid var(--line);padding-bottom:16px}
+header.sheet h1{font-family:var(--disp);font-weight:400;font-size:44px;letter-spacing:.04em}
+header.sheet p{color:var(--muted);font-size:14px;margin-top:6px}
+.tag{font-size:12px;letter-spacing:.14em;color:var(--gold);border:1px solid var(--gold);padding:6px 10px}
+.grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:36px 28px}
+.cell{display:flex;flex-direction:column;gap:10px}
+.frame{aspect-ratio:9/16;container-type:inline-size;position:relative;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.frame *{position:absolute}
+.safe{inset:0;pointer-events:none;border-top:14cqw dashed rgba(218,177,122,.0)}
+.safe::before,.safe::after{content:"";position:absolute;left:0;right:0;border-top:1px dashed rgba(218,177,122,.35)}
+.safe::before{top:12%}.safe::after{top:80%}
+.safe i{top:0;bottom:0;right:14%;border-left:1px dashed rgba(218,177,122,.25)}
+.lbl{display:flex;justify-content:space-between;font-size:12px;letter-spacing:.1em;color:var(--muted)}
+.lbl b{color:var(--ink);letter-spacing:.14em}
+.note{font-size:13px;line-height:1.55;color:var(--muted)} .note strong{color:var(--ink)}
+.chip{align-self:flex-start;font-size:11px;letter-spacing:.12em;color:var(--gold);border:1px solid var(--line);padding:4px 8px}
+.k{font-family:var(--ko);font-weight:700;font-size:3.1cqw;letter-spacing:.14em;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.disp{font-family:var(--disp);font-weight:400;line-height:.88;letter-spacing:.02em;white-space:nowrap}
+.ko{font-family:var(--ko);font-weight:800;letter-spacing:-.02em;line-height:1.18}
+.hair{height:0;border-top:1px solid var(--line)}
+.shot{object-fit:cover;object-position:top center;border:1px solid var(--line)}
+.badge{font-family:var(--ko);font-weight:700;font-size:3.6cqw;color:var(--gold);border:.35cqw solid var(--gold);padding:1.2cqw 2.6cqw;background:rgba(11,11,10,.86);white-space:nowrap}
+.phone{border:.5cqw solid #2f2d29;border-radius:6cqw;overflow:hidden;background:#000}
+.phone img{position:static;width:100%;height:100%;object-fit:cover;object-position:top center;display:block}
+.fade{left:0;right:0;background:linear-gradient(to bottom,rgba(11,11,10,0),var(--bg))}
+.seam{grid-column:1/-1;border:1px solid var(--line);padding:18px 20px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.seam span{border:1px solid var(--line);padding:6px 10px;color:var(--ink)} .seam em{color:var(--gold);font-style:normal}
+.tokens{grid-column:1/-1;border:1px solid var(--line);padding:18px 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;font-size:13px;color:var(--muted)}
+.sw{display:flex;gap:8px;align-items:center}.sw i{width:22px;height:22px;border:1px solid var(--line);display:inline-block}
+</style></head><body>
+<header class="sheet"><div><h1>INTO:DAWN — 실제 화면 투어 (B안) · v2</h1><p>폰 속 실제 사이트 화면으로 셋리스트 → 가이드 → 티켓을 보여 준다.</p><p style="color:var(--gold)">v2 — discover 컷 추가(필수), 사이트 화면 속 앨범 커버 허용, 15초 유지·컷 길이 재배분</p></div><span class="tag">1080×1920 · 15s · 6 BEATS · SILENT</span></header>
+<main class="grid"><div class="cell"><div class="frame" id="frame-01"><p class="ko" style="top:13%;left:7cqw;font-size:6.2cqw">위켄드 고양 공연 가는 사람</p>
+<p class="ko" style="top:18%;left:7cqw;font-size:6.2cqw;color:var(--gold)">팸플릿 먼저 펼쳐 보기</p>
+<div class="phone" style="top:27%;left:19cqw;width:62cqw;height:112cqw"><img src="assets/screen-home-hero-live.png"></div><div class="safe"><i></i></div></div>
+<div class="lbl"><b>01 · OPEN THE GUIDE</b><span>0.0–2.5s</span></div><p class="note"><strong>폰 화면이 아래에서 올라와 자리 잡고</strong>, 두 줄 자막이 차례로. 폰 안 일식 영역은 실제 루프 영상 재생.</p><span class="chip">cut (open)</span></div><div class="cell"><div class="frame" id="frame-02"><p class="ko" style="top:13%;left:7cqw;font-size:6.2cqw">3분 만에 The Weeknd 알기</p>
+<p class="ko" style="top:18%;left:7cqw;font-size:5cqw;font-weight:700;color:var(--gold)">정규 앨범 6장 · 두 개의 Trilogy</p>
+<div class="phone" style="top:27%;left:19cqw;width:62cqw;height:112cqw"><img src="assets/screen-discover-top.png"></div><div class="safe"><i></i></div></div>
+<div class="lbl"><b>02 · MEET THE WEEKND</b><span>2.5–5.0s</span></div><p class="note"><strong>폰 속 discover 화면이 "한 장씩 넘겨 보기" 제목에서 시작해</strong> 정규 앨범 6장 목록으로 스크롤해.</p><span class="chip">crossfade</span></div><div class="cell"><div class="frame" id="frame-03"><p class="ko" style="top:13%;left:7cqw;font-size:6.2cqw">예상 셋리스트 38곡</p>
+<p class="badge" style="top:18.5%;left:7cqw">예상 · 보장 아님</p>
+<div class="phone" style="top:27%;left:19cqw;width:62cqw;height:112cqw"><img src="assets/screen-setlist-top.png"></div><div class="safe"><i></i></div></div>
+<div class="lbl"><b>03 · EXPECTED SETLIST</b><span>5.0–7.5s</span></div><p class="note"><strong>폰 안 화면이 위로 스크롤하다 배지 위치에서 0.5초 멈춤.</strong> 자막 배지는 고정.</p><span class="chip">crossfade</span></div><div class="cell"><div class="frame" id="frame-04"><p class="ko" style="top:13%;left:7cqw;font-size:5.4cqw">가는 길 · 좌석 · 준비물 · 귀가</p>
+<p class="ko" style="top:18%;left:7cqw;font-size:5cqw;font-weight:700;color:var(--gold)">10.7–8 고양종합운동장</p>
+<div class="phone" style="top:27%;left:19cqw;width:62cqw;height:112cqw"><img src="assets/screen-goyang-top.png"></div><div class="safe"><i></i></div></div>
+<div class="lbl"><b>04 · CONCERT GUIDE</b><span>7.5–10.0s</span></div><p class="note"><strong>카메라가 폰 속 "공식 공연 정보"로 살짝 밀고 들어간 뒤</strong> 가이드 목록으로 내려가.</p><span class="chip">crossfade</span></div><div class="cell"><div class="frame" id="frame-05"><p class="ko" style="top:13%;left:7cqw;font-size:6.2cqw">내 곡 3개로 D-day 티켓</p>
+<div class="phone" style="top:27%;left:19cqw;width:62cqw;height:112cqw;opacity:.35"><img src="assets/screen-home-guide.png"></div>
+<img src="assets/screen-ticket-export.png" style="top:45%;left:3cqw;width:94cqw;transform:rotate(-5deg);border:1px solid var(--line)"><div class="safe"><i></i></div></div>
+<div class="lbl"><b>05 · D-DAY TICKET</b><span>10.0–12.5s</span></div><p class="note"><strong>폰이 어두워지면서 티켓이 앞으로 튀어나와</strong> 화면 폭을 채워.</p><span class="chip">crossfade</span></div><div class="cell"><div class="frame" id="frame-06"><img class="shot" src="assets/screen-footer.png" style="top:24%;left:7cqw;width:86cqw;height:40cqw;object-position:top center">
+<div class="hair" style="top:52%;left:7cqw;right:7cqw"></div>
+<p class="disp" style="top:55%;left:7cqw;font-size:18cqw">INTO:DAWN</p>
+<p class="ko" style="top:66%;left:7cqw;font-size:4.6cqw;font-weight:700">비공식 팬 가이드 · <span style="position:static;color:var(--gold)">프로필 링크에서</span></p><div class="safe"><i></i></div></div>
+<div class="lbl"><b>06 · END CARD</b><span>12.5–15.0s</span></div><p class="note"><strong>실제 풋터 조각이 먼저 보이고</strong>, 워드마크와 링크 안내가 아래에서 올라와 정지. 이메일 영역은 잘라냄.</p><span class="chip">crossfade</span></div>
+<div class="seam"><em>SEAMS</em> <span>cut</span> → <span>crossfade</span> → <span>crossfade</span> → <span>crossfade</span> → <span>crossfade</span> → <span>crossfade</span></div>
+<div class="tokens"><div><em style="color:var(--gold);font-style:normal">PALETTE</em><div class="sw"><i style="background:#0B0B0A"></i>#0B0B0A ground</div><div class="sw"><i style="background:#F1EEE7"></i>#F1EEE7 ink</div><div class="sw"><i style="background:#DAB17A"></i>#DAB17A gold (one accent)</div><div class="sw"><i style="background:#2A2926"></i>#2A2926 hairline</div></div>
+<div><em style="color:var(--gold);font-style:normal">TYPE</em><p>Bebas Neue — 영문 디스플레이·숫자</p><p>Noto Sans KR 800 — 한글 헤드라인</p><p>Noto Sans KR 700 · 0.14em — 라벨</p></div>
+<div><em style="color:var(--gold);font-style:normal">SAFE ZONE</em><p>점선: 위 12% · 아래 20% · 오른쪽 14%는 인스타 UI가 덮음. 핵심 문구는 안쪽.</p></div>
+<div><em style="color:var(--gold);font-style:normal">BANS</em><p>공식 로고·포스터 없음 · 앨범 커버는 사이트 화면 속 그대로만 · 그림자·그라데이션 장식 없음 · 이메일 노출 없음 · 미발표 운영 정보 없음</p></div></div>
+</main></body></html>

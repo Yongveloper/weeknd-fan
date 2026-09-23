@@ -1,0 +1,197 @@
+<template>
+  <style>
+    @font-face {
+      font-family: "Noto Sans KR";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: block;
+      src: url("assets/fonts/noto-sans-kr/noto-sans-kr-latin-wght-normal.woff2") format("woff2");
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304,
+        U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    }
+    @font-face {
+      font-family: "Noto Sans KR";
+      font-style: normal;
+      font-weight: 100 900;
+      font-display: block;
+      src: url("assets/fonts/noto-sans-kr/noto-sans-kr-latin-ext-wght-normal.woff2") format("woff2");
+      unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308,
+        U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113,
+        U+2C60-2C7F, U+A720-A7FF;
+    }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1920px;
+      overflow: hidden;
+      color: #f1eee7;
+      font-family: "Noto Sans KR", sans-serif;
+    }
+
+    #root [data-f04="ground"] {
+      position: absolute;
+      inset: 0;
+      background: #0b0b0a;
+    }
+
+    /* Phone seat shared with frames 01-03: left 205, top 520, width 670. */
+    #root [data-f04="cam"] {
+      position: absolute;
+      left: 205px;
+      top: 520px;
+      width: 670px;
+      height: 1403px;
+    }
+
+    #root [data-f04="device"] {
+      position: absolute;
+      inset: 0;
+      padding: 18px;
+      border: 2px solid #2a2926;
+      border-radius: 75px;
+      background: #141310;
+    }
+
+    #root [data-f04="notch"] {
+      position: absolute;
+      z-index: 2;
+      top: 4px;
+      left: 278px;
+      width: 110px;
+      height: 8px;
+      border-radius: 999px;
+      background: #000;
+    }
+
+    #root [data-f04="screen"] {
+      position: relative;
+      width: 630px;
+      height: 1363px;
+      overflow: hidden;
+      border-radius: 58px;
+      background: #0b0b0a;
+    }
+
+    #root [data-f04="shot"] {
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: block;
+      width: 630px;
+      height: 1363px;
+    }
+
+    #root [data-f04="cap"] {
+      position: absolute;
+      inset: 0;
+    }
+
+    #root [data-f04="line1"],
+    #root [data-f04="line2"] {
+      position: absolute;
+      left: 76px;
+      margin: 0;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+      line-height: 1.18;
+    }
+
+    #root [data-f04="line1"] {
+      top: 250px;
+      font-size: 58px;
+      font-weight: 800;
+      color: #f1eee7;
+    }
+
+    #root [data-f04="line2"] {
+      top: 346px;
+      font-size: 54px;
+      font-weight: 700;
+      color: #dab17a;
+    }
+
+    #root [data-f04="word"] {
+      display: inline-block;
+    }
+  </style>
+
+  <div data-hf-id="hf-46mp" id="root" data-composition-id="04-guide" data-width="1080" data-height="1920" data-duration="3.4">
+    <div data-hf-id="hf-8ua7" id="04-guide-ground" data-f04="ground" class="clip" data-start="0" data-duration="3.4" data-track-index="0"></div>
+
+    <div data-hf-id="hf-hf5d" id="04-guide-cam" data-f04="cam" class="clip" data-start="0" data-duration="3.4" data-track-index="1" data-layout-allow-overflow="">
+      <div data-hf-id="hf-xoed" id="04-guide-device" data-f04="device" role="img" aria-label="/goyang/ 공식 공연 정보 화면">
+        <span data-hf-id="hf-a66x" id="04-guide-notch" data-f04="notch" aria-hidden="true"></span>
+        <div data-hf-id="hf-7cxv" id="04-guide-screen" data-f04="screen">
+          <img data-hf-id="hf-qy0h" id="04-guide-shot" data-f04="shot" src="assets/screen-goyang-top.png" alt="">
+        </div>
+      </div>
+    </div>
+
+    <div data-hf-id="hf-t7v7" id="04-guide-cap" data-f04="cap" class="clip" data-start="0" data-duration="3.4" data-track-index="2">
+      <p data-hf-id="hf-iq5w" id="04-guide-line1" data-f04="line1">
+        <span data-hf-id="hf-49xw" data-f04="word">가는 길</span> <span data-hf-id="hf-44px" data-f04="word">·</span>
+        <span data-hf-id="hf-p86j" data-f04="word">좌석</span> <span data-hf-id="hf-p5q1" data-f04="word">·</span>
+        <span data-hf-id="hf-2vhc" data-f04="word">준비물</span> <span data-hf-id="hf-qcn4" data-f04="word">·</span>
+        <span data-hf-id="hf-p6xc" data-f04="word">귀가</span>
+      </p>
+      <p data-hf-id="hf-gkqs" id="04-guide-line2" data-f04="line2">10.7–8 고양종합운동장</p>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+      var root = document.querySelector('[data-composition-id="04-guide"]');
+      var cam = root.querySelector('[data-f04="cam"]');
+      var shot = root.querySelector('[data-f04="shot"]');
+      var words = root.querySelectorAll('[data-f04="line1"] [data-f04="word"]');
+      var line2 = root.querySelector('[data-f04="line2"]');
+
+      // Camera targets baked from the screenshot geometry (image-space
+      // fractions, no font dependence). The 공식 공연 정보 block sits at
+      // ~0.62-0.82 of the screen height.
+      // In-slot scroll: scale 1.35 anchored bottom-left (5% 100%) lifts the
+      // block from ~0.80 to ~0.76 and enlarges it while 콘서트 가이드 leaves the top.
+      var SCROLL_SCALE = 1.35;
+
+      var tl = gsap.timeline({ paused: true });
+
+      // Seat state at t=0 (identical to frame 03's phone seat).
+      tl.set(cam, { transformOrigin: "335px 930px", scale: 1, y: 0 }, 0);
+      tl.set(shot, { transformOrigin: "5% 100%", scale: 1 }, 0);
+
+      // Scene 1 (0.0-0.5): captions swap in.
+      tl.fromTo(
+        words,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 0.38, ease: "power3.out", stagger: 0.045 },
+        0,
+      );
+      tl.fromTo(
+        line2,
+        { opacity: 0, y: 26 },
+        { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" },
+        0.22,
+      );
+
+      // Scene 2 (0.5-1.9): screen scrolls to 공식 공연 정보 while the phone
+      // pushes in on that block, decelerating.
+      tl.fromTo(
+        shot,
+        { scale: 1 },
+        { scale: SCROLL_SCALE, duration: 1.4, ease: "power3.out", immediateRender: false },
+        0.5,
+      );
+      // The phone itself stays in the shared seat (frames 01-05) so the cut
+      // into 05-ticket doesn't show two phones of different sizes; only the
+      // screen content zooms. Scene 3 (1.9-2.5): still read.
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["04-guide"] = tl;
+    })();
+  </script>
+</template>

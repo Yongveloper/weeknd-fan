@@ -8,5 +8,13 @@
   },
   "media": {
     "autoProxy": true
-  }
+  },
+  "authoringSkill": "product-launch-video",
+  "registryItems": [
+    {
+      "name": "browser-device-stage",
+      "type": "hyperframes:component",
+      "target": "compositions/components/browser-device-stage.html"
+    }
+  ]
 }

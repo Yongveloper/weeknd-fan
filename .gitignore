@@ -19,5 +19,11 @@ test-results/
 # Session handoff notes (local only)
 docs/handoff-context.md
 
-# HyperFrames render output
-video/renders/
+# HyperFrames promo projects: binaries and regenerable output stay local (see video/README.md)
+video/*/assets/
+video/*/renders/
+video/*/capture/
+video/*/snapshots/
+video/*/.thumbnails/
+video/*/.hyperframes/
+video/*/.media/
