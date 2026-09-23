@@ -3,11 +3,13 @@
   "summary": "협업곡의 익숙한 멜로디로 흐름을 넓히는 곡",
   "body": "The Weeknd의 보컬이 다른 프로듀서 세계와 만나는 장면이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Heroes & Villains"],
   "relatedSongs": [],
@@ -21,6 +23,8 @@
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ]
 }

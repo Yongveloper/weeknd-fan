@@ -13,7 +13,7 @@ const { locale } = Astro.props;
 const strings = ui(locale).guide.seatMap;
 const newTab = ui(locale).content.externalLink.newTab;
 const alt = strings.alt.replaceAll('{venue}', bilingual(VENUE, locale));
-const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
+const NOL_PRODUCT = 'https://nol.yanolja.com/ticket/products/26006903';
 ---
 
 <figure class="seat-map" data-enter>
@@ -34,7 +34,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
   </a>
   <figcaption>
     {strings.sourcePrefix}
-    <a href={INTERPARK} target="_blank" rel="noreferrer"
+    <a href={NOL_PRODUCT} target="_blank" rel="noreferrer"
       >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
     >
     <span class="nowrap">{strings.confirmedOn}</span>. {strings.opensNewTabNote}

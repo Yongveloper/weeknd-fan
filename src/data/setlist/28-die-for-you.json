@@ -3,11 +3,13 @@
   "summary": "시간이 지나 더 크게 사랑받은 Starboy의 발라드",
   "body": "공연 중반 이후의 감정선을 한 번 더 깊게 만드는 곡이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Starboy"],
   "relatedSongs": [],
@@ -21,6 +23,8 @@
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ]
 }

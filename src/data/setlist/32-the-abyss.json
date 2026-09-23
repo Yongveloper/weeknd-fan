@@ -3,11 +3,13 @@
   "summary": "최근 3부작의 마지막 장을 더 깊은 어둠으로 이끄는 곡",
   "body": "Hurry Up Tomorrow의 서사적 분위기를 무대 전환으로 느낀다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Hurry Up Tomorrow"],
   "relatedSongs": [],
@@ -21,6 +23,8 @@
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ]
 }

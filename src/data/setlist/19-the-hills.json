@@ -3,11 +3,13 @@
   "summary": "어둡게 치닫는 전개가 강한 대표곡",
   "body": "초기 대중적 돌파구의 묵직한 질감을 라이브로 확인한다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Beauty Behind the Madness"],
   "relatedSongs": [],
@@ -21,6 +23,8 @@
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ]
 }

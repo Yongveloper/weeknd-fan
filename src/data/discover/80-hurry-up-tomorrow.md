@@ -2,7 +2,7 @@
 title: 2025 · Hurry Up Tomorrow
 summary: Hurry Up Tomorrow는 2025년의 여섯 번째 정규 앨범이자 After Hours와 Dawn FM을 잇는 3부작의 마지막 장이다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources: [umc-hurry-up-tomorrow]
 relatedAlbums: [Hurry Up Tomorrow]
 relatedSongs: []

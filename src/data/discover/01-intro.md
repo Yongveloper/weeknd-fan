@@ -2,7 +2,7 @@
 title: 1분 입문
 summary: The Weeknd는 어두운 R&B의 익명성에서 출발해 팝과 영화적 무대를 자기 언어로 만든 아티스트다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources: [umc-kiss-land, umc-hurry-up-tomorrow]
 relatedAlbums: [Kiss Land, Hurry Up Tomorrow]
 relatedSongs: []

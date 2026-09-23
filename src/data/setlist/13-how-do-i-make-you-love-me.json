@@ -3,11 +3,13 @@
   "summary": "Dawn FM의 질문을 경쾌한 신스로 밀어붙이는 곡",
   "body": "빠른 흐름 속에서도 앨범의 라디오 콘셉트를 떠올릴 수 있다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Dawn FM"],
   "relatedSongs": [],
@@ -21,6 +23,8 @@
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ]
 }

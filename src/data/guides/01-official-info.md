@@ -2,7 +2,7 @@
 title: 공식 공연 정보
 summary: 공식 공지로 확인된 공연 기본 정보만 모았습니다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources:
   - live-nation-goyang
   - nol-notice

@@ -2,7 +2,7 @@
 title: 보는 음악
 summary: 이 음악은 앨범·단편·공연의 조명과 인물을 서로 이어 보며 즐기기 좋다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources: [umc-after-hours, umc-hurry-up-tomorrow]
 relatedAlbums: [After Hours, Dawn FM, Hurry Up Tomorrow]
 relatedSongs: []

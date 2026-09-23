@@ -822,7 +822,7 @@ describe('content trust contract', () => {
     };
 
     expect(
-      await auditCurrentData(new Date('2026-09-21T12:00:00+09:00')),
+      await auditCurrentData(new Date('2026-09-23T12:00:00+09:00')),
     ).toEqual([]);
     expect(await auditCurrentData()).toEqual([]);
   });

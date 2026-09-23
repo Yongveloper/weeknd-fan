@@ -2,7 +2,7 @@
 title: 2016 · Starboy
 summary: Starboy는 2016년의 세 번째 정규 앨범으로, 선명한 훅과 전자적 질감을 크게 밀어 올린 시기다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources: [umc-starboy]
 relatedAlbums: [Starboy]
 relatedSongs: []

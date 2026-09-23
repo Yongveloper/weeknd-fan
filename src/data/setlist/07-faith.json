@@ -3,11 +3,13 @@
   "summary": "긴장감 있는 전개로 After Hours의 밤을 깊게 만드는 곡",
   "body": "앨범의 어두운 결을 라이브의 속도로 체감하는 구간이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["After Hours"],
   "relatedSongs": [],
@@ -17,10 +19,11 @@
   "album": "After Hours",
   "liveNote": "빛이 좁아졌다 넓어지는 전환을 본다.",
   "singAlongNote": "멜로디가 익숙한 부분만 함께 부른다.",
-  "confidence": "high",
+  "confidence": "medium",
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-20"
   ]
 }

@@ -2,7 +2,7 @@
 title: 2018 · My Dear Melancholy,
 summary: My Dear Melancholy,는 정규 앨범 번호에 넣지 않는 2018년 EP다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources: [spotify-my-dear-melancholy]
 relatedAlbums: [My Dear Melancholy]
 relatedSongs: []

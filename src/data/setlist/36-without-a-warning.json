@@ -3,11 +3,13 @@
   "summary": "협업 앨범의 긴장감을 무대로 끌어오는 곡",
   "body": "짧은 출연 구간도 투어의 장르 폭을 보여 주는 장면이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-08-29",
+  "lastVerifiedAt": "2026-09-23",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
-    "setlist-london-2026-08-15"
+    "setlist-london-2026-08-15",
+    "setlist-tokyo-2026-09-19",
+    "setlist-tokyo-2026-09-20"
   ],
   "relatedAlbums": ["Hurry Up Tomorrow"],
   "relatedSongs": [],
@@ -17,7 +19,7 @@
   "album": "Hurry Up Tomorrow",
   "liveNote": "낮은 베이스와 화면 전환을 본다.",
   "singAlongNote": "리듬에 맞춰 반응한다.",
-  "confidence": "high",
+  "confidence": "low",
   "observedIn": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",

@@ -2,7 +2,7 @@
 title: 좌석 안내
 summary: 인터파크 공식 좌석도를 그대로 실었습니다. 탭하면 원본 이미지가 새 탭에서 열립니다.
 status: official
-lastVerifiedAt: 2026-08-29
+lastVerifiedAt: 2026-09-23
 sources:
   - interpark-goods-26006903
 relatedAlbums: []
