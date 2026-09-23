@@ -32,6 +32,7 @@ describe('buildEventJsonLd', () => {
           name: '고양종합운동장 주경기장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
+        image: 'https://fan-guide.test/og/default.jpg',
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
@@ -49,6 +50,7 @@ describe('buildEventJsonLd', () => {
           name: '고양종합운동장 주경기장',
           address: 'Goyang-si, Gyeonggi-do, KR',
         },
+        image: 'https://fan-guide.test/og/default.jpg',
         performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
         organizer: { '@type': 'Organization', name: '현대카드' },
         url: 'https://tickets.interpark.com/contents/notice/detail/14180',
@@ -72,6 +74,12 @@ describe('buildEventJsonLd', () => {
     expect(() =>
       buildEventJsonLd(concert, 'ftp://fan-guide.test', 'ko'),
     ).toThrow('siteUrl must be an absolute HTTP(S) URL');
+  });
+
+  it('points image at the published og card on the site origin', () => {
+    expect(
+      buildEventJsonLd(input, 'https://fan-guide.test/path/', 'ko')[0]?.image,
+    ).toBe('https://fan-guide.test/og/default.jpg');
   });
 
   it('declares the rendered language', () => {

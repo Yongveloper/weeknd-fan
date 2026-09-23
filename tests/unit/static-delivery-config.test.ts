@@ -108,6 +108,9 @@ test('keeps Cloudflare delivery static-only and serves the required headers', as
     'Permissions-Policy: camera=(), microphone=(), geolocation=()',
   );
   expect(headers).toContain(
+    'Strict-Transport-Security: max-age=31536000; includeSubDomains',
+  );
+  expect(headers).toContain(
     '/_astro/*\n  Cache-Control: public, max-age=31536000, immutable',
   );
 });

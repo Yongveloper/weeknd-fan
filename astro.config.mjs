@@ -22,6 +22,18 @@ export default defineConfig({
               defaultLocale: 'ko',
               locales: { ko: 'ko', en: 'en' },
             },
+            // Pages already declare x-default (the korean URL) in <head>;
+            // the sitemap has to carry the same set or crawlers may drop it.
+            // Every locale of a page shares one links array, so build a new
+            // one instead of pushing into it.
+            serialize(item) {
+              const korean = item.links?.find((link) => link.lang === 'ko');
+              if (!korean) return item;
+              return {
+                ...item,
+                links: [...item.links, { url: korean.url, lang: 'x-default' }],
+              };
+            },
           }),
         ]
       : []),

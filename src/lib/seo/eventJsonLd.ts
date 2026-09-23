@@ -17,6 +17,7 @@ export interface MusicEventJsonLd {
     name: string;
     address: 'Goyang-si, Gyeonggi-do, KR';
   };
+  image: string;
   performer: { '@type': 'MusicGroup'; name: 'The Weeknd' };
   organizer: { '@type': 'Organization'; name: string };
   url: 'https://tickets.interpark.com/contents/notice/detail/14180';
@@ -40,7 +41,8 @@ export function buildEventJsonLd(
   siteUrl: string,
   locale: Locale,
 ): MusicEventJsonLd[] {
-  normalizeSiteUrl(siteUrl);
+  // The same card the pages already publish as og:image.
+  const image = new URL('og/default.jpg', normalizeSiteUrl(siteUrl)).href;
 
   return concert.shows.map(({ startsAt }) => ({
     '@context': 'https://schema.org',
@@ -54,6 +56,7 @@ export function buildEventJsonLd(
       name: bilingual(VENUE_FULL, locale),
       address: 'Goyang-si, Gyeonggi-do, KR',
     },
+    image,
     performer: { '@type': 'MusicGroup', name: 'The Weeknd' },
     organizer: {
       '@type': 'Organization',

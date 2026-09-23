@@ -16,6 +16,8 @@ import {
   getSetlistEditorialMetadata,
 } from '../../lib/content/queries';
 import { buildEventJsonLd, serializeJsonLd } from '../../lib/seo/eventJsonLd';
+import { buildWebSiteJsonLd } from '../../lib/seo/websiteJsonLd';
+import { wordmark } from '../../components/chrome/navigation';
 import { localeFromParam, localePaths } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
 import { ARTIST } from '../../lib/i18n/proper-nouns';
@@ -35,6 +37,11 @@ const eventJsonLd = buildEventJsonLd(
   (Astro.site ?? Astro.url).toString(),
   locale,
 );
+const websiteJsonLd = buildWebSiteJsonLd(
+  wordmark.name,
+  new URL(Astro.url.pathname, Astro.site ?? Astro.url).href,
+  locale,
+);
 const sources = await getCollection('sources');
 const officialNoticeUrl = sources.find((source) => source.id === 'nol-notice')
   ?.data.url;
@@ -52,7 +59,7 @@ if (!officialNoticeUrl) throw new Error('Missing source record: nol-notice');
   <script
     is:inline
     type="application/ld+json"
-    set:html={serializeJsonLd(eventJsonLd)}
+    set:html={serializeJsonLd([websiteJsonLd, ...eventJsonLd])}
   />
   {
     /* The cover sky scrolls away with the hero; this fixed sky stays behind
