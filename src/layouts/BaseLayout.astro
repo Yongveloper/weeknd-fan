@@ -28,6 +28,8 @@ interface Props {
   cloudSky?: boolean;
   /** Page renders hotlinked Spotify album covers. */
   coverCdn?: boolean;
+  /** Error documents: no canonical, no alternates, ask crawlers not to index. */
+  noindex?: boolean;
 }
 
 const {
@@ -39,6 +41,7 @@ const {
   lunarSky = false,
   cloudSky = false,
   coverCdn = false,
+  noindex = false,
 } = Astro.props;
 const strings = ui(locale);
 // Only the deploy job sets this, so local builds, CI builds and the preview
@@ -52,7 +55,7 @@ const site = Astro.site ?? Astro.url;
 const canonical = new URL(Astro.url.pathname, site);
 const ogImageUrl = new URL(ogImage, site);
 const pageTitle = `${wordmark.name} | ${title}`;
-const alternates = alternateLinks(Astro.url.pathname, site);
+const alternates = noindex ? [] : alternateLinks(Astro.url.pathname, site);
 const ogLocale = locale === 'ko' ? 'ko_KR' : 'en_US';
 const ogAlternates = locale === 'ko' ? ['en_US'] : ['ko_KR'];
 // Both sky variants paint the same texture first; it is the LCP element on
@@ -71,7 +74,8 @@ const preloadSkyTexture = cloudSky || lunarSky;
     }
     <script is:inline set:html={localePreferenceScript} />
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    {!noindex && <link rel="canonical" href={canonical} />}
     {
       alternates.map(({ hreflang, href }) => (
         <link rel="alternate" hreflang={hreflang} href={href} />

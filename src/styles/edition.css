@@ -58,7 +58,7 @@ body[data-edition] .site-header__wordmark {
 }
 body[data-edition] .site-header__edition {
   color: var(--mist);
-  font-size: 0.6rem;
+  font-size: 0.75rem;
   letter-spacing: 0.18em;
 }
 body[data-edition] .site-header__nav-list {
@@ -120,11 +120,12 @@ body[data-edition] .pamphlet-contents {
   position: sticky;
   top: 2rem;
   width: 100%;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 2rem;
   border: 0;
   padding: 0 1.5rem 1.5rem 0;
+}
+body[data-edition] .pamphlet-contents__chapters {
+  grid-template-columns: 1fr;
+  gap: 2rem;
 }
 body[data-edition] .pamphlet-contents__chapter p {
   margin-bottom: 0.75rem;
@@ -315,7 +316,7 @@ body[data-edition]:not([data-lunar-sky]) header > p {
   max-width: 42rem;
 }
 body[data-edition] .timeline__entry {
-  padding-block: 3rem;
+  padding-block: 2.5rem;
   border-color: rgb(218 177 122 / 25%);
 }
 body[data-edition] .timeline__summary {
@@ -388,9 +389,11 @@ body[data-edition] .back-to-top {
   }
   body[data-edition] .pamphlet-contents {
     position: static;
+    padding-bottom: 2.5rem;
+  }
+  body[data-edition] .pamphlet-contents__chapters {
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    padding-bottom: 2.5rem;
   }
   body[data-edition] .pamphlet-contents__chapter + .pamphlet-contents__chapter {
     padding-top: 0;
@@ -529,8 +532,19 @@ body[data-edition]
   body[data-edition] .home-hero {
     --hero-h1: min(14vw, 5.5rem);
   }
-  body[data-edition] .edition-directory .pamphlet-contents {
+  body[data-edition] .edition-directory .pamphlet-contents__chapters {
     grid-template-columns: minmax(0, 1fr);
+  }
+  /* The collapsed toggle is a single 44px row, so the 48rem sheet padding
+     below it reads as a hole. Keep the row centred in a tight band. */
+  body[data-edition] .pamphlet-contents {
+    padding-block: 1rem;
+  }
+  body[data-edition] .edition-chapters > section:first-child {
+    padding-top: 2rem;
+  }
+  body[data-edition] .pamphlet-contents__mobile > summary {
+    font-size: 0.75rem;
   }
   body[data-edition]
     .edition-directory
@@ -547,8 +561,5 @@ body[data-edition]
   body[data-edition] .pamphlet-contents a span {
     min-width: 0;
     overflow-wrap: anywhere;
-  }
-  body[data-edition] .guide-overview {
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
   }
 }

@@ -1,0 +1,79 @@
+---
+import type { SourceRecord } from '../../lib/content/contracts';
+import { formatSeoulDate } from '../../lib/content/audit';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+
+interface Props {
+  locale: Locale;
+  sources: SourceRecord[];
+  ariaLabel?: string;
+}
+
+const { locale, sources, ariaLabel } = Astro.props;
+const strings = ui(locale).content.sourceList;
+const newTabNote = ui(locale).content.externalLink.newTab;
+---
+
+<ul class="source-list__items" aria-label={ariaLabel}>
+  {
+    sources.map((source) => (
+      <li>
+        {source.data.medium === 'sms' ? (
+          <>
+            <span class="source-list__name">{source.data.name}</span>
+            <span class="source-list__date">
+              {strings.receivedOn.replace(
+                '{date}',
+                formatSeoulDate(source.data.receivedAt),
+              )}
+            </span>
+          </>
+        ) : (
+          <>
+            <a href={source.data.url} target="_blank" rel="noreferrer">
+              {source.data.name}
+              <span class="sr-only">{newTabNote}</span>
+            </a>
+            <span class="source-list__date">
+              {strings.lastChecked.replace(
+                '{date}',
+                formatSeoulDate(source.data.lastCheckedAt),
+              )}
+            </span>
+          </>
+        )}
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .source-list__items {
+    display: grid;
+    gap: 0.3rem;
+    margin: 0;
+    padding: 0;
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+    list-style: none;
+  }
+
+  .source-list__items li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.15rem 0.7rem;
+    align-items: baseline;
+  }
+
+  .source-list__items a,
+  .source-list__name {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+
+  .source-list__date {
+    color: color-mix(in srgb, var(--ink-muted) 80%, transparent);
+    white-space: nowrap;
+  }
+</style>

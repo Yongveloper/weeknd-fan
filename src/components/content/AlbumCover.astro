@@ -11,7 +11,9 @@ interface Props {
 
 const { locale, album, size } = Astro.props;
 const { title, era, spotifyUrl, cover } = album.data;
-const alt = ui(locale).content.albumCover.alt.replace('{title}', title);
+const strings = ui(locale).content;
+const alt = strings.albumCover.alt.replace('{title}', title);
+const newTab = strings.externalLink.newTab;
 ---
 
 <a
@@ -32,6 +34,7 @@ const alt = ui(locale).content.albumCover.alt.replace('{title}', title);
     decoding="async"
     referrerpolicy="no-referrer"
   />
+  <span class="sr-only">{newTab}</span>
 </a>
 
 <style>

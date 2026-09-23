@@ -16,6 +16,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.transport;
+const newTab = ui(locale).content.externalLink.newTab;
 const metroAreas = SHUTTLE_METRO_STOPS.map((stop) => singleName(stop, locale));
 const regionalAreas = SHUTTLE_REGIONAL_STOPS.map((stop) =>
   singleName(stop, locale),
@@ -56,7 +57,9 @@ const shuttleRoute = strings.shuttleRoute
     <p>
       {strings.kakaoIntro}
       <a href="https://kko.to/NSrfta0uxT" target="_blank" rel="noreferrer"
-        >{strings.kakaoReserveLabel} <span aria-hidden="true">↗</span></a
+        >{strings.kakaoReserveLabel}
+        <span aria-hidden="true">↗</span>
+        <span class="sr-only">{newTab}</span></a
       >
     </p>
     <div class="transport-operations__areas" data-locale={locale}>

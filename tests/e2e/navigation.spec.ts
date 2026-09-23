@@ -9,6 +9,13 @@ async function openPrimaryNav(page: import('@playwright/test').Page) {
   if (await menu.isVisible()) await menu.click();
 }
 
+// The home directory collapses into a <details> on phones; open it before
+// clicking a link inside. Desktop hides the summary and keeps it expanded.
+async function openPamphletContents(page: import('@playwright/test').Page) {
+  const toggle = page.getByLabel('팜플렛 목차').locator('summary');
+  if (await toggle.isVisible()) await toggle.click();
+}
+
 async function expectAnchorHeadingInViewport(
   page: import('@playwright/test').Page,
   heading: string,
@@ -100,6 +107,7 @@ test('reaches both private share tools through contextual product CTAs', async (
   page,
 }) => {
   await page.goto('/');
+  await openPamphletContents(page);
   await page
     .getByLabel('팜플렛 목차')
     .getByRole('link', { name: '나만의 D-day 티켓 만들기' })

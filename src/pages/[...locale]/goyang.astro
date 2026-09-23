@@ -4,7 +4,6 @@ import AccessMap from '../../components/guide/AccessMap.astro';
 import AccessTable from '../../components/guide/AccessTable.astro';
 import DirectionsLinks from '../../components/guide/DirectionsLinks.astro';
 import GuideJumpNav from '../../components/guide/GuideJumpNav.astro';
-import GuideOverview from '../../components/guide/GuideOverview.astro';
 import GuideSection from '../../components/guide/GuideSection.astro';
 import LiveMap from '../../components/guide/LiveMap.astro';
 import SeatMap from '../../components/guide/SeatMap.astro';
@@ -36,13 +35,6 @@ const jump = [
   })),
   { id: 'tips', label: strings.tips.heading, order: tips[0]?.data.order ?? 30 },
 ].sort((a, b) => a.order - b.order);
-const overviewItems = jump.map(({ id, label }) => {
-  const entry =
-    id === 'tips' ? tips[0] : sections.find((item) => item.data.section === id);
-  if (!entry)
-    throw new Error(`Missing guide metadata for overview section: ${id}`);
-  return { id, label, status: entry.data.status };
-});
 ---
 
 <BaseLayout
@@ -62,7 +54,6 @@ const overviewItems = jump.map(({ id, label }) => {
         {strings.page.intro}
       </p>
     </header>
-    <GuideOverview locale={locale} items={overviewItems} />
     <div class="guide-body">
       <GuideJumpNav locale={locale} items={jump} />
       {
@@ -109,9 +100,7 @@ const overviewItems = jump.map(({ id, label }) => {
   .guide-page :global(.guide-section__heading),
   .guide-page :global(.guide-section) > *,
   .guide-page :global(.access-table),
-  .guide-page :global(.access-table) > *,
-  .guide-page :global(.guide-overview),
-  .guide-page :global(.guide-overview) > * {
+  .guide-page :global(.access-table) > * {
     min-width: 0;
   }
 
@@ -128,13 +117,20 @@ const overviewItems = jump.map(({ id, label }) => {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .guide-page :global(.access-map),
   .guide-page :global(.directions),
   .guide-page :global(.live-map),
   .guide-page :global(.live-map__note) {
     width: 100%;
     min-width: 0;
     max-width: 100%;
+  }
+
+  /* Same reading width as the seat map (32rem): the 499px Interpark raster
+     otherwise stretches across the whole column on desktop. */
+  .guide-page :global(.access-map) {
+    width: 100%;
+    min-width: 0;
+    max-width: 32rem;
   }
 
   .guide-page :global(.access-map img) {

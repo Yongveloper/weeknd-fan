@@ -146,10 +146,10 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
   expect(ids).toEqual([
     'official',
     'transport',
+    'packing',
     'seating',
     'tips',
     'return',
-    'packing',
     'pending',
   ]);
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
@@ -170,10 +170,10 @@ test('activates all seven guide jump links from the keyboard', async ({
   const ids = [
     'official',
     'transport',
+    'packing',
     'seating',
     'tips',
     'return',
-    'packing',
     'pending',
   ];
 
@@ -190,21 +190,8 @@ test('activates all seven guide jump links from the keyboard', async ({
   }
 });
 
-test('summarizes day-of actions and tracks the current guide section', async ({
-  page,
-}) => {
+test('tracks the current guide section', async ({ page }) => {
   await page.goto('/goyang/');
-
-  const overview = page.getByRole('navigation', { name: '당일 행동 요약' });
-  await expect(overview.getByRole('link')).toHaveText([
-    /도착 전.*가는 길.*준비물/,
-    /입장.*공식 공연 정보.*공식 발표 대기/,
-    /관람.*좌석 안내.*현장 팁/,
-    /귀가.*귀가 확인/,
-  ]);
-  await expect(
-    overview.getByRole('link', { name: /공식 발표 대기/ }),
-  ).toHaveText(/미공개 · 확인 필요/);
 
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
   for (const id of ['transport', 'seating', 'return']) {
@@ -246,10 +233,10 @@ test('clears the actual sticky jump nav from every guide heading', async ({
   const ids = [
     'official',
     'transport',
+    'packing',
     'seating',
     'tips',
     'return',
-    'packing',
     'pending',
   ];
 
@@ -420,10 +407,10 @@ test('keeps the hash target and current section aligned after navigation', async
     for (const [id, top] of [
       ['official', 0],
       ['transport', 101],
+      ['packing', 102],
       ['seating', 101],
       ['tips', 102],
       ['return', 102],
-      ['packing', 102],
       ['pending', 102],
     ] as const) {
       Object.defineProperty(

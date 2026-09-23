@@ -3,73 +3,122 @@ import type { SourceRecord } from '../../lib/content/contracts';
 import { formatSeoulDate } from '../../lib/content/audit';
 import type { Locale } from '../../lib/i18n/locales';
 import { ui } from '../../lib/i18n/ui';
+import SourceListItems from './SourceListItems.astro';
 
 interface Props {
   locale: Locale;
   sources: SourceRecord[];
+  /**
+   * Collapse the list behind a one-line summary. Pass `false` when the list
+   * already sits inside a Disclosure panel: a second disclosure there would
+   * make readers open two things to reach one link.
+   */
+  collapsible?: boolean;
 }
 
-const { locale, sources } = Astro.props;
+const { locale, sources, collapsible = true } = Astro.props;
 const strings = ui(locale).content.sourceList;
+
+function checkedAt(source: SourceRecord): Date | undefined {
+  return source.data.medium === 'sms'
+    ? source.data.receivedAt
+    : source.data.lastCheckedAt;
+}
+
+const latest = sources
+  .map(checkedAt)
+  .filter((date): date is Date => date instanceof Date)
+  .sort((a, b) => b.getTime() - a.getTime())[0];
+
+const summary = strings.summary
+  .replace('{count}', String(sources.length))
+  .replace('{date}', latest ? formatSeoulDate(latest) : '');
 ---
 
-<ul class="source-list" aria-label={strings.ariaLabel}>
-  {
-    sources.map((source) => (
-      <li>
-        {'medium' in source.data && source.data.medium === 'sms' ? (
-          <>
-            <span class="source-list__message">{source.data.name}</span>
-            <span>
-              {strings.receivedOn.replace(
-                '{date}',
-                formatSeoulDate(source.data.receivedAt),
-              )}
-            </span>
-          </>
-        ) : (
-          <>
-            <a href={source.data.url} target="_blank" rel="noreferrer">
-              {source.data.name}
-            </a>
-            <span>
-              {strings.lastChecked.replace(
-                '{date}',
-                formatSeoulDate(source.data.lastCheckedAt),
-              )}
-            </span>
-          </>
-        )}
-      </li>
+{
+  sources.length > 0 &&
+    (collapsible ? (
+      <details
+        class="source-list"
+        data-disclosure
+        data-motion="fast"
+        aria-label={strings.ariaLabel}
+      >
+        <summary>
+          <span class="source-list__summary">{summary}</span>
+          <svg
+            class="source-list__chevron"
+            aria-hidden="true"
+            viewBox="0 0 16 16"
+            width="12"
+            height="12"
+          >
+            <path
+              d="M3 6l5 5 5-5"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </summary>
+        <div class="disclosure__panel">
+          <SourceListItems locale={locale} sources={sources} />
+        </div>
+      </details>
+    ) : (
+      <div class="source-list">
+        <SourceListItems
+          locale={locale}
+          sources={sources}
+          ariaLabel={strings.ariaLabel}
+        />
+      </div>
     ))
-  }
-</ul>
+}
+
+<script src="../../scripts/disclosure.ts"></script>
 
 <style>
   .source-list {
-    display: grid;
-    gap: 0.45rem;
     margin: 0;
-    padding: 0;
     color: var(--ink-muted);
     font-size: 0.82rem;
+  }
+
+  summary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding-block: 0.4rem;
+    cursor: pointer;
     list-style: none;
   }
-
-  .source-list li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.35rem 0.8rem;
-    align-items: baseline;
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary:hover .source-list__summary,
+  summary:focus-visible .source-list__summary {
+    color: var(--ivory);
   }
 
-  .source-list a {
-    color: var(--ivory);
+  .source-list__summary {
     font-weight: 700;
+    letter-spacing: 0.01em;
   }
 
-  .source-list__message {
-    color: var(--ivory);
-    font-weight: 700;
+  .source-list__chevron {
+    flex: 0 0 auto;
+    color: var(--amber);
+    transition: transform var(--motion-fast) var(--ease-cinematic);
+  }
+  .source-list[open]:not([data-closing]) > summary .source-list__chevron {
+    transform: rotate(180deg);
+  }
+
+  .disclosure__panel {
+    padding-block: 0.1rem 0.6rem;
   }
 </style>

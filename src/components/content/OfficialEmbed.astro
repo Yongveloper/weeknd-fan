@@ -10,6 +10,7 @@ interface Props {
 
 const { locale, url, songTitle } = Astro.props;
 const strings = ui(locale).content.officialEmbed;
+const newTab = ui(locale).content.externalLink.newTab;
 const iframeTitle = strings.iframeTitle.replace('{song}', songTitle);
 const allowedProviders = new Set([
   'www.youtube.com',
@@ -34,7 +35,10 @@ if (
   data-song-title={songTitle}
   data-iframe-title={iframeTitle}
 >
-  <a href={url} target="_blank" rel="noreferrer">{strings.listen}</a>
+  <a href={url} target="_blank" rel="noreferrer">
+    {strings.listen}
+    <span class="sr-only">{newTab}</span>
+  </a>
   <button type="button" data-load-embed>{strings.loadVideo}</button>
 </official-embed>
 

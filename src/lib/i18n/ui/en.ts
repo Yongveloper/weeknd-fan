@@ -32,10 +32,14 @@ export const en: UiStrings = {
       loadVideo: 'Load the official video',
       iframeTitle: '{song} official media',
     },
+    externalLink: {
+      newTab: '(opens in a new tab)',
+    },
     sourceList: {
       ariaLabel: 'Sources',
       receivedOn: 'Received {date}',
       lastChecked: 'Last checked {date}',
+      summary: '{count} sources · last checked {date}',
     },
   },
   discover: {
@@ -125,13 +129,6 @@ export const en: UiStrings = {
     },
     jumpNav: {
       sectionsAriaLabel: 'Guide sections',
-    },
-    overview: {
-      beforeArrival: 'Before you arrive',
-      entry: 'Entry',
-      show: 'The show',
-      goingHome: 'Getting home',
-      summaryAriaLabel: 'Day-of summary',
     },
     section: {
       pendingAriaLabel: 'Items awaiting official announcement',
@@ -238,6 +235,7 @@ export const en: UiStrings = {
       posterLink: 'Make a setlist poster',
     },
     pamphlet: {
+      mobileToggle: 'Contents',
       navAriaLabel: 'Pamphlet contents',
       chapters: {
         beforeDawn: {
@@ -444,6 +442,16 @@ export const en: UiStrings = {
       coverNote:
         'Album covers load directly from the Spotify CDN (no cookies). We do not store or re-process them, and tapping a cover opens its Spotify album page.',
     },
+  },
+  notFound: {
+    page: {
+      title: 'Page not found',
+      description: 'There is no page at the requested address.',
+    },
+    eyebrow: '404',
+    heading: 'This page never reached the dawn',
+    body: 'The address may have changed, or the page never existed. Continue from one of these.',
+    navAriaLabel: 'Go to another page',
   },
   ui: {
     backToTop: 'Back to top',

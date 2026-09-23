@@ -15,6 +15,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.accessTable;
+const newTab = ui(locale).content.externalLink.newTab;
 const daehwa = bilingual(STATION_DAEHWA, locale);
 const kintex = bilingual(STATION_KINTEX, locale);
 
@@ -98,7 +99,7 @@ const buses = [
   <p class="access-table__source">
     {strings.sourcePrefix}
     <a href={INTERPARK} target="_blank" rel="noreferrer"
-      >{strings.sourceLinkLabel}</a
+      >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
     >
     <span class="nowrap">{strings.confirmedOn}</span>
   </p>

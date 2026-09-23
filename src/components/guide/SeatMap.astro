@@ -11,6 +11,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.seatMap;
+const newTab = ui(locale).content.externalLink.newTab;
 const alt = strings.alt.replaceAll('{venue}', bilingual(VENUE, locale));
 const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
 ---
@@ -20,7 +21,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
     href={seatMap.src}
     target="_blank"
     rel="noreferrer"
-    aria-label={strings.openOriginalAriaLabel}
+    aria-label={`${strings.openOriginalAriaLabel} ${newTab}`}
   >
     <Picture
       src={seatMap}
@@ -34,7 +35,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
   <figcaption>
     {strings.sourcePrefix}
     <a href={INTERPARK} target="_blank" rel="noreferrer"
-      >{strings.sourceLinkLabel}</a
+      >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
     >
     <span class="nowrap">{strings.confirmedOn}</span>. {strings.opensNewTabNote}
   </figcaption>

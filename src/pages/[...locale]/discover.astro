@@ -105,7 +105,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
         <div lang={introLang}>
           <IntroContent />
         </div>
-        <SourceList locale={locale} sources={introSources} />
+        <SourceList
+          locale={locale}
+          sources={introSources}
+          collapsible={false}
+        />
       </Disclosure>
     </header>
 
@@ -162,7 +166,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
           <div lang={glossaryLang}>
             <GlossaryContent />
           </div>
-          <SourceList locale={locale} sources={glossarySources} />
+          <SourceList
+            locale={locale}
+            sources={glossarySources}
+            collapsible={false}
+          />
         </Disclosure>
       </div>
       <div>
@@ -182,7 +190,11 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
           <div lang={visualLang}>
             <VisualContent />
           </div>
-          <SourceList locale={locale} sources={visualSources} />
+          <SourceList
+            locale={locale}
+            sources={visualSources}
+            collapsible={false}
+          />
         </Disclosure>
       </div>
     </section>
@@ -289,6 +301,17 @@ const [albumsNoteBeforeMdm = '', albumsNoteAfterMdm = ''] =
     gap: 0.9rem;
     align-items: center;
     color: var(--mist);
+  }
+
+  /* The cover keeps its 72px; only the label gives way when a column is
+     narrow, so the six thumbnails stay one size and the labels line up. */
+  .discover__albums li :global(.album-cover) {
+    flex: 0 0 auto;
+  }
+
+  .discover__albums li > span {
+    min-width: 0;
+    line-height: 1.4;
   }
 
   .discover__albums > p:last-child {

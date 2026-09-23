@@ -13,6 +13,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.directions;
+const newTab = ui(locale).content.externalLink.newTab;
 const LAT = 37.6764;
 const LNG = 126.7432;
 // Domestic map apps resolve the korean name reliably; a translated name
@@ -39,6 +40,7 @@ const links = [
     links.map((link) => (
       <a href={link.href} target="_blank" rel="noreferrer">
         {link.label} <span aria-hidden="true">↗</span>
+        <span class="sr-only">{newTab}</span>
       </a>
     ))
   }

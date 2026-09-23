@@ -42,10 +42,14 @@ export const ko = {
       loadVideo: '공식 영상 불러오기',
       iframeTitle: '{song} 공식 미디어',
     },
+    externalLink: {
+      newTab: '(새 창에서 열림)',
+    },
     sourceList: {
       ariaLabel: '출처',
       receivedOn: '수신일 {date}',
       lastChecked: '마지막 확인 {date}',
+      summary: '출처 {count}개 · 마지막 확인 {date}',
     },
   },
   discover: {
@@ -135,13 +139,6 @@ export const ko = {
     },
     jumpNav: {
       sectionsAriaLabel: '가이드 섹션',
-    },
-    overview: {
-      beforeArrival: '도착 전',
-      entry: '입장',
-      show: '관람',
-      goingHome: '귀가',
-      summaryAriaLabel: '당일 행동 요약',
     },
     section: {
       pendingAriaLabel: '공식 발표 대기 항목',
@@ -245,6 +242,7 @@ export const ko = {
       posterLink: '셋리스트 포스터 만들기',
     },
     pamphlet: {
+      mobileToggle: '차례',
       navAriaLabel: '팜플렛 목차',
       chapters: {
         beforeDawn: {
@@ -440,6 +438,16 @@ export const ko = {
       coverNote:
         '앨범 커버는 Spotify CDN에서 직접 불러옵니다(쿠키 없음). 자체 저장·재가공하지 않으며 커버를 누르면 Spotify 앨범 페이지로 이동합니다.',
     },
+  },
+  notFound: {
+    page: {
+      title: '페이지를 찾을 수 없어요',
+      description: '요청한 주소에 해당하는 페이지가 없습니다.',
+    },
+    eyebrow: '404',
+    heading: '이 페이지는 새벽에 닿지 않았어요',
+    body: '주소가 바뀌었거나 처음부터 없던 페이지입니다. 아래에서 이어가세요.',
+    navAriaLabel: '다른 페이지로 이동',
   },
   ui: {
     backToTop: '맨 위로 이동',

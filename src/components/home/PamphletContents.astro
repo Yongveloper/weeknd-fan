@@ -40,48 +40,114 @@ const chapters = [
 ];
 ---
 
+{
+  /* The directory ships `open` so a no-JS reader always sees it. The summary
+     only exists on phones (≤42rem): there the inline script below closes the
+     details before first paint, so the eight links no longer fill a whole
+     screen under the hero. Desktop hides the summary and keeps the chapters
+     expanded, so the sticky sidebar is unchanged. */
+}
 <nav class="pamphlet-contents shell-content" aria-label={strings.navAriaLabel}>
-  {
-    chapters.map((chapter) => (
-      <div class="pamphlet-contents__chapter">
-        <p>{chapter.title}</p>
-        <ul>
-          {chapter.links.map(([href, label]) => (
-            <li>
-              <a
-                class="pamphlet-contents__link"
-                href={href}
-                rel={href?.startsWith('http') ? 'noreferrer' : undefined}
-              >
-                <span>{label}</span>
-                <svg
-                  aria-hidden="true"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                >
-                  <path d="M5 12h14m-6-6 6 6-6 6" />
-                </svg>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))
-  }
+  <details
+    class="pamphlet-contents__mobile"
+    data-disclosure
+    data-motion="fast"
+    open
+  >
+    <summary>
+      <span>{strings.mobileToggle}</span>
+      <svg
+        class="pamphlet-contents__chevron"
+        aria-hidden="true"
+        viewBox="0 0 16 16"
+        width="16"
+        height="16"
+      >
+        <path
+          d="M3 6l5 5 5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"></path>
+      </svg>
+    </summary>
+    <div class="disclosure__panel pamphlet-contents__chapters">
+      {
+        chapters.map((chapter) => (
+          <div class="pamphlet-contents__chapter">
+            <p>{chapter.title}</p>
+            <ul>
+              {chapter.links.map(([href, label]) => (
+                <li>
+                  <a
+                    class="pamphlet-contents__link"
+                    href={href}
+                    rel={href?.startsWith('http') ? 'noreferrer' : undefined}
+                  >
+                    <span>{label}</span>
+                    <svg
+                      aria-hidden="true"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="1.5"
+                    >
+                      <path d="M5 12h14m-6-6 6 6-6 6" />
+                    </svg>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </details>
 </nav>
+
+<script is:inline>
+  (() => {
+    // Same breakpoint as the component's mobile query. Runs while the
+    // document is still parsing, so a phone never paints the open directory.
+    const details = document.querySelector('.pamphlet-contents__mobile');
+    if (!details) return;
+    const mobile = matchMedia('(max-width: 42rem)');
+    const synchronize = () => {
+      // Crossing the breakpoint mid-animation would otherwise leave
+      // disclosure.ts's transient state pointing the wrong way.
+      delete details.dataset.closing;
+      delete details.dataset.state;
+      details.open = !mobile.matches;
+    };
+    synchronize();
+    mobile.addEventListener('change', synchronize);
+  })();
+</script>
+
+<script src="../../scripts/disclosure.ts"></script>
 
 <style>
   .pamphlet-contents {
     position: relative;
+    padding-block: 2.5rem;
+    border-block: 1px solid color-mix(in srgb, var(--amber) 32%, transparent);
+  }
+  .pamphlet-contents__chapters {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: clamp(1.5rem, 4vw, 4rem);
-    padding-block: 2.5rem;
-    border-block: 1px solid color-mix(in srgb, var(--amber) 32%, transparent);
+  }
+  /* Hidden by default and revealed only inside the mobile query, so the
+     toggle and the script's breakpoint cannot fall out of step. */
+  summary {
+    display: none;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
   }
   p {
     margin-bottom: 0.75rem;
@@ -116,13 +182,43 @@ const chapters = [
   }
   @media (max-width: 42rem) {
     .pamphlet-contents {
+      padding-block: 2rem;
+    }
+    .pamphlet-contents__chapters {
       grid-template-columns: 1fr;
       gap: 1.5rem;
-      padding-block: 2rem;
+      padding-top: 1.25rem;
+    }
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      min-height: 44px;
+      color: var(--amber);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .pamphlet-contents__chevron {
+      color: var(--amber);
+      transition: transform var(--motion-fast) var(--ease-cinematic);
+    }
+    .pamphlet-contents__mobile[open]:not([data-closing])
+      > summary
+      .pamphlet-contents__chevron {
+      transform: rotate(180deg);
     }
     .pamphlet-contents__chapter + .pamphlet-contents__chapter {
       padding-top: 1.25rem;
       border-top: 1px solid color-mix(in srgb, var(--ivory) 16%, transparent);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pamphlet-contents__chevron {
+      transition-duration: 0.01ms;
     }
   }
 </style>

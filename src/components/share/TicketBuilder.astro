@@ -117,7 +117,7 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
       </p>
       <p class="status" aria-live="polite" data-status></p>
       <p class="error" role="alert" hidden data-error></p>
-      <div class="share-fallback">
+      <div class="share-fallback" data-share-fallback>
         <p class="share-fallback__title">{strings.common.fallbackHeading}</p>
         <div class="share-fallback__actions">
           <a href="/og/default.jpg">{strings.common.fallbackImageLink}</a>
@@ -165,6 +165,7 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
       const copyShare =
         root.querySelector<HTMLButtonElement>('[data-copy-share]');
       const shareUrl = root.querySelector<HTMLElement>('[data-share-url]');
+      const fallback = root.querySelector<HTMLElement>('[data-share-fallback]');
       let isGenerating = false;
       let shareButton: HTMLButtonElement | undefined;
 
@@ -191,6 +192,15 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
       const clipboardTextTemplate = root.dataset.clipboardTextTemplate ?? '';
 
       if (!button || !status || !error || !dayOneStart || !dayTwoStart) return;
+
+      // The fallback box is server-rendered visible for no-JS visitors. With
+      // JS it stays out of the way until saving fails, has already happened,
+      // or this browser cannot trigger downloads at all.
+      if (fallback) fallback.hidden = true;
+      const revealFallback = () => {
+        if (fallback) fallback.hidden = false;
+      };
+      if (!('download' in HTMLAnchorElement.prototype)) revealFallback();
 
       if (previewToggle && previewFigure) {
         previewToggle.hidden = false;
@@ -296,6 +306,7 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
           const blob = await renderCommands(canvas, getLayout(), messages);
           downloadBlob(blob, 'weeknd-goyang-dday-ticket.jpg');
           status.textContent = savedStatus;
+          revealFallback();
           const file = new File([blob], 'weeknd-goyang-dday-ticket.jpg', {
             type: 'image/jpeg',
           });
@@ -332,6 +343,7 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
             caught instanceof Error ? caught.message : messages.exportFailed;
           error.hidden = false;
           status.textContent = '';
+          revealFallback();
         } finally {
           isGenerating = false;
           button.disabled = false;
@@ -495,6 +507,9 @@ const clipboardText = strings.ticket.clipboardText.replace('{artist}', ARTIST);
     gap: 0.7rem;
     padding: 1rem;
     border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+  }
+  .share-fallback[hidden] {
+    display: none;
   }
   .share-fallback__title {
     margin: 0;

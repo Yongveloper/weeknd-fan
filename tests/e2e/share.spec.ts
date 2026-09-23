@@ -343,6 +343,7 @@ test('shows a visible error when ticket JPEG creation returns no blob', async ({
   await expect(page.getByRole('alert')).toContainText(
     '이미지 생성에 실패했습니다',
   );
+  await expect(page.locator('[data-share-fallback]')).toBeVisible();
   await expect(
     page.getByRole('link', { name: '기본 공유 이미지 보기' }),
   ).toHaveAttribute('href', '/og/default.jpg');
@@ -360,10 +361,13 @@ test('keeps setlist fallback alternatives available after JPEG failure', async (
     };
   });
   await page.goto('/share/setlist/');
+  const fallback = page.locator('[data-share-fallback]');
+  await expect(fallback).toBeHidden();
   await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
   await expect(page.getByRole('alert')).toContainText(
     '이미지 생성에 실패했습니다',
   );
+  await expect(fallback).toBeVisible();
   await expect(
     page.getByRole('link', { name: '기본 공유 이미지 보기' }),
   ).toHaveAttribute('href', '/og/default.jpg');
@@ -379,6 +383,15 @@ test('copies the current absolute share route and exposes it as manual fallback 
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/share/ticket/');
   const expectedUrl = new URL('/share/ticket/', page.url()).href;
+  const fallback = page.locator('[data-share-fallback]');
+  await expect(fallback).toBeHidden();
+  await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
+  await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
+  await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'D-day 티켓 저장' }).click();
+  await download;
+  await expect(fallback).toBeVisible();
   await expect(page.locator('[data-share-url]')).toHaveText(expectedUrl);
   await page.getByRole('button', { name: '텍스트 공유 문구 복사' }).click();
   await expect(page.locator('[data-status]')).toHaveText(
@@ -396,10 +409,28 @@ test('explains the manual fallback when clipboard access is unavailable', async 
     Object.defineProperty(navigator, 'clipboard', { value: undefined });
   });
   await page.goto('/share/setlist/');
+  const download = page.waitForEvent('download');
+  await page.getByRole('button', { name: '셋리스트 카드 저장' }).click();
+  await download;
   await page.getByRole('button', { name: '텍스트 공유 문구 복사' }).click();
   await expect(page.locator('[data-status]')).toContainText(
     '직접 복사해 주세요',
   );
+});
+
+test('reveals the fallback on load when anchor downloads are unsupported', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    delete (HTMLAnchorElement.prototype as { download?: string }).download;
+  });
+  for (const route of ['/share/ticket/', '/share/setlist/']) {
+    await page.goto(route);
+    await expect(page.locator('[data-share-fallback]')).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
+    ).toBeVisible();
+  }
 });
 
 test('keeps share primary actions and fallback controls reachable on mobile', async ({
@@ -410,7 +441,21 @@ test('keeps share primary actions and fallback controls reachable on mobile', as
     await page.goto(route);
     await expectNoHorizontalDocumentOverflow(page);
     await expectVisibleControlsInsideViewport(page);
-    await expect(page.getByRole('button', { name: /저장/ })).toBeVisible();
+    const save = page.getByRole('button', { name: /저장/ });
+    await expect(save).toBeVisible();
+    const fallback = page.locator('[data-share-fallback]');
+    await expect(fallback).toBeHidden();
+    if (route === '/share/ticket/') {
+      await page.getByLabel('첫 번째 곡').selectOption({ index: 1 });
+      await page.getByLabel('두 번째 곡').selectOption({ index: 2 });
+      await page.getByLabel('세 번째 곡').selectOption({ index: 3 });
+    }
+    const download = page.waitForEvent('download');
+    await save.click();
+    await download;
+    await expect(fallback).toBeVisible();
+    await expectNoHorizontalDocumentOverflow(page);
+    await expectVisibleControlsInsideViewport(page);
     await expect(
       page.getByRole('button', { name: '텍스트 공유 문구 복사' }),
     ).toBeVisible();
@@ -481,6 +526,7 @@ test.describe('without JavaScript', () => {
       await expect(page.getByText(label, { exact: true })).toBeVisible();
     }
     await expect(page.getByText(/선택값을 저장하지 않습니다/)).toBeVisible();
+    await expect(page.locator('[data-share-fallback]')).toBeVisible();
     await expect(page.getByText('이미지 저장이 안 되면')).toBeVisible();
   });
 

@@ -16,6 +16,7 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale).guide.accessMap;
+const newTab = ui(locale).content.externalLink.newTab;
 const alt = strings.alt
   .replaceAll('{daehwa}', bilingual(STATION_DAEHWA, locale))
   .replaceAll('{kintex}', bilingual(STATION_KINTEX, locale))
@@ -28,7 +29,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
     href={accessMap.src}
     target="_blank"
     rel="noreferrer"
-    aria-label={strings.openOriginalAriaLabel}
+    aria-label={`${strings.openOriginalAriaLabel} ${newTab}`}
   >
     <Picture
       src={accessMap}
@@ -42,7 +43,7 @@ const INTERPARK = 'https://tickets.interpark.com/goods/26006903';
   <figcaption>
     {strings.sourcePrefix}
     <a href={INTERPARK} target="_blank" rel="noreferrer"
-      >{strings.sourceLinkLabel}</a
+      >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
     >
     <span class="nowrap">{strings.confirmedOn}</span>. {strings.opensNewTabNote}
   </figcaption>

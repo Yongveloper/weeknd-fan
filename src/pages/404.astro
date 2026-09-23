@@ -1,0 +1,87 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { navigationFor } from '../components/chrome/navigation';
+import { localeHref } from '../lib/i18n/routes';
+import { ui } from '../lib/i18n/ui';
+
+// Static hosting serves one 404 document for every missing path, whatever
+// its locale prefix, so this page is korean — the source of record — and
+// links back into the korean edition. Astro emits it as dist/404.html and
+// Cloudflare Workers static assets serve that file by default.
+const locale = 'ko';
+const strings = ui(locale).notFound;
+const WAYS_BACK = ['/', '/goyang/', '/setlist/'].map((path) =>
+  localeHref(locale, path),
+);
+const links = WAYS_BACK.map((href) => {
+  const item = navigationFor(locale).find((entry) => entry.href === href);
+  if (!item) throw new Error(`Missing navigation item: ${href}`);
+  return item;
+});
+---
+
+<BaseLayout
+  locale={locale}
+  cloudSky
+  noindex
+  title={strings.page.title}
+  description={strings.page.description}
+>
+  <section class="not-found shell-content" aria-labelledby="not-found-title">
+    <p class="eyebrow">{strings.eyebrow}</p>
+    <h1 id="not-found-title">{strings.heading}</h1>
+    <p>{strings.body}</p>
+    <nav aria-label={strings.navAriaLabel}>
+      {
+        links.map(({ href, label }) => (
+          <a href={href}>
+            {label} <span aria-hidden="true">→</span>
+          </a>
+        ))
+      }
+    </nav>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    gap: 1rem;
+    max-width: 44rem;
+    padding-block: clamp(4rem, 10vw, 8rem);
+  }
+
+  .eyebrow,
+  h1,
+  p {
+    margin: 0;
+  }
+
+  p:not(.eyebrow) {
+    color: var(--mist);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+  }
+
+  nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1rem;
+  }
+
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    min-block-size: 44px;
+    color: var(--ivory);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 1px solid color-mix(in srgb, var(--amber) 60%, transparent);
+  }
+
+  nav a:hover,
+  nav a:focus-visible {
+    color: var(--amber);
+  }
+</style>

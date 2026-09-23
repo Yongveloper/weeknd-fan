@@ -46,9 +46,6 @@ const routeLabels = {
   '/setlist/': strings.routeLabels.setlist,
   '/goyang/': strings.routeLabels.goyang,
 } as const;
-const supportingSources = sources.filter(
-  (source) => source.data.kind === 'editorial-reference',
-);
 type SourceEntry = (typeof sources)[number];
 const isSmsSource = (
   source: SourceEntry,
@@ -69,26 +66,38 @@ const sharedCheckedDate = (records: SourceEntry[]) => {
   );
   return dates.size === 1 ? [...dates][0] : undefined;
 };
-const supportingDate = sharedCheckedDate(supportingSources);
 const groups: Array<{
+  id: string;
   title: string;
   description: string;
   kinds: string[];
+  /** Non-linked closing row (the NamuWiki PDF note). */
+  trailing?: { name: string; note: string };
 }> = [
   {
+    id: 'official',
     title: strings.kind.official.title,
     description: strings.kind.official.description,
     kinds: ['official'],
   },
   {
+    id: 'public-agency',
     title: strings.kind['public-agency'].title,
     description: strings.kind['public-agency'].description,
     kinds: ['public-agency'],
   },
   {
+    id: 'crowd-sourced',
     title: strings.kind['crowd-sourced'].title,
     description: strings.kind['crowd-sourced'].description,
     kinds: ['crowd-sourced'],
+  },
+  {
+    id: 'supporting',
+    title: strings.kind['editorial-reference'].title,
+    description: strings.kind['editorial-reference'].description,
+    kinds: ['editorial-reference'],
+    trailing: strings.wikiReference,
   },
 ];
 
@@ -116,10 +125,10 @@ const checkpoints = strings.checkpoints.items;
           return (
             <section
               class="source-group"
-              aria-labelledby={`source-group-${group.title}`}
+              aria-labelledby={`source-group-${group.id}`}
             >
               <div>
-                <h2 id={`source-group-${group.title}`}>{group.title}</h2>
+                <h2 id={`source-group-${group.id}`}>{group.title}</h2>
                 <p>{group.description}</p>
                 {sharedDate && (
                   <p class="source-group__checked">
@@ -131,8 +140,11 @@ const checkpoints = strings.checkpoints.items;
                 {records.map((source) => {
                   const translated = isSourceTranslated(source.id);
                   const nameLang = translated ? locale : DEFAULT_LOCALE;
+                  const showNote = !translated && locale !== DEFAULT_LOCALE;
+                  const usage = sourceUsage.get(source.id);
+                  const hasMeta = showNote || !sharedDate || Boolean(usage);
                   return (
-                    <li>
+                    <li class="source-row">
                       {isSmsSource(source) ? (
                         <span class="source-group__message" lang={nameLang}>
                           {source.data.name}
@@ -142,134 +154,69 @@ const checkpoints = strings.checkpoints.items;
                           href={source.data.url}
                           target="_blank"
                           rel="noreferrer"
-                          lang={nameLang}
                         >
-                          {source.data.name}
+                          <span lang={nameLang}>{source.data.name}</span>
+                          <span class="sr-only">
+                            {contentStrings.externalLink.newTab}
+                          </span>
                         </a>
                       )}
-                      {!translated && locale !== DEFAULT_LOCALE && (
-                        <span class="source-group__untranslated">
-                          {contentStrings.untranslatedSourceNote}
-                        </span>
-                      )}
-                      {!sharedDate && (
-                        <span>
-                          {isSmsSource(source)
-                            ? strings.receivedLabel
-                            : strings.lastCheckedLabel}{' '}
-                          {formatSeoulDate(sourceDate(source))}
-                        </span>
-                      )}
-                      {sourceUsage.get(source.id) && (
-                        <div class="source-usage">
-                          <span class="source-usage__label">
-                            {strings.usedInLabel}
-                          </span>
-                          <ul
-                            aria-label={strings.usedInAriaLabel.replace(
-                              '{name}',
-                              source.data.name,
-                            )}
-                          >
-                            {sourceUsage.get(source.id)?.routes.map((route) => (
-                              <li>
-                                <a href={localeHref(locale, route)}>
-                                  {routeLabels[route]}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
+                      {hasMeta && (
+                        <div class="source-row__meta">
+                          {showNote && (
+                            <span class="source-group__untranslated">
+                              {contentStrings.untranslatedSourceNote}
+                            </span>
+                          )}
+                          {!sharedDate && (
+                            <span>
+                              {isSmsSource(source)
+                                ? strings.receivedLabel
+                                : strings.lastCheckedLabel}{' '}
+                              {formatSeoulDate(sourceDate(source))}
+                            </span>
+                          )}
+                          {usage && (
+                            <div class="source-usage">
+                              <span class="source-usage__label">
+                                {strings.usedInLabel}
+                              </span>
+                              <ul
+                                aria-label={strings.usedInAriaLabel.replace(
+                                  '{name}',
+                                  source.data.name,
+                                )}
+                              >
+                                {usage.routes.map((route) => (
+                                  <li>
+                                    <a href={localeHref(locale, route)}>
+                                      {routeLabels[route]}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
                         </div>
                       )}
                     </li>
                   );
                 })}
+                {group.trailing && (
+                  <li class="source-row">
+                    <span class="source-group__reference">
+                      {group.trailing.name}
+                    </span>
+                    <div class="source-row__meta">
+                      <span>{group.trailing.note}</span>
+                    </div>
+                  </li>
+                )}
               </ul>
             </section>
           );
         })
       }
-      <section class="source-group" aria-labelledby="source-group-supporting">
-        <div>
-          <h2 id="source-group-supporting">
-            {strings.kind['editorial-reference'].title}
-          </h2>
-          <p>{strings.kind['editorial-reference'].description}</p>
-          {
-            supportingDate && (
-              <p class="source-group__checked">
-                {strings.allCheckedOn.replace('{date}', supportingDate)}
-              </p>
-            )
-          }
-        </div>
-        <ul>
-          {
-            supportingSources.map((source) => {
-              const translated = isSourceTranslated(source.id);
-              const nameLang = translated ? locale : DEFAULT_LOCALE;
-              return (
-                <li>
-                  {isSmsSource(source) ? (
-                    <span class="source-group__message" lang={nameLang}>
-                      {source.data.name}
-                    </span>
-                  ) : (
-                    <a
-                      href={source.data.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      lang={nameLang}
-                    >
-                      {source.data.name}
-                    </a>
-                  )}
-                  {!translated && locale !== DEFAULT_LOCALE && (
-                    <span class="source-group__untranslated">
-                      {contentStrings.untranslatedSourceNote}
-                    </span>
-                  )}
-                  {!supportingDate && (
-                    <span>
-                      {isSmsSource(source)
-                        ? strings.receivedLabel
-                        : strings.lastCheckedLabel}{' '}
-                      {formatSeoulDate(sourceDate(source))}
-                    </span>
-                  )}
-                  {sourceUsage.get(source.id) && (
-                    <div class="source-usage">
-                      <span class="source-usage__label">
-                        {strings.usedInLabel}
-                      </span>
-                      <ul
-                        aria-label={strings.usedInAriaLabel.replace(
-                          '{name}',
-                          source.data.name,
-                        )}
-                      >
-                        {sourceUsage.get(source.id)?.routes.map((route) => (
-                          <li>
-                            <a href={localeHref(locale, route)}>
-                              {routeLabels[route]}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </li>
-              );
-            })
-          }
-          <li>
-            <span class="source-group__reference">
-              {strings.wikiReference.name}
-            </span>
-            <span>{strings.wikiReference.note}</span>
-          </li>
-        </ul>
-      </section>
     </section>
 
     <section
@@ -328,14 +275,15 @@ const checkpoints = strings.checkpoints.items;
 
   .source-group {
     display: grid;
-    grid-template-columns: minmax(12rem, 0.7fr) minmax(0, 1.3fr);
-    gap: 1.5rem clamp(2rem, 8vw, 9rem);
-    padding-block: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+    gap: 1.5rem clamp(2rem, 6vw, 6rem);
+    padding-block: clamp(2rem, 4vw, 3rem);
   }
 
   .source-group > div {
     display: grid;
     gap: 0.7rem;
+    align-content: start;
   }
   .source-group ul,
   .sources-page__checkpoints ol {
@@ -343,13 +291,18 @@ const checkpoints = strings.checkpoints.items;
     padding: 0;
     list-style: none;
   }
-  .source-group ul {
+  .source-group > ul {
     display: grid;
-    gap: 1rem;
+    gap: 0.75rem;
   }
-  .source-group li {
+  .source-row {
     display: grid;
-    gap: 0.2rem;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .source-row + .source-row {
+    padding-top: 0.75rem;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 16%, transparent);
   }
   .source-group a,
   .source-group__reference,
@@ -357,25 +310,34 @@ const checkpoints = strings.checkpoints.items;
     color: var(--ivory);
     font-weight: 800;
   }
-  .source-group li > span,
   .source-group__checked {
     color: var(--ink-muted);
     font-size: 0.86rem;
-  }
-  .source-group__checked {
     font-weight: 700;
   }
   .source-group__untranslated {
     font-style: italic;
   }
 
-  .source-usage {
+  /* One muted line: "마지막 확인 09.21 · 사용 위치 홈 콘서트 가이드", wrapping only when needed. */
+  .source-row__meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.35rem 0.8rem;
     align-items: baseline;
     color: var(--ink-muted);
     font-size: 0.86rem;
+    line-height: 1.5;
+  }
+  .source-row__meta > * + *::before {
+    content: '·';
+    margin-inline: 0.5em;
+  }
+
+  .source-usage {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0 0.5em;
+    align-items: baseline;
   }
 
   .source-usage__label {
@@ -383,9 +345,9 @@ const checkpoints = strings.checkpoints.items;
   }
 
   .source-usage ul {
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
-    gap: 0.35rem 0.8rem;
+    gap: 0 0.7em;
   }
 
   .source-usage a {
