@@ -2,7 +2,7 @@
 title: 공식 발표 대기
 summary: 아래 여덟 운영 항목은 현재 이 공연의 공식 세부 안내가 없습니다.
 status: unpublished
-lastVerifiedAt: 2026-09-23
+lastVerifiedAt: 2026-09-25
 sources:
   - live-nation-goyang
   - nol-notice
