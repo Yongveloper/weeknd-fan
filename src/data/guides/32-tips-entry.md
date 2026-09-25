@@ -2,7 +2,7 @@
 title: 입장
 summary: 타 공연 후기에서 반복된 도보 동선·금지 물품·보관함 경험입니다.
 status: practical
-lastVerifiedAt: 2026-09-21
+lastVerifiedAt: 2026-09-25
 sources:
   - nol-notice
   - news-ohmynews-2025-04
