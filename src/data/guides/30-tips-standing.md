@@ -2,7 +2,7 @@
 title: 스탠딩
 summary: 타 공연 후기에서 반복된 스탠딩 대기·입장·반입 경험입니다.
 status: practical
-lastVerifiedAt: 2026-09-25
+lastVerifiedAt: 2026-09-26
 sources:
   - review-vitaria-coldplay-2025
   - review-dcinside-bigbang-2026
