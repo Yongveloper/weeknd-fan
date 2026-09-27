@@ -2,11 +2,12 @@
 title: 공식 공연 정보
 summary: 공식 공지로 확인된 공연 기본 정보만 모았습니다.
 status: official
-lastVerifiedAt: 2026-09-23
+lastVerifiedAt: 2026-09-27
 sources:
   - live-nation-goyang
   - nol-notice
   - hyundai-card-announcement
+  - hyundai-card-dive
   - gys-goyang-sports
 relatedAlbums: []
 relatedSongs: []
