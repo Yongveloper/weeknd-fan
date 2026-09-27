@@ -117,7 +117,7 @@ export const ko = {
       alt: '인터파크 오는 길 안내. 3호선 {daehwa}과 GTX-A {kintex} 사이 격자 도로 위에 {venue}(현대카드 슈퍼콘서트 28 위켄드), 보조경기장, 킨텍스 제1·제2 전시장, 일산백병원, 대화마을 위치를 표시한 약도와 주소·지하철·버스 안내.',
       sourcePrefix: '오는 길 안내 출처:',
       sourceLinkLabel: 'NOL 티켓 공연 상세',
-      confirmedOn: '(2026-09-23 확인)',
+      confirmedOn: '(2026-09-27 확인)',
       opensNewTabNote: '탭하면 원본 이미지가 새 탭에서 열립니다.',
     },
     accessTable: {
@@ -129,7 +129,7 @@ export const ko = {
       busRoutesAriaLabel: '{stop} 정류장 정차 노선',
       sourcePrefix: '오는 길 정보 출처:',
       sourceLinkLabel: 'NOL 티켓 공연 상세',
-      confirmedOn: '(2026-09-23 확인)',
+      confirmedOn: '(2026-09-27 확인)',
     },
     directions: {
       navAriaLabel: '길찾기 앱 열기',
@@ -171,7 +171,7 @@ export const ko = {
       alt: '{venue} 좌석 안내도. 상단 무대, 플로어 스탠딩 A·B, 십자형 런웨이, 1~3층 스탠드 구역과 등급 색상 범례.',
       sourcePrefix: '좌석 안내도 출처:',
       sourceLinkLabel: 'NOL 티켓 공연 상세',
-      confirmedOn: '(2026-09-23 확인)',
+      confirmedOn: '(2026-09-27 확인)',
       opensNewTabNote: '탭하면 원본 이미지가 새 탭에서 열립니다.',
     },
     tips: {
