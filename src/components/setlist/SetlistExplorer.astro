@@ -17,6 +17,7 @@ import {
 } from '../../lib/content/queries';
 import type { Locale } from '../../lib/i18n/locales';
 import { DEFAULT_LOCALE } from '../../lib/i18n/locales';
+import { localeHref } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
 
 interface Props {
@@ -31,6 +32,7 @@ interface Props {
 const { locale, entries, showRecords, sources, archivePublished, albums } =
   Astro.props;
 const strings = ui(locale).setlist.explorer;
+const { posterLink } = ui(locale).home.setlistPreview;
 const twoDigits = (value: number) => String(value).padStart(2, '0');
 const dayLabel = (showDate: string) =>
   strings.dayVerified.replace('{day}', showDate.endsWith('-07') ? '1' : '2');
@@ -250,6 +252,18 @@ const hasEssentialSet =
     <p class="setlist-filter__empty" data-setlist-empty hidden>
       {strings.noResults}
     </p>
+    {
+      /* The poster artwork reads EXPECTED SETLIST, so it only fits this page
+        until the post-show archive replaces the expected guide. */
+      !archivePublished && (
+        <a
+          class="expected-setlist__poster"
+          href={localeHref(locale, '/share/setlist/')}
+        >
+          {posterLink} <span aria-hidden="true">→</span>
+        </a>
+      )
+    }
   </section>
 </div>
 
@@ -390,6 +404,22 @@ const hasEssentialSet =
     margin: 1rem 0 0;
     color: var(--mist);
     font-weight: 800;
+  }
+
+  .expected-setlist__poster {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    margin-top: 1.5rem;
+    color: var(--ivory);
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .expected-setlist__poster:hover,
+  .expected-setlist__poster:focus-visible {
+    color: var(--amber);
   }
 
   .expected-setlist__list,
