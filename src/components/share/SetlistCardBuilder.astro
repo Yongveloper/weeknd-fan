@@ -115,9 +115,23 @@ const clipboardText = strings.setlist.clipboardText.replace('{artist}', ARTIST);
 </section>
 
 <script>
-  import { buildSetlistCardLayout } from '../../lib/share/buildSetlistCardLayout';
+  import posterDateFont from '@fontsource-variable/noto-sans-kr/files/noto-sans-kr-latin-wght-normal.woff2?url';
+  import {
+    buildSetlistCardLayout,
+    POSTER_DATE_FONT_FAMILY,
+  } from '../../lib/share/buildSetlistCardLayout';
   import { renderCommands } from '../../lib/share/canvas';
   import { downloadBlob } from '../../lib/share/download';
+
+  // The site's Noto Sans KR faces use font-display: optional, so a face that
+  // loads after first paint stays unusable on this page — canvas included.
+  // The poster date gets its own blocking face over the same Latin file.
+  document.fonts.add(
+    new FontFace(POSTER_DATE_FONT_FAMILY, `url(${posterDateFont})`, {
+      weight: '100 900',
+      display: 'block',
+    }),
+  );
 
   document
     .querySelectorAll<HTMLElement>('[data-setlist-builder]')
@@ -163,7 +177,9 @@ const clipboardText = strings.setlist.clipboardText.replace('{artist}', ARTIST);
       const shareFailed = root.dataset.shareFailed ?? '';
       const clipboardTextTemplate = root.dataset.clipboardTextTemplate ?? '';
 
-      const layout = buildSetlistCardLayout();
+      const layout = buildSetlistCardLayout(
+        (root.dataset.version ?? '').replaceAll('-', '.'),
+      );
 
       // Preview: draws the same commands as the saved card onto the on-screen
       // canvas. renderCommands also builds a JPEG blob after drawing, so a
