@@ -107,7 +107,7 @@ export const en: UiStrings = {
       alt: 'Interpark directions guide. A sketch map over the grid streets between Line 3 {daehwa} and GTX-A {kintex}, marking {venue} (Hyundai Card Super Concert 28 Weeknd), the auxiliary stadium, KINTEX Halls 1 and 2, Ilsan Paik Hospital and Daehwa-maeul, plus the address, subway and bus directions.',
       sourcePrefix: 'Directions guide source:',
       sourceLinkLabel: 'NOL ticket listing',
-      confirmedOn: '(confirmed 2026-09-23)',
+      confirmedOn: '(confirmed 2026-09-27)',
       opensNewTabNote: 'Tapping opens the original image in a new tab.',
     },
     accessTable: {
@@ -119,7 +119,7 @@ export const en: UiStrings = {
       busRoutesAriaLabel: 'Bus routes serving {stop}',
       sourcePrefix: 'Directions info source:',
       sourceLinkLabel: 'NOL ticket listing',
-      confirmedOn: '(confirmed 2026-09-23)',
+      confirmedOn: '(confirmed 2026-09-27)',
     },
     directions: {
       navAriaLabel: 'Open a directions app',
@@ -161,7 +161,7 @@ export const en: UiStrings = {
       alt: '{venue} seating guide. Stage at the top, floor standing sections A and B, a cross-shaped runway, tier 1-3 stand sections, and a color-coded price legend.',
       sourcePrefix: 'Seating guide source:',
       sourceLinkLabel: 'NOL ticket listing',
-      confirmedOn: '(confirmed 2026-09-23)',
+      confirmedOn: '(confirmed 2026-09-27)',
       opensNewTabNote: 'Tapping opens the original image in a new tab.',
     },
     tips: {
