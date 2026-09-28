@@ -3,13 +3,15 @@
   "summary": "긴장감 있는 전개로 After Hours의 밤을 깊게 만드는 곡",
   "body": "앨범의 어두운 결을 라이브의 속도로 체감하는 구간이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-23",
+  "lastVerifiedAt": "2026-09-28",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ],
   "relatedAlbums": ["After Hours"],
   "relatedSongs": [],
@@ -24,6 +26,8 @@
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ]
 }

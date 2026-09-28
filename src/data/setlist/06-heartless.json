@@ -3,13 +3,15 @@
   "summary": "After Hours의 거친 자신감을 압축한 곡",
   "body": "어두운 서사에서 더 직접적인 리듬으로 넘어가는 장면이다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-23",
+  "lastVerifiedAt": "2026-09-28",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ],
   "relatedAlbums": ["After Hours"],
   "relatedSongs": [],
@@ -25,6 +27,8 @@
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ]
 }

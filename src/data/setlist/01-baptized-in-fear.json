@@ -3,13 +3,15 @@
   "summary": "Hurry Up Tomorrow의 불안과 정화 이미지를 여는 곡",
   "body": "공연의 첫 장면과 최근 앨범 3부작의 마지막 장을 연결해 듣는다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-23",
+  "lastVerifiedAt": "2026-09-28",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ],
   "relatedAlbums": ["Hurry Up Tomorrow"],
   "relatedSongs": [],
@@ -24,6 +26,8 @@
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ]
 }

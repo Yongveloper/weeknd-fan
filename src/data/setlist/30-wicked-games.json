@@ -3,13 +3,15 @@
   "summary": "초기 믹스테이프의 어두운 공기를 대표하는 곡",
   "body": "2011년의 공간감 있는 사운드가 거대한 경기장에서 어떻게 들리는지 본다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-23",
+  "lastVerifiedAt": "2026-09-28",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ],
   "relatedAlbums": ["House of Balloons"],
   "relatedSongs": [],
@@ -25,6 +27,8 @@
     "setlist-london-2026-08-14",
     "setlist-london-2026-08-15",
     "setlist-tokyo-2026-09-19",
-    "setlist-tokyo-2026-09-20"
+    "setlist-tokyo-2026-09-20",
+    "setlist-jakarta-2026-09-26",
+    "setlist-jakarta-2026-09-27"
   ]
 }
