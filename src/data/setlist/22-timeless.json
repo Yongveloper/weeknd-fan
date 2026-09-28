@@ -1,7 +1,7 @@
 {
-  "title": "I Was Never There",
-  "summary": "My Dear Melancholy,의 고립감을 선명하게 드러내는 곡",
-  "body": "전자음의 긴장과 감정의 낙차를 함께 듣는다.",
+  "title": "Timeless",
+  "summary": "최근 앨범의 차가운 자신감을 밀어붙이는 곡",
+  "body": "새로운 시대의 텐션을 힙합 리듬으로 이어 주는 구간이다.",
   "status": "expected",
   "lastVerifiedAt": "2026-09-28",
   "sources": [
@@ -13,14 +13,14 @@
     "setlist-jakarta-2026-09-26",
     "setlist-jakarta-2026-09-27"
   ],
-  "relatedAlbums": ["My Dear Melancholy,"],
+  "relatedAlbums": ["Hurry Up Tomorrow"],
   "relatedSongs": [],
   "spoilerLevel": "titles",
-  "expectedOrder": 18,
-  "songTitle": "I Was Never There",
-  "album": "My Dear Melancholy,",
-  "liveNote": "공간감 있는 조명과 정면 화면을 본다.",
-  "singAlongNote": "익숙한 멜로디만 조용히 따라간다.",
+  "expectedOrder": 22,
+  "songTitle": "Timeless",
+  "album": "Hurry Up Tomorrow",
+  "liveNote": "낮은 조명과 큰 화면의 리듬을 본다.",
+  "singAlongNote": "리듬과 제목 구간만 가볍게 따라간다.",
   "confidence": "high",
   "observedIn": [
     "setlist-manchester-2026-06-12",

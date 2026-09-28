@@ -1,7 +1,7 @@
 {
-  "title": "The Hills",
-  "summary": "어둡게 치닫는 전개가 강한 대표곡",
-  "body": "초기 대중적 돌파구의 묵직한 질감을 라이브로 확인한다.",
+  "title": "I Was Never There",
+  "summary": "My Dear Melancholy,의 고립감을 선명하게 드러내는 곡",
+  "body": "전자음의 긴장과 감정의 낙차를 함께 듣는다.",
   "status": "expected",
   "lastVerifiedAt": "2026-09-28",
   "sources": [
@@ -13,14 +13,14 @@
     "setlist-jakarta-2026-09-26",
     "setlist-jakarta-2026-09-27"
   ],
-  "relatedAlbums": ["Beauty Behind the Madness"],
+  "relatedAlbums": ["My Dear Melancholy,"],
   "relatedSongs": [],
   "spoilerLevel": "titles",
-  "expectedOrder": 19,
-  "songTitle": "The Hills",
-  "album": "Beauty Behind the Madness",
-  "liveNote": "폭발 전후의 빛 대비를 본다.",
-  "singAlongNote": "제목이 반복되는 지점에 반응한다.",
+  "expectedOrder": 20,
+  "songTitle": "I Was Never There",
+  "album": "My Dear Melancholy,",
+  "liveNote": "공간감 있는 조명과 정면 화면을 본다.",
+  "singAlongNote": "익숙한 멜로디만 조용히 따라간다.",
   "confidence": "high",
   "observedIn": [
     "setlist-manchester-2026-06-12",

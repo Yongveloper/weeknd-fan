@@ -103,7 +103,15 @@
     "sourceHash": "1bab492ecfbd932a",
     "translatedAt": "2026-09-21"
   },
-  "14-cant-feel-my-face": {
+  "14-tokyo": {
+    "title": "Tokyo",
+    "summary": "An unreleased new song first performed at the 2026 Tokyo shows",
+    "liveNote": "It's a song you'll be hearing for the first time, so watch the stage visuals and lighting first.",
+    "singAlongNote": "There's no released recording yet, so focus on listening rather than singing along.",
+    "sourceHash": "7d6cfb0dbc3716fb",
+    "translatedAt": "2026-09-28"
+  },
+  "15-cant-feel-my-face": {
     "title": "Can't Feel My Face",
     "summary": "A signature track that raises the show's temperature with a broadly popular melody",
     "liveNote": "Watch for the moment the whole crowd starts moving.",
@@ -111,7 +119,7 @@
     "sourceHash": "710a5ed72af568d8",
     "translatedAt": "2026-09-21"
   },
-  "15-lost-in-the-fire": {
+  "16-lost-in-the-fire": {
     "title": "Lost in the Fire",
     "summary": "A collaborative single that lowers the temperature again with a low, settled beat",
     "liveNote": "Watch for the screen tone shifting like a shadow.",
@@ -119,7 +127,15 @@
     "sourceHash": "3bb4a7e579489975",
     "translatedAt": "2026-09-21"
   },
-  "16-often": {
+  "17-kiss-land": {
+    "title": "Kiss Land",
+    "summary": "The title track of his 2013 debut studio album",
+    "liveNote": "Remember that it returns in two separate parts.",
+    "singAlongNote": "Just follow along on the title line in the chorus.",
+    "sourceHash": "d046140d693b8f08",
+    "translatedAt": "2026-09-28"
+  },
+  "18-often": {
     "title": "Often",
     "summary": "A song that raises the rhythm while keeping the mystery of the early era",
     "liveNote": "Watch for the lighting change where the beat stands out.",
@@ -127,7 +143,7 @@
     "sourceHash": "e02b6204b42892a7",
     "translatedAt": "2026-09-21"
   },
-  "17-given-up-on-me": {
+  "19-given-up-on-me": {
     "title": "Given Up on Me",
     "summary": "A track that carries forward Hurry Up Tomorrow's cool, distant emotional thread",
     "liveNote": "Watch for the dark staging that puts the focus on the vocal.",
@@ -135,7 +151,7 @@
     "sourceHash": "e1adc125bed132d7",
     "translatedAt": "2026-09-21"
   },
-  "18-i-was-never-there": {
+  "20-i-was-never-there": {
     "title": "I Was Never There",
     "summary": "A song that sharply lays bare the isolation of My Dear Melancholy,",
     "liveNote": "Watch for the spacious lighting and the head-on screen shot.",
@@ -143,7 +159,7 @@
     "sourceHash": "b1238b350915f920",
     "translatedAt": "2026-09-21"
   },
-  "19-the-hills": {
+  "21-the-hills": {
     "title": "The Hills",
     "summary": "A signature track built on a dark, headlong build",
     "liveNote": "Watch for the contrast in light before and after the burst.",
@@ -151,7 +167,7 @@
     "sourceHash": "11e9fa19be062188",
     "translatedAt": "2026-09-21"
   },
-  "20-timeless": {
+  "22-timeless": {
     "title": "Timeless",
     "summary": "A song that pushes forward the recent album's cold confidence",
     "liveNote": "Watch for the low lighting and the rhythm of the large screen.",
@@ -159,28 +175,12 @@
     "sourceHash": "993cafdd9afae2a8",
     "translatedAt": "2026-09-21"
   },
-  "21-rather-lie": {
-    "title": "RATHER LIE",
-    "summary": "At the European shows, Playboi Carti's appearance led this song's staging — but whether that happens in Goyang is unconfirmed.",
-    "liveNote": "Check whether a guest appears and watch for any stage change right before the song starts.",
-    "singAlongNote": "Instead of the lyrics, react only when the title is heard.",
-    "sourceHash": "3de9b969f7de2134",
-    "translatedAt": "2026-09-21"
-  },
-  "22-creepin": {
+  "23-creepin": {
     "title": "Creepin'",
     "summary": "A collaboration track that widens the flow with a familiar melody",
     "liveNote": "Watch for how dense the crowd's singing gets in this section.",
     "singAlongNote": "Sing along only with the short chorus melody.",
     "sourceHash": "1e4e9166cc46b121",
-    "translatedAt": "2026-09-21"
-  },
-  "23-niagara-falls": {
-    "title": "Niagara Falls",
-    "summary": "A song that carries forward the collaboration segment's color with a loose groove",
-    "liveNote": "Watch for the combination of low light and slow stage movement.",
-    "singAlongNote": "Ride the rhythm and listen quietly.",
-    "sourceHash": "07b75d9d9e6ebdef",
     "translatedAt": "2026-09-21"
   },
   "24-one-of-the-girls": {
@@ -279,13 +279,13 @@
     "sourceHash": "c9d7597441133c68",
     "translatedAt": "2026-09-21"
   },
-  "36-without-a-warning": {
-    "title": "Without a Warning",
-    "summary": "A song that brings the tension of a collaborative album onto the stage",
-    "liveNote": "Watch for the low bass and the screen transition.",
-    "singAlongNote": "React along with the rhythm.",
-    "sourceHash": "8e9ac2b88cf4d05f",
-    "translatedAt": "2026-09-21"
+  "36-adaptation": {
+    "title": "Adaptation",
+    "summary": "A Kiss Land track that closed the main set at the Asian shows",
+    "liveNote": "Watch the transition as the stage darkens after Blinding Lights.",
+    "singAlongNote": "Rather than singing along, take in the afterglow before the encore.",
+    "sourceHash": "5f072d33b7e89a5f",
+    "translatedAt": "2026-09-28"
   },
   "37-house-of-balloons": {
     "title": "House of Balloons",

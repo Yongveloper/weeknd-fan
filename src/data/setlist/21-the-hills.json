@@ -1,7 +1,7 @@
 {
-  "title": "Creepin'",
-  "summary": "협업곡의 익숙한 멜로디로 흐름을 넓히는 곡",
-  "body": "The Weeknd의 보컬이 다른 프로듀서 세계와 만나는 장면이다.",
+  "title": "The Hills",
+  "summary": "어둡게 치닫는 전개가 강한 대표곡",
+  "body": "초기 대중적 돌파구의 묵직한 질감을 라이브로 확인한다.",
   "status": "expected",
   "lastVerifiedAt": "2026-09-28",
   "sources": [
@@ -13,14 +13,14 @@
     "setlist-jakarta-2026-09-26",
     "setlist-jakarta-2026-09-27"
   ],
-  "relatedAlbums": ["Heroes & Villains"],
+  "relatedAlbums": ["Beauty Behind the Madness"],
   "relatedSongs": [],
   "spoilerLevel": "titles",
-  "expectedOrder": 22,
-  "songTitle": "Creepin'",
-  "album": "Heroes & Villains",
-  "liveNote": "관객이 따라 부르는 구간의 밀도를 본다.",
-  "singAlongNote": "짧은 후렴의 멜로디만 함께 부른다.",
+  "expectedOrder": 21,
+  "songTitle": "The Hills",
+  "album": "Beauty Behind the Madness",
+  "liveNote": "폭발 전후의 빛 대비를 본다.",
+  "singAlongNote": "제목이 반복되는 지점에 반응한다.",
   "confidence": "high",
   "observedIn": [
     "setlist-manchester-2026-06-12",
