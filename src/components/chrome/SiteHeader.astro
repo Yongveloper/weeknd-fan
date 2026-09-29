@@ -44,7 +44,6 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
           open
         >
           <summary aria-label={strings.chrome.menu}>
-            {strings.chrome.menu}
             <span class="site-header__menu-icon" aria-hidden="true">
               <span></span>
               <span></span>
@@ -246,8 +245,13 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
     }
 
     .site-header__wordmark {
+      position: absolute;
+      inset-block-start: 50%;
+      inset-inline-start: 50%;
       min-inline-size: 0;
       max-inline-size: 100%;
+      transform: translate(-50%, -50%) scale(0.48);
+      transform-origin: center;
     }
 
     .site-header__edition {
@@ -280,13 +284,13 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
     .site-header__menu-icon {
       position: relative;
       display: block;
-      inline-size: 24px;
-      block-size: 16px;
+      inline-size: 22px;
+      block-size: 14px;
     }
 
     .site-header__menu-icon > span {
       position: absolute;
-      inset-inline: 1px;
+      inset-inline: 0;
       block-size: 2px;
       border-radius: 999px;
       background: currentColor;
@@ -294,11 +298,11 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
     }
 
     .site-header__menu-icon > span:first-child {
-      inset-block-start: 2px;
+      inset-block-start: 1px;
     }
 
     .site-header__menu-icon > span:last-child {
-      inset-block-end: 2px;
+      inset-block-end: 1px;
     }
 
     .site-header__nav

@@ -21,7 +21,7 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
   await page.goto('/');
 
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
-  const links = nav.getByRole('link');
+  const links = nav.locator('.site-header__nav-list').getByRole('link');
   await expect(links).toHaveCount(4);
   for (const link of await links.all()) {
     await expect(link).toBeVisible();
@@ -42,12 +42,14 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
   await page.keyboard.press('Tab');
   await expect(
     page.getByRole('link', {
-      name: 'INTO:DAWN · The Weeknd 고양 팬 가이드 홈',
+      name: 'INTO:DAWN · 고양 팬 가이드 홈',
     }),
   ).toBeFocused();
   await page.keyboard.press('Tab');
   await expect(
-    page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴'),
+    page
+      .getByRole('group', { name: '주요 메뉴' })
+      .locator('summary[aria-label="메뉴"]'),
   ).toBeFocused();
   for (const [index, href] of expectedHrefs.entries()) {
     await page.keyboard.press('Tab');

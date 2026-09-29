@@ -5,7 +5,7 @@ import { tabUntilFocused } from './helpers/accessibility';
 async function openPrimaryNav(page: import('@playwright/test').Page) {
   const menu = page
     .getByRole('navigation', { name: '주요 메뉴' })
-    .getByText('메뉴');
+    .locator('summary[aria-label="메뉴"]');
   if (await menu.isVisible()) await menu.click();
 }
 
@@ -147,7 +147,9 @@ test('opens and closes the mobile menu from the keyboard', async ({ page }) => {
   await page.setViewportSize({ width: 652, height: 526 });
   await page.goto('/');
 
-  const menu = page.getByRole('group', { name: '주요 메뉴' }).getByText('메뉴');
+  const menu = page
+    .getByRole('group', { name: '주요 메뉴' })
+    .locator('summary[aria-label="메뉴"]');
   const details = page.getByRole('group', { name: '주요 메뉴' });
   const list = page.locator('.site-header__nav-list');
   const firstLink = page
@@ -852,11 +854,12 @@ test('exposes every primary route without horizontal scrolling on mobile', async
 
   await page
     .getByRole('group', { name: '주요 메뉴' })
-    .getByText('메뉴')
+    .locator('summary[aria-label="메뉴"]')
     .click();
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
-  await expect(nav.getByRole('link')).toHaveCount(4);
-  for (const link of await nav.getByRole('link').all()) {
+  const links = nav.locator('.site-header__nav-list').getByRole('link');
+  await expect(links).toHaveCount(4);
+  for (const link of await links.all()) {
     await expect(link).toBeVisible();
   }
   expect(
@@ -881,6 +884,7 @@ test('synchronizes the header menu when resizing across the mobile breakpoint', 
   await expect(menu).toHaveAttribute('open', '');
   const links = page
     .getByRole('navigation', { name: '주요 메뉴' })
+    .locator('.site-header__nav-list')
     .getByRole('link');
   await expect(links).toHaveCount(4);
   for (const link of await links.all()) {

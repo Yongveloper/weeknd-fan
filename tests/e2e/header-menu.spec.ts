@@ -115,6 +115,37 @@ test('opens a compact mobile overlay without moving the page', async ({
   await expect.poll(async () => (await main.boundingBox())?.y).toBe(mainBox?.y);
 });
 
+test('centers the scaled mobile wordmark and aligns the two-bar menu icon', async ({
+  page,
+}) => {
+  const viewport = { width: 468, height: 780 };
+  await page.setViewportSize(viewport);
+  await page.goto('/');
+
+  const [headerBox, wordmarkBox, iconBox] = await Promise.all([
+    page.locator('.site-header').boundingBox(),
+    page.locator('.site-header__wordmark').boundingBox(),
+    page.locator('.site-header__menu-icon').boundingBox(),
+  ]);
+
+  expect(headerBox).not.toBeNull();
+  expect(wordmarkBox).not.toBeNull();
+  expect(iconBox).not.toBeNull();
+
+  const wordmarkCenter = (wordmarkBox?.x ?? 0) + (wordmarkBox?.width ?? 0) / 2;
+  const headerCenter = (headerBox?.height ?? 0) / 2;
+  const iconCenter = (iconBox?.y ?? 0) + (iconBox?.height ?? 0) / 2;
+
+  expect(wordmarkCenter).toBeCloseTo(viewport.width / 2, 0);
+  expect(wordmarkBox?.width).toBeGreaterThanOrEqual(95);
+  expect(wordmarkBox?.width).toBeLessThanOrEqual(105);
+  expect(wordmarkBox?.height).toBeGreaterThanOrEqual(20);
+  expect(wordmarkBox?.height).toBeLessThanOrEqual(23);
+  expect(iconBox?.width).toBeCloseTo(22, 0);
+  expect(iconBox?.height).toBeCloseTo(14, 0);
+  expect(Math.abs(iconCenter - headerCenter)).toBeLessThanOrEqual(0.5);
+});
+
 test('keeps opened menu links above the home hero pointer layer', async ({
   page,
 }) => {
@@ -329,7 +360,7 @@ test('keeps the desktop navigation open and inline', async ({ page }) => {
   await page.setViewportSize({ width: 1000, height: 700 });
   await page.goto('/');
   const { details, summary } = headerMenu(page);
-  const links = details.getByRole('link');
+  const links = details.locator('.site-header__nav-list').getByRole('link');
 
   await expect(details).toHaveAttribute('open', '');
   await expect(summary).toBeHidden();
@@ -337,7 +368,7 @@ test('keeps the desktop navigation open and inline', async ({ page }) => {
   for (const link of await links.all()) await expect(link).toBeVisible();
   expect(
     await details
-      .locator('ul')
+      .locator('.site-header__nav-list')
       .evaluate((element) => getComputedStyle(element).display),
   ).toBe('flex');
 });
@@ -351,7 +382,7 @@ test.describe('without JavaScript', () => {
     await page.setViewportSize(mobileViewport);
     await page.goto('/');
     const { details } = headerMenu(page);
-    const links = details.getByRole('link');
+    const links = details.locator('.site-header__nav-list').getByRole('link');
 
     await expect(details).toHaveAttribute('open', '');
     await expect(links).toHaveCount(4);
