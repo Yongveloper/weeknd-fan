@@ -1,7 +1,7 @@
 {
-  "title": "Timeless",
-  "summary": "최근 앨범의 차가운 자신감을 밀어붙이는 곡",
-  "body": "새로운 시대의 텐션을 힙합 리듬으로 이어 주는 구간이다.",
+  "title": "Can't Feel My Face",
+  "summary": "대중적 멜로디로 공연의 온도를 높이는 대표곡",
+  "body": "팝스타로의 전환기를 보여 주는 곡이라 처음 듣는 관객도 반응하기 쉽다.",
   "status": "expected",
   "lastVerifiedAt": "2026-09-28",
   "sources": [
@@ -13,14 +13,14 @@
     "setlist-jakarta-2026-09-26",
     "setlist-jakarta-2026-09-27"
   ],
-  "relatedAlbums": ["Hurry Up Tomorrow"],
+  "relatedAlbums": ["Beauty Behind the Madness"],
   "relatedSongs": [],
   "spoilerLevel": "titles",
-  "expectedOrder": 20,
-  "songTitle": "Timeless",
-  "album": "Hurry Up Tomorrow",
-  "liveNote": "낮은 조명과 큰 화면의 리듬을 본다.",
-  "singAlongNote": "리듬과 제목 구간만 가볍게 따라간다.",
+  "expectedOrder": 15,
+  "songTitle": "Can't Feel My Face",
+  "album": "Beauty Behind the Madness",
+  "liveNote": "관객 전체가 움직이는 순간을 본다.",
+  "singAlongNote": "익숙한 후렴을 짧게 함께 부른다.",
   "confidence": "high",
   "observedIn": [
     "setlist-manchester-2026-06-12",
