@@ -261,7 +261,7 @@ export const ko = {
         },
         keepsake: {
           title: '기다림을 담아두기',
-          poster: '셋리스트 포스터',
+          poster: '셋리스트 포스터 만들기',
           ticket: '나만의 D-day 티켓 만들기',
         },
       },

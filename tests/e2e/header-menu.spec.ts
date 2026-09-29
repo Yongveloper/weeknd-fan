@@ -396,7 +396,7 @@ test.describe('without JavaScript', () => {
     const links = details.locator('.site-header__nav-list').getByRole('link');
 
     await expect(details).toHaveAttribute('open', '');
-    await expect(links).toHaveCount(4);
+    await expect(links).toHaveCount(6);
     for (const link of await links.all()) await expect(link).toBeVisible();
 
     await links.first().focus();

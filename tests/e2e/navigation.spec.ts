@@ -115,7 +115,11 @@ test('reaches both private share tools through contextual product CTAs', async (
   await expect(page).toHaveURL(/\/share\/ticket\/$/);
 
   await page.goto('/');
-  await page.getByRole('link', { name: '셋리스트 포스터 만들기' }).click();
+  await openPamphletContents(page);
+  await page
+    .getByLabel('팜플렛 목차')
+    .getByRole('link', { name: '셋리스트 포스터 만들기' })
+    .click();
   await expect(page).toHaveURL(/\/share\/setlist\/$/);
 });
 
@@ -858,7 +862,7 @@ test('exposes every primary route without horizontal scrolling on mobile', async
     .click();
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
   const links = nav.locator('.site-header__nav-list').getByRole('link');
-  await expect(links).toHaveCount(4);
+  await expect(links).toHaveCount(6);
   for (const link of await links.all()) {
     await expect(link).toBeVisible();
   }

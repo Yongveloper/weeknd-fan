@@ -253,7 +253,7 @@ export const en: UiStrings = {
         },
         keepsake: {
           title: 'Something to keep while you wait',
-          poster: 'Setlist poster',
+          poster: 'Make a setlist poster',
           ticket: 'Make your own D-day ticket',
         },
       },

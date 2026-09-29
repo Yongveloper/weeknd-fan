@@ -22,7 +22,7 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
 
   const nav = page.getByRole('navigation', { name: '주요 메뉴' });
   const links = nav.locator('.site-header__nav-list').getByRole('link');
-  await expect(links).toHaveCount(4);
+  await expect(links).toHaveCount(6);
   for (const link of await links.all()) {
     await expect(link).toBeVisible();
   }
@@ -34,7 +34,14 @@ test('keeps every primary route visible and keyboard reachable on a narrow scree
     ),
   ).toBe(true);
 
-  const expectedHrefs = ['/', '/discover/', '/setlist/', '/goyang/'];
+  const expectedHrefs = [
+    '/',
+    '/discover/',
+    '/setlist/',
+    '/goyang/',
+    '/share/setlist/',
+    '/share/ticket/',
+  ];
   await page.keyboard.press('Tab');
   await expect(
     page.getByRole('link', { name: '본문으로 건너뛰기' }),

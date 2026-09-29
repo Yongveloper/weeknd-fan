@@ -3,7 +3,11 @@ import type { Locale } from '../../lib/i18n/locales';
 import { localeHref } from '../../lib/i18n/routes';
 import { ui } from '../../lib/i18n/ui';
 import LocaleSwitcher from './LocaleSwitcher.astro';
-import { navigationFor, wordmark } from './navigation';
+import {
+  mobileCreatorNavigationFor,
+  navigationFor,
+  wordmark,
+} from './navigation';
 import Wordmark from './Wordmark.astro';
 
 interface Props {
@@ -12,7 +16,13 @@ interface Props {
 
 const { locale } = Astro.props;
 const strings = ui(locale);
-const navigation = navigationFor(locale);
+const navigation = [
+  ...navigationFor(locale).map((item) => ({ ...item, mobileOnly: false })),
+  ...mobileCreatorNavigationFor(locale).map((item) => ({
+    ...item,
+    mobileOnly: true,
+  })),
+];
 const pathname = Astro.url.pathname;
 const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 ---
@@ -52,8 +62,10 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
           <div class="disclosure__panel">
             <ul class="site-header__nav-list">
               {
-                navigation.map(({ href, label }) => (
-                  <li>
+                navigation.map(({ href, label, mobileOnly }) => (
+                  <li
+                    class:list={{ 'site-header__mobile-creator': mobileOnly }}
+                  >
                     <a
                       href={href}
                       aria-current={pathname === href ? 'page' : undefined}
@@ -208,6 +220,10 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
       background var(--motion-fast) var(--ease-cinematic);
   }
 
+  .site-header__mobile-creator {
+    display: none;
+  }
+
   .site-header__nav-list a::after {
     position: absolute;
     inset: auto 0.65rem 0.4rem;
@@ -341,6 +357,10 @@ const homeLabel = `${wordmark.name} · ${strings.chrome.homeSuffix}`;
 
     .site-header__nav-list li {
       width: 100%;
+    }
+
+    .site-header__mobile-creator {
+      display: list-item;
     }
 
     /* On a phone the panel is a dropdown, so the switcher belongs in it as a
