@@ -1,6 +1,7 @@
 import { access, readFile, readdir, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
+import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
 
 const distRoot = path.resolve(process.env.PERFORMANCE_BUDGET_DIST ?? 'dist');
@@ -33,7 +34,7 @@ export function rasterBudgetFor(relativePath) {
 
 // Only run the check when this file is executed directly — tests import
 // rasterBudgetFor above without triggering a full dist walk.
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   await main();
 }
 
