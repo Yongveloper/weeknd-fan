@@ -49,6 +49,30 @@ export const VENUE_ADDRESS: ProperNoun = {
 };
 
 /**
+ * Landmarks printed on Hyundai Card's venue map (VenueMap). Fans match the
+ * Korean label on the map image, so English keeps it beside the translation.
+ */
+export const MAP_AUX_STADIUM: ProperNoun = {
+  latin: 'Auxiliary Stadium',
+  ko: '보조경기장',
+};
+
+export const MAP_SONO_ARENA: ProperNoun = {
+  latin: 'Sono Arena',
+  ko: '소노아레나',
+};
+
+export const MAP_PARKING_LOT_3: ProperNoun = {
+  latin: 'Parking Lot 3',
+  ko: '제3주차장',
+};
+
+export const MAP_SOUTH_PLAZA: ProperNoun = {
+  latin: 'South Plaza',
+  ko: '남측광장',
+};
+
+/**
  * Kakao T shuttle departure points (TransportOperations). Every stop is
  * something a fan has to physically find, so each keeps its korean original.
  */

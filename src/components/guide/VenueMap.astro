@@ -1,0 +1,139 @@
+---
+import { Image } from 'astro:assets';
+import venueMap from '../../assets/guide/venue-map-hyundaicard.png';
+import Disclosure from '../ui/Disclosure.astro';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  MAP_AUX_STADIUM,
+  MAP_PARKING_LOT_3,
+  MAP_SONO_ARENA,
+  MAP_SOUTH_PLAZA,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.venueMap;
+const newTab = ui(locale).content.externalLink.newTab;
+const place = (line: string) =>
+  line
+    .replaceAll('{auxStadium}', bilingual(MAP_AUX_STADIUM, locale))
+    .replaceAll('{parking}', bilingual(MAP_PARKING_LOT_3, locale))
+    .replaceAll('{sonoArena}', bilingual(MAP_SONO_ARENA, locale))
+    .replaceAll('{southPlaza}', bilingual(MAP_SOUTH_PLAZA, locale));
+const points = [
+  strings.points.standingBooth,
+  strings.points.seatedBooth,
+  strings.points.earlyEntry,
+  strings.points.merchandise,
+  strings.points.records,
+  strings.points.gates,
+].map(place);
+// Hyundai Card's slide 3/5 as posted. The user approved one change: the
+// Instagram carousel's "3/5" counter was blanked to the slide's own black.
+// The page shows a single WebP (the aggregate raster budget has no room for
+// an AVIF twin); the tap target is the untouched PNG under /downloads/, which
+// the budget accounts for with the other user-provided originals.
+// Only ever hand `venueMap` to <Image>. Reading one of its properties here
+// (even `.width`) marks the PNG as referenced and Astro ships an extra 820KiB
+// copy into `_astro/`. 1206 is the slide's native width.
+const ORIGINAL = '/downloads/venue-map-hyundaicard.png';
+const INSTAGRAM_POST = 'https://www.instagram.com/p/Dd5iIpMiQKE/';
+---
+
+<div class="venue-map">
+  <h3 id="timetable-map-title">{strings.heading}</h3>
+  <figure data-enter>
+    <a
+      href={ORIGINAL}
+      target="_blank"
+      rel="noreferrer"
+      aria-label={`${strings.openOriginalAriaLabel} ${newTab}`}
+    >
+      <Image
+        src={venueMap}
+        widths={[1206]}
+        sizes="(max-width: 48rem) 100vw, 46rem"
+        format="webp"
+        quality={70}
+        alt={strings.alt}
+      />
+    </a>
+    <figcaption>
+      {strings.sourcePrefix}
+      <a href={INSTAGRAM_POST} target="_blank" rel="noreferrer"
+        >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
+      >
+      <span class="nowrap">{strings.confirmedOn}</span>. {
+        strings.opensNewTabNote
+      }
+    </figcaption>
+  </figure>
+  <Disclosure
+    locale={locale}
+    motion="fast"
+    label={strings.summaryLabel}
+    class="venue-map__text"
+  >
+    <ul>
+      {points.map((point) => <li>{point}</li>)}
+    </ul>
+  </Disclosure>
+</div>
+
+<style>
+  /* Wider than the seat map (32rem): this slide carries far more small type,
+     so it takes the section's full reading column. */
+  .venue-map {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 46rem;
+  }
+  h3 {
+    margin: 0;
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  /* The parenthetical confirmation note would otherwise split at the hyphen on narrow screens */
+  .nowrap {
+    white-space: nowrap;
+  }
+  figure {
+    display: grid;
+    gap: 0.6rem;
+    margin: 0;
+  }
+  figure > a {
+    display: block;
+  }
+  figure :global(img) {
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #000;
+  }
+  figcaption {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  figcaption a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+  ul {
+    display: grid;
+    gap: 0.5rem;
+    margin: 0;
+    padding-left: 1.2rem;
+    color: var(--mist);
+    font-size: 0.95rem;
+  }
+</style>

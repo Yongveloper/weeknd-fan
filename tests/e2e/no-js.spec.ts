@@ -88,12 +88,12 @@ test('keeps Goyang transport and pending guidance readable without JavaScript', 
   const pendingItems = page.locator('#pending .pending-list li');
   await expect(pendingItems).toHaveCount(6);
   await expect(pendingItems.locator('strong')).toHaveText([
-    '입장 게이트',
+    '구역별 입장 게이트',
     '반입 금지 물품',
     '교통 통제',
     '순환버스 세부 운영',
     '접근성 지원',
-    '스탠딩·Early Entry 운영',
+    'Early Entry 우선 입장 방식',
   ]);
   for (const item of await pendingItems.all()) await expect(item).toBeVisible();
   await expect(page.locator('#pending .pending-list')).not.toContainText(
@@ -113,4 +113,19 @@ test('keeps Discover summaries and sources readable without JavaScript', async (
   await expect(
     disclosure.getByRole('link', { name: /Universal Music Canada/ }).first(),
   ).toBeVisible();
+});
+
+test('keeps the Goyang show-day timetable readable without JavaScript', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  const timetable = page.locator('#timetable');
+  await expect(timetable.locator('.entry-timetable li')).toHaveCount(7);
+  for (const row of await timetable.locator('.entry-timetable li').all())
+    await expect(row).toBeVisible();
+  await expect(timetable.locator('.entry-duration tbody th')).toHaveCount(4);
+  await expect(timetable.locator('.venue-map img')).toBeVisible();
+  const details = timetable.locator('.venue-map details');
+  await details.locator('summary').click();
+  await expect(details.getByRole('listitem').first()).toBeVisible();
 });

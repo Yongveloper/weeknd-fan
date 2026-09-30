@@ -52,6 +52,7 @@ docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배�
 - 출처 `lastCheckedAt`과 콘텐츠 `lastVerifiedAt`은 실제 확인 날짜로 **함께** 갱신. 날짜 기준 `Asia/Seoul`.
 - `src/data/concert/goyang-2026.json`의 `archivePublished`는 `archive/goyang-2026-10-07.json`·`-08.json` 둘 다 존재 + audit 통과 전 `true` 금지.
 - 사용자가 제공한 이미지(Interpark 좌석도, 지도)는 **원본 그대로** 사용. 재드로잉·범례 재구성·재인코딩 금지. 지도 임베드는 클릭 없이 로드.
+  - 예외(사용자 승인, 2026-09-30): 현대카드 공연장 맵(`src/assets/guide/venue-map-hyundaicard.png`, 원본 탭 대상 `public/downloads/` 동일 파일)은 사용자 캡처에서 슬라이드 영역만 잘라내고 Instagram 캐러셀 번호 배지("3/5")만 슬라이드 배경색으로 지웠다. 그 밖의 영역은 16→8비트 반올림 외에 바꾸지 않았고, 색 프로파일(iCCP·cICP)은 유지, 캡처 메타데이터(eXIf·XMP)는 제거했다. 페이지에는 WebP 1장만 쓴다(전체 raster 예산 여유 부족).
 
 ## 함정
 

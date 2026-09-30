@@ -111,6 +111,7 @@ const guides = defineCollection({
   schema: common.extend({
     order: z.number().int().positive(),
     section: z.enum([
+      'timetable',
       'official',
       'transport',
       'arrival',

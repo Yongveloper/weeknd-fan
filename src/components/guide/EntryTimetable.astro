@@ -1,0 +1,195 @@
+---
+import { getEntry } from 'astro:content';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import { ARTIST } from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.timetable;
+const rowText = strings.rows;
+const concert = await getEntry('concert', 'goyang-2026');
+if (!concert) throw new Error('Missing concert record goyang-2026');
+const [firstShow] = concert.data.shows;
+if (!firstShow) throw new Error('Concert record goyang-2026 has no shows');
+
+// Both show days share one schedule (Hyundai Card timetable, 2026-09-30).
+// The last two slots come from the audited concert record so the start times
+// cannot drift from the rest of the site; `HH:MM` sits at 11–16 in an
+// ISO datetime with a +09:00 offset.
+const clock = (iso: string) => iso.slice(11, 16);
+const rows: Array<{
+  time: string;
+  items: Array<{ label: string; note?: string }>;
+  emphasis?: boolean;
+}> = [
+  { time: '11:00', items: [{ label: rowText.ticketBox }] },
+  {
+    time: '12:00',
+    items: [
+      { label: rowText.booths },
+      {
+        label: rowText.merchandisePreOpen,
+        note: rowText.merchandisePreOpenNote,
+      },
+    ],
+  },
+  {
+    time: '13:00',
+    items: [
+      { label: rowText.merchandiseOpen, note: rowText.merchandiseOpenNote },
+    ],
+  },
+  { time: '14:00', items: [{ label: rowText.standingQueue }] },
+  {
+    time: '16:30',
+    items: [{ label: rowText.entry, note: rowText.entryNote }],
+    emphasis: true,
+  },
+  {
+    time: clock(firstShow.openerStartsAt),
+    items: [
+      { label: rowText.opener.replace('{opener}', concert.data.opener.name) },
+    ],
+  },
+  {
+    time: clock(firstShow.startsAt),
+    items: [{ label: rowText.headliner.replace('{artist}', ARTIST) }],
+  },
+];
+---
+
+<div class="entry-timetable">
+  <div class="entry-timetable__alert">
+    <strong>{strings.alertHeading}</strong>
+    <p>{strings.alertBody}</p>
+  </div>
+
+  <div class="entry-timetable__schedule">
+    <h3 id="timetable-schedule-title">{strings.scheduleHeading}</h3>
+    <p class="entry-timetable__note">{strings.scheduleNote}</p>
+    <ol aria-labelledby="timetable-schedule-title">
+      {
+        rows.map((row) => (
+          <li data-emphasis={row.emphasis ? '' : undefined}>
+            <time datetime={row.time}>{row.time}</time>
+            <div class="entry-timetable__items">
+              {row.items.map((item) => (
+                <p>
+                  <span class="entry-timetable__label">{item.label}</span>
+                  {item.note && (
+                    <span class="entry-timetable__item-note">{item.note}</span>
+                  )}
+                </p>
+              ))}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+    <p class="entry-timetable__note">{strings.changeNote}</p>
+  </div>
+</div>
+
+<style>
+  .entry-timetable {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 46rem;
+  }
+  h3,
+  p,
+  ol {
+    margin: 0;
+  }
+  /* Same voice as the guide body's h3 so the section reads as one chapter. */
+  h3 {
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  /* Mirrors the transport section's no-parking notice: the one rule on the
+     page that costs a fan their spot if missed. */
+  .entry-timetable__alert {
+    display: grid;
+    gap: 0.5rem;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--amber) 65%, transparent);
+    background: color-mix(in srgb, var(--amber) 8%, transparent);
+  }
+  .entry-timetable__alert > strong {
+    color: var(--amber);
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+  }
+  .entry-timetable__alert p {
+    color: var(--mist);
+  }
+  .entry-timetable__schedule {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .entry-timetable__note {
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+  ol {
+    padding: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    list-style: none;
+  }
+  li {
+    display: grid;
+    grid-template-columns: 4.25rem minmax(0, 1fr);
+    gap: 0.35rem 1rem;
+    align-items: baseline;
+    min-height: 44px;
+    padding: 0.75rem 0.75rem 0.75rem calc(0.75rem - 3px);
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    /* Every row reserves the accent bar so the 16:30 row stays on the grid. */
+    border-left: 3px solid transparent;
+  }
+  li[data-emphasis] {
+    border-left-color: var(--amber);
+    background: color-mix(in srgb, var(--amber) 8%, transparent);
+  }
+  time {
+    color: var(--ivory);
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  li[data-emphasis] time,
+  li[data-emphasis] .entry-timetable__label {
+    color: var(--amber);
+  }
+  .entry-timetable__items {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .entry-timetable__items p {
+    display: grid;
+    gap: 0.15rem;
+  }
+  .entry-timetable__label {
+    color: var(--ivory);
+    font-weight: 800;
+  }
+  .entry-timetable__item-note {
+    color: var(--mist);
+    font-size: 0.88rem;
+  }
+  @media (max-width: 22rem) {
+    li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
