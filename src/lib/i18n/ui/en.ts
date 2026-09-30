@@ -133,14 +133,12 @@ export const en: UiStrings = {
     section: {
       pendingAriaLabel: 'Items awaiting official announcement',
       pendingItems: {
-        gateOpening: 'Gate opening time',
-        entryGate: 'Entry gates',
+        entryGate: 'Entry gate by seating section',
         prohibitedItems: 'Prohibited items',
         trafficControl: 'Traffic control',
         shuttleOperations: 'Shuttle bus operational details',
         accessibilitySupport: 'Accessibility support',
-        standingEarlyEntry: 'Standing & Early Entry operations',
-        merchandise: 'Official merchandise sales',
+        standingEarlyEntry: 'Early Entry priority admission',
       },
       lastCheckedPrefix: 'Last checked',
     },
@@ -155,6 +153,80 @@ export const en: UiStrings = {
       zoomInLabel: 'Zoom in',
       zoomOutLabel: 'Zoom out',
       markerAlt: '{venue} location',
+    },
+    timetable: {
+      alertHeading: 'Standing: be in the queue area before 16:30',
+      alertBody:
+        'Finish the adult check first, then wait in the standing queue area in admission-number order. Arrive after 16:30 and your admission number is voided.',
+      scheduleHeading: 'Official schedule',
+      scheduleAriaLabel: 'Show-day schedule',
+      scheduleNote:
+        'The same schedule was announced for both shows, Wednesday 7 and Thursday 8 October.',
+      rows: {
+        ticketBox: 'Ticket box · Standing Early Entry Package booth open',
+        booths: 'Adult check · record booths open',
+        merchandisePreOpen: 'Merchandise booth early opening',
+        merchandisePreOpenNote: 'Standing Early Entry Package buyers only',
+        merchandiseOpen: 'Merchandise booth opens to everyone',
+        merchandiseOpenNote: 'All ticket holders',
+        standingQueue: 'Standing queue area opens',
+        entry: 'Standing and reserved-seat entry begins',
+        entryNote: 'Standing admission numbers are void after 16:30',
+        opener: '{opener} opening set begins',
+        headliner: '{artist} show begins',
+      },
+      changeNote:
+        'Times may change with conditions on the day. Crowds can make every step take longer, so arrive with time to spare.',
+    },
+    entryDuration: {
+      heading: 'Estimated time to get in',
+      intro:
+        'The minimum estimated time from leaving public transport to reaching your spot.',
+      stepHeader: 'Step',
+      seatedLabel: 'Seated',
+      standingLabel: 'Standing',
+      totalLabel: 'Total',
+      totalValue: 'at least {minutes} min',
+      minutes: '{minutes} min',
+      steps: {
+        arrival: 'From public transport to the adult-check booth',
+        wristband: 'Adult check and wristband pickup',
+        booths: 'Photo zone, merchandise, record and event booths',
+        seat: 'Finding your spot after entering',
+      },
+      arrivalSeated:
+        'Seated: at least 13 min on foot from {daehwa}; at least 20 min on foot or by shuttle bus from {kintex}',
+      arrivalStanding:
+        'Standing: at least 15 min on foot from {daehwa}; at least 25 min on foot or by shuttle bus from {kintex}',
+      arrivalNote:
+        'These times run to the adult-check booth. The “about 3 minutes on foot from Exit 3 of {daehwa}” in Getting There is measured to the stadium, a different point.',
+      estimateNote:
+        'These are estimates and vary with conditions on the day and with what each person stops for.',
+      boothsNote: 'The totals include 95 minutes at the photo zone and booths.',
+    },
+    venueMap: {
+      heading: 'Venue map',
+      openOriginalAriaLabel: 'Open the original venue map image',
+      alt: 'Hyundai Card Super Concert venue map. The stage and standing sections A and B in the middle of the stadium, W, N and E gates around it, standing and reserved-seat adult-check booths, merchandise, record, Early Entry Package and VIP Package booths, lockers, information and restrooms, with a legend.',
+      sourcePrefix: 'Venue map source:',
+      sourceLinkLabel: 'Hyundai Card official Instagram',
+      confirmedOn: '(confirmed 2026-09-30)',
+      opensNewTabNote: 'Tapping opens the original image in a new tab.',
+      summaryLabel: 'Read the map as text',
+      points: {
+        standingBooth:
+          'The standing adult-check booth and standing queue area are on the {auxStadium} side. Standing-only merchandise and restrooms are marked there, and a yellow dotted route leads from the queue area to the standing sections.',
+        seatedBooth:
+          'The reserved-seat adult-check booth is beside the {southPlaza}, toward {parking}. The ticket box and the VIP Package booth are marked in the same area.',
+        merchandise:
+          'The merchandise area is on the {sonoArena} side, with lockers and restrooms marked. MD marks also appear beside gates W4–W5 and E8.',
+        earlyEntry:
+          'The Early Entry Package booth is near gate W1, with lockers and restrooms marked nearby.',
+        records:
+          'The record booth is above the {southPlaza} and information is below it.',
+        gates:
+          'Gates W1, W3, W4, W5, N1-2 and E1, E2, E3, E4, E5, E8 are marked. Which gate each seating section uses has not been announced.',
+      },
     },
     seatMap: {
       openOriginalAriaLabel: 'Open the original seating guide image',

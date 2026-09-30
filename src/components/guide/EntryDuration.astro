@@ -1,0 +1,223 @@
+---
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  STATION_DAEHWA,
+  STATION_KINTEX,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.entryDuration;
+const daehwa = bilingual(STATION_DAEHWA, locale);
+const kintex = bilingual(STATION_KINTEX, locale);
+const stations = (line: string) =>
+  line.replaceAll('{daehwa}', daehwa).replaceAll('{kintex}', kintex);
+const minutes = (value: number) =>
+  strings.minutes.replace('{minutes}', String(value));
+
+// Hyundai Card's "입장 예상 소요 시간 안내" slide (2026-09-30). The totals are
+// summed rather than typed so a corrected step cannot leave them stale; the
+// slide's own totals are 147 and 137 minutes.
+const steps = [
+  {
+    label: strings.steps.arrival,
+    seated: 20,
+    standing: 25,
+    details: [
+      stations(strings.arrivalSeated),
+      stations(strings.arrivalStanding),
+    ],
+  },
+  { label: strings.steps.wristband, seated: 15, standing: 15 },
+  { label: strings.steps.booths, seated: 95, standing: 95 },
+  { label: strings.steps.seat, seated: 17, standing: 2 },
+];
+const total = (key: 'seated' | 'standing') =>
+  steps.reduce((sum, step) => sum + step[key], 0);
+const totals = [
+  { label: strings.seatedLabel, value: total('seated') },
+  { label: strings.standingLabel, value: total('standing') },
+];
+---
+
+<div class="entry-duration">
+  <h3 id="timetable-duration-title">{strings.heading}</h3>
+  <p class="entry-duration__intro">{strings.intro}</p>
+  <dl class="entry-duration__totals">
+    {
+      totals.map((item) => (
+        <div>
+          <dt>{item.label}</dt>
+          <dd>{strings.totalValue.replace('{minutes}', String(item.value))}</dd>
+        </div>
+      ))
+    }
+  </dl>
+  <table aria-labelledby="timetable-duration-title">
+    <thead>
+      <tr>
+        <th scope="col">{strings.stepHeader}</th>
+        <th scope="col">{strings.seatedLabel}</th>
+        <th scope="col">{strings.standingLabel}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        steps.map((step) => (
+          <>
+            <tr data-has-details={step.details ? '' : undefined}>
+              <th scope="row">{step.label}</th>
+              <td>{minutes(step.seated)}</td>
+              <td>{minutes(step.standing)}</td>
+            </tr>
+            {/* Full-width follow-up row: squeezed into the step column the
+                per-station breakdown wrapped one word per line at 320px. */}
+            {step.details && (
+              <tr class="entry-duration__details">
+                <td colspan="3">
+                  {step.details.map((line) => (
+                    <span>{line}</span>
+                  ))}
+                </td>
+              </tr>
+            )}
+          </>
+        ))
+      }
+    </tbody>
+  </table>
+  <ul class="entry-duration__notes">
+    <li>{stations(strings.arrivalNote)}</li>
+    <li>{strings.boothsNote}</li>
+    <li>{strings.estimateNote}</li>
+  </ul>
+</div>
+
+<style>
+  .entry-duration {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 46rem;
+  }
+  h3,
+  p,
+  dl,
+  dd,
+  ul {
+    margin: 0;
+  }
+  h3 {
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  .entry-duration__intro {
+    color: var(--mist);
+  }
+  .entry-duration__totals {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .entry-duration__totals > div {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.75rem 1rem;
+    border: 1px solid color-mix(in srgb, var(--ivory) 22%, transparent);
+  }
+  .entry-duration__totals dt {
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+    font-weight: 800;
+  }
+  .entry-duration__totals dd {
+    color: var(--ivory);
+    font-size: clamp(1.1rem, 2.4vw, 1.35rem);
+    font-weight: 900;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+  }
+  th,
+  td {
+    padding: 0.7rem 0.5rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    text-align: start;
+    vertical-align: top;
+  }
+  thead th {
+    border-bottom-color: color-mix(in srgb, var(--ivory) 45%, transparent);
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  thead th:not(:first-child),
+  td {
+    width: 5.5rem;
+    text-align: end;
+    white-space: nowrap;
+  }
+  th:first-child {
+    padding-inline-start: 0;
+  }
+  td:last-child,
+  thead th:last-child {
+    padding-inline-end: 0;
+  }
+  td {
+    color: var(--ivory);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The page-wide `overflow-wrap: anywhere` lets a narrow step column shrink
+     below one word, which split english mid-word at 320px ("transpor/t").
+     Break between words only; korean still wraps by eojeol under keep-all. */
+  tbody th {
+    color: var(--ivory);
+    font-weight: 700;
+    overflow-wrap: break-word;
+  }
+  tr[data-has-details] > * {
+    padding-bottom: 0.25rem;
+    border-bottom: 0;
+  }
+  .entry-duration__details td {
+    width: auto;
+    padding-top: 0;
+    padding-inline: 0;
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-align: start;
+    white-space: normal;
+  }
+  .entry-duration__details span {
+    display: block;
+  }
+  .entry-duration__details span + span {
+    margin-top: 0.15rem;
+  }
+  .entry-duration__notes {
+    display: grid;
+    gap: 0.3rem;
+    padding-left: 1.1rem;
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+  }
+  @media (max-width: 26rem) {
+    thead th:not(:first-child),
+    td {
+      width: 4.25rem;
+    }
+  }
+</style>

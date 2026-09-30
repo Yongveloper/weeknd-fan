@@ -143,14 +143,12 @@ export const ko = {
     section: {
       pendingAriaLabel: '공식 발표 대기 항목',
       pendingItems: {
-        gateOpening: '게이트 오픈 시각',
-        entryGate: '입장 게이트',
+        entryGate: '구역별 입장 게이트',
         prohibitedItems: '반입 금지 물품',
         trafficControl: '교통 통제',
         shuttleOperations: '순환버스 세부 운영',
         accessibilitySupport: '접근성 지원',
-        standingEarlyEntry: '스탠딩·Early Entry 운영',
-        merchandise: '공식 굿즈(MD) 판매',
+        standingEarlyEntry: 'Early Entry 우선 입장 방식',
       },
       lastCheckedPrefix: '마지막 확인',
     },
@@ -165,6 +163,80 @@ export const ko = {
       zoomInLabel: '지도 확대',
       zoomOutLabel: '지도 축소',
       markerAlt: '{venue} 위치',
+    },
+    timetable: {
+      alertHeading: '스탠딩은 16:30 전까지 대기장소로',
+      alertBody:
+        '성인인증을 마친 뒤 스탠딩 대기장소에서 입장번호 순서대로 기다립니다. 16:30 이후에 도착하면 입장번호가 무효 처리됩니다.',
+      scheduleHeading: '공식 시간표',
+      scheduleAriaLabel: '공연 당일 시간표',
+      scheduleNote:
+        '10월 7일(수)·8일(목) 두 공연 모두 같은 시간표로 안내됐습니다.',
+      rows: {
+        ticketBox: '티켓박스 · 스탠딩 Early Entry Package 부스 오픈',
+        booths: '성인인증 · 음반 부스 오픈',
+        merchandisePreOpen: '머천다이즈 부스 선오픈',
+        merchandisePreOpenNote: '스탠딩 Early Entry Package 구매자 대상',
+        merchandiseOpen: '머천다이즈 부스 일반 오픈',
+        merchandiseOpenNote: '전체 관객 대상',
+        standingQueue: '스탠딩 대기장소 오픈',
+        entry: '스탠딩 · 지정석 입장 시작',
+        entryNote: '16:30 이후 도착하면 스탠딩 입장번호 무효',
+        opener: '{opener} 오프닝 공연 시작',
+        headliner: '{artist} 공연 시작',
+      },
+      changeNote:
+        '운영 시간은 당일 현장 상황에 따라 바뀔 수 있습니다. 혼잡하면 소요 시간이 길어질 수 있으니 여유 있게 도착하세요.',
+    },
+    entryDuration: {
+      heading: '입장까지 예상 소요 시간',
+      intro:
+        '대중교통에서 내린 뒤 자리에 도착하기까지 걸리는 최소 예상 시간입니다.',
+      stepHeader: '단계',
+      seatedLabel: '지정석',
+      standingLabel: '스탠딩',
+      totalLabel: '합계',
+      totalValue: '최소 {minutes}분',
+      minutes: '{minutes}분',
+      steps: {
+        arrival: '대중교통 하차 후 성인인증 부스 방문',
+        wristband: '성인인증 후 성인인증 팔찌 수령',
+        booths: '포토존, 머천다이즈·음반·이벤트 부스 즐기기',
+        seat: '공연장 입장 후 내 자리 찾기',
+      },
+      arrivalSeated:
+        '지정석: {daehwa} 도보 최소 13분, {kintex} 최소 20분(도보·순환버스)',
+      arrivalStanding:
+        '스탠딩: {daehwa} 도보 최소 15분, {kintex} 최소 25분(도보·순환버스)',
+      arrivalNote:
+        '역에서 성인인증 부스까지의 시간입니다. 가는 길의 “{daehwa} 3번 출구에서 도보 약 3분”은 운동장까지의 거리라 기준점이 다릅니다.',
+      estimateNote:
+        '예상 소요 시간이며, 현장 상황과 개인별 이용 여부에 따라 달라질 수 있습니다.',
+      boothsNote: '합계에는 포토존·부스 이용 95분이 들어 있습니다.',
+    },
+    venueMap: {
+      heading: '공연장 맵',
+      openOriginalAriaLabel: '공연장 맵 원본 이미지 열기',
+      alt: '현대카드 슈퍼콘서트 공연장 맵. 경기장 가운데 무대와 스탠딩 A·B, 둘레의 W·N·E 게이트, 스탠딩·지정석 성인인증 부스, 머천다이즈·음반·Early Entry Package·VIP Package 부스, 물품보관소·인포메이션·화장실 위치와 범례.',
+      sourcePrefix: '공연장 맵 출처:',
+      sourceLinkLabel: '현대카드 공식 인스타그램',
+      confirmedOn: '(2026-09-30 확인)',
+      opensNewTabNote: '탭하면 원본 이미지가 새 탭에서 열립니다.',
+      summaryLabel: '지도 내용을 글로 보기',
+      points: {
+        standingBooth:
+          '스탠딩 성인인증 부스와 스탠딩 대기장소는 {auxStadium} 쪽에 있습니다. 스탠딩 전용 머천다이즈와 화장실이 함께 표시돼 있고, 대기장소에서 스탠딩 구역까지 노란 점선 동선이 이어집니다.',
+        seatedBooth:
+          '지정석 성인인증 부스는 {southPlaza} 옆 {parking} 쪽에 있습니다. 티켓박스와 VIP Package 부스가 같은 구역에 표시돼 있습니다.',
+        merchandise:
+          '머천다이즈 구역은 {sonoArena} 쪽에 있고 물품보관소와 화장실이 표시돼 있습니다. W4·W5 게이트와 E8 게이트 옆에도 MD 표시가 있습니다.',
+        earlyEntry:
+          'Early Entry Package 부스는 W1 게이트 근처에 있고, 주변에 물품보관소와 화장실이 표시돼 있습니다.',
+        records:
+          '음반 부스는 {southPlaza} 위쪽, 인포메이션은 {southPlaza} 아래쪽에 있습니다.',
+        gates:
+          '게이트는 W1·W3·W4·W5, N1-2, E1·E2·E3·E4·E5·E8이 표시돼 있습니다. 좌석 구역별 입장 게이트는 아직 안내되지 않았습니다.',
+      },
     },
     seatMap: {
       openOriginalAriaLabel: '좌석 안내도 원본 이미지 열기',

@@ -138,12 +138,13 @@ test.describe('without JavaScript', () => {
   });
 });
 
-test('orders the seven sections and offers a jump nav', async ({ page }) => {
+test('orders the eight sections and offers a jump nav', async ({ page }) => {
   await page.goto('/goyang/');
   const ids = await page
     .locator('main section[id]')
     .evaluateAll((els) => els.map((el) => el.id));
   expect(ids).toEqual([
+    'timetable',
     'official',
     'transport',
     'packing',
@@ -153,7 +154,7 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
     'pending',
   ]);
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
-  await expect(jump.getByRole('link')).toHaveCount(7);
+  await expect(jump.getByRole('link')).toHaveCount(8);
   await expect(jump.getByRole('link', { name: '좌석 안내' })).toHaveAttribute(
     'href',
     '#seating',
@@ -161,13 +162,16 @@ test('orders the seven sections and offers a jump nav', async ({ page }) => {
   await expect(page.getByText('아직 발표되지 않은 운영 정보')).toBeVisible();
 });
 
-test('activates all seven guide jump links from the keyboard', async ({
+test('activates all eight guide jump links from the keyboard', async ({
   page,
 }) => {
+  // One fresh page load per link; eight sections sit right at the 30s default.
+  test.setTimeout(60_000);
   await page.goto('/goyang/');
   const jump = page.getByRole('navigation', { name: '가이드 섹션' });
   const links = jump.getByRole('link');
   const ids = [
+    'timetable',
     'official',
     'transport',
     'packing',
@@ -222,6 +226,9 @@ test('tracks the current guide section', async ({ page }) => {
 test('clears the actual sticky jump nav from every guide heading', async ({
   page,
 }) => {
+  // 6 viewport/zoom cases × 8 sections of smooth-scroll clicks: the run took
+  // 27s with seven sections, so the eighth pushed it past the 30s default.
+  test.setTimeout(60_000);
   const cases = [
     { width: 320, zoom: false },
     { width: 390, zoom: false },
@@ -231,6 +238,7 @@ test('clears the actual sticky jump nav from every guide heading', async ({
     { width: 1280, zoom: true },
   ];
   const ids = [
+    'timetable',
     'official',
     'transport',
     'packing',
@@ -474,4 +482,98 @@ test('keeps every tips tab inside the viewport on mobile', async ({
   const fifth = await tabs.nth(4).boundingBox();
   expect(fifth).not.toBeNull();
   expect(fifth!.x + fifth!.width).toBeLessThanOrEqual(viewport!.width);
+});
+
+test('leads with the official show-day timetable', async ({ page }) => {
+  await page.goto('/goyang/');
+  const firstSection = page.locator('main section[id]').first();
+  await expect(firstSection).toHaveAttribute('id', 'timetable');
+
+  const timetable = page.locator('#timetable');
+  await expect(
+    timetable.getByRole('heading', { level: 2, name: '당일 타임테이블' }),
+  ).toBeVisible();
+  await expect(
+    timetable.getByText('스탠딩은 16:30 전까지 대기장소로'),
+  ).toBeVisible();
+
+  const rows = timetable
+    .getByRole('list', { name: '공식 시간표' })
+    .locator('li');
+  await expect(rows.locator('time')).toHaveText([
+    '11:00',
+    '12:00',
+    '13:00',
+    '14:00',
+    '16:30',
+    '18:45',
+    '19:45',
+  ]);
+  await expect(
+    rows.filter({ has: page.locator('[datetime="16:30"]') }),
+  ).toHaveAttribute('data-emphasis', '');
+  await expect(rows.nth(1)).toContainText(
+    '스탠딩 Early Entry Package 구매자 대상',
+  );
+  await expect(rows.nth(5)).toContainText('Creepy Nuts 오프닝 공연 시작');
+  await expect(rows.nth(6)).toContainText('The Weeknd 공연 시작');
+
+  const totals = timetable.locator('.entry-duration__totals dd');
+  await expect(totals).toHaveText(['최소 147분', '최소 137분']);
+  const steps = timetable.getByRole('table', {
+    name: '입장까지 예상 소요 시간',
+  });
+  await expect(steps.locator('tbody th[scope="row"]')).toHaveCount(4);
+  await expect(steps).toContainText('대화역 도보 최소 13분');
+
+  await expect(
+    timetable.getByRole('listitem').filter({ hasText: '모바일 신분증' }),
+  ).toBeVisible();
+  await expect(
+    timetable.getByRole('link', { name: '현대카드 공식 인스타그램' }).first(),
+  ).toHaveAttribute('href', 'https://www.instagram.com/p/Dd5iIpMiQKE/');
+});
+
+test('shows the Hyundai Card venue map with a text alternative', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  const map = page.locator('#timetable .venue-map');
+  const original = map.getByRole('link', {
+    name: /공연장 맵 원본 이미지 열기/,
+  });
+  await expect(original).toHaveAttribute(
+    'href',
+    '/downloads/venue-map-hyundaicard.png',
+  );
+  const image = map.locator('img');
+  await expect(image).toHaveAttribute('alt', /현대카드 슈퍼콘서트 공연장 맵/);
+  await image.scrollIntoViewIfNeeded();
+  // One 1206w WebP only; naturalWidth is density-corrected against `sizes`,
+  // so check the decoded source instead of a pixel width.
+  await expect
+    .poll(() =>
+      image.evaluate(
+        (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+      ),
+    )
+    .toBe(true);
+  await expect
+    .poll(() => image.evaluate((img: HTMLImageElement) => img.currentSrc))
+    .toMatch(/venue-map-hyundaicard\.[^/]+\.webp$/);
+
+  const response = await page.request.get(
+    '/downloads/venue-map-hyundaicard.png',
+  );
+  expect(response.ok()).toBe(true);
+  expect(response.headers()['content-type']).toContain('image/png');
+
+  const details = map.locator('details');
+  await expect(details).not.toHaveAttribute('open', '');
+  await details.locator('summary').click();
+  await expect(details.getByRole('listitem')).toHaveCount(6);
+  await expect(details).toContainText('보조경기장');
+  await expect(details).toContainText(
+    '좌석 구역별 입장 게이트는 아직 안내되지 않았습니다',
+  );
 });

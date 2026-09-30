@@ -761,12 +761,12 @@ test('renders exact unpublished operations and an accessible schematic map', asy
     pending.locator('.guide-section__heading > p:last-child'),
   ).toContainText('아래 여섯 운영 항목');
   await expect(pending.locator('.pending-list strong')).toHaveText([
-    '입장 게이트',
+    '구역별 입장 게이트',
     '반입 금지 물품',
     '교통 통제',
     '순환버스 세부 운영',
     '접근성 지원',
-    '스탠딩·Early Entry 운영',
+    'Early Entry 우선 입장 방식',
   ]);
   await expect(pending.locator('.status')).toHaveCount(6);
   await expect(pending.locator('.status')).toHaveText(
