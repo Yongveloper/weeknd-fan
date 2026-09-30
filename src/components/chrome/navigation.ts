@@ -20,6 +20,17 @@ const FOOTER_ONLY: readonly NavItem[] = [
   },
 ] as const;
 
+const MOBILE_CREATORS: readonly NavItem[] = [
+  {
+    path: '/share/setlist/',
+    label: { ko: '셋리스트 포스터 만들기', en: 'Make a setlist poster' },
+  },
+  {
+    path: '/share/ticket/',
+    label: { ko: '나만의 D-day 티켓 만들기', en: 'Make your own D-day ticket' },
+  },
+];
+
 /** Endonyms for the locale switcher — identical in both dictionaries, so
  *  they live here once instead of duplicated in ui/ko.ts and ui/en.ts. */
 export const localeLabels: Record<Locale, string> = {
@@ -38,6 +49,10 @@ export function navigationFor(locale: Locale) {
   return resolve(NAV, locale);
 }
 
+export function mobileCreatorNavigationFor(locale: Locale) {
+  return resolve(MOBILE_CREATORS, locale);
+}
+
 export function footerNavigationFor(locale: Locale) {
   return resolve([...NAV, ...FOOTER_ONLY], locale);
 }
@@ -49,7 +64,9 @@ export const chromeText = {
   body: [
     wordmark.edition,
     ...LOCALES.flatMap((locale) =>
-      [...NAV, ...FOOTER_ONLY].map(({ label }) => label[locale]),
+      [...NAV, ...FOOTER_ONLY, ...MOBILE_CREATORS].map(
+        ({ label }) => label[locale],
+      ),
     ),
     ...LOCALES.map((locale) => localeLabels[locale]),
   ].join(''),
