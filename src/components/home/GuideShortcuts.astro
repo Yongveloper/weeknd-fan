@@ -10,6 +10,7 @@ interface Props {
 const { locale } = Astro.props;
 const strings = ui(locale).home.shortcuts;
 const shortcuts = [
+  [localeHref(locale, '/goyang/#timetable'), strings.timetable],
   [localeHref(locale, '/goyang/#official'), strings.official],
   [localeHref(locale, '/goyang/#transport'), strings.directions],
   [localeHref(locale, '/goyang/#seating'), strings.seating],

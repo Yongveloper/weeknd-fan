@@ -686,32 +686,26 @@ test('links each Goyang shortcut to its stable guide anchor', async ({
     name: '콘서트 가이드 바로가기',
   });
   await expect(shortcuts.getByRole('link')).toHaveText([
+    '당일 타임테이블 →',
     '공식 공연 정보 →',
     '가는 길 →',
     '좌석 안내 →',
     '준비물 →',
     '귀가 확인 →',
   ]);
-  await expect(shortcuts.getByRole('link').nth(0)).toHaveAttribute(
-    'href',
+  const anchors = [
+    '/goyang/#timetable',
     '/goyang/#official',
-  );
-  await expect(shortcuts.getByRole('link').nth(1)).toHaveAttribute(
-    'href',
     '/goyang/#transport',
-  );
-  await expect(shortcuts.getByRole('link').nth(2)).toHaveAttribute(
-    'href',
     '/goyang/#seating',
-  );
-  await expect(shortcuts.getByRole('link').nth(3)).toHaveAttribute(
-    'href',
     '/goyang/#packing',
-  );
-  await expect(shortcuts.getByRole('link').nth(4)).toHaveAttribute(
-    'href',
     '/goyang/#return',
-  );
+  ];
+  for (const [index, href] of anchors.entries())
+    await expect(shortcuts.getByRole('link').nth(index)).toHaveAttribute(
+      'href',
+      href,
+    );
 });
 
 test('opens transport and return information within two actions', async ({

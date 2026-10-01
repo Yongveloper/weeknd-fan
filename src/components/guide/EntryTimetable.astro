@@ -16,7 +16,8 @@ if (!concert) throw new Error('Missing concert record goyang-2026');
 const [firstShow] = concert.data.shows;
 if (!firstShow) throw new Error('Concert record goyang-2026 has no shows');
 
-// Both show days share one schedule (Hyundai Card timetable, 2026-09-30).
+// Both show days share one schedule (Hyundai Card timetable, 2026-09-30;
+// repeated with the venue map preview, 2026-10-01).
 // The last two slots come from the audited concert record so the start times
 // cannot drift from the rest of the site; `HH:MM` sits at 11–16 in an
 // ISO datetime with a +09:00 offset.
@@ -26,7 +27,10 @@ const rows: Array<{
   items: Array<{ label: string; note?: string }>;
   emphasis?: boolean;
 }> = [
-  { time: '11:00', items: [{ label: rowText.ticketBox }] },
+  {
+    time: '11:00',
+    items: [{ label: rowText.ticketBox, note: rowText.ticketBoxNote }],
+  },
   {
     time: '12:00',
     items: [
@@ -63,6 +67,11 @@ const rows: Array<{
 ---
 
 <div class="entry-timetable">
+  <div class="entry-timetable__arrival">
+    <strong>{strings.arrivalHeading}</strong>
+    <p>{strings.arrivalBody}</p>
+  </div>
+
   <div class="entry-timetable__alert">
     <strong>{strings.alertHeading}</strong>
     <p>{strings.alertBody}</p>
@@ -113,6 +122,19 @@ const rows: Array<{
     font-weight: 800;
     letter-spacing: 0;
     line-height: 1.5;
+  }
+  /* Advice for everyone, so it sits above the standing-only alert without
+     competing with it: same type ramp, no amber frame. */
+  .entry-timetable__arrival {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .entry-timetable__arrival > strong {
+    color: var(--ivory);
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+  }
+  .entry-timetable__arrival p {
+    color: var(--mist);
   }
   /* Mirrors the transport section's no-parking notice: the one rule on the
      page that costs a fan their spot if missed. */

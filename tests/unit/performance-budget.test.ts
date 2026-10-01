@@ -40,7 +40,7 @@ test('rejects an unreferenced built raster that exceeds the aggregate budget', a
   const fixture = await createFixture(
     '<!doctype html><html><body></body></html>',
   );
-  await writeFile(path.join(fixture, 'og.jpg'), Buffer.alloc(1300 * 1024 + 1));
+  await writeFile(path.join(fixture, 'og.jpg'), Buffer.alloc(1400 * 1024 + 1));
 
   await expect(runBudget(fixture)).rejects.toThrow(
     'Aggregate raster budget exceeded',
@@ -70,6 +70,21 @@ test('budgets linked print originals separately without relaxing page-image limi
     '<html><body><img src="/downloads/print.png" alt=""></body></html>',
   );
   await expect(runBudget(fixture)).rejects.toThrow('/ raster budget exceeded');
+});
+
+test('rejects print originals that exceed the download budget', async () => {
+  const fixture = await createFixture(
+    '<!doctype html><html><body></body></html>',
+  );
+  await mkdir(path.join(fixture, 'downloads'));
+  await writeFile(
+    path.join(fixture, 'downloads/print.png'),
+    Buffer.alloc(9 * 1024 * 1024 + 1),
+  );
+
+  await expect(runBudget(fixture)).rejects.toThrow(
+    'Download originals raster budget exceeded',
+  );
 });
 
 test('rejects built media that exceeds the aggregate media budget', async () => {
@@ -121,6 +136,6 @@ test('reports media usage without counting it as raster', async () => {
     /^media\ttotal=2\.0KiB\/13312\.0KiB\tcompact=0\.0KiB\/3072\.0KiB$/m,
   );
   expect(stdout).toMatch(
-    /^aggregate\tjs-gzip=0\.0KiB\/75\.0KiB\traster=0\.0KiB\/1300\.0KiB$/m,
+    /^aggregate\tjs-gzip=0\.0KiB\/75\.0KiB\traster=0\.0KiB\/1400\.0KiB$/m,
   );
 });

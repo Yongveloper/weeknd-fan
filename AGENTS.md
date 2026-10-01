@@ -52,11 +52,11 @@ docs/content-update-runbook.md   콘텐츠 갱신·아카이브 게이트·배�
 - 출처 `lastCheckedAt`과 콘텐츠 `lastVerifiedAt`은 실제 확인 날짜로 **함께** 갱신. 날짜 기준 `Asia/Seoul`.
 - `src/data/concert/goyang-2026.json`의 `archivePublished`는 `archive/goyang-2026-10-07.json`·`-08.json` 둘 다 존재 + audit 통과 전 `true` 금지.
 - 사용자가 제공한 이미지(Interpark 좌석도, 지도)는 **원본 그대로** 사용. 재드로잉·범례 재구성·재인코딩 금지. 지도 임베드는 클릭 없이 로드.
-  - 예외(사용자 승인, 2026-09-30): 현대카드 공연장 맵(`src/assets/guide/venue-map-hyundaicard.png`, 원본 탭 대상 `public/downloads/` 동일 파일)은 사용자 캡처에서 슬라이드 영역만 잘라내고 Instagram 캐러셀 번호 배지("3/5")만 슬라이드 배경색으로 지웠다. 그 밖의 영역은 16→8비트 반올림 외에 바꾸지 않았고, 색 프로파일(iCCP·cICP)은 유지, 캡처 메타데이터(eXIf·XMP)는 제거했다. 페이지에는 WebP 1장만 쓴다(전체 raster 예산 여유 부족).
+  - 예외(사용자 승인, 2026-10-01): 현대카드 공연장 맵 4장(`src/assets/guide/venue-map-hyundaicard*.png` — 전체·지정석·스탠딩·Early Entry)은 사용자가 준 원본 PNG를 바이트 그대로 두고, 원본 탭 대상 `public/downloads/`에도 같은 파일을 둔다. 페이지에는 Astro가 만든 WebP 1장씩만 쓴다(전체 1080w, 상세 480w 썸네일) — AVIF 쌍은 전체 raster 예산 여유가 없어 만들지 않는다.
 
 ## 함정
 
-- 성능 예산(`scripts/check-performance-budget.mjs`): JS 75KiB gzip, raster 합계 1300KiB, 홈 700KiB, 기타 페이지 400KiB. Spotify 핫링크 커버는 제외. 예산 수치를 바꾸면 `tests/unit/performance-budget.test.ts` fixture도 같이 갱신.
+- 성능 예산(`scripts/check-performance-budget.mjs`): JS 75KiB gzip, raster 합계 1400KiB, 홈 700KiB, 기타 페이지 400KiB, 다운로드 원본(`dist/downloads/`) 9MiB. Spotify 핫링크 커버는 제외. 예산 수치를 바꾸면 `tests/unit/performance-budget.test.ts` fixture도 같이 갱신.
 - 앨범 커버는 `src/data/albums/*.json` 직접 편집 대신 `npm run covers:refresh` / `covers:verify`.
 - 홈 배경(eclipse·starfield)은 `node scripts/build-space-assets.mjs`로 생성(sharp, seeded PRNG → 결정적). 손편집 금지.
 - `<details>` 애니메이션: Chromium은 닫힌 details 내용을 `content-visibility: hidden`으로 감춰 `getBoundingClientRect().height`가 stale 값 반환. `src/scripts/disclosure.ts`의 `details.open ? rect.height : 0` 패턴 유지. 디스클로저를 grid `auto` 열에 두면 열릴 때 layout shift.

@@ -33,16 +33,16 @@ const points = [
   strings.points.records,
   strings.points.gates,
 ].map(place);
-// Hyundai Card's slide 3/5 as posted. The user approved one change: the
-// Instagram carousel's "3/5" counter was blanked to the slide's own black.
-// The page shows a single WebP (the aggregate raster budget has no room for
-// an AVIF twin); the tap target is the untouched PNG under /downloads/, which
-// the budget accounts for with the other user-provided originals.
+// Hyundai Card's venue map preview (slide 1/4), byte-for-byte as the user
+// provided it. The page shows a single WebP (the aggregate raster budget has
+// no room for an AVIF twin); the tap target is the untouched PNG under
+// /downloads/, which the budget accounts for with the other user-provided
+// originals.
 // Only ever hand `venueMap` to <Image>. Reading one of its properties here
-// (even `.width`) marks the PNG as referenced and Astro ships an extra 820KiB
-// copy into `_astro/`. 1206 is the slide's native width.
+// (even `.width`) marks the PNG as referenced and Astro ships an extra 730KiB
+// copy into `_astro/`. 1080 is the slide's native width.
 const ORIGINAL = '/downloads/venue-map-hyundaicard.png';
-const INSTAGRAM_POST = 'https://www.instagram.com/p/Dd5iIpMiQKE/';
+const INSTAGRAM_POST = 'https://www.instagram.com/p/Dd8N44RiTng/';
 ---
 
 <div class="venue-map">
@@ -56,7 +56,7 @@ const INSTAGRAM_POST = 'https://www.instagram.com/p/Dd5iIpMiQKE/';
     >
       <Image
         src={venueMap}
-        widths={[1206]}
+        widths={[1080]}
         sizes="(max-width: 48rem) 100vw, 46rem"
         format="webp"
         quality={70}

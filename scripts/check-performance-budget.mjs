@@ -6,8 +6,11 @@ import { gzipSync } from 'node:zlib';
 
 const distRoot = path.resolve(process.env.PERFORMANCE_BUDGET_DIST ?? 'dist');
 const javascriptBudget = 75 * 1024;
-// 좌석 안내도 원본 PNG(사용자 결정: 재인코딩 없이 그대로 사용) 수용을 위해 1100→1300
-const aggregateRasterBudget = 1300 * 1024;
+// 좌석 안내도 원본 PNG(사용자 결정: 재인코딩 없이 그대로 사용) 수용을 위해 1100→1300,
+// 현대카드 공연장 상세 맵 3장 썸네일(사용자 승인, 2026-10-01)로 1300→1400
+const aggregateRasterBudget = 1400 * 1024;
+// 사용자 제공 원본 다운로드. 현대카드 상세 맵 원본 3장(사용자 승인, 2026-10-01)으로 8→9MiB
+const downloadRasterBudget = 9 * 1024 * 1024;
 const pageRasterBudgets = { home: 700 * 1024, other: 400 * 1024 };
 const viewport = { width: 390, deviceScaleFactor: 3 };
 // Hero video: 1440×1440 intro/loop plus the ≤42rem compact encodes. Not
@@ -56,10 +59,10 @@ async function main() {
   assertWithinBudget(
     'Download originals raster',
     downloadBytes,
-    8 * 1024 * 1024,
+    downloadRasterBudget,
   );
   process.stdout.write(
-    `download-originals\traster=${formatBytes(downloadBytes)}/8192.0KiB\n`,
+    `download-originals\traster=${formatBytes(downloadBytes)}/${formatBytes(downloadRasterBudget)}\n`,
   );
 
   const builtMedia = files.filter(isMediaAsset);

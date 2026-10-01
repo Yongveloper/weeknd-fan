@@ -1,0 +1,206 @@
+---
+import { Image } from 'astro:assets';
+import seatedMap from '../../assets/guide/venue-map-hyundaicard-seated.png';
+import standingMap from '../../assets/guide/venue-map-hyundaicard-standing.png';
+import earlyEntryMap from '../../assets/guide/venue-map-hyundaicard-early-entry.png';
+import type { Locale } from '../../lib/i18n/locales';
+import { ui } from '../../lib/i18n/ui';
+import {
+  MAP_AUX_STADIUM,
+  MAP_PARKING_LOT_3,
+  MAP_SOUTH_PLAZA,
+  bilingual,
+} from '../../lib/i18n/proper-nouns';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const strings = ui(locale).guide.ticketRoutes;
+const newTab = ui(locale).content.externalLink.newTab;
+const place = (line: string) =>
+  line
+    .replaceAll('{auxStadium}', bilingual(MAP_AUX_STADIUM, locale))
+    .replaceAll('{parking}', bilingual(MAP_PARKING_LOT_3, locale))
+    .replaceAll('{southPlaza}', bilingual(MAP_SOUTH_PLAZA, locale));
+// Hyundai Card's venue map preview, slides 2–4, byte-for-byte as the user
+// provided them; the tap targets are the same PNGs under /downloads/. As with
+// the venue map, only ever hand the imports to <Image> — reading a property
+// ships an extra full-size copy into `_astro/`. One 480w WebP covers the
+// thumbnail at 3x on phones and 2x on desktop; `width` pins the `src`
+// fallback to it too, or Astro adds a second, full-size WebP.
+const routes = [
+  {
+    text: strings.seated,
+    map: seatedMap,
+    original: '/downloads/venue-map-hyundaicard-seated.png',
+  },
+  {
+    text: strings.standing,
+    map: standingMap,
+    original: '/downloads/venue-map-hyundaicard-standing.png',
+  },
+  {
+    text: strings.earlyEntry,
+    map: earlyEntryMap,
+    original: '/downloads/venue-map-hyundaicard-early-entry.png',
+  },
+];
+const INSTAGRAM_POST = 'https://www.instagram.com/p/Dd8N44RiTng/';
+---
+
+<div class="ticket-routes">
+  <h3 id="timetable-routes-title">{strings.heading}</h3>
+  <p class="ticket-routes__intro">{strings.intro}</p>
+  <ul aria-labelledby="timetable-routes-title" data-enter>
+    {
+      routes.map(({ text, map, original }) => (
+        <li>
+          <a
+            href={original}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={`${strings.openOriginalAriaLabel.replace('{ticket}', text.title)} ${newTab}`}
+          >
+            <Image
+              src={map}
+              width={480}
+              widths={[480]}
+              sizes="(max-width: 36rem) 8.5rem, 11rem"
+              format="webp"
+              quality={70}
+              alt={place(text.alt)}
+            />
+          </a>
+          <div class="ticket-routes__head">
+            <h4>{text.title}</h4>
+            <p class="ticket-routes__place">{place(text.place)}</p>
+          </div>
+          <ul class="ticket-routes__steps">
+            {text.steps.map((step) => (
+              <li>{place(step)}</li>
+            ))}
+          </ul>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="ticket-routes__source">
+    {strings.sourcePrefix}
+    <a href={INSTAGRAM_POST} target="_blank" rel="noreferrer"
+      >{strings.sourceLinkLabel}<span class="sr-only">{newTab}</span></a
+    >
+    <span class="nowrap">{strings.confirmedOn}</span>.
+  </p>
+</div>
+
+<style>
+  .ticket-routes {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 46rem;
+  }
+  h3,
+  h4,
+  p,
+  ul {
+    margin: 0;
+  }
+  /* Same voice as the venue map heading above it. */
+  h3 {
+    color: var(--amber);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.5;
+  }
+  .ticket-routes__intro {
+    color: var(--mist);
+  }
+  /* Ruled rows like the timetable list, so the three tickets scan as one
+     list rather than three cards. */
+  .ticket-routes > ul {
+    padding: 0;
+    border-top: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+    list-style: none;
+  }
+  /* The map spans both rows on wide screens; on phones the steps drop under
+     it at full width so they don't wrap in a narrow column. */
+  .ticket-routes > ul > li {
+    display: grid;
+    grid-template-areas:
+      'map head'
+      'map steps';
+    /* The % cap keeps the thumbnail from crowding out the text when the
+       reader zooms text (rem grows, the viewport doesn't). */
+    grid-template-columns: min(11rem, 40%) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    gap: 0.6rem 1.25rem;
+    align-items: start;
+    padding-block: 1rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--ivory) 28%, transparent);
+  }
+  .ticket-routes > ul > li > a {
+    display: block;
+    grid-area: map;
+  }
+  .ticket-routes :global(img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid color-mix(in srgb, var(--ivory) 18%, transparent);
+    background: #000;
+  }
+  .ticket-routes__head {
+    display: grid;
+    grid-area: head;
+    gap: 0.35rem;
+    overflow-wrap: anywhere;
+  }
+  h4 {
+    color: var(--ivory);
+    font-family: var(--font-body);
+    font-size: clamp(1.05rem, 2vw, 1.2rem);
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.4;
+  }
+  .ticket-routes__place {
+    color: var(--amber);
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+  .ticket-routes__steps {
+    display: grid;
+    grid-area: steps;
+    gap: 0.4rem;
+    padding-left: 1.2rem;
+    list-style: disc;
+    color: var(--mist);
+    font-size: 0.95rem;
+  }
+  .ticket-routes__source {
+    color: var(--ink-muted);
+    font-size: 0.82rem;
+  }
+  .ticket-routes__source a {
+    color: var(--ivory);
+    font-weight: 700;
+  }
+  /* The parenthetical confirmation note would otherwise split at the hyphen on narrow screens */
+  .nowrap {
+    white-space: nowrap;
+  }
+  @media (max-width: 36rem) {
+    .ticket-routes > ul > li {
+      grid-template-areas:
+        'map head'
+        'steps steps';
+      grid-template-columns: min(8.5rem, 40%) minmax(0, 1fr);
+      grid-template-rows: auto auto;
+      gap: 0.85rem 1rem;
+    }
+  }
+</style>

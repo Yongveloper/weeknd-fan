@@ -165,6 +165,9 @@ export const ko = {
       markerAlt: '{venue} 위치',
     },
     timetable: {
+      arrivalHeading: '16:00 전 공연장 도착 권장',
+      arrivalBody:
+        '원활한 입장을 위해 늦어도 16:00 전에는 공연장에 도착하기를 권장합니다. 스탠딩 입장번호 순서대로 들어가려면 아래 16:30 기준이 있으니 조금 더 여유 있게 오세요.',
       alertHeading: '스탠딩은 16:30 전까지 대기장소로',
       alertBody:
         '성인인증을 마친 뒤 스탠딩 대기장소에서 입장번호 순서대로 기다립니다. 16:30 이후에 도착하면 입장번호가 무효 처리됩니다.',
@@ -174,6 +177,8 @@ export const ko = {
         '10월 7일(수)·8일(목) 두 공연 모두 같은 시간표로 안내됐습니다.',
       rows: {
         ticketBox: '티켓박스 · 스탠딩 Early Entry Package 부스 오픈',
+        ticketBoxNote:
+          'Early Entry Package 현장 수령은 티켓박스에서 티켓을 받은 뒤 부스 방문',
         booths: '성인인증 · 음반 부스 오픈',
         merchandisePreOpen: '머천다이즈 부스 선오픈',
         merchandisePreOpenNote: '스탠딩 Early Entry Package 구매자 대상',
@@ -220,7 +225,7 @@ export const ko = {
       alt: '현대카드 슈퍼콘서트 공연장 맵. 경기장 가운데 무대와 스탠딩 A·B, 둘레의 W·N·E 게이트, 스탠딩·지정석 성인인증 부스, 머천다이즈·음반·Early Entry Package·VIP Package 부스, 물품보관소·인포메이션·화장실 위치와 범례.',
       sourcePrefix: '공연장 맵 출처:',
       sourceLinkLabel: '현대카드 공식 인스타그램',
-      confirmedOn: '(2026-09-30 확인)',
+      confirmedOn: '(2026-10-01 확인)',
       opensNewTabNote: '탭하면 원본 이미지가 새 탭에서 열립니다.',
       summaryLabel: '지도 내용을 글로 보기',
       points: {
@@ -236,6 +241,45 @@ export const ko = {
           '음반 부스는 {southPlaza} 위쪽, 인포메이션은 {southPlaza} 아래쪽에 있습니다.',
         gates:
           '게이트는 W1·W3·W4·W5, N1-2, E1·E2·E3·E4·E5·E8이 표시돼 있습니다. 좌석 구역별 입장 게이트는 아직 안내되지 않았습니다.',
+      },
+    },
+    ticketRoutes: {
+      heading: '티켓별 첫 동선',
+      intro:
+        '티켓 종류마다 처음 들러야 할 곳이 다릅니다. 지도를 탭하면 원본 이미지가 새 탭에서 열립니다.',
+      openOriginalAriaLabel: '{ticket} 맵 원본 이미지 열기',
+      sourcePrefix: '지도 출처:',
+      sourceLinkLabel: '현대카드 공식 인스타그램',
+      confirmedOn: '(2026-10-01 확인)',
+      seated: {
+        title: '지정석',
+        place: '{parking} · 지정석 성인인증 부스',
+        alt: '현대카드 슈퍼콘서트 지정석 맵. {southPlaza} 옆 {parking}을 확대해 지정석 성인인증 부스 두 곳, 티켓박스, 성인인증 구역의 입구 세 곳과 출구 두 곳을 표시.',
+        steps: [
+          '{parking}에 있는 지정석 성인인증 부스(2곳)에서 성인인증을 받고 팔찌를 받습니다.',
+          '티켓박스와 VIP Package 부스도 같은 {parking} 안에 있습니다. 성인인증 구역에는 입구 세 곳과 출구 두 곳이 표시돼 있습니다.',
+        ],
+      },
+      standing: {
+        title: '스탠딩',
+        place: '{auxStadium} · 스탠딩 대기장소',
+        alt: '현대카드 슈퍼콘서트 스탠딩 맵. 스탠딩 대기장소인 {auxStadium}을 확대해 입구 두 곳, 스탠딩 성인인증 부스 두 곳, 스탠딩 전용 머천다이즈를 표시.',
+        steps: [
+          '{auxStadium}이 스탠딩 대기장소입니다. 안에 있는 스탠딩 성인인증 부스(2곳)에서 성인인증을 받습니다.',
+          '스탠딩 전용 머천다이즈도 대기장소 안에 있습니다.',
+          '대기장소는 14:00에 열립니다. 16:30 전까지 대기장소에서 입장번호 순서대로 기다립니다.',
+          '현장에서 티켓을 받는다면 티켓박스는 {parking}에 있습니다.',
+        ],
+      },
+      earlyEntry: {
+        title: '스탠딩 Early Entry Package',
+        place: 'W1 게이트 옆 · Early Entry Package 부스',
+        alt: '현대카드 슈퍼콘서트 스탠딩 Early Entry Package 맵. {auxStadium} 아래 W1 게이트 옆의 Early Entry Package 부스 위치와 부스 이용 안내를 표시.',
+        steps: [
+          'Early Entry Package 부스에서 성인인증을 받고 성인인증 팔찌와 기프트를 받습니다.',
+          '티켓을 현장에서 받는다면 먼저 {parking}의 티켓박스에서 수령한 뒤 부스로 갑니다.',
+          '입장번호 순서대로 들어가려면 16:30까지 성인인증을 마치고 대기장소에 들어가야 합니다. 이후에는 입장번호가 무효 처리됩니다.',
+        ],
       },
     },
     seatMap: {
@@ -288,6 +332,7 @@ export const ko = {
     shortcuts: {
       heading: '콘서트 가이드',
       navAriaLabel: '콘서트 가이드 바로가기',
+      timetable: '당일 타임테이블',
       official: '공식 공연 정보',
       directions: '가는 길',
       seating: '좌석 안내',

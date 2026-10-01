@@ -155,6 +155,9 @@ export const en: UiStrings = {
       markerAlt: '{venue} location',
     },
     timetable: {
+      arrivalHeading: 'Arrive at the venue before 16:00',
+      arrivalBody:
+        'For a smooth entry, arriving at the venue by 16:00 at the latest is recommended. If you hold a standing ticket and want to enter in admission-number order, the 16:30 rule below applies, so leave a little more time.',
       alertHeading: 'Standing: be in the queue area before 16:30',
       alertBody:
         'Finish the adult check first, then wait in the standing queue area in admission-number order. Arrive after 16:30 and your admission number is voided.',
@@ -164,6 +167,8 @@ export const en: UiStrings = {
         'The same schedule was announced for both shows, Wednesday 7 and Thursday 8 October.',
       rows: {
         ticketBox: 'Ticket box · Standing Early Entry Package booth open',
+        ticketBoxNote:
+          'Collecting an Early Entry Package ticket on site: pick it up at the ticket box, then visit the booth',
         booths: 'Adult check · record booths open',
         merchandisePreOpen: 'Merchandise booth early opening',
         merchandisePreOpenNote: 'Standing Early Entry Package buyers only',
@@ -210,7 +215,7 @@ export const en: UiStrings = {
       alt: 'Hyundai Card Super Concert venue map. The stage and standing sections A and B in the middle of the stadium, W, N and E gates around it, standing and reserved-seat adult-check booths, merchandise, record, Early Entry Package and VIP Package booths, lockers, information and restrooms, with a legend.',
       sourcePrefix: 'Venue map source:',
       sourceLinkLabel: 'Hyundai Card official Instagram',
-      confirmedOn: '(confirmed 2026-09-30)',
+      confirmedOn: '(confirmed 2026-10-01)',
       opensNewTabNote: 'Tapping opens the original image in a new tab.',
       summaryLabel: 'Read the map as text',
       points: {
@@ -226,6 +231,45 @@ export const en: UiStrings = {
           'The record booth is above the {southPlaza} and information is below it.',
         gates:
           'Gates W1, W3, W4, W5, N1-2 and E1, E2, E3, E4, E5, E8 are marked. Which gate each seating section uses has not been announced.',
+      },
+    },
+    ticketRoutes: {
+      heading: 'Where to go first by ticket type',
+      intro:
+        'Each ticket type starts at a different place. Tapping a map opens the original image in a new tab.',
+      openOriginalAriaLabel: 'Open the original {ticket} map image',
+      sourcePrefix: 'Map source:',
+      sourceLinkLabel: 'Hyundai Card official Instagram',
+      confirmedOn: '(confirmed 2026-10-01)',
+      seated: {
+        title: 'Reserved seats',
+        place: '{parking} — reserved-seat adult-check booth',
+        alt: 'Hyundai Card Super Concert reserved-seat map. A close-up of {parking} beside the {southPlaza}, marking the two reserved-seat adult-check booths, the ticket box, and the three entrances and two exits of the check area.',
+        steps: [
+          'Take the adult check and collect your wristband at the reserved-seat adult-check booths (two) in {parking}.',
+          'The ticket box and the VIP Package booth are in {parking} too. The check area has three entrances and two exits marked.',
+        ],
+      },
+      standing: {
+        title: 'Standing',
+        place: '{auxStadium} — standing queue area',
+        alt: 'Hyundai Card Super Concert standing map. A close-up of the {auxStadium}, the standing queue area, marking its two entrances, the two standing adult-check booths and standing-only merchandise.',
+        steps: [
+          'The {auxStadium} is the standing queue area. Take the adult check at the standing adult-check booths (two) inside it.',
+          'Standing-only merchandise is inside the queue area too.',
+          'The queue area opens at 14:00. Wait there in admission-number order before 16:30.',
+          'Collecting your ticket on site? The ticket box is in {parking}.',
+        ],
+      },
+      earlyEntry: {
+        title: 'Standing Early Entry Package',
+        place: 'Beside gate W1 — Early Entry Package booth',
+        alt: 'Hyundai Card Super Concert standing Early Entry Package map. The Early Entry Package booth beside gate W1, below the {auxStadium}, with notes on using the booth.',
+        steps: [
+          'Take the adult check at the Early Entry Package booth and collect the adult-check wristband and a gift there.',
+          'Collecting your ticket on site? Pick it up at the ticket box in {parking} first, then go to the booth.',
+          'To enter in admission-number order, finish the adult check and be inside the queue area by 16:30. After that your admission number is voided.',
+        ],
       },
     },
     seatMap: {
@@ -280,6 +324,7 @@ export const en: UiStrings = {
     shortcuts: {
       heading: 'Concert guide',
       navAriaLabel: 'Concert guide shortcuts',
+      timetable: 'Show-day timetable',
       official: 'Official show information',
       directions: 'Getting there',
       seating: 'Seating guide',

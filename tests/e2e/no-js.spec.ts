@@ -125,6 +125,7 @@ test('keeps the Goyang show-day timetable readable without JavaScript', async ({
     await expect(row).toBeVisible();
   await expect(timetable.locator('.entry-duration tbody th')).toHaveCount(4);
   await expect(timetable.locator('.venue-map img')).toBeVisible();
+  await expect(timetable.locator('.ticket-routes img')).toHaveCount(3);
   const details = timetable.locator('.venue-map details');
   await details.locator('summary').click();
   await expect(details.getByRole('listitem').first()).toBeVisible();

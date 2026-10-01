@@ -1,14 +1,15 @@
 ---
 title: Show-Day Timetable
 summary: The show-day schedule and entry route from Hyundai Card's official announcement. Times may change with conditions on the day.
-sourceHash: 4ef4907235c80abf
-translatedAt: 2026-09-30
+sourceHash: badb20be35b469a8
+translatedAt: 2026-10-01
 ---
 
 ### Adult check before entry
 
 - **Bring ID on the day.** Korean nationals: resident registration card, driver's licence, passport or mobile ID. Foreign nationals: passport or alien registration card.
-- Reserved-seat and standing ticket holders alike must visit an adult-check booth, pass the check and collect an **adult-check wristband**. Standing and reserved seats have separate booths; both are marked on the venue map below.
+- Reserved-seat and standing ticket holders alike must visit an adult-check booth, pass the check and collect an **adult-check wristband**. Standing and reserved seats have separate booths; both are marked on the venue map and under where to go first by ticket type below.
+- Standing Early Entry Package buyers take the adult check at the Early Entry Package booth and collect the adult-check wristband and a gift there.
 
 ### Standing entry time is strict
 

@@ -529,9 +529,14 @@ test('leads with the official show-day timetable', async ({ page }) => {
   await expect(
     timetable.getByRole('listitem').filter({ hasText: '모바일 신분증' }),
   ).toBeVisible();
-  await expect(
-    timetable.getByRole('link', { name: '현대카드 공식 인스타그램' }).first(),
-  ).toHaveAttribute('href', 'https://www.instagram.com/p/Dd5iIpMiQKE/');
+  // The timetable post (09-30) and the venue map preview (10-01) are both
+  // cited: the schedule rows come from the first, the maps from the second.
+  for (const post of ['Dd5iIpMiQKE', 'Dd8N44RiTng'])
+    await expect(
+      timetable
+        .locator(`a[href="https://www.instagram.com/p/${post}/"]`)
+        .first(),
+    ).toBeAttached();
 });
 
 test('shows the Hyundai Card venue map with a text alternative', async ({
@@ -549,7 +554,7 @@ test('shows the Hyundai Card venue map with a text alternative', async ({
   const image = map.locator('img');
   await expect(image).toHaveAttribute('alt', /현대카드 슈퍼콘서트 공연장 맵/);
   await image.scrollIntoViewIfNeeded();
-  // One 1206w WebP only; naturalWidth is density-corrected against `sizes`,
+  // One 1080w WebP only; naturalWidth is density-corrected against `sizes`,
   // so check the decoded source instead of a pixel width.
   await expect
     .poll(() =>
@@ -576,4 +581,70 @@ test('shows the Hyundai Card venue map with a text alternative', async ({
   await expect(details).toContainText(
     '좌석 구역별 입장 게이트는 아직 안내되지 않았습니다',
   );
+});
+
+test('routes each ticket type to its own Hyundai Card detail map', async ({
+  page,
+}) => {
+  await page.goto('/goyang/');
+  await expect(
+    page.locator('#timetable .entry-timetable__arrival'),
+  ).toContainText('16:00 전 공연장 도착 권장');
+  await expect(
+    page.locator('#timetable .entry-timetable li').first(),
+  ).toContainText('티켓박스에서 티켓을 받은 뒤 부스 방문');
+
+  const routes = page.locator('#timetable .ticket-routes');
+  await expect(
+    routes.getByRole('heading', { name: '티켓별 첫 동선' }),
+  ).toBeVisible();
+  const items = routes
+    .getByRole('list', { name: '티켓별 첫 동선' })
+    .locator(':scope > li');
+  await expect(items.locator('h4')).toHaveText([
+    '지정석',
+    '스탠딩',
+    '스탠딩 Early Entry Package',
+  ]);
+  const originals = [
+    '/downloads/venue-map-hyundaicard-seated.png',
+    '/downloads/venue-map-hyundaicard-standing.png',
+    '/downloads/venue-map-hyundaicard-early-entry.png',
+  ];
+  for (const [index, href] of originals.entries()) {
+    const item = items.nth(index);
+    await expect(item.getByRole('link')).toHaveAttribute('href', href);
+    const image = item.locator('img');
+    await image.scrollIntoViewIfNeeded();
+    await expect
+      .poll(() =>
+        image.evaluate(
+          (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+        ),
+      )
+      .toBe(true);
+    const response = await page.request.get(href);
+    expect(response.ok()).toBe(true);
+  }
+  await expect(items.nth(2)).toContainText('성인인증 팔찌와 기프트');
+  await expect(
+    routes.getByRole('link', { name: /현대카드 공식 인스타그램/ }),
+  ).toHaveAttribute('href', 'https://www.instagram.com/p/Dd8N44RiTng/');
+});
+
+test('renders the ticket routes in English without leftover placeholders', async ({
+  page,
+}) => {
+  await page.goto('/en/goyang/');
+  const routes = page.locator('#timetable .ticket-routes');
+  await expect(
+    routes.getByRole('heading', { name: 'Where to go first by ticket type' }),
+  ).toBeVisible();
+  await expect(routes.locator('h4')).toHaveText([
+    'Reserved seats',
+    'Standing',
+    'Standing Early Entry Package',
+  ]);
+  await expect(routes).toContainText('Parking Lot 3 · 제3주차장');
+  await expect(routes).not.toContainText('{');
 });
