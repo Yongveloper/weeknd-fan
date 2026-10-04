@@ -2,7 +2,7 @@
 title: 좌석과 시야
 summary: 타 공연 후기에서 반복된 구역별 시야·음향 경험입니다.
 status: practical
-lastVerifiedAt: 2026-10-01
+lastVerifiedAt: 2026-10-04
 sources:
   - nol-notice
   - review-alljoylog-seatview

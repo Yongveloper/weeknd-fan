@@ -2,7 +2,7 @@
 title: 준비물
 summary: 확정된 규정이 아닌, 티켓과 당일 확인 도구 중심의 짧은 체크입니다.
 status: practical
-lastVerifiedAt: 2026-10-01
+lastVerifiedAt: 2026-10-04
 sources:
   - nol-notice
   - live-nation-goyang

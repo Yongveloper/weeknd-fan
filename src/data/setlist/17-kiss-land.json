@@ -3,7 +3,7 @@
   "summary": "2013년 정규 1집의 타이틀곡",
   "body": "아시아 공연에서는 곡을 둘로 나눠 앞부분은 Lost in the Fire 뒤, 뒷부분은 Timeless 뒤에 배치했다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-28",
+  "lastVerifiedAt": "2026-10-04",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
@@ -11,7 +11,8 @@
     "setlist-tokyo-2026-09-19",
     "setlist-tokyo-2026-09-20",
     "setlist-jakarta-2026-09-26",
-    "setlist-jakarta-2026-09-27"
+    "setlist-jakarta-2026-09-27",
+    "setlist-singapore-2026-10-02"
   ],
   "relatedAlbums": ["Kiss Land"],
   "relatedSongs": [],
@@ -26,6 +27,7 @@
     "setlist-tokyo-2026-09-19",
     "setlist-tokyo-2026-09-20",
     "setlist-jakarta-2026-09-26",
-    "setlist-jakarta-2026-09-27"
+    "setlist-jakarta-2026-09-27",
+    "setlist-singapore-2026-10-02"
   ]
 }
