@@ -3,7 +3,7 @@
   "summary": "전자음과 보컬이 맞물리는 협업곡으로 마무리를 잇는 곡",
   "body": "다른 전자음악 세계와 연결된 보컬의 질감을 듣는다.",
   "status": "expected",
-  "lastVerifiedAt": "2026-09-28",
+  "lastVerifiedAt": "2026-10-05",
   "sources": [
     "setlist-manchester-2026-06-12",
     "setlist-london-2026-08-14",
@@ -11,7 +11,9 @@
     "setlist-tokyo-2026-09-19",
     "setlist-tokyo-2026-09-20",
     "setlist-jakarta-2026-09-26",
-    "setlist-jakarta-2026-09-27"
+    "setlist-jakarta-2026-09-27",
+    "setlist-singapore-2026-10-02",
+    "setlist-singapore-2026-10-03"
   ],
   "relatedAlbums": ["Paradise Again"],
   "relatedSongs": [],
@@ -29,6 +31,8 @@
     "setlist-tokyo-2026-09-19",
     "setlist-tokyo-2026-09-20",
     "setlist-jakarta-2026-09-26",
-    "setlist-jakarta-2026-09-27"
+    "setlist-jakarta-2026-09-27",
+    "setlist-singapore-2026-10-02",
+    "setlist-singapore-2026-10-03"
   ]
 }
