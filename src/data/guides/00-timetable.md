@@ -2,7 +2,7 @@
 title: 당일 타임테이블
 summary: 현대카드 공식 안내에 나온 공연 당일 시간표와 입장 동선입니다. 운영 시간은 당일 현장 상황에 따라 바뀔 수 있습니다.
 status: official
-lastVerifiedAt: 2026-10-07
+lastVerifiedAt: 2026-10-08
 sources:
   - hyundai-card-instagram-timetable
   - hyundai-card-instagram-venue-map
