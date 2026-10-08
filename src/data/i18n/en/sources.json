@@ -59,10 +59,20 @@
     "sourceHash": "23478de3c62d97fe",
     "translatedAt": "2026-09-21"
   },
+  "news-mydaily-goyang-2026-10-07": {
+    "name": "MyDaily — review of The Weeknd's first Goyang show",
+    "sourceHash": "bbefbb15dec0251b",
+    "translatedAt": "2026-10-08"
+  },
   "news-ohmynews-2025-04": {
     "name": "OhmyNews — Coldplay Goyang show, traffic on the ground (2025-04)",
     "sourceHash": "6a01b342f1993296",
     "translatedAt": "2026-09-21"
+  },
+  "news-starnews-goyang-2026-10-07": {
+    "name": "Star News Korea (English) — The Weeknd's first Goyang show report",
+    "sourceHash": "584e5837dc9240ed",
+    "translatedAt": "2026-10-08"
   },
   "nol-notice": {
     "name": "NOL — show notices and must-read information",
@@ -133,6 +143,11 @@
     "name": "vitariaplus — concert review: Coldplay Goyang standing-area, day 1 (2025-04)",
     "sourceHash": "fc44f6df865532ba",
     "translatedAt": "2026-09-21"
+  },
+  "setlist-goyang-2026-10-07": {
+    "name": "setlist.fm — Goyang (Goyang Stadium), 2026-10-07",
+    "sourceHash": "1f929756e66dd2f4",
+    "translatedAt": "2026-10-08"
   },
   "setlist-jakarta-2026-09-26": {
     "name": "setlist.fm — Jakarta (Jakarta International Stadium), 2026-09-26",
